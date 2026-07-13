@@ -1,35 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireAdmin } from "@/lib/actions/adminAuth";
 import * as posts from "@/lib/repositories/posts";
 import * as caseStudies from "@/lib/repositories/caseStudies";
 
-function assertAdmin(token) {
-  const expected = process.env.ADMIN_TOKEN;
-  if (!expected) {
-    throw new Error("Admin editing is disabled on this deployment — set ADMIN_TOKEN in the environment to enable it.");
-  }
-  if (!token || token !== expected) {
-    throw new Error("Invalid admin token.");
-  }
-}
-
-export async function adminCheckToken(token) {
-  try {
-    assertAdmin(token);
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, error: err.message };
-  }
-}
-
-export async function adminListPosts(token) {
-  assertAdmin(token);
+export async function adminListPosts() {
+  await requireAdmin();
   return posts.listPosts();
 }
 
-export async function adminSavePost(token, { isNew, slug, title, excerpt, category, date, readTime, author, content }) {
-  assertAdmin(token);
+export async function adminSavePost({ isNew, slug, title, excerpt, category, date, readTime, author, content }) {
+  await requireAdmin();
   const contentParagraphs = content
     .split("\n")
     .map((p) => p.trim())
@@ -44,21 +26,21 @@ export async function adminSavePost(token, { isNew, slug, title, excerpt, catego
   return saved;
 }
 
-export async function adminDeletePost(token, slug) {
-  assertAdmin(token);
+export async function adminDeletePost(slug) {
+  await requireAdmin();
   posts.deletePost(slug);
   revalidatePath("/blog");
   revalidatePath(`/blog/${slug}`);
   revalidatePath("/sitemap.xml");
 }
 
-export async function adminListCaseStudies(token) {
-  assertAdmin(token);
+export async function adminListCaseStudies() {
+  await requireAdmin();
   return caseStudies.listCaseStudies();
 }
 
-export async function adminSaveCaseStudy(token, { isNew, slug, client, industry, location, title, summary, stats, challenge, approach, outcome }) {
-  assertAdmin(token);
+export async function adminSaveCaseStudy({ isNew, slug, client, industry, location, title, summary, stats, challenge, approach, outcome }) {
+  await requireAdmin();
   const statList = stats
     .split("\n")
     .map((line) => {
@@ -76,8 +58,8 @@ export async function adminSaveCaseStudy(token, { isNew, slug, client, industry,
   return saved;
 }
 
-export async function adminDeleteCaseStudy(token, slug) {
-  assertAdmin(token);
+export async function adminDeleteCaseStudy(slug) {
+  await requireAdmin();
   caseStudies.deleteCaseStudy(slug);
   revalidatePath("/portfolio");
   revalidatePath(`/portfolio/${slug}`);

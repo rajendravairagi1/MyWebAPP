@@ -5,8 +5,8 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Textarea from "@/components/ui/Textarea";
 import Toast from "@/components/ui/Toast";
+import { adminLogin, adminLogout, adminWhoAmI } from "@/lib/actions/adminAuth";
 import {
-  adminCheckToken,
   adminListPosts,
   adminSavePost,
   adminDeletePost,
@@ -14,8 +14,6 @@ import {
   adminSaveCaseStudy,
   adminDeleteCaseStudy,
 } from "@/lib/actions/admin";
-
-const TOKEN_KEY = "oneweblink-admin-token";
 
 const wrap = { maxWidth: "900px", margin: "0 auto", padding: "var(--space-2xl) var(--container-padding)", fontFamily: "var(--font-sans)" };
 const cardStyle = { border: "1px solid var(--color-border)", borderRadius: "var(--radius-lg)", padding: "var(--space-lg)", marginBottom: "var(--space-md)" };
@@ -34,9 +32,9 @@ const EMPTY_POST = { isNew: true, slug: "", title: "", excerpt: "", category: ""
 const EMPTY_CASE = { isNew: true, slug: "", client: "", industry: "", location: "", title: "", summary: "", stats: "", challenge: "", approach: "", outcome: "" };
 
 export default function AdminApp() {
-  const [token, setToken] = useState("");
   const [tokenInput, setTokenInput] = useState("");
   const [unlocked, setUnlocked] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [authError, setAuthError] = useState("");
   const [tab, setTab] = useState("posts");
   const [posts, setPosts] = useState([]);
@@ -46,43 +44,45 @@ export default function AdminApp() {
   const [message, setMessage] = useState(null);
 
   useEffect(() => {
-    const saved = typeof window !== "undefined" ? sessionStorage.getItem(TOKEN_KEY) : null;
-    if (saved) tryUnlock(saved);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount only
+    adminWhoAmI().then((res) => {
+      setCheckingSession(false);
+      if (res.ok) {
+        setUnlocked(true);
+        refreshAll();
+      }
+    });
   }, []);
 
   async function tryUnlock(candidate) {
-    const res = await adminCheckToken(candidate);
+    const res = await adminLogin(candidate);
     if (res.ok) {
-      setToken(candidate);
       setUnlocked(true);
       setAuthError("");
-      sessionStorage.setItem(TOKEN_KEY, candidate);
-      refreshAll(candidate);
+      refreshAll();
     } else {
       setAuthError(res.error);
       setUnlocked(false);
     }
   }
 
-  async function refreshAll(t) {
-    const [p, c] = await Promise.all([adminListPosts(t), adminListCaseStudies(t)]);
+  async function refreshAll() {
+    const [p, c] = await Promise.all([adminListPosts(), adminListCaseStudies()]);
     setPosts(p);
     setCaseStudies(c);
   }
 
-  function logout() {
-    sessionStorage.removeItem(TOKEN_KEY);
-    setToken("");
+  async function logout() {
+    await adminLogout();
     setUnlocked(false);
+    setTokenInput("");
   }
 
   async function savePost(form) {
     try {
-      await adminSavePost(token, form);
+      await adminSavePost(form);
       setMessage({ tone: "success", text: `Saved "${form.title}".` });
       setEditingPost(null);
-      refreshAll(token);
+      refreshAll();
     } catch (err) {
       setMessage({ tone: "danger", text: err.message });
     }
@@ -91,9 +91,9 @@ export default function AdminApp() {
   async function removePost(slug) {
     if (!confirm(`Delete post "${slug}"? This can't be undone.`)) return;
     try {
-      await adminDeletePost(token, slug);
+      await adminDeletePost(slug);
       setMessage({ tone: "success", text: "Post deleted." });
-      refreshAll(token);
+      refreshAll();
     } catch (err) {
       setMessage({ tone: "danger", text: err.message });
     }
@@ -101,10 +101,10 @@ export default function AdminApp() {
 
   async function saveCase(form) {
     try {
-      await adminSaveCaseStudy(token, form);
+      await adminSaveCaseStudy(form);
       setMessage({ tone: "success", text: `Saved "${form.title}".` });
       setEditingCase(null);
-      refreshAll(token);
+      refreshAll();
     } catch (err) {
       setMessage({ tone: "danger", text: err.message });
     }
@@ -113,12 +113,16 @@ export default function AdminApp() {
   async function removeCase(slug) {
     if (!confirm(`Delete case study "${slug}"? This can't be undone.`)) return;
     try {
-      await adminDeleteCaseStudy(token, slug);
+      await adminDeleteCaseStudy(slug);
       setMessage({ tone: "success", text: "Case study deleted." });
-      refreshAll(token);
+      refreshAll();
     } catch (err) {
       setMessage({ tone: "danger", text: err.message });
     }
+  }
+
+  if (checkingSession) {
+    return <div style={wrap} />;
   }
 
   if (!unlocked) {
