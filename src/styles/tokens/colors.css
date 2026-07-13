@@ -1,0 +1,44 @@
+:root {
+  /* Base palette */
+  --blue-600: #2563eb;
+  --blue-500: #3b82f6;
+  --blue-100: #dbeafe;
+  --blue-50: #eff6ff;
+
+  --gray-900: #1a1a1a;
+  --gray-600: #6b7280;
+  --gray-300: #e5e7eb;
+  --gray-100: #f3f4f6;
+  --gray-50: #f9fafb;
+  --white: #ffffff;
+
+  --green-500: #10b981;
+  --green-50: #ecfdf5;
+  --red-500: #ef4444;
+  --red-50: #fef2f2;
+  --whatsapp: #25d366;
+
+  /* Semantic aliases */
+  --color-accent: var(--blue-500);
+  --color-accent-dark: var(--blue-600);
+  --color-accent-tint: var(--blue-100);
+  --color-accent-tint-weak: var(--blue-50);
+
+  --color-text-primary: var(--gray-900);
+  --color-text-secondary: var(--gray-600);
+  --color-text-on-accent: var(--white);
+  --color-text-inverse: var(--white);
+
+  --color-border: var(--gray-300);
+  --color-border-strong: var(--gray-600);
+
+  --color-bg: var(--white);
+  --color-bg-subtle: var(--gray-50);
+  --color-bg-inverse: var(--gray-900);
+
+  --color-success: var(--green-500);
+  --color-success-bg: var(--green-50);
+  --color-danger: var(--red-500);
+  --color-danger-bg: var(--red-50);
+  --color-whatsapp: var(--whatsapp);
+}
