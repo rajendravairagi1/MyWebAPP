@@ -68,11 +68,22 @@ export default function Footer({ brand, columns = [], copyright }) {
           padding: "var(--space-md) var(--container-padding)",
           maxWidth: "var(--container-max)",
           margin: "0 auto",
-          font: "var(--font-body-sm)",
-          color: "var(--gray-600)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "var(--space-sm)",
         }}
       >
-        {copyright}
+        <span style={{ font: "var(--font-body-sm)", color: "var(--gray-600)" }}>{copyright}</span>
+        <div style={{ display: "flex", gap: "var(--space-md)" }}>
+          <Link href="/privacy-policy" style={{ font: "var(--font-body-sm)", color: "var(--gray-600)", textDecoration: "none" }}>
+            Privacy Policy
+          </Link>
+          <Link href="/terms-of-service" style={{ font: "var(--font-body-sm)", color: "var(--gray-600)", textDecoration: "none" }}>
+            Terms of Service
+          </Link>
+        </div>
       </div>
     </footer>
   );

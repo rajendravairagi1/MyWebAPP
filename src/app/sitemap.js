@@ -5,7 +5,18 @@ import { BLOG_POSTS } from "@/data/blog";
 import { CASE_STUDIES } from "@/data/portfolio";
 
 export default function sitemap() {
-  const staticRoutes = ["", "/services", "/industries", "/about", "/portfolio", "/blog", "/contact", "/faq"].map((route) => ({
+  const staticRoutes = [
+    "",
+    "/services",
+    "/industries",
+    "/about",
+    "/portfolio",
+    "/blog",
+    "/contact",
+    "/faq",
+    "/privacy-policy",
+    "/terms-of-service",
+  ].map((route) => ({
     url: `${SITE.url}${route}`,
     lastModified: new Date(),
   }));
