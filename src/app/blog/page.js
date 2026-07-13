@@ -1,17 +1,20 @@
 import Link from "next/link";
 import Tag from "@/components/ui/Tag";
-import { BLOG_POSTS } from "@/data/blog";
+import { listPosts } from "@/lib/repositories/posts";
 
 export const metadata = {
   title: "Blog",
   description: "SEO, local search, GEO, and paid media insights from the Oneweblink team.",
 };
 
+export const dynamic = "force-dynamic";
+
 function formatDate(iso) {
   return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 }
 
 export default function BlogPage() {
+  const posts = listPosts();
   return (
     <div style={{ fontFamily: "var(--font-sans)" }}>
       <section style={{ background: "var(--color-bg-inverse)", padding: "var(--space-3xl) var(--container-padding)", textAlign: "center" }}>
@@ -29,7 +32,7 @@ export default function BlogPage() {
           className="grid-2"
           style={{ maxWidth: "var(--container-max)", margin: "0 auto", padding: "0 var(--container-padding)", display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "var(--space-lg)" }}
         >
-          {BLOG_POSTS.map((p) => (
+          {posts.map((p) => (
             <Link
               key={p.slug}
               href={`/blog/${p.slug}`}

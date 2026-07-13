@@ -1,14 +1,17 @@
 import Link from "next/link";
 import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
-import { CASE_STUDIES } from "@/data/portfolio";
+import { listCaseStudies } from "@/lib/repositories/caseStudies";
 
 export const metadata = {
   title: "Case Studies",
   description: "Real results for real clients — organic traffic growth, map pack rankings, and pipeline built through search.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function PortfolioPage() {
+  const caseStudies = listCaseStudies();
   return (
     <div style={{ fontFamily: "var(--font-sans)" }}>
       <section style={{ background: "var(--color-bg-inverse)", padding: "var(--space-3xl) var(--container-padding)", textAlign: "center" }}>
@@ -23,7 +26,7 @@ export default function PortfolioPage() {
 
       <section style={{ padding: "var(--space-3xl) 0" }}>
         <div style={{ maxWidth: "var(--container-max)", margin: "0 auto", padding: "0 var(--container-padding)", display: "flex", flexDirection: "column", gap: "var(--space-lg)" }}>
-          {CASE_STUDIES.map((c) => (
+          {caseStudies.map((c) => (
             <Link
               key={c.slug}
               href={`/portfolio/${c.slug}`}

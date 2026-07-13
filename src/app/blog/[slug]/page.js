@@ -2,11 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Tag from "@/components/ui/Tag";
 import Button from "@/components/ui/Button";
-import { BLOG_POSTS, getPostBySlug } from "@/data/blog";
+import { listPosts, getPostBySlug } from "@/lib/repositories/posts";
 
-export function generateStaticParams() {
-  return BLOG_POSTS.map((p) => ({ slug: p.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -36,7 +34,9 @@ export default async function BlogPostPage({ params }) {
     description: post.excerpt,
   };
 
-  const otherPosts = BLOG_POSTS.filter((p) => p.slug !== post.slug).slice(0, 3);
+  const otherPosts = listPosts()
+    .filter((p) => p.slug !== post.slug)
+    .slice(0, 3);
 
   return (
     <div style={{ fontFamily: "var(--font-sans)" }}>

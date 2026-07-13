@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Button from "@/components/ui/Button";
-import { CASE_STUDIES, getCaseStudyBySlug } from "@/data/portfolio";
+import { listCaseStudies, getCaseStudyBySlug } from "@/lib/repositories/caseStudies";
 
-export function generateStaticParams() {
-  return CASE_STUDIES.map((c) => ({ slug: c.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -22,7 +20,7 @@ export default async function CaseStudyPage({ params }) {
   const study = getCaseStudyBySlug(slug);
   if (!study) notFound();
 
-  const others = CASE_STUDIES.filter((c) => c.slug !== study.slug);
+  const others = listCaseStudies().filter((c) => c.slug !== study.slug);
 
   return (
     <div style={{ fontFamily: "var(--font-sans)" }}>
