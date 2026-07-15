@@ -1,4 +1,4 @@
-import { DatabaseSync } from "node:sqlite";
+import Database from "better-sqlite3";
 import fs from "node:fs";
 import path from "node:path";
 import { BLOG_POSTS } from "@/data/blog";
@@ -36,8 +36,8 @@ export function getDb() {
   if (db) return db;
 
   fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  db = new DatabaseSync(DB_PATH);
-  db.exec("PRAGMA journal_mode = WAL;");
+  db = new Database(DB_PATH);
+  db.pragma("journal_mode = WAL");
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS blog_posts (

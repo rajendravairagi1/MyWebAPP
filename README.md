@@ -19,7 +19,7 @@ Open [http://localhost:3000](http://localhost:3000).
 - `src/components/ui` — design system primitives (Button, Input, Dialog, Card, etc.), ported from the synced Oneweblink design system.
 - `src/components/layout` — Navbar, Footer, FloatingContactButtons.
 - `src/data` — content for services, industries, and FAQs, plus the seed content for the database (see below).
-- `src/lib/db.js` — SQLite connection (Node's built-in `node:sqlite`), schema, and one-time seeding from `src/data/blog.js` / `src/data/portfolio.js`.
+- `src/lib/db.js` — SQLite connection (`better-sqlite3`), schema, and one-time seeding from `src/data/blog.js` / `src/data/portfolio.js`.
 - `src/lib/repositories` — read/write data access for blog posts and case studies.
 - `src/lib/actions/admin.js` — server actions backing the admin panel (token-checked, call `revalidatePath` so edits show up immediately).
 - `src/styles/tokens` — color, typography, and spacing CSS custom properties from the design system.
@@ -36,9 +36,14 @@ Visit `/admin` to manage blog posts and case studies. Set `ADMIN_TOKEN` in the e
 
 The contact/consultation forms POST to `/api/contact`. Set `RESEND_API_KEY` (see `.env.example`) to send real email via [Resend](https://resend.com); without it, submissions are still validated and logged server-side.
 
+## Deploying to shared hosting (cPanel)
+
+See [`CPANEL-DEPLOY.md`](./CPANEL-DEPLOY.md) for step-by-step instructions for hosts like Bluehost that run Node apps through cPanel's Application Manager (Phusion Passenger). `server.js` is the entry point Passenger needs — it isn't used for `npm run dev`/`npm run build`/`npm run start`, only for that kind of hosting.
+
 ## Scripts
 
 - `npm run dev` — start the dev server
 - `npm run build` — production build
-- `npm run start` — run the production build
+- `npm run start` — run the production build (normal Node hosting / your own machine)
+- `npm run server` — run via `server.js` (Passenger/cPanel-style hosting — see above)
 - `npm run lint` — lint the project
