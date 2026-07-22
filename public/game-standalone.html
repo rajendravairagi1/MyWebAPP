@@ -108,7 +108,7 @@ canvas{display:block;touch-action:none}
     <p>CLEAR THE PICTURE</p>
     <button class="hbtn main" onclick="goLevelSelect()">▶ PLAY</button>
     <div class="htips">
-      <div class="htip"><span>🖼️</span><span>Har level ek shape banata hai — L, C, Dil, Star, Chidiya, Tiger-face!</span></div>
+      <div class="htip"><span>🎲</span><span>14 pictures ka pool hai (L, C, Dil, Star, Chidiya, Tiger, Sun, Rocket...) — har baar random shape aayegi!</span></div>
       <div class="htip"><span>👉</span><span>Tap an arrow — agar uske path mein koi aur arrow NAHI hai, woh udd jaayega!</span></div>
       <div class="htip"><span>📏</span><span>Kuch arrows LAMBE hote hain — 2-3 box ek saath cover karte hain</span></div>
       <div class="htip"><span>🚫</span><span>Path block hai toh kuch nahi hoga — pehle doosre arrows hatao</span></div>
@@ -202,100 +202,91 @@ const DIR_ANGLE = i => i * Math.PI/4;
 
 function shuffleArr(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
-// ── Shape masks (15x15 picture silhouettes) ──────────────
+// ── Shape masks (picture silhouettes, each cropped tight to its own
+// bounding box so thin/small pictures like L get big, easy-to-tap
+// cells instead of sitting tiny in a corner of a fixed 15x15 grid) ──
 const SHAPES = {
-  // L: 58 active cells
-  L: [
-    "000000000000000",
-    "000111000000000",
-    "000111000000000",
-    "000111000000000",
-    "000111000000000",
-    "000111000000000",
-    "000111000000000",
-    "000111000000000",
-    "000111000000000",
-    "000111100000000",
-    "000111111111100",
-    "000111111111100",
-    "000111111111100",
-    "000000000000000",
-    "000000000000000",
-  ],
-  // C: 71 active cells
-  C: [
-    "000000000000000",
-    "000001111100000",
-    "000011111110000",
-    "000111111111000",
-    "001111000110000",
-    "011110000000000",
-    "011100000000000",
-    "011100000000000",
-    "011100000000000",
-    "011110000000000",
-    "001111000100000",
-    "000111111110000",
-    "000111111111000",
-    "000001111100000",
-    "000000000000000",
-  ],
-  // DIAMOND: 85 active cells
-  DIAMOND: [
-    "000000000000000",
-    "000000010000000",
-    "000000111000000",
-    "000001111100000",
-    "000011111110000",
-    "000111111111000",
-    "001111111111100",
-    "011111111111110",
-    "001111111111100",
-    "000111111111000",
-    "000011111110000",
-    "000001111100000",
-    "000000111000000",
-    "000000010000000",
-    "000000000000000",
-  ],
-  // STAR: 66 active cells
-  STAR: [
-    "000000000000000",
-    "000000010000000",
-    "000000010000000",
-    "000000111000000",
-    "000000111000000",
-    "011111111111110",
-    "001111111111100",
-    "000011111110000",
-    "000001111100000",
-    "000011111110000",
-    "000011111110000",
-    "000011000110000",
-    "000110000011000",
-    "000000000000000",
-    "000000000000000",
-  ],
-  // HEART: 95 active cells
-  HEART: [
-    "000000000000000",
-    "000000000000000",
-    "000011101110000",
-    "001111111111100",
-    "001111111111100",
-    "001111111111100",
-    "011111111111110",
-    "001111111111100",
-    "000111111111000",
-    "000011111110000",
-    "000011111110000",
-    "000001111100000",
-    "000000111000000",
-    "000000010000000",
-    "000000000000000",
-  ],
-  // BIRD: 27 active cells
-  BIRD: [
+  // L: n=12 active=58
+  L: { n:12, rows:[
+    "011100000000",
+    "011100000000",
+    "011100000000",
+    "011100000000",
+    "011100000000",
+    "011100000000",
+    "011100000000",
+    "011100000000",
+    "011110000000",
+    "011111111110",
+    "011111111110",
+    "011111111110",
+  ]},
+  // C: n=13 active=71
+  C: { n:13, rows:[
+    "0000011111000",
+    "0000111111100",
+    "0001111111110",
+    "0011110001100",
+    "0111100000000",
+    "0111000000000",
+    "0111000000000",
+    "0111000000000",
+    "0111100000000",
+    "0011110001000",
+    "0001111111100",
+    "0001111111110",
+    "0000011111000",
+  ]},
+  // DIAMOND: n=13 active=85
+  DIAMOND: { n:13, rows:[
+    "0000001000000",
+    "0000011100000",
+    "0000111110000",
+    "0001111111000",
+    "0011111111100",
+    "0111111111110",
+    "1111111111111",
+    "0111111111110",
+    "0011111111100",
+    "0001111111000",
+    "0000111110000",
+    "0000011100000",
+    "0000001000000",
+  ]},
+  // STAR: n=13 active=66
+  STAR: { n:13, rows:[
+    "0000001000000",
+    "0000001000000",
+    "0000011100000",
+    "0000011100000",
+    "1111111111111",
+    "0111111111110",
+    "0001111111000",
+    "0000111110000",
+    "0001111111000",
+    "0001111111000",
+    "0001100011000",
+    "0011000001100",
+    "0000000000000",
+  ]},
+  // HEART: n=13 active=95
+  HEART: { n:13, rows:[
+    "0001110111000",
+    "0111111111110",
+    "0111111111110",
+    "0111111111110",
+    "1111111111111",
+    "0111111111110",
+    "0011111111100",
+    "0001111111000",
+    "0001111111000",
+    "0000111110000",
+    "0000011100000",
+    "0000001000000",
+    "0000000000000",
+  ]},
+  // BIRD: n=15 active=27
+  BIRD: { n:15, rows:[
     "000000000000000",
     "000000000000000",
     "000000000000000",
@@ -311,47 +302,151 @@ const SHAPES = {
     "000000000000000",
     "000000000000000",
     "000000000000000",
-  ],
-  // TIGER: 104 active cells
-  TIGER: [
-    "000000000000000",
-    "000100000001000",
-    "000110000011000",
-    "000111000111000",
-    "000111111111000",
-    "000111111111000",
-    "000111111111000",
-    "001111111111100",
-    "001111111111100",
-    "001111111111100",
-    "001111111111100",
-    "000111111111000",
-    "000011111110000",
+  ]},
+  // TIGER: n=13 active=104
+  TIGER: { n:13, rows:[
+    "0010000000100",
+    "0011000001100",
+    "0011100011100",
+    "0011111111100",
+    "0011111111100",
+    "0011111111100",
+    "0111111111110",
+    "0111111111110",
+    "0111111111110",
+    "0111111111110",
+    "0011111111100",
+    "0001111111000",
+    "0000111110000",
+  ]},
+  // MOON: n=10 active=31
+  MOON: { n:10, rows:[
+    "0001100000",
+    "0011000000",
+    "0011000000",
+    "0111000000",
+    "0111000000",
+    "0111000000",
+    "0011100000",
+    "0011110000",
+    "0001111100",
+    "0000011110",
+  ]},
+  // FISH: n=13 active=56
+  FISH: { n:13, rows:[
+    "0000000000000",
+    "0000000000000",
+    "0000010000000",
+    "0000010000000",
+    "0000111000000",
+    "0011111100011",
+    "0111111110111",
+    "1111111111111",
+    "0111111110111",
+    "0011111100011",
+    "0000000000000",
+    "0000000000000",
+    "0000000000000",
+  ]},
+  // SUN: n=11 active=53
+  SUN: { n:11, rows:[
+    "00000100000",
+    "01000100010",
+    "00101110100",
+    "00011111000",
+    "00111111100",
+    "11111111111",
+    "00111111100",
+    "00011111000",
+    "00101110100",
+    "01000100010",
+    "00000100000",
+  ]},
+  // CROWN: n=13 active=80
+  CROWN: { n:13, rows:[
+    "0000000000000",
+    "0000001000000",
+    "0000001000000",
+    "0000011100000",
+    "0000111110000",
+    "1000111110001",
+    "1101111111011",
+    "1111111111111",
+    "1111111111111",
+    "1111111111111",
+    "1111111111111",
+    "0000000000000",
+    "0000000000000",
+  ]},
+  // ROCKET: n=12 active=51
+  ROCKET: { n:12, rows:[
+    "000001000000",
+    "000001000000",
+    "000011100000",
+    "000011100000",
+    "000111110000",
+    "000111110000",
+    "000111110000",
+    "000111110000",
+    "000111110000",
+    "001111111000",
+    "011111111100",
+    "010000000100",
+  ]},
+  // FLOWER: n=15 active=143
+  FLOWER: { n:15, rows:[
+    "000000111000000",
     "000001111100000",
+    "000001111100000",
+    "001111111111100",
+    "011111111111110",
+    "111111111111111",
+    "111111111111111",
+    "011111111111110",
+    "001111111111100",
+    "001111111111100",
+    "001111111111100",
+    "001111111111100",
+    "001111111111100",
+    "000111101111000",
     "000000000000000",
-  ],
+  ]},
+  // ANCHOR: n=14 active=77
+  ANCHOR: { n:14, rows:[
+    "00000010000000",
+    "00000111000000",
+    "00001101100000",
+    "00001101100000",
+    "00000111000000",
+    "00000111000000",
+    "00111111111000",
+    "00111111111000",
+    "00000111000000",
+    "01100111001100",
+    "01110000011100",
+    "01111111111100",
+    "00111111111000",
+    "00001111100000",
+  ]},
 };
-const SHAPE_ICONS = { L:'🔤', C:'🌙', DIAMOND:'💎', STAR:'⭐', HEART:'❤️', BIRD:'🐦', TIGER:'🐯' };
 
-function getMask(name){ return SHAPES[name].map(row=>row.split('').map(c=>c==='1')); }
+// A couple of shapes (thin rings / hooked outlines) are harder to fill
+// completely without diagonal escape routes — always give them diagonal
+// movement so they generate cleanly even on early levels.
+const SHAPES_NEED_DIAG = ['C','ANCHOR'];
+
+function getMask(name){ return SHAPES[name].rows.map(row=>row.split('').map(c=>c==='1')); }
 
 // ── Level config ─────────────────────────────────────────
+// The picture is picked at random from the whole shape pool every time a
+// level is (re)started, so no two playthroughs look the same. Difficulty
+// still ramps with level number: diagonal arrows unlock at level 4, and
+// multi-cell arrows are in from level 1.
 function levelConfig(idx){
-  const table = [
-    {shape:'L',      diag:false, multi:false},
-    {shape:'BIRD',   diag:false, multi:false},
-    {shape:'DIAMOND',diag:false, multi:true},
-    {shape:'L',      diag:false, multi:true},
-    {shape:'C',      diag:true,  multi:false},
-    {shape:'STAR',   diag:true,  multi:true},
-    {shape:'C',      diag:true,  multi:true},
-    {shape:'HEART',  diag:true,  multi:true},
-    {shape:'DIAMOND',diag:true,  multi:true},
-    {shape:'TIGER',  diag:true,  multi:true},
-  ];
-  if(idx < table.length) return Object.assign({n:15}, table[idx]);
-  const names=Object.keys(SHAPES);
-  return { n:15, shape: names[Math.floor(Math.random()*names.length)], diag:true, multi:true };
+  const names = Object.keys(SHAPES);
+  const shape = names[Math.floor(Math.random()*names.length)];
+  const diag = idx >= 3 || SHAPES_NEED_DIAG.includes(shape);
+  return { shape, diag, multi:true };
 }
 
 // ── Board generation (guaranteed solvable) ─────────────────
@@ -514,7 +609,7 @@ function generateSolvableBoard(mask, n, allowMulti, diag){
   let total=0; for(let y=0;y<n;y++) for(let x=0;x<n;x++) if(mask[y][x]) total++;
 
   let best=null, bestCells=-1;
-  for(let attempt=0; attempt<10; attempt++){
+  for(let attempt=0; attempt<20; attempt++){
     const tiled = tileMask(mask, n, allowMulti, depth);
     const result = assignDirections(tiled, n, diag, depth);
     let cells=0; for(const p of result) cells+=p.len;
@@ -589,11 +684,10 @@ function buildLevelGrid(){
   const showCount = Math.max(20, maxUnlocked+4);
   for(let i=0;i<showCount;i++){
     const stars = parseInt(localStorage.getItem(`ab_stars_${i}`)||'0');
-    const cfg = levelConfig(i);
     const btn=document.createElement('button');
     const locked = i>=maxUnlocked;
     btn.className='lvl-btn '+(locked?'locked':(stars>0?'cleared':'unlocked'));
-    btn.innerHTML = `<span class="lnum">${i+1}</span>` + (locked?'':`<span class="lshape">${SHAPE_ICONS[cfg.shape]||''}</span><span class="lstars">${stars>0?'⭐'.repeat(stars):'· · ·'}</span>`);
+    btn.innerHTML = `<span class="lnum">${i+1}</span>` + (locked?'':`<span class="lshape">🎲</span><span class="lstars">${stars>0?'⭐'.repeat(stars):'· · ·'}</span>`);
     if(!locked) btn.onclick=()=>startLevel(i);
     grid.appendChild(btn);
   }
@@ -603,7 +697,7 @@ function buildLevelGrid(){
 function startLevel(idx){
   curLevel=idx;
   const cfg=levelConfig(idx);
-  N=cfg.n; DIAG=cfg.diag; MULTI=cfg.multi;
+  N=SHAPES[cfg.shape].n; DIAG=cfg.diag; MULTI=cfg.multi;
   mask = getMask(cfg.shape);
 
   pieces = generateSolvableBoard(mask, N, MULTI, DIAG);
@@ -800,7 +894,7 @@ function useShuffle(){
   const depth = computeDepth(mask, N);
   const wantCells = remaining;
   let best=null, bestCells=-1;
-  for(let attempt=0; attempt<10; attempt++){
+  for(let attempt=0; attempt<20; attempt++){
     const result = reshuffleAttempt(pieces, N, DIAG, depth);
     let cells=0; for(const p of result.pieces) cells+=p.len;
     if(cells>bestCells){ bestCells=cells; best=result; }
