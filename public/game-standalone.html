@@ -51,8 +51,11 @@ button{font-family:inherit}
 .tb-stat{text-align:center;min-width:44px}
 .tb-lbl{font-size:8px;color:#999;letter-spacing:1px;font-weight:700}
 .tb-val{font-size:17px;font-weight:900;color:#333}
-#progress-wrap{flex-shrink:0;padding:6px 14px;background:#fff}
-#progress-track{height:8px;border-radius:4px;background:#e8e8f0;overflow:hidden}
+#progress-wrap{flex-shrink:0;padding:6px 14px;background:#fff;display:flex;align-items:center;gap:10px}
+#lives-row{display:flex;gap:3px;flex-shrink:0}
+.life-heart{font-size:17px;transition:transform .25s,opacity .3s}
+.life-heart.lost{opacity:.2;transform:scale(.6)}
+#progress-track{flex:1;height:8px;border-radius:4px;background:#e8e8f0;overflow:hidden}
 #progress-fill{height:100%;background:linear-gradient(90deg,#667eea,#43e97b);border-radius:4px;transition:width .3s}
 #canvas-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:8px;overflow:hidden;position:relative}
 canvas{display:block;touch-action:none}
@@ -80,6 +83,14 @@ canvas{display:block;touch-action:none}
 .wbtn.main{background:linear-gradient(135deg,#43e97b,#38f9d7);color:#0a3d24}
 .wbtn.sec{background:#f0f0f0;color:#333}
 #confetti-cv{position:fixed;inset:0;pointer-events:none;z-index:41}
+
+/* ═══ FAIL OVERLAY ═══ */
+#fail-overlay{position:fixed;inset:0;background:rgba(40,10,10,.75);display:none;align-items:center;justify-content:center;z-index:40}
+.fcard{background:#fff;border-radius:28px;padding:32px 28px;max-width:300px;width:85%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.fcard .fico{font-size:60px;display:block;margin-bottom:6px;animation:shakeico .5s ease}
+@keyframes shakeico{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.fcard h2{font-size:24px;font-weight:900;color:#c62828;margin-bottom:6px}
+.fcard p{color:#888;font-size:13px;margin-bottom:18px;line-height:1.5}
 
 /* Toast */
 #toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(20,10,40,.85);color:#fff;border-radius:14px;padding:9px 18px;z-index:50;opacity:0;transition:opacity .25s;font-size:13px;font-weight:700;pointer-events:none;white-space:nowrap}
@@ -124,7 +135,10 @@ canvas{display:block;touch-action:none}
     <div class="tb-stat"><div class="tb-lbl">TIME</div><div class="tb-val" id="tb-time">0:00</div></div>
     <button class="iconbtn" onclick="goLevelSelect()">☰</button>
   </div>
-  <div id="progress-wrap"><div id="progress-track"><div id="progress-fill" style="width:0%"></div></div></div>
+  <div id="progress-wrap">
+    <div id="lives-row"><span class="life-heart" id="life1">❤️</span><span class="life-heart" id="life2">❤️</span><span class="life-heart" id="life3">❤️</span></div>
+    <div id="progress-track"><div id="progress-fill" style="width:0%"></div></div>
+  </div>
   <div id="canvas-wrap"><canvas id="c"></canvas></div>
   <div id="toolbar">
     <button class="pu-btn" id="btn-hint" onclick="useHint()"><span class="pu-ico">💡</span><span class="pu-lbl">HINT</span><span class="pu-badge" id="hint-badge">3</span></button>
@@ -148,6 +162,21 @@ canvas{display:block;touch-action:none}
     </div>
     <button class="wbtn main" onclick="winNext()">NEXT LEVEL ▶</button>
     <button class="wbtn sec" onclick="winRetry()">🔄 RETRY</button>
+  </div>
+</div>
+
+<!-- FAIL OVERLAY -->
+<div id="fail-overlay">
+  <div class="fcard">
+    <span class="fico">💥</span>
+    <h2>GAME OVER!</h2>
+    <p>3 galat taps ho gaye — arrow tabhi udega jab uske aage koi arrow na ho.</p>
+    <div class="wstats">
+      <div class="wrow"><span>Score</span><span id="f-score">0</span></div>
+      <div class="wrow"><span>Cleared</span><span id="f-cleared">0</span></div>
+    </div>
+    <button class="wbtn main" onclick="winRetry()">🔄 TRY AGAIN</button>
+    <button class="wbtn sec" onclick="goLevelSelect()">☰ LEVEL SELECT</button>
   </div>
 </div>
 
@@ -258,6 +287,7 @@ let history=[]; // {x,y,dir} for undo
 let flying=[];  // animated arrows leaving board
 let particles=[];
 let hintCell=null, hintT=0;
+const MAX_MISTAKES=3;
 let startTime=0, elapsedMs=0, timerInt=null;
 let winShown=false;
 let maxUnlocked = parseInt(localStorage.getItem('ab_max')||'1');
@@ -300,9 +330,13 @@ function startLevel(idx){
   history=[]; flying=[]; particles=[]; hintCell=null;
   winShown=false;
 
+  document.getElementById('win-overlay').style.display='none';
+  document.getElementById('fail-overlay').style.display='none';
+
   fitCanvas();
   document.getElementById('tb-level').textContent = idx+1;
   updateHUD();
+  updateLives();
   showScreen('game');
   startTimer();
   requestRender();
@@ -316,7 +350,7 @@ function fitCanvas(){
   const maxW = wrap.clientWidth - 16;
   const maxH = wrap.clientHeight - 16;
   CELL = Math.floor(Math.min(maxW/N, maxH/N));
-  CELL = Math.max(28, Math.min(72, CELL));
+  CELL = Math.max(28, Math.min(130, CELL));
   CV.width = N*CELL; CV.height = N*CELL;
 }
 window.addEventListener('resize', ()=>{ if(document.getElementById('game').classList.contains('active')){ fitCanvas(); requestRender(); } });
@@ -339,6 +373,21 @@ function updateHUD(){
   document.getElementById('btn-hint').disabled = hintsLeft<=0;
   document.getElementById('btn-undo').disabled = undosLeft<=0 || history.length===0;
   document.getElementById('btn-shuffle').disabled = shufflesLeft<=0;
+}
+
+function updateLives(){
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById('life'+i);
+    if(el) el.classList.toggle('lost', mistakes>=i);
+  }
+}
+
+function triggerFail(){
+  winShown=true; stopTimer();
+  document.getElementById('f-score').textContent = score;
+  document.getElementById('f-cleared').textContent = totalArrows-remaining;
+  document.getElementById('fail-overlay').style.display='flex';
+  sndBuzz(); vibrate([30,60,30,60,30]);
 }
 
 function toast(msg,dur=2000){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),dur); }
@@ -377,6 +426,13 @@ function handleTap(clientX,clientY){
     shakeAt(x,y);
     sndBuzz(); vibrate([16,30,16]);
     updateHUD();
+    updateLives();
+    if(mistakes>=MAX_MISTAKES){
+      winShown=true;
+      requestRender();
+      setTimeout(triggerFail, 500);
+      return;
+    }
   }
   requestRender();
 }
@@ -416,14 +472,25 @@ function useShuffle(){
 function pulseShuffle(){ const b=document.getElementById('btn-shuffle'); b.classList.add('pulse'); setTimeout(()=>b.classList.remove('pulse'),3000); }
 
 // ── Fly-off animation ────────────────────────────────────
+function stepsToEdge(x,y,dx,dy,n){
+  let steps=0, cx=x+dx, cy=y+dy;
+  while(cx>=0&&cx<n&&cy>=0&&cy<n){ steps++; cx+=dx; cy+=dy; }
+  return steps;
+}
+
 function spawnFly(x,y,dirIdx){
   const {dx,dy}=DIRS[dirIdx];
-  const cx=x*CELL+CELL/2, cy=y*CELL+CELL/2;
-  flying.push({ x:cx,y:cy, vx:dx*CELL*.55, vy:dy*CELL*.55, dir:dirIdx, life:1, rot:DIR_ANGLE(dirIdx) });
+  const mag=Math.hypot(dx,dy);
+  const steps=stepsToEdge(x,y,dx,dy,N);
+  const dist=(steps+1)*CELL*mag; // travel across remaining cells, one extra to clear the edge
+  const cx0=x*CELL+CELL/2, cy0=y*CELL+CELL/2;
+  const speed=1300; // px/sec — constant speed so direction of travel is unambiguous
+  const duration=Math.min(700,Math.max(220,dist/speed*1000));
+  flying.push({ x0:cx0,y0:cy0, ux:dx/mag, uy:dy/mag, dist, dir:dirIdx, start:Date.now(), duration, rot:DIR_ANGLE(dirIdx), lastTrail:0 });
   const color=DIR_COLORS[dirIdx];
   for(let i=0;i<10;i++){
     const a=Math.random()*Math.PI*2, spd=Math.random()*3+1;
-    particles.push({ x:cx,y:cy, vx:Math.cos(a)*spd,vy:Math.sin(a)*spd, life:1, decay:.04, size:Math.random()*4+2, color });
+    particles.push({ x:cx0,y:cy0, vx:Math.cos(a)*spd,vy:Math.sin(a)*spd, life:1, decay:.04, size:Math.random()*4+2, color });
   }
 }
 
@@ -515,15 +582,25 @@ function render(){
     drawArrowGlyph(cx,cy,size*.5,DIR_ANGLE(c.dir),color,isHint);
   }
 
-  // Flying arrows
+  // Flying arrows — slide along the exact direction they point, so it's
+  // always clear which way each arrow left the board.
   for(let i=flying.length-1;i>=0;i--){
     const f=flying[i];
-    f.x+=f.vx; f.y+=f.vy; f.vx*=1.03; f.vy*=1.03; f.life-=.035;
-    if(f.life<=0 || f.x<-60||f.x>CV.width+60||f.y<-60||f.y>CV.height+60){ flying.splice(i,1); continue; }
-    ctx.save(); ctx.globalAlpha=Math.max(0,f.life);
-    const r=CELL*.4*f.life+CELL*.15;
-    drawArrowGlyph(f.x,f.y,r,f.rot,DIR_COLORS[f.dir],false);
+    let t=(now-f.start)/f.duration; if(t>1) t=1;
+    const traveled=f.dist*t;
+    const px=f.x0+f.ux*traveled, py=f.y0+f.uy*traveled;
+    let alpha=1; if(t>0.7) alpha=Math.max(0,1-(t-0.7)/0.3);
+
+    if(now-f.lastTrail>16){
+      f.lastTrail=now;
+      particles.push({ x:px,y:py, vx:-f.ux*.6,vy:-f.uy*.6, life:1, decay:.08, size:CELL*.11, color:DIR_COLORS[f.dir] });
+    }
+
+    ctx.save(); ctx.globalAlpha=alpha;
+    drawArrowGlyph(px,py,CELL*.42,f.rot,DIR_COLORS[f.dir],false);
     ctx.restore();
+
+    if(t>=1) flying.splice(i,1);
   }
 
   // Particles
