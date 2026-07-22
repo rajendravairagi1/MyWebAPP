@@ -778,9 +778,12 @@ function fitCanvas(){
   const wrap = document.getElementById('canvas-wrap');
   const maxW = wrap.clientWidth - 16;
   const maxH = wrap.clientHeight - 16;
-  CELL = Math.floor(Math.min(maxW/N, maxH/N));
+  // Reserve one extra cell of margin on every side (a lane for the
+  // orbiting ball) around the N x N puzzle grid.
+  const totalCells = N + 2;
+  CELL = Math.floor(Math.min(maxW/totalCells, maxH/totalCells));
   CELL = Math.max(16, Math.min(70, CELL));
-  CV.width = N*CELL; CV.height = N*CELL;
+  CV.width = totalCells*CELL; CV.height = totalCells*CELL;
 }
 window.addEventListener('resize', ()=>{ if(document.getElementById('game').classList.contains('active')){ fitCanvas(); requestRender(); } });
 
@@ -826,7 +829,9 @@ function cellFromClient(clientX,clientY){
   const rect=CV.getBoundingClientRect();
   const sx=CV.width/rect.width, sy=CV.height/rect.height;
   const mx=(clientX-rect.left)*sx, my=(clientY-rect.top)*sy;
-  return { x:Math.floor(mx/CELL), y:Math.floor(my/CELL) };
+  // The puzzle grid is drawn inset by one cell (see render()'s translate),
+  // to leave a margin lane for the orbiting ball, so undo that here.
+  return { x:Math.floor((mx-CELL)/CELL), y:Math.floor((my-CELL)/CELL) };
 }
 
 function handleTap(clientX,clientY){
@@ -978,16 +983,21 @@ function spawnFly(piece){
 // The ball travels in a loop between these anchors (only the ones the
 // current level allows), so it's always somewhere reachable.
 function edgeAnchorPos(dir){
-  const w=CV.width, h=CV.height, off=CELL*0.9, diag=off*0.72;
+  // Positions are in the SAME (translated) coordinate space as the puzzle
+  // pieces — see render()'s ctx.translate(CELL,CELL) — so they use the
+  // logical board size (N*CELL), not the physical canvas size. The
+  // reserved 1-cell margin lane means every one of these sits safely
+  // on-screen instead of being clipped past the canvas edge.
+  const w=N*CELL, h=N*CELL, m=CELL*0.5;
   switch(dir){
-    case 0: return {x:w+off, y:h/2};            // R
-    case 1: return {x:w+diag, y:h+diag};         // DR
-    case 2: return {x:w/2, y:h+off};             // D
-    case 3: return {x:-diag, y:h+diag};          // DL
-    case 4: return {x:-off, y:h/2};              // L
-    case 5: return {x:-diag, y:-diag};           // UL
-    case 6: return {x:w/2, y:-off};              // U
-    case 7: return {x:w+diag, y:-diag};          // UR
+    case 0: return {x:w+m, y:h/2};    // R
+    case 1: return {x:w+m, y:h+m};    // DR
+    case 2: return {x:w/2, y:h+m};    // D
+    case 3: return {x:-m,  y:h+m};    // DL
+    case 4: return {x:-m,  y:h/2};    // L
+    case 5: return {x:-m,  y:-m};     // UL
+    case 6: return {x:w/2, y:-m};     // U
+    case 7: return {x:w+m, y:-m};     // UR
   }
 }
 
@@ -1165,6 +1175,13 @@ function render(){
   ctx.fillStyle='#f7f9ff';
   ctx.fillRect(0,0,CV.width,CV.height);
 
+  // Everything below (pieces, flying pieces, particles, the ball) is drawn
+  // inset by one cell, leaving a margin lane around the puzzle for the
+  // orbiting ball to travel through in full view instead of being clipped
+  // off the edge of the canvas.
+  ctx.save();
+  ctx.translate(CELL, CELL);
+
   const now=Date.now();
   const dt = lastFrameNow ? Math.min(now-lastFrameNow,100) : 16;
   lastFrameNow = now;
@@ -1221,6 +1238,8 @@ function render(){
 
   // Ball drawn last so it always stays visible on top of pieces/particles
   drawBall(now);
+
+  ctx.restore();
 
   if(document.getElementById('game').classList.contains('active')) requestRender();
 }
