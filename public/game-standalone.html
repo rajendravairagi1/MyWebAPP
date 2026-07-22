@@ -53,8 +53,8 @@ button{font-family:inherit}
 .tb-lbl{font-size:8px;color:#999;letter-spacing:1px;font-weight:700}
 .tb-val{font-size:17px;font-weight:900;color:#333}
 #progress-wrap{flex-shrink:0;padding:6px 14px;background:#fff;display:flex;align-items:center;gap:10px}
-#lives-row{display:flex;gap:3px;flex-shrink:0}
-.life-heart{font-size:17px;transition:transform .25s,opacity .3s}
+#lives-row{display:flex;gap:2px;flex-shrink:0}
+.life-heart{font-size:15px;transition:transform .25s,opacity .3s}
 .life-heart.lost{opacity:.2;transform:scale(.6)}
 #progress-track{flex:1;height:8px;border-radius:4px;background:#e8e8f0;overflow:hidden}
 #progress-fill{height:100%;background:linear-gradient(90deg,#667eea,#43e97b);border-radius:4px;transition:width .3s}
@@ -112,7 +112,8 @@ canvas{display:block;touch-action:none}
       <div class="htip"><span>👉</span><span>Tap an arrow — if nothing is blocking its path, it flies off the board!</span></div>
       <div class="htip"><span>📏</span><span>Some arrows are LONG — they span 2-3 boxes at once</span></div>
       <div class="htip"><span>🚫</span><span>If the path is blocked, nothing happens — clear the other arrows first</span></div>
-      <div class="htip"><span>❤️</span><span>3 wrong taps = Game Over — think before you tap!</span></div>
+      <div class="htip"><span>🎈</span><span>A bonus balloon floats past one edge — clear an arrow facing that same direction to pop it for +300!</span></div>
+      <div class="htip"><span>❤️</span><span>5 wrong taps = Game Over — think before you tap!</span></div>
       <div class="htip"><span>🧠</span><span>The further you go, the fewer Hints/Undos/Shuffles you get — from level 15 there's no help at all, just your brain!</span></div>
     </div>
   </div>
@@ -138,7 +139,7 @@ canvas{display:block;touch-action:none}
     <button class="iconbtn" onclick="goLevelSelect()">☰</button>
   </div>
   <div id="progress-wrap">
-    <div id="lives-row"><span class="life-heart" id="life1">❤️</span><span class="life-heart" id="life2">❤️</span><span class="life-heart" id="life3">❤️</span></div>
+    <div id="lives-row"><span class="life-heart" id="life1">❤️</span><span class="life-heart" id="life2">❤️</span><span class="life-heart" id="life3">❤️</span><span class="life-heart" id="life4">❤️</span><span class="life-heart" id="life5">❤️</span></div>
     <div id="progress-track"><div id="progress-fill" style="width:0%"></div></div>
   </div>
   <div id="canvas-wrap"><canvas id="c"></canvas></div>
@@ -172,7 +173,7 @@ canvas{display:block;touch-action:none}
   <div class="fcard">
     <span class="fico">💥</span>
     <h2>GAME OVER!</h2>
-    <p>You made 3 wrong taps — an arrow only flies off when nothing blocks its path.</p>
+    <p>You made 5 wrong taps — an arrow only flies off when nothing blocks its path.</p>
     <div class="wstats">
       <div class="wrow"><span>Score</span><span id="f-score">0</span></div>
       <div class="wrow"><span>Cleared</span><span id="f-cleared">0</span></div>
@@ -656,6 +657,7 @@ function sndPop(combo){ tone(500+Math.min(combo,10)*40,'sine',.15,.22); }
 function sndBuzz(){ tone(140,'sawtooth',.18,.18,90); }
 function sndWin(){ [500,650,800,1000,1300].forEach((f,i)=>setTimeout(()=>tone(f,'sine',.2,.22),i*70)); }
 function sndPU(){ [400,700,1000].forEach((f,i)=>setTimeout(()=>tone(f,'sine',.13,.2),i*55)); }
+function sndBalloonPop(){ tone(700,'sine',.08,.25); setTimeout(()=>tone(1000,'sine',.12,.25),60); setTimeout(()=>tone(1300,'sine',.16,.22),120); }
 function vibrate(pattern){ if(navigator.vibrate) try{navigator.vibrate(pattern);}catch(e){} }
 
 // ── State ─────────────────────────────────────────────────
@@ -669,11 +671,21 @@ let history=[]; // pieces removed, for undo
 let flying=[];  // animated pieces leaving board
 let particles=[];
 let hintPiece=null;
-const MAX_MISTAKES=3;
+const MAX_MISTAKES=5;
 let startTime=0, elapsedMs=0, timerInt=null;
 let winShown=false;
 let maxUnlocked = parseInt(localStorage.getItem('ab_max')||'1');
 let shakeMap={};
+
+// ── Bonus balloon ───────────────────────────────────────────
+// A balloon floats just past one edge of the board. Whenever an arrow
+// that flies off in that same direction reaches the edge, it pops the
+// balloon for a score bonus - so clearing arrows does double duty:
+// solving the picture puzzle AND aiming shots at a target.
+let balloon=null; // {dir, x, y, spawnedAt, expiresAt}
+let nextBalloonAt=0;
+const BALLOON_LIFETIME=7000;
+const BALLOON_RESPAWN_MIN=1200, BALLOON_RESPAWN_MAX=2600;
 
 const CV = document.getElementById('c');
 const ctx = CV.getContext('2d');
@@ -734,6 +746,7 @@ function startLevel(idx){
   hintsLeft=maxHints; undosLeft=maxUndos; shufflesLeft=maxShuffles;
   history=[]; flying=[]; particles=[]; hintPiece=null; shakeMap={};
   winShown=false;
+  balloon=null; nextBalloonAt=Date.now()+1500;
 
   document.getElementById('win-overlay').style.display='none';
   document.getElementById('fail-overlay').style.display='none';
@@ -784,7 +797,7 @@ function updateHUD(){
 }
 
 function updateLives(){
-  for(let i=1;i<=3;i++){
+  for(let i=1;i<=MAX_MISTAKES;i++){
     const el=document.getElementById('life'+i);
     if(el) el.classList.toggle('lost', mistakes>=i);
   }
@@ -826,6 +839,7 @@ function handleTap(clientX,clientY){
     const gained = 100*Math.min(combo,10)*piece.len;
     score += gained;
     spawnFly(piece);
+    if(balloon && piece.dir===balloon.dir){ flying[flying.length-1].hitsBalloon=true; }
     sndPop(combo); vibrate(14);
     updateHUD();
     if(remaining<=0){ setTimeout(()=>winLevel(),450); }
@@ -951,6 +965,55 @@ function spawnFly(piece){
   }
 }
 
+// ── Bonus balloon ─────────────────────────────────────────
+function balloonPos(dir){
+  const w=CV.width, h=CV.height, off=CELL*0.9, diag=off*0.72;
+  switch(dir){
+    case 0: return {x:w+off, y:h/2};            // R
+    case 1: return {x:w+diag, y:h+diag};         // DR
+    case 2: return {x:w/2, y:h+off};             // D
+    case 3: return {x:-diag, y:h+diag};          // DL
+    case 4: return {x:-off, y:h/2};              // L
+    case 5: return {x:-diag, y:-diag};           // UL
+    case 6: return {x:w/2, y:-off};              // U
+    case 7: return {x:w+diag, y:-diag};          // UR
+  }
+}
+
+function maybeSpawnBalloon(now){
+  if(balloon || now<nextBalloonAt || !pieces.length) return;
+  const dirList = DIAG ? [0,1,2,3,4,5,6,7] : [0,2,4,6];
+  const dir = dirList[Math.floor(Math.random()*dirList.length)];
+  const pos = balloonPos(dir);
+  balloon = { dir, x:pos.x, y:pos.y, spawnedAt:now, expiresAt: now+BALLOON_LIFETIME };
+}
+
+function popBalloon(){
+  if(!balloon) return;
+  const {x,y} = balloon;
+  score += 300;
+  updateHUD();
+  sndBalloonPop(); vibrate([12,20,12]);
+  for(let i=0;i<18;i++){
+    const a=Math.random()*Math.PI*2, spd=Math.random()*5+2;
+    particles.push({ x,y, vx:Math.cos(a)*spd,vy:Math.sin(a)*spd, life:1, decay:.032, size:Math.random()*6+3, color:'#ff6fb0' });
+  }
+  balloon=null;
+  nextBalloonAt = Date.now() + BALLOON_RESPAWN_MIN + Math.random()*(BALLOON_RESPAWN_MAX-BALLOON_RESPAWN_MIN);
+}
+
+function drawBalloon(now){
+  if(!balloon) return;
+  const bob = Math.sin(now*0.003 + balloon.spawnedAt*0.001)*4;
+  ctx.save();
+  ctx.font = `${Math.round(CELL*0.9)}px Arial`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.shadowColor='rgba(255,255,255,.7)'; ctx.shadowBlur=10;
+  ctx.fillText('🎈', balloon.x, balloon.y+bob);
+  ctx.shadowBlur=0;
+  ctx.restore();
+}
+
 // ── Render ────────────────────────────────────────────────
 let rafPending=false;
 function requestRender(){ if(!rafPending){ rafPending=true; requestAnimationFrame(()=>{ rafPending=false; render(); }); } }
@@ -1066,6 +1129,11 @@ function render(){
 
   const now=Date.now();
 
+  // Bonus balloon: spawn/expire on a timer, draw it floating past whichever
+  // edge it's currently on.
+  if(balloon && now>balloon.expiresAt){ balloon=null; nextBalloonAt=now+600; }
+  maybeSpawnBalloon(now);
+
   // Pieces still on the board
   for(const piece of pieces){
     let shakeOff=0;
@@ -1096,7 +1164,10 @@ function render(){
     }
 
     drawPiece(f.piece, ox, oy, alpha, false, 0);
-    if(t>=1) flying.splice(i,1);
+    if(t>=1){
+      if(f.hitsBalloon) popBalloon();
+      flying.splice(i,1);
+    }
   }
 
   // Particles
@@ -1108,7 +1179,10 @@ function render(){
   }
   ctx.globalAlpha=1;
 
-  if(flying.length||particles.length) requestRender();
+  // Balloon drawn last so it always stays visible on top of pieces/particles
+  drawBalloon(now);
+
+  if(document.getElementById('game').classList.contains('active')) requestRender();
 }
 
 // ── Win flow ──────────────────────────────────────────────
