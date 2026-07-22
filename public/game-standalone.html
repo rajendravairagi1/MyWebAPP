@@ -37,6 +37,7 @@ button{font-family:inherit}
 .lvl-btn{aspect-ratio:1;border-radius:16px;border:none;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.08)}
 .lvl-btn .lnum{font-size:20px;font-weight:900;color:#333}
 .lvl-btn .lstars{font-size:10px;margin-top:2px;letter-spacing:1px}
+.lvl-btn .lshape{font-size:9px;margin-top:1px;opacity:.7;letter-spacing:.5px}
 .lvl-btn.locked{background:#e2e2e2;color:#aaa}
 .lvl-btn.locked .lnum{color:#aaa}
 .lvl-btn.locked::after{content:'🔒';position:absolute;top:6px;right:6px;font-size:10px}
@@ -104,14 +105,14 @@ canvas{display:block;touch-action:none}
   <div class="hcard">
     <span class="ico">🏹</span>
     <h1>ARROW BLAST</h1>
-    <p>CLEAR THE BOARD</p>
+    <p>CLEAR THE PICTURE</p>
     <button class="hbtn main" onclick="goLevelSelect()">▶ PLAY</button>
     <div class="htips">
+      <div class="htip"><span>🖼️</span><span>Har level ek shape banata hai — L, C, Dil, Star, Chidiya, Tiger-face!</span></div>
       <div class="htip"><span>👉</span><span>Tap an arrow — agar uske path mein koi aur arrow NAHI hai, woh udd jaayega!</span></div>
+      <div class="htip"><span>📏</span><span>Kuch arrows LAMBE hote hain — 2-3 box ek saath cover karte hain</span></div>
       <div class="htip"><span>🚫</span><span>Path block hai toh kuch nahi hoga — pehle doosre arrows hatao</span></div>
-      <div class="htip"><span>🌈</span><span>Har direction ka apna color hai — dhyan se socho, order matter karta hai!</span></div>
-      <div class="htip"><span>↗️</span><span>Higher levels mein DIAGONAL arrows bhi aayenge — naya twist!</span></div>
-      <div class="htip"><span>💡</span><span>Fasogaye? Hint, Undo, Shuffle power-ups use karo</span></div>
+      <div class="htip"><span>❤️</span><span>3 galat tap = Game Over — dhyan se socho!</span></div>
     </div>
   </div>
 </div>
@@ -184,11 +185,11 @@ canvas{display:block;touch-action:none}
 
 <script>
 // ═══════════════════════════════════════════════════════════
-//  ARROW BLAST — inspired by Arrow Puzzle, rebuilt & extended
-//  Tap an arrow: if its straight path to the board edge is
-//  clear of other arrows, it flies off. Clear the whole board!
-//  NEW: diagonal arrows, combo scoring, hint/undo/shuffle,
-//       level map with stars, juicy fly-off + confetti FX.
+//  ARROW BLAST — shaped picture boards + multi-cell arrows
+//  Every level's active cells form a picture (L, C, heart, star,
+//  bird, tiger-face...). Tap an arrow — if its straight path to
+//  the board edge is clear of other arrows, it flies off. Some
+//  arrows are 2-3 cells long. Clear the whole picture to win!
 // ═══════════════════════════════════════════════════════════
 
 // 8 directions: R, DR, D, DL, L, UL, U, UR
@@ -201,71 +202,351 @@ const DIR_ANGLE = i => i * Math.PI/4;
 
 function shuffleArr(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
+// ── Shape masks (15x15 picture silhouettes) ──────────────
+const SHAPES = {
+  // L: 58 active cells
+  L: [
+    "000000000000000",
+    "000111000000000",
+    "000111000000000",
+    "000111000000000",
+    "000111000000000",
+    "000111000000000",
+    "000111000000000",
+    "000111000000000",
+    "000111000000000",
+    "000111100000000",
+    "000111111111100",
+    "000111111111100",
+    "000111111111100",
+    "000000000000000",
+    "000000000000000",
+  ],
+  // C: 71 active cells
+  C: [
+    "000000000000000",
+    "000001111100000",
+    "000011111110000",
+    "000111111111000",
+    "001111000110000",
+    "011110000000000",
+    "011100000000000",
+    "011100000000000",
+    "011100000000000",
+    "011110000000000",
+    "001111000100000",
+    "000111111110000",
+    "000111111111000",
+    "000001111100000",
+    "000000000000000",
+  ],
+  // DIAMOND: 85 active cells
+  DIAMOND: [
+    "000000000000000",
+    "000000010000000",
+    "000000111000000",
+    "000001111100000",
+    "000011111110000",
+    "000111111111000",
+    "001111111111100",
+    "011111111111110",
+    "001111111111100",
+    "000111111111000",
+    "000011111110000",
+    "000001111100000",
+    "000000111000000",
+    "000000010000000",
+    "000000000000000",
+  ],
+  // STAR: 66 active cells
+  STAR: [
+    "000000000000000",
+    "000000010000000",
+    "000000010000000",
+    "000000111000000",
+    "000000111000000",
+    "011111111111110",
+    "001111111111100",
+    "000011111110000",
+    "000001111100000",
+    "000011111110000",
+    "000011111110000",
+    "000011000110000",
+    "000110000011000",
+    "000000000000000",
+    "000000000000000",
+  ],
+  // HEART: 95 active cells
+  HEART: [
+    "000000000000000",
+    "000000000000000",
+    "000011101110000",
+    "001111111111100",
+    "001111111111100",
+    "001111111111100",
+    "011111111111110",
+    "001111111111100",
+    "000111111111000",
+    "000011111110000",
+    "000011111110000",
+    "000001111100000",
+    "000000111000000",
+    "000000010000000",
+    "000000000000000",
+  ],
+  // BIRD: 27 active cells
+  BIRD: [
+    "000000000000000",
+    "000000000000000",
+    "000000000000000",
+    "000000000000000",
+    "000000000000000",
+    "000110000011000",
+    "001111000111100",
+    "011001101100110",
+    "110000111000011",
+    "000000000000000",
+    "000000000000000",
+    "000000000000000",
+    "000000000000000",
+    "000000000000000",
+    "000000000000000",
+  ],
+  // TIGER: 104 active cells
+  TIGER: [
+    "000000000000000",
+    "000100000001000",
+    "000110000011000",
+    "000111000111000",
+    "000111111111000",
+    "000111111111000",
+    "000111111111000",
+    "001111111111100",
+    "001111111111100",
+    "001111111111100",
+    "001111111111100",
+    "000111111111000",
+    "000011111110000",
+    "000001111100000",
+    "000000000000000",
+  ],
+};
+const SHAPE_ICONS = { L:'🔤', C:'🌙', DIAMOND:'💎', STAR:'⭐', HEART:'❤️', BIRD:'🐦', TIGER:'🐯' };
+
+function getMask(name){ return SHAPES[name].map(row=>row.split('').map(c=>c==='1')); }
+
 // ── Level config ─────────────────────────────────────────
 function levelConfig(idx){
   const table = [
-    {n:4,density:.55,diag:false},
-    {n:5,density:.6, diag:false},
-    {n:5,density:.7, diag:false},
-    {n:6,density:.62,diag:false},
-    {n:6,density:.74,diag:false},
-    {n:7,density:.65,diag:true},
-    {n:7,density:.78,diag:true},
-    {n:8,density:.7, diag:true},
-    {n:8,density:.8, diag:true},
-    {n:9,density:.75,diag:true},
+    {shape:'L',      diag:false, multi:false},
+    {shape:'BIRD',   diag:false, multi:false},
+    {shape:'DIAMOND',diag:false, multi:true},
+    {shape:'L',      diag:false, multi:true},
+    {shape:'C',      diag:true,  multi:false},
+    {shape:'STAR',   diag:true,  multi:true},
+    {shape:'C',      diag:true,  multi:true},
+    {shape:'HEART',  diag:true,  multi:true},
+    {shape:'DIAMOND',diag:true,  multi:true},
+    {shape:'TIGER',  diag:true,  multi:true},
   ];
-  if(idx < table.length) return table[idx];
-  const n = Math.min(12, 9 + Math.floor((idx-9)/2));
-  return { n, density: .72 + Math.random()*.13, diag:true };
+  if(idx < table.length) return Object.assign({n:15}, table[idx]);
+  const names=Object.keys(SHAPES);
+  return { n:15, shape: names[Math.floor(Math.random()*names.length)], diag:true, multi:true };
 }
 
 // ── Board generation (guaranteed solvable) ─────────────────
-function isPathClear(board,x,y,dx,dy,n){
+function isPathClear(grid,x,y,dx,dy,n){
   let cx=x+dx, cy=y+dy;
-  while(cx>=0&&cx<n&&cy>=0&&cy<n){ if(board[cy][cx]) return false; cx+=dx; cy+=dy; }
+  while(cx>=0&&cx<n&&cy>=0&&cy<n){ if(grid[cy][cx]) return false; cx+=dx; cy+=dy; }
   return true;
 }
 
-function genBoard(n, density, diag){
-  const dirList = diag ? [0,1,2,3,4,5,6,7] : [0,2,4,6];
-  const total = n*n;
-  const cells = [];
-  for(let y=0;y<n;y++) for(let x=0;x<n;x++) cells.push({x,y});
-  shuffleArr(cells);
-  const desired = Math.max(4, Math.round(total*density));
-  const chosen = shuffleArr(cells.slice(0, desired));
-  const board = Array.from({length:n},()=>Array(n).fill(null));
-  for(const {x,y} of chosen){
-    const avail = dirList.filter(di=>isPathClear(board,x,y,DIRS[di].dx,DIRS[di].dy,n));
-    if(avail.length) board[y][x] = { dir: avail[Math.floor(Math.random()*avail.length)] };
-  }
-  let count=0;
-  for(let y=0;y<n;y++) for(let x=0;x<n;x++) if(board[y][x]) count++;
-  return { board, count };
+function stepsToEdge(x,y,dx,dy,n){
+  let steps=0, cx=x+dx, cy=y+dy;
+  while(cx>=0&&cx<n&&cy>=0&&cy<n){ steps++; cx+=dx; cy+=dy; }
+  return steps;
 }
 
-function reshuffleRemaining(board, n, diag){
-  const positions=[];
-  for(let y=0;y<n;y++) for(let x=0;x<n;x++) if(board[y][x]) positions.push({x,y});
-  shuffleArr(positions);
-  const dirList = diag ? [0,1,2,3,4,5,6,7] : [0,2,4,6];
-  const temp = Array.from({length:n},()=>Array(n).fill(null));
-  for(const {x,y} of positions){
-    const avail = dirList.filter(di=>isPathClear(temp,x,y,DIRS[di].dx,DIRS[di].dy,n));
-    if(avail.length) temp[y][x] = { dir: avail[Math.floor(Math.random()*avail.length)] };
-    else temp[y][x] = { dir: dirList[0] };
-  }
-  return temp;
-}
-
-function hasAnyValidMove(board, n){
+// BFS distance of each active cell from the nearest inactive cell / edge
+// of the shape. Used to order generation so cells deep inside the
+// silhouette (which have plenty of empty board around them early on)
+// are placed first, and boundary cells (which always have a short escape
+// route out of the shape) are placed last — this reliably avoids interior
+// cells getting boxed in on all sides by the time it's their turn.
+function computeDepth(mask, n){
+  const depth = Array.from({length:n},()=>Array(n).fill(Infinity));
+  const queue=[];
+  const N4=[[1,0],[-1,0],[0,1],[0,-1]];
   for(let y=0;y<n;y++) for(let x=0;x<n;x++){
-    const c=board[y][x]; if(!c) continue;
-    const {dx,dy}=DIRS[c.dir];
-    if(isPathClear(board,x,y,dx,dy,n)) return {x,y};
+    if(!mask[y][x]) continue;
+    const onBoundary = N4.some(([dx,dy])=>{ const nx=x+dx, ny=y+dy; return nx<0||nx>=n||ny<0||ny>=n||!mask[ny][nx]; });
+    if(onBoundary){ depth[y][x]=1; queue.push({x,y}); }
+  }
+  let qi=0;
+  while(qi<queue.length){
+    const {x,y}=queue[qi++];
+    for(const [dx,dy] of N4){
+      const nx=x+dx, ny=y+dy;
+      if(nx<0||nx>=n||ny<0||ny>=n||!mask[ny][nx]) continue;
+      if(depth[ny][nx] > depth[y][x]+1){ depth[ny][nx]=depth[y][x]+1; queue.push({x:nx,y:ny}); }
+    }
+  }
+  return depth;
+}
+
+// Tile the shape's active cells into straight runs of length 1-3
+// (when multi is enabled) so some arrows visually span 2-3 boxes.
+function tileMask(mask, n, allowMulti, depth){
+  const covered = Array.from({length:n},()=>Array(n).fill(false));
+  const cellsList = [];
+  for(let y=0;y<n;y++) for(let x=0;x<n;x++) if(mask[y][x]) cellsList.push({x,y});
+  cellsList.sort((a,b)=> depth[b.y][b.x]-depth[a.y][a.x] || Math.random()-0.5);
+
+  const pieces=[];
+  for(const {x,y} of cellsList){
+    if(covered[y][x]) continue;
+    let placed=false;
+    if(allowMulti){
+      const lens = shuffleArr([3,2]);
+      outerLoop:
+      for(const len of lens){
+        const axes = shuffleArr(['H','V']);
+        for(const axis of axes){
+          const dirsToTry = shuffleArr(axis==='H' ? [[1,0],[-1,0]] : [[0,1],[0,-1]]);
+          for(const [sx,sy] of dirsToTry){
+            const cells=[];
+            let ok=true;
+            for(let i=0;i<len;i++){
+              const cx=x+sx*i, cy=y+sy*i;
+              if(cx<0||cx>=n||cy<0||cy>=n||!mask[cy][cx]||covered[cy][cx]){ ok=false; break; }
+              cells.push({x:cx,y:cy});
+            }
+            if(ok){
+              if(axis==='H') cells.sort((a,b)=>a.x-b.x); else cells.sort((a,b)=>a.y-b.y);
+              for(const c of cells) covered[c.y][c.x]=true;
+              pieces.push({ cells, axis, len });
+              placed=true;
+              break outerLoop;
+            }
+          }
+        }
+      }
+    }
+    if(!placed){
+      covered[y][x]=true;
+      pieces.push({ cells:[{x,y}], axis:'S', len:1 });
+    }
+  }
+  return pieces;
+}
+
+function pieceHead(piece){
+  if(piece.len===1) return piece.cells[0];
+  const {dx,dy}=DIRS[piece.dir];
+  return (dx>0||dy>0) ? piece.cells[piece.cells.length-1] : piece.cells[0];
+}
+
+// Reverse-insertion assignment: guarantees a valid solve order exists.
+// Pieces are processed deepest-inside-the-shape first (see computeDepth),
+// matching the order cells were tiled in, so boundary pieces — which
+// always have a short way out — are assigned last, when the board is
+// densest.
+function assignDirections(pieces, n, diag, depth){
+  pieces.sort((a,b)=>{
+    const da=Math.max(...a.cells.map(c=>depth[c.y][c.x]));
+    const db=Math.max(...b.cells.map(c=>depth[c.y][c.x]));
+    return db-da || Math.random()-0.5;
+  });
+  const tempOcc = Array.from({length:n},()=>Array(n).fill(null));
+  const straightDirList = [0,2,4,6];
+  const fullDirList = diag ? [0,1,2,3,4,5,6,7] : straightDirList;
+  const finalPieces=[];
+
+  for(const piece of pieces){
+    if(piece.len===1){
+      const {x,y}=piece.cells[0];
+      const candidates = fullDirList.filter(di=>isPathClear(tempOcc,x,y,DIRS[di].dx,DIRS[di].dy,n));
+      if(candidates.length){
+        piece.dir = candidates[Math.floor(Math.random()*candidates.length)];
+        tempOcc[y][x]=piece;
+        finalPieces.push(piece);
+      }
+      // else: no direction is clear at all (astronomically rare) — leave
+      // this single cell out of the puzzle rather than risk an unsolvable board.
+      continue;
+    }
+
+    const first=piece.cells[0], last=piece.cells[piece.cells.length-1];
+    const opts = piece.axis==='H' ? [{dir:0,head:last},{dir:4,head:first}] : [{dir:2,head:last},{dir:6,head:first}];
+    const candidates = opts.filter(o=>isPathClear(tempOcc,o.head.x,o.head.y,DIRS[o.dir].dx,DIRS[o.dir].dy,n)).map(o=>o.dir);
+
+    if(candidates.length){
+      piece.dir = candidates[Math.floor(Math.random()*candidates.length)];
+      for(const c of piece.cells) tempOcc[c.y][c.x]=piece;
+      finalPieces.push(piece);
+    } else {
+      // This piece has only 2 possible facings and neither is clear right
+      // now. Rather than guessing a direction that might be blocked (which
+      // would break the solvability guarantee), split it into single cells
+      // and re-evaluate each one at this exact point in the sequence —
+      // singles have 4-8 directional options instead of 2, so this reliably
+      // recovers a valid placement.
+      for(const c of piece.cells){
+        const cCandidates = fullDirList.filter(di=>isPathClear(tempOcc,c.x,c.y,DIRS[di].dx,DIRS[di].dy,n));
+        if(cCandidates.length){
+          const single = { cells:[c], axis:'S', len:1, dir: cCandidates[Math.floor(Math.random()*cCandidates.length)] };
+          tempOcc[c.y][c.x]=single;
+          finalPieces.push(single);
+        }
+      }
+    }
+  }
+  return finalPieces;
+}
+
+// Generates a level's board. Tiling + direction assignment is randomized,
+// so on rare unlucky shuffles a handful of cells (usually 0, occasionally
+// 1-2 out of dozens) can't find a safe placement and get left out —
+// retrying a few times and keeping the most complete attempt makes that
+// effectively never visible.
+function generateSolvableBoard(mask, n, allowMulti, diag){
+  const depth = computeDepth(mask, n);
+  let total=0; for(let y=0;y<n;y++) for(let x=0;x<n;x++) if(mask[y][x]) total++;
+
+  let best=null, bestCells=-1;
+  for(let attempt=0; attempt<10; attempt++){
+    const tiled = tileMask(mask, n, allowMulti, depth);
+    const result = assignDirections(tiled, n, diag, depth);
+    let cells=0; for(const p of result) cells+=p.len;
+    if(cells>bestCells){ bestCells=cells; best=result; }
+    if(cells>=total) break;
+  }
+  return best;
+}
+
+function hasAnyValidMove(){
+  for(const piece of pieces){
+    const head=pieceHead(piece);
+    const {dx,dy}=DIRS[piece.dir];
+    if(isPathClear(occ,head.x,head.y,dx,dy,N)) return piece;
   }
   return null;
+}
+
+function pieceBounds(piece){
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  for(const c of piece.cells){ minX=Math.min(minX,c.x); minY=Math.min(minY,c.y); maxX=Math.max(maxX,c.x); maxY=Math.max(maxY,c.y); }
+  return {minX,minY,maxX,maxY};
+}
+
+function removePiece(piece){
+  const idx=pieces.indexOf(piece);
+  if(idx>=0) pieces.splice(idx,1);
+  for(const c of piece.cells) occ[c.y][c.x]=null;
+}
+function restorePiece(piece){
+  pieces.push(piece);
+  for(const c of piece.cells) occ[c.y][c.x]=piece;
 }
 
 // ── Audio ────────────────────────────────────────────────
@@ -279,18 +560,20 @@ function sndPU(){ [400,700,1000].forEach((f,i)=>setTimeout(()=>tone(f,'sine',.13
 function vibrate(pattern){ if(navigator.vibrate) try{navigator.vibrate(pattern);}catch(e){} }
 
 // ── State ─────────────────────────────────────────────────
-let N, DIAG, board=[], CELL;
+let N, DIAG, MULTI, CELL;
+let mask=[], pieces=[], occ=[];
 let curLevel=0, remaining=0, totalArrows=0;
 let moves=0, mistakes=0, combo=0, score=0;
 let hintsLeft=3, undosLeft=3, shufflesLeft=3;
-let history=[]; // {x,y,dir} for undo
-let flying=[];  // animated arrows leaving board
+let history=[]; // pieces removed, for undo
+let flying=[];  // animated pieces leaving board
 let particles=[];
-let hintCell=null, hintT=0;
+let hintPiece=null;
 const MAX_MISTAKES=3;
 let startTime=0, elapsedMs=0, timerInt=null;
 let winShown=false;
 let maxUnlocked = parseInt(localStorage.getItem('ab_max')||'1');
+let shakeMap={};
 
 const CV = document.getElementById('c');
 const ctx = CV.getContext('2d');
@@ -306,10 +589,11 @@ function buildLevelGrid(){
   const showCount = Math.max(20, maxUnlocked+4);
   for(let i=0;i<showCount;i++){
     const stars = parseInt(localStorage.getItem(`ab_stars_${i}`)||'0');
+    const cfg = levelConfig(i);
     const btn=document.createElement('button');
     const locked = i>=maxUnlocked;
     btn.className='lvl-btn '+(locked?'locked':(stars>0?'cleared':'unlocked'));
-    btn.innerHTML = `<span class="lnum">${i+1}</span>` + (locked?'':`<span class="lstars">${stars>0?'⭐'.repeat(stars):'· · ·'}</span>`);
+    btn.innerHTML = `<span class="lnum">${i+1}</span>` + (locked?'':`<span class="lshape">${SHAPE_ICONS[cfg.shape]||''}</span><span class="lstars">${stars>0?'⭐'.repeat(stars):'· · ·'}</span>`);
     if(!locked) btn.onclick=()=>startLevel(i);
     grid.appendChild(btn);
   }
@@ -319,15 +603,21 @@ function buildLevelGrid(){
 function startLevel(idx){
   curLevel=idx;
   const cfg=levelConfig(idx);
-  N=cfg.n; DIAG=cfg.diag;
+  N=cfg.n; DIAG=cfg.diag; MULTI=cfg.multi;
+  mask = getMask(cfg.shape);
 
-  let gen;
-  do { gen = genBoard(N, cfg.density, DIAG); } while(gen.count < Math.min(4, N*N));
-  board = gen.board; totalArrows = gen.count; remaining = gen.count;
+  pieces = generateSolvableBoard(mask, N, MULTI, DIAG);
+  pieces.forEach((p,i)=>{ p.id=i; });
+
+  occ = Array.from({length:N},()=>Array(N).fill(null));
+  for(const p of pieces) for(const c of p.cells) occ[c.y][c.x]=p;
+
+  totalArrows=0; for(const p of pieces) totalArrows+=p.len;
+  remaining=totalArrows;
 
   moves=0; mistakes=0; combo=0; score=0;
   hintsLeft=3; undosLeft=3; shufflesLeft=3;
-  history=[]; flying=[]; particles=[]; hintCell=null;
+  history=[]; flying=[]; particles=[]; hintPiece=null; shakeMap={};
   winShown=false;
 
   document.getElementById('win-overlay').style.display='none';
@@ -345,7 +635,7 @@ function startLevel(idx){
   // and produces a tiny board that only "fixes itself" on the next resize.
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ fitCanvas(); requestRender(); }); });
 
-  if(idx===0){ setTimeout(()=>{ const h=hasAnyValidMove(board,N); if(h){ hintCell=h; hintT=1; toast('👉 Highlighted arrow ka path clear hai — tap karo!',3200); } },500); }
+  if(idx===0){ setTimeout(()=>{ const p=hasAnyValidMove(); if(p){ hintPiece=p; toast('👉 Highlighted arrow ka path clear hai — tap karo!',3200); } },500); }
 }
 
 function fitCanvas(){
@@ -353,7 +643,7 @@ function fitCanvas(){
   const maxW = wrap.clientWidth - 16;
   const maxH = wrap.clientHeight - 16;
   CELL = Math.floor(Math.min(maxW/N, maxH/N));
-  CELL = Math.max(28, Math.min(130, CELL));
+  CELL = Math.max(16, Math.min(70, CELL));
   CV.width = N*CELL; CV.height = N*CELL;
 }
 window.addEventListener('resize', ()=>{ if(document.getElementById('game').classList.contains('active')){ fitCanvas(); requestRender(); } });
@@ -407,26 +697,27 @@ function handleTap(clientX,clientY){
   if(winShown) return;
   const {x,y}=cellFromClient(clientX,clientY);
   if(x<0||x>=N||y<0||y>=N) return;
-  const c=board[y][x];
-  if(!c) return;
-  hintCell=null;
+  const piece = occ[y][x];
+  if(!piece) return;
+  hintPiece=null;
 
-  const {dx,dy}=DIRS[c.dir];
-  if(isPathClear(board,x,y,dx,dy,N)){
+  const head=pieceHead(piece);
+  const {dx,dy}=DIRS[piece.dir];
+  if(isPathClear(occ,head.x,head.y,dx,dy,N)){
     // VALID
-    history.push({x,y,dir:c.dir});
-    board[y][x]=null;
-    remaining--; moves++; combo++;
-    const gained = 100*Math.min(combo,10);
+    history.push(piece);
+    removePiece(piece);
+    remaining -= piece.len; moves++; combo++;
+    const gained = 100*Math.min(combo,10)*piece.len;
     score += gained;
-    spawnFly(x,y,c.dir);
+    spawnFly(piece);
     sndPop(combo); vibrate(14);
     updateHUD();
-    if(remaining===0){ setTimeout(()=>winLevel(),450); }
+    if(remaining<=0){ setTimeout(()=>winLevel(),450); }
   } else {
     // INVALID
     mistakes++; combo=0;
-    shakeAt(x,y);
+    shakeAt(piece);
     sndBuzz(); vibrate([16,30,16]);
     updateHUD();
     updateLives();
@@ -442,30 +733,81 @@ function handleTap(clientX,clientY){
 CV.addEventListener('click',e=>handleTap(e.clientX,e.clientY));
 CV.addEventListener('touchend',e=>{ e.preventDefault(); const t=e.changedTouches[0]; handleTap(t.clientX,t.clientY); },{passive:false});
 
-let shakeMap={};
-function shakeAt(x,y){ shakeMap[`${x},${y}`]=1; }
+function shakeAt(piece){ shakeMap[piece.id]=1; }
 
 // ── Power-ups ─────────────────────────────────────────────
 function useHint(){
   if(hintsLeft<=0) return;
-  const h = hasAnyValidMove(board,N);
-  if(!h){ toast('😵 Koi valid move nahi — SHUFFLE try karo!'); pulseShuffle(); return; }
-  hintsLeft--; hintCell=h; hintT=1;
+  const p = hasAnyValidMove();
+  if(!p){ toast('😵 Koi valid move nahi — SHUFFLE try karo!'); pulseShuffle(); return; }
+  hintsLeft--; hintPiece=p;
   sndPU(); updateHUD(); requestRender();
-  setTimeout(()=>{ hintCell=null; requestRender(); },2500);
+  setTimeout(()=>{ hintPiece=null; requestRender(); },2500);
 }
 
 function useUndo(){
   if(undosLeft<=0 || history.length===0) return;
-  const last = history.pop();
-  board[last.y][last.x] = { dir:last.dir };
-  remaining++; undosLeft--; combo=0;
+  const piece = history.pop();
+  restorePiece(piece);
+  remaining += piece.len; undosLeft--; combo=0;
   sndPU(); updateHUD(); requestRender();
+}
+
+function reshuffleAttempt(sourcePieces, n, diag, depth){
+  const pieceList = sourcePieces.map(p=>({ cells:p.cells, axis:p.axis, len:p.len, id:p.id }));
+  pieceList.sort((a,b)=>{
+    const da=Math.max(...a.cells.map(c=>depth[c.y][c.x]));
+    const db=Math.max(...b.cells.map(c=>depth[c.y][c.x]));
+    return db-da || Math.random()-0.5;
+  });
+  const tempOcc = Array.from({length:n},()=>Array(n).fill(null));
+  const straightDirList=[0,2,4,6];
+  const fullDirList = diag ? [0,1,2,3,4,5,6,7] : straightDirList;
+  const finalPieces=[];
+
+  for(const piece of pieceList){
+    if(piece.len===1){
+      const c=piece.cells[0];
+      const candidates = fullDirList.filter(di=>isPathClear(tempOcc,c.x,c.y,DIRS[di].dx,DIRS[di].dy,n));
+      if(candidates.length){ piece.dir=candidates[Math.floor(Math.random()*candidates.length)]; tempOcc[c.y][c.x]=piece; finalPieces.push(piece); }
+      continue;
+    }
+    const first=piece.cells[0], last=piece.cells[piece.cells.length-1];
+    const opts = piece.axis==='H' ? [{dir:0,head:last},{dir:4,head:first}] : [{dir:2,head:last},{dir:6,head:first}];
+    const candidates = opts.filter(o=>isPathClear(tempOcc,o.head.x,o.head.y,DIRS[o.dir].dx,DIRS[o.dir].dy,n)).map(o=>o.dir);
+    if(candidates.length){
+      piece.dir = candidates[Math.floor(Math.random()*candidates.length)];
+      for(const c of piece.cells) tempOcc[c.y][c.x]=piece;
+      finalPieces.push(piece);
+    } else {
+      // Same recovery as initial generation: split into singles so we
+      // never leave a piece facing a direction we haven't verified.
+      for(const c of piece.cells){
+        const cCandidates = fullDirList.filter(di=>isPathClear(tempOcc,c.x,c.y,DIRS[di].dx,DIRS[di].dy,n));
+        if(cCandidates.length){
+          const single = { cells:[c], axis:'S', len:1, id:piece.id+'_'+c.x+'_'+c.y, dir: cCandidates[Math.floor(Math.random()*cCandidates.length)] };
+          tempOcc[c.y][c.x]=single;
+          finalPieces.push(single);
+        }
+      }
+    }
+  }
+  return { pieces:finalPieces, occ:tempOcc };
 }
 
 function useShuffle(){
   if(shufflesLeft<=0) return;
-  board = reshuffleRemaining(board, N, DIAG);
+  const depth = computeDepth(mask, N);
+  const wantCells = remaining;
+  let best=null, bestCells=-1;
+  for(let attempt=0; attempt<10; attempt++){
+    const result = reshuffleAttempt(pieces, N, DIAG, depth);
+    let cells=0; for(const p of result.pieces) cells+=p.len;
+    if(cells>bestCells){ bestCells=cells; best=result; }
+    if(cells>=wantCells) break;
+  }
+  pieces = best.pieces;
+  occ = best.occ;
   shufflesLeft--; combo=0;
   sndPU(); vibrate(20);
   toast('🔀 Arrows reshuffled!');
@@ -475,22 +817,19 @@ function useShuffle(){
 function pulseShuffle(){ const b=document.getElementById('btn-shuffle'); b.classList.add('pulse'); setTimeout(()=>b.classList.remove('pulse'),3000); }
 
 // ── Fly-off animation ────────────────────────────────────
-function stepsToEdge(x,y,dx,dy,n){
-  let steps=0, cx=x+dx, cy=y+dy;
-  while(cx>=0&&cx<n&&cy>=0&&cy<n){ steps++; cx+=dx; cy+=dy; }
-  return steps;
-}
-
-function spawnFly(x,y,dirIdx){
-  const {dx,dy}=DIRS[dirIdx];
+function spawnFly(piece){
+  const head=pieceHead(piece);
+  const {dx,dy}=DIRS[piece.dir];
   const mag=Math.hypot(dx,dy);
-  const steps=stepsToEdge(x,y,dx,dy,N);
-  const dist=(steps+1)*CELL*mag; // travel across remaining cells, one extra to clear the edge
-  const cx0=x*CELL+CELL/2, cy0=y*CELL+CELL/2;
-  const speed=1300; // px/sec — constant speed so direction of travel is unambiguous
-  const duration=Math.min(700,Math.max(220,dist/speed*1000));
-  flying.push({ x0:cx0,y0:cy0, ux:dx/mag, uy:dy/mag, dist, dir:dirIdx, start:Date.now(), duration, rot:DIR_ANGLE(dirIdx), lastTrail:0 });
-  const color=DIR_COLORS[dirIdx];
+  const steps=stepsToEdge(head.x,head.y,dx,dy,N);
+  const dist=(steps+piece.len)*CELL*mag; // clears both the head AND the trailing tail
+  const speed=1300;
+  const duration=Math.min(750,Math.max(220,dist/speed*1000));
+  flying.push({ piece, ux:dx/mag, uy:dy/mag, dist, start:Date.now(), duration, lastTrail:0 });
+
+  const {minX,minY,maxX,maxY}=pieceBounds(piece);
+  const cx0=(minX+maxX+1)/2*CELL, cy0=(minY+maxY+1)/2*CELL;
+  const color=DIR_COLORS[piece.dir];
   for(let i=0;i<10;i++){
     const a=Math.random()*Math.PI*2, spd=Math.random()*3+1;
     particles.push({ x:cx0,y:cy0, vx:Math.cos(a)*spd,vy:Math.sin(a)*spd, life:1, decay:.04, size:Math.random()*4+2, color });
@@ -502,6 +841,7 @@ let rafPending=false;
 function requestRender(){ if(!rafPending){ rafPending=true; requestAnimationFrame(()=>{ rafPending=false; render(); }); } }
 
 function roundRectPath(x,y,w,h,r){
+  r = Math.max(0, Math.min(r, w/2, h/2));
   ctx.beginPath();
   ctx.moveTo(x+r,y);
   ctx.arcTo(x+w,y,x+w,y+h,r);
@@ -511,7 +851,15 @@ function roundRectPath(x,y,w,h,r){
   ctx.closePath();
 }
 
-function drawArrowGlyph(cx,cy,r,rot,color,glow){
+function lighten(hex,amt){
+  const n=parseInt(hex.slice(1),16);
+  let r=(n>>16)+amt, g=((n>>8)&0xff)+amt, b=(n&0xff)+amt;
+  r=Math.min(255,r);g=Math.min(255,g);b=Math.min(255,b);
+  return `rgb(${r},${g},${b})`;
+}
+
+// Compact arrow glyph for single-cell pieces (unchanged proportions).
+function drawArrowGlyph(cx,cy,r,rot,glow){
   ctx.save();
   ctx.translate(cx,cy);
   ctx.rotate(rot);
@@ -525,84 +873,114 @@ function drawArrowGlyph(cx,cy,r,rot,color,glow){
   ctx.restore();
 }
 
+// Stretched arrow glyph for multi-cell pieces: shaft spans the piece's
+// length, arrowhead sits at the facing end, thickness stays cell-sized.
+function drawArrowGlyphElongated(cx,cy,rLen,rWid,rot,glow){
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(rot);
+  if(glow){ ctx.shadowColor='#fff'; ctx.shadowBlur=10; }
+  ctx.strokeStyle='#fff'; ctx.fillStyle='#fff';
+  ctx.lineWidth=Math.max(2,rWid*.5); ctx.lineCap='round';
+  const headLen = Math.min(rLen*0.55, rWid*1.3);
+  ctx.beginPath(); ctx.moveTo(-rLen*0.82,0); ctx.lineTo(rLen-headLen*0.9,0); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(rLen,0); ctx.lineTo(rLen-headLen,-rWid*0.85); ctx.lineTo(rLen-headLen,rWid*0.85);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+// Draws one piece (its rounded "capsule" body + glyph) at an optional
+// pixel offset (ox,oy) — used both for on-board pieces (offset 0,0)
+// and for the fly-off animation (offset animates along its direction).
+function drawPiece(piece, ox, oy, alpha, glow, shakeOff){
+  const {minX,minY,maxX,maxY}=pieceBounds(piece);
+  const pad=3;
+  const w=(maxX-minX+1)*CELL - pad*2;
+  const h=(maxY-minY+1)*CELL - pad*2;
+  const x0=minX*CELL+pad+ox+(shakeOff||0);
+  const y0=minY*CELL+pad+oy;
+  const r=Math.min(w,h)/2;
+  const cx=x0+w/2, cy=y0+h/2;
+  const color=DIR_COLORS[piece.dir];
+
+  ctx.save();
+  ctx.globalAlpha=alpha;
+
+  // soft shadow for depth (no outline/border — just a colored capsule)
+  ctx.fillStyle='rgba(0,0,0,.12)';
+  roundRectPath(x0,y0+3,w,h,r);
+  ctx.fill();
+
+  // glossy fill
+  const grad=ctx.createLinearGradient(x0,y0,x0,y0+h);
+  grad.addColorStop(0, lighten(color,20));
+  grad.addColorStop(1, color);
+  ctx.fillStyle=grad;
+  roundRectPath(x0,y0,w,h,r);
+  ctx.fill();
+
+  if(glow){
+    const pulse=.5+Math.sin(Date.now()*.008)*.5;
+    ctx.strokeStyle=`rgba(255,255,255,${.6+pulse*.4})`;
+    ctx.lineWidth=3+pulse*2;
+    roundRectPath(x0,y0,w,h,r);
+    ctx.stroke();
+    requestRender();
+  }
+
+  // soft top shine (gloss, not an outline)
+  ctx.fillStyle='rgba(255,255,255,.22)';
+  roundRectPath(x0+w*0.1, y0+h*0.08, w*0.8, h*0.26, Math.min(w,h)*0.13);
+  ctx.fill();
+
+  if(piece.len===1){
+    drawArrowGlyph(cx,cy, Math.min(w,h)*0.5, DIR_ANGLE(piece.dir), false);
+  } else {
+    const axisLen = piece.axis==='H' ? w : h;
+    drawArrowGlyphElongated(cx,cy, axisLen*0.44, Math.min(w,h)*0.5, DIR_ANGLE(piece.dir), false);
+  }
+
+  ctx.restore();
+}
+
 function render(){
   ctx.clearRect(0,0,CV.width,CV.height);
   ctx.fillStyle='#f7f9ff';
   ctx.fillRect(0,0,CV.width,CV.height);
 
-  // Faint grid
-  ctx.strokeStyle='rgba(0,0,0,.05)'; ctx.lineWidth=1;
-  for(let i=1;i<N;i++){ ctx.beginPath();ctx.moveTo(i*CELL,0);ctx.lineTo(i*CELL,CV.height);ctx.stroke(); ctx.beginPath();ctx.moveTo(0,i*CELL);ctx.lineTo(CV.width,i*CELL);ctx.stroke(); }
-
-  // Tiles
   const now=Date.now();
-  for(let y=0;y<N;y++) for(let x=0;x<N;x++){
-    const c=board[y][x]; if(!c) continue;
-    const key=`${x},${y}`;
-    let px=x*CELL, py=y*CELL;
+
+  // Pieces still on the board
+  for(const piece of pieces){
     let shakeOff=0;
-    if(shakeMap[key]!==undefined){
-      shakeMap[key]-=.08;
-      if(shakeMap[key]<=0) delete shakeMap[key];
-      else { shakeOff=Math.sin(shakeMap[key]*40)*4; requestRender(); }
+    const sk=shakeMap[piece.id];
+    if(sk!==undefined){
+      shakeMap[piece.id]-=.08;
+      if(shakeMap[piece.id]<=0) delete shakeMap[piece.id];
+      else { shakeOff=Math.sin(shakeMap[piece.id]*40)*4; requestRender(); }
     }
-    const pad=3, size=CELL-pad*2;
-    const cx=px+CELL/2+shakeOff, cy=py+CELL/2;
-    const color = DIR_COLORS[c.dir];
-    const isHint = hintCell && hintCell.x===x && hintCell.y===y;
-
-    // shadow
-    ctx.fillStyle='rgba(0,0,0,.1)';
-    roundRectPath(px+pad+shakeOff,py+pad+3,size,size,size*.28);
-    ctx.fill();
-
-    // glossy tile
-    const grad=ctx.createLinearGradient(px,py,px,py+size+pad*2);
-    grad.addColorStop(0, lighten(color,18));
-    grad.addColorStop(1, color);
-    ctx.fillStyle=grad;
-    roundRectPath(px+pad+shakeOff,py+pad,size,size,size*.28);
-    ctx.fill();
-
-    if(isHint){
-      const pulse = .5+Math.sin(now*.008)*.5;
-      ctx.strokeStyle=`rgba(255,255,255,${.6+pulse*.4})`;
-      ctx.lineWidth=3+pulse*2;
-      roundRectPath(px+pad+shakeOff,py+pad,size,size,size*.28);
-      ctx.stroke();
-      requestRender();
-    } else {
-      ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=1.5;
-      roundRectPath(px+pad+shakeOff,py+pad,size,size,size*.28);
-      ctx.stroke();
-    }
-
-    // top shine
-    ctx.fillStyle='rgba(255,255,255,.25)';
-    roundRectPath(px+pad+shakeOff+size*.1,py+pad+size*.08,size*.8,size*.28,size*.14);
-    ctx.fill();
-
-    drawArrowGlyph(cx,cy,size*.5,DIR_ANGLE(c.dir),color,isHint);
+    const isHint = piece===hintPiece;
+    drawPiece(piece, 0, 0, 1, isHint, shakeOff);
   }
 
-  // Flying arrows — slide along the exact direction they point, so it's
-  // always clear which way each arrow left the board.
+  // Flying pieces — slide along the exact direction they point, whole
+  // shape moving together, so it's always clear which way each piece left.
   for(let i=flying.length-1;i>=0;i--){
     const f=flying[i];
     let t=(now-f.start)/f.duration; if(t>1) t=1;
     const traveled=f.dist*t;
-    const px=f.x0+f.ux*traveled, py=f.y0+f.uy*traveled;
+    const ox=f.ux*traveled, oy=f.uy*traveled;
     let alpha=1; if(t>0.7) alpha=Math.max(0,1-(t-0.7)/0.3);
 
     if(now-f.lastTrail>16){
       f.lastTrail=now;
-      particles.push({ x:px,y:py, vx:-f.ux*.6,vy:-f.uy*.6, life:1, decay:.08, size:CELL*.11, color:DIR_COLORS[f.dir] });
+      const {minX,minY,maxX,maxY}=pieceBounds(f.piece);
+      const tx=(minX+maxX+1)/2*CELL+ox, ty=(minY+maxY+1)/2*CELL+oy;
+      particles.push({ x:tx,y:ty, vx:-f.ux*.6,vy:-f.uy*.6, life:1, decay:.08, size:CELL*.11, color:DIR_COLORS[f.piece.dir] });
     }
 
-    ctx.save(); ctx.globalAlpha=alpha;
-    drawArrowGlyph(px,py,CELL*.42,f.rot,DIR_COLORS[f.dir],false);
-    ctx.restore();
-
+    drawPiece(f.piece, ox, oy, alpha, false, 0);
     if(t>=1) flying.splice(i,1);
   }
 
@@ -616,13 +994,6 @@ function render(){
   ctx.globalAlpha=1;
 
   if(flying.length||particles.length) requestRender();
-}
-
-function lighten(hex,amt){
-  const n=parseInt(hex.slice(1),16);
-  let r=(n>>16)+amt, g=((n>>8)&0xff)+amt, b=(n&0xff)+amt;
-  r=Math.min(255,r);g=Math.min(255,g);b=Math.min(255,b);
-  return `rgb(${r},${g},${b})`;
 }
 
 // ── Win flow ──────────────────────────────────────────────
