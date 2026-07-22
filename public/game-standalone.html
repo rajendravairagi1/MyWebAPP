@@ -112,7 +112,7 @@ canvas{display:block;touch-action:none}
       <div class="htip"><span>👉</span><span>Tap an arrow — if nothing is blocking its path, it flies off the board!</span></div>
       <div class="htip"><span>📏</span><span>Some arrows are LONG — they span 2-3 boxes at once</span></div>
       <div class="htip"><span>🚫</span><span>If the path is blocked, nothing happens — clear the other arrows first</span></div>
-      <div class="htip"><span>🎈</span><span>A bonus balloon floats past one edge — clear an arrow facing that same direction to pop it for +300!</span></div>
+      <div class="htip"><span>🟠</span><span>A bonus ball keeps orbiting the board — clear an arrow facing where it currently is to hit it! 5 hits break it, then a new one appears</span></div>
       <div class="htip"><span>❤️</span><span>5 wrong taps = Game Over — think before you tap!</span></div>
       <div class="htip"><span>🧠</span><span>The further you go, the fewer Hints/Undos/Shuffles you get — from level 15 there's no help at all, just your brain!</span></div>
     </div>
@@ -657,7 +657,7 @@ function sndPop(combo){ tone(500+Math.min(combo,10)*40,'sine',.15,.22); }
 function sndBuzz(){ tone(140,'sawtooth',.18,.18,90); }
 function sndWin(){ [500,650,800,1000,1300].forEach((f,i)=>setTimeout(()=>tone(f,'sine',.2,.22),i*70)); }
 function sndPU(){ [400,700,1000].forEach((f,i)=>setTimeout(()=>tone(f,'sine',.13,.2),i*55)); }
-function sndBalloonPop(){ tone(700,'sine',.08,.25); setTimeout(()=>tone(1000,'sine',.12,.25),60); setTimeout(()=>tone(1300,'sine',.16,.22),120); }
+function sndBallHit(breaking){ tone(breaking?500:700,'sine',.08,.25); setTimeout(()=>tone(breaking?700:1000,'sine',.12,.25),60); if(breaking) setTimeout(()=>tone(1300,'sine',.16,.22),120); }
 function vibrate(pattern){ if(navigator.vibrate) try{navigator.vibrate(pattern);}catch(e){} }
 
 // ── State ─────────────────────────────────────────────────
@@ -677,15 +677,22 @@ let winShown=false;
 let maxUnlocked = parseInt(localStorage.getItem('ab_max')||'1');
 let shakeMap={};
 
-// ── Bonus balloon ───────────────────────────────────────────
-// A balloon floats just past one edge of the board. Whenever an arrow
-// that flies off in that same direction reaches the edge, it pops the
-// balloon for a score bonus - so clearing arrows does double duty:
-// solving the picture puzzle AND aiming shots at a target.
-let balloon=null; // {dir, x, y, spawnedAt, expiresAt}
-let nextBalloonAt=0;
-const BALLOON_LIFETIME=7000;
-const BALLOON_RESPAWN_MIN=1200, BALLOON_RESPAWN_MAX=2600;
+// ── Bonus ball ────────────────────────────────────────────────
+// A ball continuously orbits just outside the board, cycling through
+// whichever directions the level allows. Whenever an arrow is cleared
+// facing the direction the ball currently occupies, it lands a hit —
+// the ball shrinks a bit and awards a score bonus. After 5 hits it
+// breaks completely and a fresh full-size ball appears and keeps
+// orbiting. Solving the picture puzzle now also means aiming shots.
+let ball=null; // {phase, hitsLeft, scale}
+let nextBallAt=0;
+let ballDirCycle=[0,2,4,6];
+let lastFrameNow=0;
+const BALL_SEGMENT_MS=1200; // time to travel between two adjacent anchor points
+const BALL_START_HITS=5;
+const BALL_RESPAWN_DELAY=1000;
+
+function updateBallCycle(){ ballDirCycle = DIAG ? [0,1,2,3,4,5,6,7] : [0,2,4,6]; }
 
 const CV = document.getElementById('c');
 const ctx = CV.getContext('2d');
@@ -730,6 +737,7 @@ function startLevel(idx){
   curLevel=idx;
   const cfg=levelConfig(idx);
   N=SHAPES[cfg.shape].n; DIAG=cfg.diag; MULTI=cfg.multi;
+  updateBallCycle();
   mask = getMask(cfg.shape);
 
   pieces = generateSolvableBoard(mask, N, MULTI, DIAG, longBiasForLevel(idx));
@@ -746,7 +754,7 @@ function startLevel(idx){
   hintsLeft=maxHints; undosLeft=maxUndos; shufflesLeft=maxShuffles;
   history=[]; flying=[]; particles=[]; hintPiece=null; shakeMap={};
   winShown=false;
-  balloon=null; nextBalloonAt=Date.now()+1500;
+  ball=null; nextBallAt=Date.now()+500; lastFrameNow=0;
 
   document.getElementById('win-overlay').style.display='none';
   document.getElementById('fail-overlay').style.display='none';
@@ -839,7 +847,7 @@ function handleTap(clientX,clientY){
     const gained = 100*Math.min(combo,10)*piece.len;
     score += gained;
     spawnFly(piece);
-    if(balloon && piece.dir===balloon.dir){ flying[flying.length-1].hitsBalloon=true; }
+    if(ball && piece.dir===ballCurrentDir()){ flying[flying.length-1].hitsBall=true; }
     sndPop(combo); vibrate(14);
     updateHUD();
     if(remaining<=0){ setTimeout(()=>winLevel(),450); }
@@ -965,8 +973,11 @@ function spawnFly(piece){
   }
 }
 
-// ── Bonus balloon ─────────────────────────────────────────
-function balloonPos(dir){
+// ── Bonus ball ────────────────────────────────────────────
+// Anchor point just past the board edge for a given direction index.
+// The ball travels in a loop between these anchors (only the ones the
+// current level allows), so it's always somewhere reachable.
+function edgeAnchorPos(dir){
   const w=CV.width, h=CV.height, off=CELL*0.9, diag=off*0.72;
   switch(dir){
     case 0: return {x:w+off, y:h/2};            // R
@@ -980,37 +991,64 @@ function balloonPos(dir){
   }
 }
 
-function maybeSpawnBalloon(now){
-  if(balloon || now<nextBalloonAt || !pieces.length) return;
-  const dirList = DIAG ? [0,1,2,3,4,5,6,7] : [0,2,4,6];
-  const dir = dirList[Math.floor(Math.random()*dirList.length)];
-  const pos = balloonPos(dir);
-  balloon = { dir, x:pos.x, y:pos.y, spawnedAt:now, expiresAt: now+BALLOON_LIFETIME };
+function ballPos(){
+  const len=ballDirCycle.length;
+  const i0=Math.floor(ball.phase)%len, i1=(i0+1)%len;
+  const frac=ball.phase-Math.floor(ball.phase);
+  const p0=edgeAnchorPos(ballDirCycle[i0]), p1=edgeAnchorPos(ballDirCycle[i1]);
+  return { x:p0.x+(p1.x-p0.x)*frac, y:p0.y+(p1.y-p0.y)*frac };
 }
 
-function popBalloon(){
-  if(!balloon) return;
-  const {x,y} = balloon;
-  score += 300;
+function ballCurrentDir(){
+  const len=ballDirCycle.length;
+  return ballDirCycle[Math.round(ball.phase)%len];
+}
+
+function maybeSpawnBall(now){
+  if(ball || now<nextBallAt || !pieces.length) return;
+  ball = { phase: Math.random()*ballDirCycle.length, hitsLeft:BALL_START_HITS, scale:1 };
+}
+
+function hitBall(){
+  if(!ball) return;
+  ball.hitsLeft--;
+  const breaking = ball.hitsLeft<=0;
+  score += 120;
   updateHUD();
-  sndBalloonPop(); vibrate([12,20,12]);
-  for(let i=0;i<18;i++){
+  sndBallHit(breaking); vibrate(breaking?[15,30,15,30,15]:[12,20,12]);
+
+  const pos = ballPos();
+  for(let i=0;i<(breaking?22:12);i++){
     const a=Math.random()*Math.PI*2, spd=Math.random()*5+2;
-    particles.push({ x,y, vx:Math.cos(a)*spd,vy:Math.sin(a)*spd, life:1, decay:.032, size:Math.random()*6+3, color:'#ff6fb0' });
+    particles.push({ x:pos.x,y:pos.y, vx:Math.cos(a)*spd,vy:Math.sin(a)*spd, life:1, decay:.032, size:Math.random()*6+3, color:'#ffca3a' });
   }
-  balloon=null;
-  nextBalloonAt = Date.now() + BALLOON_RESPAWN_MIN + Math.random()*(BALLOON_RESPAWN_MAX-BALLOON_RESPAWN_MIN);
+
+  if(breaking){
+    ball=null;
+    nextBallAt = Date.now() + BALL_RESPAWN_DELAY;
+  } else {
+    ball.scale = Math.sqrt(ball.hitsLeft/BALL_START_HITS);
+  }
 }
 
-function drawBalloon(now){
-  if(!balloon) return;
-  const bob = Math.sin(now*0.003 + balloon.spawnedAt*0.001)*4;
+function drawBall(now){
+  if(!ball) return;
+  const pos = ballPos();
+  const r = CELL*0.42*ball.scale;
   ctx.save();
-  ctx.font = `${Math.round(CELL*0.9)}px Arial`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.shadowColor='rgba(255,255,255,.7)'; ctx.shadowBlur=10;
-  ctx.fillText('🎈', balloon.x, balloon.y+bob);
+  const grad = ctx.createRadialGradient(pos.x-r*0.3,pos.y-r*0.35,r*0.1,pos.x,pos.y,r);
+  grad.addColorStop(0,'#fff6c8'); grad.addColorStop(.55,'#ffca3a'); grad.addColorStop(1,'#d1470a');
+  ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2);
+  ctx.fillStyle=grad;
+  ctx.shadowColor='rgba(0,0,0,.35)'; ctx.shadowBlur=6;
+  ctx.fill();
   ctx.shadowBlur=0;
+  ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=1.5;
+  ctx.stroke();
+  ctx.fillStyle='rgba(0,0,0,.6)';
+  ctx.font=`bold ${Math.max(9,Math.round(r*0.75))}px Arial`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(String(ball.hitsLeft), pos.x, pos.y);
   ctx.restore();
 }
 
@@ -1128,11 +1166,13 @@ function render(){
   ctx.fillRect(0,0,CV.width,CV.height);
 
   const now=Date.now();
+  const dt = lastFrameNow ? Math.min(now-lastFrameNow,100) : 16;
+  lastFrameNow = now;
 
-  // Bonus balloon: spawn/expire on a timer, draw it floating past whichever
-  // edge it's currently on.
-  if(balloon && now>balloon.expiresAt){ balloon=null; nextBalloonAt=now+600; }
-  maybeSpawnBalloon(now);
+  // Bonus ball: keep orbiting continuously around the board, spawning a
+  // fresh one shortly after the last one breaks from 5 hits.
+  if(ball) ball.phase = (ball.phase + dt/BALL_SEGMENT_MS) % ballDirCycle.length;
+  maybeSpawnBall(now);
 
   // Pieces still on the board
   for(const piece of pieces){
@@ -1165,7 +1205,7 @@ function render(){
 
     drawPiece(f.piece, ox, oy, alpha, false, 0);
     if(t>=1){
-      if(f.hitsBalloon) popBalloon();
+      if(f.hitsBall) hitBall();
       flying.splice(i,1);
     }
   }
@@ -1179,8 +1219,8 @@ function render(){
   }
   ctx.globalAlpha=1;
 
-  // Balloon drawn last so it always stays visible on top of pieces/particles
-  drawBalloon(now);
+  // Ball drawn last so it always stays visible on top of pieces/particles
+  drawBall(now);
 
   if(document.getElementById('game').classList.contains('active')) requestRender();
 }
