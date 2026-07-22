@@ -108,12 +108,12 @@ canvas{display:block;touch-action:none}
     <p>CLEAR THE PICTURE</p>
     <button class="hbtn main" onclick="goLevelSelect()">▶ PLAY</button>
     <div class="htips">
-      <div class="htip"><span>🎲</span><span>14 pictures ka pool hai (L, C, Dil, Star, Chidiya, Tiger, Sun, Rocket...) — har baar random shape aayegi!</span></div>
-      <div class="htip"><span>👉</span><span>Tap an arrow — agar uske path mein koi aur arrow NAHI hai, woh udd jaayega!</span></div>
-      <div class="htip"><span>📏</span><span>Kuch arrows LAMBE hote hain — 2-3 box ek saath cover karte hain</span></div>
-      <div class="htip"><span>🚫</span><span>Path block hai toh kuch nahi hoga — pehle doosre arrows hatao</span></div>
-      <div class="htip"><span>❤️</span><span>3 galat tap = Game Over — dhyan se socho!</span></div>
-      <div class="htip"><span>🧠</span><span>Level jitna aage, utne kam Hint/Undo/Shuffle milenge — level 15+ pe koi help nahi, sirf dimag!</span></div>
+      <div class="htip"><span>🎲</span><span>A pool of 14 pictures (L, C, Heart, Star, Bird, Tiger, Sun, Rocket...) — a random shape appears every time!</span></div>
+      <div class="htip"><span>👉</span><span>Tap an arrow — if nothing is blocking its path, it flies off the board!</span></div>
+      <div class="htip"><span>📏</span><span>Some arrows are LONG — they span 2-3 boxes at once</span></div>
+      <div class="htip"><span>🚫</span><span>If the path is blocked, nothing happens — clear the other arrows first</span></div>
+      <div class="htip"><span>❤️</span><span>3 wrong taps = Game Over — think before you tap!</span></div>
+      <div class="htip"><span>🧠</span><span>The further you go, the fewer Hints/Undos/Shuffles you get — from level 15 there's no help at all, just your brain!</span></div>
     </div>
   </div>
 </div>
@@ -172,7 +172,7 @@ canvas{display:block;touch-action:none}
   <div class="fcard">
     <span class="fico">💥</span>
     <h2>GAME OVER!</h2>
-    <p>3 galat taps ho gaye — arrow tabhi udega jab uske aage koi arrow na ho.</p>
+    <p>You made 3 wrong taps — an arrow only flies off when nothing blocks its path.</p>
     <div class="wstats">
       <div class="wrow"><span>Score</span><span id="f-score">0</span></div>
       <div class="wrow"><span>Cleared</span><span id="f-cleared">0</span></div>
@@ -750,7 +750,7 @@ function startLevel(idx){
   // and produces a tiny board that only "fixes itself" on the next resize.
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ fitCanvas(); requestRender(); }); });
 
-  if(idx===0){ setTimeout(()=>{ const p=hasAnyValidMove(); if(p){ hintPiece=p; toast('👉 Highlighted arrow ka path clear hai — tap karo!',3200); } },500); }
+  if(idx===0){ setTimeout(()=>{ const p=hasAnyValidMove(); if(p){ hintPiece=p; toast('👉 The highlighted arrow has a clear path — tap it!',3200); } },500); }
 }
 
 function fitCanvas(){
@@ -854,7 +854,7 @@ function shakeAt(piece){ shakeMap[piece.id]=1; }
 function useHint(){
   if(hintsLeft<=0) return;
   const p = hasAnyValidMove();
-  if(!p){ toast('😵 Koi valid move nahi — SHUFFLE try karo!'); pulseShuffle(); return; }
+  if(!p){ toast('😵 No valid move right now — try SHUFFLE!'); pulseShuffle(); return; }
   hintsLeft--; hintPiece=p;
   sndPU(); updateHUD(); requestRender();
   setTimeout(()=>{ hintPiece=null; requestRender(); },2500);
