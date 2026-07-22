@@ -333,14 +333,17 @@ function startLevel(idx){
   document.getElementById('win-overlay').style.display='none';
   document.getElementById('fail-overlay').style.display='none';
 
-  fitCanvas();
   document.getElementById('tb-level').textContent = idx+1;
   updateHUD();
   updateLives();
   showScreen('game');
   startTimer();
-  requestRender();
   getAC();
+
+  // Wait for the screen to actually become visible (display:none -> flex)
+  // before measuring canvas-wrap — measuring too early reads a size of 0
+  // and produces a tiny board that only "fixes itself" on the next resize.
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ fitCanvas(); requestRender(); }); });
 
   if(idx===0){ setTimeout(()=>{ const h=hasAnyValidMove(board,N); if(h){ hintCell=h; hintT=1; toast('👉 Highlighted arrow ka path clear hai — tap karo!',3200); } },500); }
 }
