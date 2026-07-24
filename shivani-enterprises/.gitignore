@@ -1,0 +1,8 @@
+config/config.php
+uploads/*
+!uploads/.gitkeep
+!uploads/customers/.gitkeep
+!uploads/documents/.gitkeep
+backups/*
+!backups/.gitkeep
+*.log

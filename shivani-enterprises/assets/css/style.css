@@ -1,0 +1,127 @@
+:root {
+  --brand: #0f766e;
+  --brand-dark: #0b5a54;
+  --bg: #f4f6f7;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warning: #d97706;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+a { color: var(--brand); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.app-shell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 230px;
+  background: #0d1b1e;
+  color: #d1d5db;
+  flex-shrink: 0;
+  padding: 16px 0;
+}
+.sidebar .brand {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  padding: 0 16px 16px;
+  border-bottom: 1px solid #1f2d30;
+  margin-bottom: 12px;
+}
+.sidebar .brand small { display: block; font-weight: 400; color: #9ca3af; font-size: 11px; }
+.sidebar nav a {
+  display: block;
+  padding: 10px 16px;
+  color: #d1d5db;
+  font-size: 14px;
+}
+.sidebar nav a:hover, .sidebar nav a.active {
+  background: var(--brand);
+  color: #fff;
+  text-decoration: none;
+}
+.main { flex: 1; min-width: 0; }
+.topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.content { padding: 24px; max-width: 1200px; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.stat-card .label { color: var(--muted); font-size: 13px; }
+.stat-card .value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; }
+tr:hover td { background: #fafafa; }
+
+.btn {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn:hover { background: var(--brand-dark); text-decoration: none; }
+.btn.secondary { background: #6b7280; }
+.btn.danger { background: var(--danger); }
+.btn.small { padding: 4px 10px; font-size: 12px; }
+.btn.wa { background: #25D366; }
+
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; margin-bottom: 4px; font-size: 13px; font-weight: 600; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+.form-row { display: flex; gap: 14px; flex-wrap: wrap; }
+.form-row .form-group { flex: 1; min-width: 200px; }
+
+.badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.badge.green { background: #dcfce7; color: var(--success); }
+.badge.red { background: #fee2e2; color: var(--danger); }
+.badge.orange { background: #ffedd5; color: var(--warning); }
+.badge.gray { background: #f3f4f6; color: var(--muted); }
+
+.alert { padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 14px; }
+.alert.success { background: #dcfce7; color: #14532d; }
+.alert.error { background: #fee2e2; color: #7f1d1d; }
+
+.filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: end; }
+.filters .form-group { margin-bottom: 0; min-width: 160px; }
+
+.login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f766e, #0d1b1e); }
+.login-box { background: #fff; padding: 32px; border-radius: 12px; width: 340px; box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+.login-box h1 { font-size: 20px; text-align: center; margin-bottom: 4px; }
+.login-box p.sub { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+
+.customer-photo { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); }
+.text-muted { color: var(--muted); }
+.mt-0 { margin-top: 0; }

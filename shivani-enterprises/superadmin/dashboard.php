@@ -1,0 +1,61 @@
+<?php
+require_once __DIR__ . '/../includes/functions.php';
+require_role('super_admin');
+$pageTitle = 'Super Admin Dashboard';
+
+$totalSales = (float)db()->query('SELECT COALESCE(SUM(total_amount),0) FROM sales')->fetchColumn();
+$totalPaid = (float)db()->query('SELECT COALESCE(SUM(amount),0) FROM payments')->fetchColumn();
+$totalCustomers = (int)db()->query('SELECT COUNT(*) FROM customers')->fetchColumn();
+$totalAdmins = (int)db()->query("SELECT COUNT(*) FROM users WHERE role='admin'")->fetchColumn();
+$balanceDue = $totalSales - $totalPaid;
+$pendingFollowups = (int)db()->query("SELECT COUNT(*) FROM followups WHERE status='pending' AND follow_up_date <= CURDATE()")->fetchColumn();
+
+$topProducts = db()->query('
+  SELECT si.product_name, SUM(si.qty) AS qty, SUM(si.line_total) AS amount
+  FROM sale_items si GROUP BY si.product_name ORDER BY amount DESC LIMIT 8
+')->fetchAll();
+
+$adminWise = db()->query('
+  SELECT u.id, u.name,
+    COALESCE((SELECT SUM(s.total_amount) FROM sales s WHERE s.admin_id = u.id), 0) AS sold,
+    COALESCE((SELECT SUM(p.amount) FROM payments p WHERE p.admin_id = u.id), 0) AS collected
+  FROM users u WHERE u.role = "admin" ORDER BY sold DESC
+')->fetchAll();
+
+require __DIR__ . '/../includes/header.php';
+?>
+<div class="stat-grid">
+  <div class="stat-card"><div class="label">Total Sales (All Admins)</div><div class="value"><?= money($totalSales) ?></div></div>
+  <div class="stat-card"><div class="label">Total Collected</div><div class="value"><?= money($totalPaid) ?></div></div>
+  <div class="stat-card"><div class="label">Total Balance Due</div><div class="value"><?= money($balanceDue) ?></div></div>
+  <div class="stat-card"><div class="label">Customers</div><div class="value"><?= $totalCustomers ?></div></div>
+  <div class="stat-card"><div class="label">Admins</div><div class="value"><?= $totalAdmins ?></div></div>
+  <div class="stat-card"><div class="label">Pending Follow-ups (due)</div><div class="value"><?= $pendingFollowups ?></div></div>
+</div>
+
+<div class="card">
+  <h3 class="mt-0">Admin-wise Sales &amp; Collection</h3>
+  <table>
+    <tr><th>Admin</th><th>Sold</th><th>Collected</th><th>Balance Due</th><th></th></tr>
+    <?php foreach ($adminWise as $a): ?>
+    <tr>
+      <td><?= e($a['name']) ?></td>
+      <td><?= money($a['sold']) ?></td>
+      <td><?= money($a['collected']) ?></td>
+      <td><?= money($a['sold'] - $a['collected']) ?></td>
+      <td><a href="<?= e(base_url('superadmin/reports_admin_wise.php?admin_id=' . $a['id'])) ?>">View details</a></td>
+    </tr>
+    <?php endforeach; ?>
+  </table>
+</div>
+
+<div class="card">
+  <h3 class="mt-0">Top Products by Sales Value</h3>
+  <table>
+    <tr><th>Product</th><th>Qty Sold</th><th>Amount</th></tr>
+    <?php foreach ($topProducts as $p): ?>
+    <tr><td><?= e($p['product_name']) ?></td><td><?= rtrim(rtrim(number_format($p['qty'],2),'0'),'.') ?></td><td><?= money($p['amount']) ?></td></tr>
+    <?php endforeach; ?>
+  </table>
+</div>
+<?php require __DIR__ . '/../includes/footer.php'; ?>
