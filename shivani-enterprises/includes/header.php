@@ -12,14 +12,27 @@ $pageTitle = $pageTitle ?? APP_NAME;
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 <title><?= e($pageTitle) ?> · <?= e(APP_NAME) ?></title>
 <link rel="stylesheet" href="<?= e(base_url('assets/css/style.css')) ?>">
+<script>
+  // Applied before CSS paints so the page never flashes the wrong theme.
+  (function () {
+    try {
+      var t = localStorage.getItem('shivani_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body>
+<div class="sidebar-overlay"></div>
 <div class="app-shell">
   <aside class="sidebar">
-    <div class="brand"><?= e(APP_NAME) ?><small>Sales Ledger</small></div>
+    <div class="brand">
+      <span class="brand-text"><?= e(APP_NAME) ?><small>Sales Ledger</small></span>
+      <button type="button" class="sidebar-close" aria-label="Close menu">&times;</button>
+    </div>
     <nav>
       <?php if ($u && $u['role'] === 'super_admin'): $base = 'superadmin/'; ?>
         <a href="<?= e(base_url($base.'dashboard.php')) ?>">Dashboard</a>
@@ -47,11 +60,25 @@ $pageTitle = $pageTitle ?? APP_NAME;
   </aside>
   <div class="main">
     <div class="topbar">
-      <strong><?= e($pageTitle) ?></strong>
-      <div>
+      <div class="topbar-left">
+        <button type="button" class="menu-toggle" aria-label="Open menu">&#9776;</button>
+        <strong><?= e($pageTitle) ?></strong>
+      </div>
+      <div class="topbar-right">
+        <details class="theme-switcher">
+          <summary title="Change theme"><span class="theme-dot"></span></summary>
+          <div class="theme-panel">
+            <?php foreach ([
+              'teal' => '#0f766e', 'blue' => '#2563eb', 'lightblue' => '#0284c7',
+              'green' => '#16a34a', 'purple' => '#7c3aed', 'orange' => '#ea580c', 'black' => '#111827',
+            ] as $themeKey => $themeColor): ?>
+              <button type="button" class="theme-swatch" data-theme="<?= e($themeKey) ?>" style="background:<?= e($themeColor) ?>" title="<?= e(ucfirst($themeKey)) ?>"></button>
+            <?php endforeach; ?>
+          </div>
+        </details>
         <?php if ($u): ?>
           <span class="text-muted"><?= e($u['name']) ?> (<?= e($u['role']) ?>)</span>
-          &nbsp;|&nbsp; <a href="<?= e(base_url('logout.php')) ?>">Logout</a>
+          <a href="<?= e(base_url('logout.php')) ?>">Logout</a>
         <?php endif; ?>
       </div>
     </div>

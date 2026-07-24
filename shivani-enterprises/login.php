@@ -24,21 +24,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 <title>Login · <?= e(APP_NAME) ?></title>
 <link rel="stylesheet" href="<?= e(base_url('assets/css/style.css')) ?>">
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem('shivani_theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body>
 <div class="login-wrap">
   <div class="login-box">
     <h1><?= e(APP_NAME) ?></h1>
     <p class="sub">Sales Ledger &amp; CRM Login</p>
+    <div class="login-theme-row">
+      <?php foreach ([
+        'teal' => '#0f766e', 'blue' => '#2563eb', 'lightblue' => '#0284c7',
+        'green' => '#16a34a', 'purple' => '#7c3aed', 'orange' => '#ea580c', 'black' => '#111827',
+      ] as $themeKey => $themeColor): ?>
+        <button type="button" class="theme-swatch" data-theme="<?= e($themeKey) ?>" style="background:<?= e($themeColor) ?>;width:28px;height:28px" title="<?= e(ucfirst($themeKey)) ?>"></button>
+      <?php endforeach; ?>
+    </div>
     <?php if ($error): ?><div class="alert error"><?= e($error) ?></div><?php endif; ?>
     <form method="post" autocomplete="off">
       <?= csrf_field() ?>
       <div class="form-group">
         <label>Username</label>
-        <input type="text" name="username" required autofocus>
+        <input type="text" name="username" required autofocus autocapitalize="off">
       </div>
       <div class="form-group">
         <label>Password</label>
@@ -48,5 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
   </div>
 </div>
+<script src="<?= e(base_url('assets/js/app.js')) ?>"></script>
 </body>
 </html>
