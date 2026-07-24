@@ -32,12 +32,11 @@ function pdf_signature_box(SimplePDF $pdf, float $margin, float $tableW, float $
     return $y + $boxH;
 }
 
-/** Draws a small "scan to verify" QR code in the top-right corner. */
-function pdf_verify_qr(SimplePDF $pdf, float $margin, string $url): void
+/** Draws a small "scan to verify" QR code in the top-right corner, top edge at $y. */
+function pdf_verify_qr(SimplePDF $pdf, float $margin, string $url, float $y): void
 {
     $box = 62;
     $x = $pdf->pageWidth() - $margin - $box;
-    $y = $margin - 4;
     try {
         $matrix = QRCode::encodeMatrix($url);
         $pdf->drawQrMatrix($matrix, $x, $y, $box);
@@ -64,8 +63,6 @@ function render_invoice_pdf(array $sale, array $items, array $customer, string $
     $y = $margin;
     $tableW = $pdf->pageWidth() - 2 * $margin;
 
-    pdf_verify_qr($pdf, $margin, invoice_verify_url($sale));
-
     $pdf->text($margin, $y, get_setting('company_name', APP_NAME), 18, true);
     $y += 18;
     $companyLine = trim(get_setting('company_address', '') . '  ' . get_setting('company_phone', ''));
@@ -77,6 +74,8 @@ function render_invoice_pdf(array $sale, array $items, array $customer, string $
     }
     $pdf->line($margin, $y, $pdf->pageWidth() - $margin, $y);
     $y += 22;
+
+    pdf_verify_qr($pdf, $margin, invoice_verify_url($sale), $y - 12);
 
     $pdf->text($margin, $y, 'TAX INVOICE', 14, true);
     $y += 18;
@@ -162,7 +161,7 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
     $totalPaid = array_sum(array_column($rows, 'credit'));
     $finalBalance = $totalGiven - $totalPaid;
 
-    pdf_verify_qr($pdf, $margin, statement_verify_url($customer));
+    pdf_verify_qr($pdf, $margin, statement_verify_url($customer), $margin - 4);
 
     $pdf->text($margin, $y, get_setting('company_name', APP_NAME), 18, true);
     $y += 26;
