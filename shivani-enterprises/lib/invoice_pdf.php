@@ -1,6 +1,12 @@
 <?php
 require_once __DIR__ . '/SimplePDF.php';
 
+/** Keeps a table cell's text from overflowing past its column width. */
+function pdf_truncate(string $text, int $maxChars): string
+{
+    return mb_strlen($text) > $maxChars ? rtrim(mb_substr($text, 0, $maxChars - 3)) . '...' : $text;
+}
+
 /**
  * Renders a single sale/invoice as a PDF and streams it to the browser.
  * $sale: row from `sales` joined with customer info.
@@ -39,9 +45,12 @@ function render_invoice_pdf(array $sale, array $items, array $customer, string $
     $pdf->text($margin, $y, 'Mobile: ' . $customer['mobile'], 10);
     $y += 26;
 
-    // Table header
-    $colX = [$margin, $margin + 250, $margin + 330, $margin + 410];
-    $pdf->rect($margin, $y, $pdf->pageWidth() - 2 * $margin, 20);
+    // Table header - column widths sized so numbers never cross the outer
+    // border, even for large amounts (e.g. 1,15,500.00).
+    $tableW = $pdf->pageWidth() - 2 * $margin;
+    $colW = ['product' => $tableW - 70 - 95 - 135, 'qty' => 70, 'price' => 95, 'amount' => 135];
+    $colX = [$margin, $margin + $colW['product'], $margin + $colW['product'] + $colW['qty'], $margin + $colW['product'] + $colW['qty'] + $colW['price']];
+    $pdf->rect($margin, $y, $tableW, 20);
     $pdf->text($colX[0] + 4, $y + 14, 'Product', 10, true);
     $pdf->text($colX[1] + 4, $y + 14, 'Qty', 10, true);
     $pdf->text($colX[2] + 4, $y + 14, 'Price', 10, true);
@@ -50,8 +59,8 @@ function render_invoice_pdf(array $sale, array $items, array $customer, string $
 
     foreach ($items as $item) {
         $rowH = 20;
-        $pdf->rect($margin, $y, $pdf->pageWidth() - 2 * $margin, $rowH);
-        $pdf->text($colX[0] + 4, $y + 14, $item['product_name'], 10);
+        $pdf->rect($margin, $y, $tableW, $rowH);
+        $pdf->text($colX[0] + 4, $y + 14, pdf_truncate($item['product_name'], 34), 10);
         $pdf->text($colX[1] + 4, $y + 14, rtrim(rtrim(number_format((float)$item['qty'], 2), '0'), '.'), 10);
         $pdf->text($colX[2] + 4, $y + 14, number_format((float)$item['price'], 2), 10);
         $pdf->text($colX[3] + 4, $y + 14, number_format((float)$item['line_total'], 2), 10);
@@ -107,8 +116,20 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
     }
     usort($rows, fn($a, $b) => strcmp($a['date'], $b['date']));
 
-    $colX = [$margin, $margin + 90, $margin + 320, $margin + 400, $margin + 470];
-    $pdf->rect($margin, $y, $pdf->pageWidth() - 2 * $margin, 20);
+    // Column widths sized so large amounts (lakhs, e.g. 1,90,500.00) never
+    // cross the outer border - this was overflowing before (Balance column
+    // was only ~45pt wide).
+    $tableW = $pdf->pageWidth() - 2 * $margin;
+    $colW = ['date' => 62, 'desc' => 0, 'given' => 88, 'paid' => 88, 'balance' => 95];
+    $colW['desc'] = $tableW - $colW['date'] - $colW['given'] - $colW['paid'] - $colW['balance'];
+    $colX = [
+        $margin,
+        $margin + $colW['date'],
+        $margin + $colW['date'] + $colW['desc'],
+        $margin + $colW['date'] + $colW['desc'] + $colW['given'],
+        $margin + $colW['date'] + $colW['desc'] + $colW['given'] + $colW['paid'],
+    ];
+    $pdf->rect($margin, $y, $tableW, 20);
     $pdf->text($colX[0] + 4, $y + 14, 'Date', 10, true);
     $pdf->text($colX[1] + 4, $y + 14, 'Description', 10, true);
     $pdf->text($colX[2] + 4, $y + 14, 'Given (Rs.)', 10, true);
@@ -121,9 +142,9 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
         if ($y > $pdf->pageHeight() - 80) { break; } // simple single-page cap for V1
         $balance += $r['debit'] - $r['credit'];
         $rowH = 18;
-        $pdf->rect($margin, $y, $pdf->pageWidth() - 2 * $margin, $rowH);
+        $pdf->rect($margin, $y, $tableW, $rowH);
         $pdf->text($colX[0] + 4, $y + 13, date('d-M-y', strtotime($r['date'])), 9);
-        $pdf->text($colX[1] + 4, $y + 13, $r['desc'], 9);
+        $pdf->text($colX[1] + 4, $y + 13, pdf_truncate($r['desc'], 26), 9);
         $pdf->text($colX[2] + 4, $y + 13, $r['debit'] > 0 ? number_format($r['debit'], 2) : '-', 9);
         $pdf->text($colX[3] + 4, $y + 13, $r['credit'] > 0 ? number_format($r['credit'], 2) : '-', 9);
         $pdf->text($colX[4] + 4, $y + 13, number_format($balance, 2), 9);

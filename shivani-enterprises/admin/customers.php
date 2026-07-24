@@ -32,19 +32,18 @@ require __DIR__ . '/../includes/header.php';
 
 <div class="card">
   <table>
-    <tr><th>Name</th><th>Mobile</th><th>Place</th><th>Given</th><th>Paid</th><th>Balance</th><th></th></tr>
+    <tr><th>Name</th><th>Mobile</th><th>Place</th><th>Given</th><th>Paid</th><th>Balance</th></tr>
     <?php foreach ($customers as $c): $bal = $c['total_given'] - $c['total_paid']; ?>
     <tr>
-      <td><?= e($c['name']) ?><?= $c['shop_name'] ? ' <span class="text-muted">('.e($c['shop_name']).')</span>' : '' ?></td>
+      <td><a href="<?= e(base_url('customer_view.php?id=' . $c['id'])) ?>"><strong><?= e($c['name']) ?></strong></a><?= $c['shop_name'] ? ' <span class="text-muted">('.e($c['shop_name']).')</span>' : '' ?></td>
       <td><?= e($c['mobile']) ?></td>
       <td><?= e($c['place']) ?></td>
       <td><?= money($c['total_given']) ?></td>
       <td><?= money($c['total_paid']) ?></td>
       <td style="color:<?= $bal > 0 ? '#dc2626' : '#16a34a' ?>"><?= money($bal) ?></td>
-      <td><a href="<?= e(base_url('customer_view.php?id=' . $c['id'])) ?>">View</a></td>
     </tr>
     <?php endforeach; ?>
-    <?php if (!$customers): ?><tr><td colspan="7" class="text-muted">No customers yet.</td></tr><?php endif; ?>
+    <?php if (!$customers): ?><tr><td colspan="6" class="text-muted">No customers yet.</td></tr><?php endif; ?>
   </table>
 </div>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

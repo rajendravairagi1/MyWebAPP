@@ -86,15 +86,14 @@ require __DIR__ . '/../includes/header.php';
 <div class="card">
   <h3 class="mt-0">Customers of <?= e($selected['name']) ?></h3>
   <table>
-    <tr><th>Customer</th><th>Mobile</th><th>Given</th><th>Paid</th><th>Balance</th><th></th></tr>
+    <tr><th>Customer</th><th>Mobile</th><th>Given</th><th>Paid</th><th>Balance</th></tr>
     <?php foreach ($customers as $c): $bal = $c['total_given'] - $c['total_paid']; ?>
     <tr>
-      <td><?= e($c['name']) ?></td>
+      <td><a href="<?= e(base_url('customer_view.php?id=' . $c['id'])) ?>"><strong><?= e($c['name']) ?></strong></a></td>
       <td><?= e($c['mobile']) ?></td>
       <td><?= money($c['total_given']) ?></td>
       <td><?= money($c['total_paid']) ?></td>
       <td style="color:<?= $bal > 0 ? '#dc2626' : '#16a34a' ?>"><?= money($bal) ?></td>
-      <td><a href="<?= e(base_url('customer_view.php?id=' . $c['id'])) ?>">View</a></td>
     </tr>
     <?php endforeach; ?>
   </table>

@@ -53,32 +53,37 @@ require __DIR__ . '/../includes/header.php';
 
 <div class="card">
   <h3 class="mt-0">All Products</h3>
-  <table>
-    <tr><th>Name</th><th>Unit</th><th>Default Price</th><th>Status</th><th>Update</th><th></th></tr>
+  <div class="product-rows">
+    <div class="product-row">
+      <div class="li-head">Name</div>
+      <div class="li-head">Unit</div>
+      <div class="li-head">Default Price</div>
+      <div class="li-head">Status</div>
+      <div class="li-head"></div>
+    </div>
     <?php foreach ($products as $p): $fid = 'edit-' . (int)$p['id']; ?>
-    <tr>
-        <td>
-          <form id="<?= $fid ?>" method="post">
-            <?= csrf_field() ?>
-            <input type="hidden" name="action" value="update">
-            <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
-          </form>
-          <input form="<?= $fid ?>" name="name" value="<?= e($p['name']) ?>" style="min-width:180px">
-        </td>
-        <td><input form="<?= $fid ?>" name="unit" value="<?= e($p['unit']) ?>" style="width:90px"></td>
-        <td><input form="<?= $fid ?>" type="number" step="0.01" name="default_price" value="<?= e($p['default_price']) ?>" style="width:100px"></td>
-        <td><span class="badge <?= $p['is_active'] ? 'green' : 'gray' ?>"><?= $p['is_active'] ? 'Active' : 'Inactive' ?></span></td>
-        <td><button form="<?= $fid ?>" class="btn small" type="submit">Save</button></td>
-      <td>
+    <div class="product-row">
+      <form id="<?= $fid ?>" method="post">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="update">
+        <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
+      </form>
+      <div class="li-field pr-name"><input form="<?= $fid ?>" name="name" value="<?= e($p['name']) ?>"></div>
+      <div class="li-field pr-unit"><input form="<?= $fid ?>" name="unit" value="<?= e($p['unit']) ?>"></div>
+      <div class="li-field pr-price"><input form="<?= $fid ?>" type="number" step="0.01" name="default_price" value="<?= e($p['default_price']) ?>"></div>
+      <div class="pr-status"><span class="badge <?= $p['is_active'] ? 'green' : 'gray' ?>"><?= $p['is_active'] ? 'Active' : 'Inactive' ?></span></div>
+      <div class="pr-actions">
+        <button form="<?= $fid ?>" class="btn small" type="submit">Save</button>
         <form method="post" onsubmit="return confirm('Change status?')">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="toggle">
           <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
           <button class="btn small secondary" type="submit"><?= $p['is_active'] ? 'Deactivate' : 'Activate' ?></button>
         </form>
-      </td>
-    </tr>
+      </div>
+    </div>
     <?php endforeach; ?>
-  </table>
+    <?php if (!$products): ?><p class="text-muted">No products yet.</p><?php endif; ?>
+  </div>
 </div>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

@@ -76,7 +76,7 @@ require __DIR__ . '/includes/header.php';
       <?php if ($customer['alt_mobile']): ?> / <?= e($customer['alt_mobile']) ?><?php endif; ?>
       <?php if ($u['role'] === 'super_admin'): ?> &middot; Admin: <strong><?= e($customer['admin_name']) ?></strong><?php endif; ?>
     </p>
-    <p>
+    <div class="action-bar">
       <a class="btn small" href="<?= e(base_url('customer_form.php?id=' . $id)) ?>">Edit</a>
       <a class="btn small" href="<?= e(base_url('sale_form.php?customer_id=' . $id)) ?>">+ New Sale / Invoice</a>
       <a class="btn small" href="<?= e(base_url('payment_form.php?customer_id=' . $id)) ?>">+ Record Payment</a>
@@ -89,7 +89,7 @@ require __DIR__ . '/includes/header.php';
       <?php if ($balance > 0): ?>
         <a class="btn small wa" target="_blank" href="<?= e(whatsapp_link($customer['mobile'], $waMsg)) ?>">Send Text Reminder</a>
       <?php endif; ?>
-    </p>
+    </div>
   </div>
 </div>
 
@@ -152,7 +152,7 @@ require __DIR__ . '/includes/header.php';
 
 <div class="card">
   <h3 class="mt-0">Documents</h3>
-  <form method="post" enctype="multipart/form-data" style="margin-bottom:14px">
+  <form method="post" enctype="multipart/form-data" class="file-field" style="margin-bottom:18px">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="upload_document">
     <input type="file" name="document" accept=".pdf,.jpg,.jpeg,.png" required>

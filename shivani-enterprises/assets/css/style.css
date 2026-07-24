@@ -374,6 +374,23 @@ tr:hover td { background: rgba(127,127,127,.06); }
 .text-muted { color: var(--muted); }
 .mt-0 { margin-top: 0; }
 
+/* ===== Action button bar (Edit / New Sale / Payment / ... rows) ===== */
+.action-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.action-bar .btn { flex: 0 0 auto; }
+
+/* ===== File upload field ===== */
+.file-field { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.file-field input[type="file"] {
+  flex: 1 1 220px;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  font-size: 13.5px;
+  background: rgba(127,127,127,.04);
+  color: var(--text);
+}
+
 /* ===== Sale line items (card-style rows, not a raw table) ===== */
 .line-items { margin-top: 6px; }
 .line-item-row {
@@ -419,6 +436,39 @@ tr:hover td { background: rgba(127,127,127,.06); }
   transition: background .12s ease, transform .12s ease;
 }
 .li-remove:hover { background: #fecaca; transform: scale(1.06); }
+
+/* ===== Product management rows (superadmin > Products), same card style ===== */
+.product-rows { margin-top: 6px; }
+.product-row {
+  display: grid;
+  grid-template-columns: 2fr .8fr 1fr .9fr auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.product-rows > .product-row:first-child { padding-top: 0; padding-bottom: 8px; }
+.product-row .pr-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+@media (max-width: 860px) {
+  .product-rows > .product-row:first-child { display: none; }
+  .product-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "name name"
+      "unit price"
+      "status status"
+      "actions actions";
+    gap: 10px;
+    padding: 14px 0;
+  }
+  .product-row .li-field.pr-name { grid-area: name; }
+  .product-row .li-field.pr-unit { grid-area: unit; }
+  .product-row .li-field.pr-price { grid-area: price; }
+  .product-row .pr-status { grid-area: status; }
+  .product-row .pr-actions { grid-area: actions; justify-content: stretch; }
+  .product-row .pr-actions .btn { flex: 1; }
+}
 
 /* ===== Invoice / Chalan sheet ===== */
 .invoice-sheet { border-top: 5px solid transparent; border-image: var(--brand-grad) 1; padding-top: 22px; }
@@ -517,6 +567,14 @@ tr:hover td { background: rgba(127,127,127,.06); }
   .btn { width: 100%; }
   .btn.small { width: auto; }
   form .btn[type="submit"] { width: 100%; }
+
+  /* Action-bar buttons: neat 2-column grid instead of ragged wrapping */
+  .action-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .action-bar .btn.small { width: 100%; flex: none; }
+
+  .file-field { flex-direction: column; align-items: stretch; }
+  .file-field input[type="file"] { width: 100%; }
+  .file-field .btn { width: 100%; }
 
   .filters { flex-direction: column; align-items: stretch; }
   .filters .form-group { min-width: 0; }

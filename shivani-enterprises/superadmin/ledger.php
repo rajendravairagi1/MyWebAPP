@@ -60,20 +60,19 @@ require __DIR__ . '/../includes/header.php';
 
 <div class="card">
   <table>
-    <tr><th>Customer</th><th>Mobile</th><th>Place</th><th>Admin</th><th>Given</th><th>Paid</th><th>Balance</th><th></th></tr>
+    <tr><th>Customer</th><th>Mobile</th><th>Place</th><th>Admin</th><th>Given</th><th>Paid</th><th>Balance</th></tr>
     <?php foreach ($rows as $r): $bal = $r['total_given'] - $r['total_paid']; ?>
     <tr>
-      <td><?= e($r['name']) ?></td>
+      <td><a href="<?= e(base_url('customer_view.php?id=' . $r['id'])) ?>"><strong><?= e($r['name']) ?></strong></a></td>
       <td><?= e($r['mobile']) ?></td>
       <td><?= e($r['place']) ?></td>
       <td><?= e($r['admin_name']) ?></td>
       <td><?= money($r['total_given']) ?></td>
       <td><?= money($r['total_paid']) ?></td>
       <td style="color:<?= $bal > 0 ? '#dc2626' : '#16a34a' ?>"><?= money($bal) ?></td>
-      <td><a href="<?= e(base_url('customer_view.php?id=' . $r['id'])) ?>">View</a></td>
     </tr>
     <?php endforeach; ?>
-    <?php if (!$rows): ?><tr><td colspan="8" class="text-muted">No records.</td></tr><?php endif; ?>
+    <?php if (!$rows): ?><tr><td colspan="7" class="text-muted">No records.</td></tr><?php endif; ?>
   </table>
 </div>
 <?php require __DIR__ . '/../includes/footer.php'; ?>
