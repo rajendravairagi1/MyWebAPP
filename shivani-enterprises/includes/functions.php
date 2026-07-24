@@ -193,3 +193,33 @@ function normalize_mobile(string $mobile): string
     // Keep last 10 digits as the canonical form for duplicate-checking/storage.
     return strlen($digits) > 10 ? substr($digits, -10) : $digits;
 }
+
+/**
+ * Stateless, tamper-proof "verify this document is genuine" signature.
+ * No database column needed - the signature is an HMAC over the exact
+ * values printed on the invoice/statement, keyed with APP_SECRET. verify.php
+ * recomputes it from the URL's own query params and rejects a mismatch,
+ * so an altered link (different amount, different customer, etc.) is
+ * immediately detected as invalid.
+ */
+function verify_sign(array $parts): string
+{
+    // 16 hex chars (64 bits) - plenty to stop casual link tampering, and
+    // short enough to keep the verify URL well inside the QR code's byte
+    // budget (kept to versions 1-6, ~100 bytes max, so the URL must stay
+    // short - the signed values are looked up live from the DB by
+    // verify.php rather than carried in the URL, keeping it tiny).
+    return substr(hash_hmac('sha256', implode('|', $parts), APP_SECRET), 0, 16);
+}
+
+function invoice_verify_url(array $sale): string
+{
+    $sig = verify_sign(['invoice', $sale['id']]);
+    return base_url('verify.php') . '?i=' . $sale['id'] . '&s=' . $sig;
+}
+
+function statement_verify_url(array $customer): string
+{
+    $sig = verify_sign(['statement', $customer['id']]);
+    return base_url('verify.php') . '?c=' . $customer['id'] . '&s=' . $sig;
+}

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/SimplePDF.php';
+require_once __DIR__ . '/QRCode.php';
 
 /** Keeps a table cell's text from overflowing past its column width. */
 function pdf_truncate(string $text, int $maxChars): string
@@ -31,6 +32,21 @@ function pdf_signature_box(SimplePDF $pdf, float $margin, float $tableW, float $
     return $y + $boxH;
 }
 
+/** Draws a small "scan to verify" QR code in the top-right corner. */
+function pdf_verify_qr(SimplePDF $pdf, float $margin, string $url): void
+{
+    $box = 62;
+    $x = $pdf->pageWidth() - $margin - $box;
+    $y = $margin - 4;
+    try {
+        $matrix = QRCode::encodeMatrix($url);
+        $pdf->drawQrMatrix($matrix, $x, $y, $box);
+        $pdf->text($x, $y + $box + 11, 'Scan to verify', 7, false, '#6b7280');
+    } catch (Throwable $e) {
+        // QR generation should never break invoice/statement rendering.
+    }
+}
+
 function pdf_footer(SimplePDF $pdf, float $margin, string $label): void
 {
     $y = $pdf->pageHeight() - 34;
@@ -48,6 +64,8 @@ function render_invoice_pdf(array $sale, array $items, array $customer, string $
     $y = $margin;
     $tableW = $pdf->pageWidth() - 2 * $margin;
 
+    pdf_verify_qr($pdf, $margin, invoice_verify_url($sale));
+
     $pdf->text($margin, $y, get_setting('company_name', APP_NAME), 18, true);
     $y += 18;
     $companyLine = trim(get_setting('company_address', '') . '  ' . get_setting('company_phone', ''));
@@ -61,10 +79,11 @@ function render_invoice_pdf(array $sale, array $items, array $customer, string $
     $y += 22;
 
     $pdf->text($margin, $y, 'TAX INVOICE', 14, true);
-    $pdf->text($pdf->pageWidth() - $margin - 160, $y, 'Invoice No: ' . $sale['invoice_no'], 11, true);
     $y += 18;
-    $pdf->text($pdf->pageWidth() - $margin - 160, $y, 'Date: ' . date('d-M-Y', strtotime($sale['sale_date'])), 10);
-    $y += 26;
+    $pdf->text($margin, $y, 'Invoice No: ' . $sale['invoice_no'], 11, true);
+    $y += 16;
+    $pdf->text($margin, $y, 'Date: ' . date('d-M-Y', strtotime($sale['sale_date'])), 10);
+    $y += 24;
 
     $pdf->text($margin, $y, 'Bill To:', 10, true);
     $y += 14;
@@ -128,6 +147,23 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
     $y = $margin;
     $tableW = $pdf->pageWidth() - 2 * $margin;
 
+    // Merge sales (debit) and payments (credit) into one chronological ledger,
+    // and total everything up-front - the verify QR signs these exact totals
+    // so it needs to know them before anything is drawn.
+    $rows = [];
+    foreach ($sales as $s) {
+        $rows[] = ['date' => $s['sale_date'], 'desc' => 'Invoice ' . $s['invoice_no'], 'debit' => (float)$s['total_amount'], 'credit' => 0];
+    }
+    foreach ($payments as $p) {
+        $rows[] = ['date' => $p['payment_date'], 'desc' => 'Payment (' . $p['mode'] . ')' . (!empty($p['note']) ? ' - ' . $p['note'] : ''), 'debit' => 0, 'credit' => (float)$p['amount']];
+    }
+    usort($rows, fn($a, $b) => strcmp($a['date'], $b['date']));
+    $totalGiven = array_sum(array_column($rows, 'debit'));
+    $totalPaid = array_sum(array_column($rows, 'credit'));
+    $finalBalance = $totalGiven - $totalPaid;
+
+    pdf_verify_qr($pdf, $margin, statement_verify_url($customer));
+
     $pdf->text($margin, $y, get_setting('company_name', APP_NAME), 18, true);
     $y += 26;
     $pdf->text($margin, $y, 'Customer Statement', 14, true);
@@ -138,16 +174,6 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
     $y += 10;
     $pdf->line($margin, $y, $pdf->pageWidth() - $margin, $y);
     $y += 20;
-
-    // Merge sales (debit) and payments (credit) into one chronological ledger
-    $rows = [];
-    foreach ($sales as $s) {
-        $rows[] = ['date' => $s['sale_date'], 'desc' => 'Invoice ' . $s['invoice_no'], 'debit' => (float)$s['total_amount'], 'credit' => 0];
-    }
-    foreach ($payments as $p) {
-        $rows[] = ['date' => $p['payment_date'], 'desc' => 'Payment (' . $p['mode'] . ')' . (!empty($p['note']) ? ' - ' . $p['note'] : ''), 'debit' => 0, 'credit' => (float)$p['amount']];
-    }
-    usort($rows, fn($a, $b) => strcmp($a['date'], $b['date']));
 
     // Column widths sized so large amounts (lakhs, e.g. 10,00,000.00) never
     // cross the outer border.
@@ -189,12 +215,10 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
 
     // Total Given / Total Paid / Balance Due, each as its own dark box
     // with the label on the left and the amount right-aligned opposite it.
-    $totalGiven = array_sum(array_column($rows, 'debit'));
-    $totalPaid = array_sum(array_column($rows, 'credit'));
     $summary = [
         ['Total Given', $totalGiven],
         ['Total Paid', $totalPaid],
-        ['Balance Due', $balance],
+        ['Balance Due', $finalBalance],
     ];
     $boxH = 26;
     foreach ($summary as [$label, $amount]) {

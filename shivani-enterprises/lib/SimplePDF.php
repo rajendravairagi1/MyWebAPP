@@ -92,6 +92,20 @@ class SimplePDF
         $this->ops[] = sprintf('%.3F %.3F %.3F rg %.2F %.2F %.2F %.2F re f', $r, $g, $b, $x, $py, $w, $h);
     }
 
+    /** Draws a QRCode::encodeMatrix() boolean matrix as a square of size $boxSize, top-left at ($x,$y). */
+    public function drawQrMatrix(array $matrix, float $x, float $y, float $boxSize): void
+    {
+        $n = count($matrix);
+        $moduleSize = $boxSize / $n;
+        foreach ($matrix as $row => $cells) {
+            foreach ($cells as $col => $dark) {
+                if ($dark) {
+                    $this->rectFilled($x + $col * $moduleSize, $y + $row * $moduleSize, $moduleSize + 0.2, $moduleSize + 0.2, '#000000');
+                }
+            }
+        }
+    }
+
     public function pageWidth(): float { return $this->pageW; }
     public function pageHeight(): float { return $this->pageH; }
 
