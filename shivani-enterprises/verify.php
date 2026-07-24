@@ -69,7 +69,7 @@ if (isset($_GET['i'])) {
     <p class="sub"><?= e($title) ?> Verification</p>
     <?php if ($valid): ?>
       <div class="alert success" style="text-align:center;font-weight:700;font-size:16px">&#10003; Genuine Document</div>
-      <table style="margin-top:10px">
+      <table style="margin-top:10px;min-width:0;width:100%">
         <?php foreach ($details as $label => $val): ?>
           <tr><td class="text-muted"><?= e($label) ?></td><td style="text-align:right;font-weight:700"><?= e($val) ?></td></tr>
         <?php endforeach; ?>
