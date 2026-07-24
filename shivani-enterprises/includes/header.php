@@ -7,6 +7,12 @@
 no_store_headers();
 $u = current_user();
 $pageTitle = $pageTitle ?? APP_NAME;
+$currentScript = basename($_SERVER['SCRIPT_NAME']);
+function nav_active(string $file): string
+{
+    global $currentScript;
+    return $currentScript === $file ? ' class="active"' : '';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,26 +41,26 @@ $pageTitle = $pageTitle ?? APP_NAME;
     </div>
     <nav>
       <?php if ($u && $u['role'] === 'super_admin'): $base = 'superadmin/'; ?>
-        <a href="<?= e(base_url($base.'dashboard.php')) ?>">Dashboard</a>
-        <a href="<?= e(base_url($base.'admins.php')) ?>">Admins</a>
-        <a href="<?= e(base_url($base.'products.php')) ?>">Products</a>
-        <a href="<?= e(base_url($base.'customers.php')) ?>">All Customers</a>
-        <a href="<?= e(base_url($base.'sales.php')) ?>">All Sales</a>
-        <a href="<?= e(base_url($base.'payments.php')) ?>">All Payments</a>
-        <a href="<?= e(base_url($base.'ledger.php')) ?>">Global Ledger</a>
-        <a href="<?= e(base_url($base.'reports_admin_wise.php')) ?>">Admin-wise Report</a>
-        <a href="<?= e(base_url($base.'followups.php')) ?>">Follow-ups / Commitments</a>
-        <a href="<?= e(base_url($base.'backup.php')) ?>">Backup</a>
-        <a href="<?= e(base_url($base.'settings.php')) ?>">Settings</a>
-        <a href="<?= e(base_url('change_password.php')) ?>">Change Password</a>
+        <a<?= nav_active('dashboard.php') ?> href="<?= e(base_url($base.'dashboard.php')) ?>">Dashboard</a>
+        <a<?= nav_active('admins.php') ?> href="<?= e(base_url($base.'admins.php')) ?>">Admins</a>
+        <a<?= nav_active('products.php') ?> href="<?= e(base_url($base.'products.php')) ?>">Products</a>
+        <a<?= nav_active('customers.php') ?> href="<?= e(base_url($base.'customers.php')) ?>">All Customers</a>
+        <a<?= nav_active('sales.php') ?> href="<?= e(base_url($base.'sales.php')) ?>">All Sales</a>
+        <a<?= nav_active('payments.php') ?> href="<?= e(base_url($base.'payments.php')) ?>">All Payments</a>
+        <a<?= nav_active('ledger.php') ?> href="<?= e(base_url($base.'ledger.php')) ?>">Global Ledger</a>
+        <a<?= nav_active('reports_admin_wise.php') ?> href="<?= e(base_url($base.'reports_admin_wise.php')) ?>">Admin-wise Report</a>
+        <a<?= nav_active('followups.php') ?> href="<?= e(base_url($base.'followups.php')) ?>">Follow-ups / Commitments</a>
+        <a<?= nav_active('backup.php') ?> href="<?= e(base_url($base.'backup.php')) ?>">Backup</a>
+        <a<?= nav_active('settings.php') ?> href="<?= e(base_url($base.'settings.php')) ?>">Settings</a>
+        <a<?= nav_active('change_password.php') ?> href="<?= e(base_url('change_password.php')) ?>">Change Password</a>
       <?php elseif ($u): $base = 'admin/'; ?>
-        <a href="<?= e(base_url($base.'dashboard.php')) ?>">Dashboard</a>
-        <a href="<?= e(base_url($base.'customers.php')) ?>">My Customers</a>
-        <a href="<?= e(base_url($base.'sales.php')) ?>">Sales / Invoices</a>
-        <a href="<?= e(base_url($base.'payments.php')) ?>">Payments</a>
-        <a href="<?= e(base_url($base.'followups.php')) ?>">Follow-ups</a>
-        <a href="<?= e(base_url($base.'reports.php')) ?>">My Reports</a>
-        <a href="<?= e(base_url('change_password.php')) ?>">Change Password</a>
+        <a<?= nav_active('dashboard.php') ?> href="<?= e(base_url($base.'dashboard.php')) ?>">Dashboard</a>
+        <a<?= nav_active('customers.php') ?> href="<?= e(base_url($base.'customers.php')) ?>">My Customers</a>
+        <a<?= nav_active('sales.php') ?> href="<?= e(base_url($base.'sales.php')) ?>">Sales / Invoices</a>
+        <a<?= nav_active('payments.php') ?> href="<?= e(base_url($base.'payments.php')) ?>">Payments</a>
+        <a<?= nav_active('followups.php') ?> href="<?= e(base_url($base.'followups.php')) ?>">Follow-ups</a>
+        <a<?= nav_active('reports.php') ?> href="<?= e(base_url($base.'reports.php')) ?>">My Reports</a>
+        <a<?= nav_active('change_password.php') ?> href="<?= e(base_url('change_password.php')) ?>">Change Password</a>
       <?php endif; ?>
     </nav>
   </aside>
@@ -69,10 +75,11 @@ $pageTitle = $pageTitle ?? APP_NAME;
           <summary title="Change theme"><span class="theme-dot"></span></summary>
           <div class="theme-panel">
             <?php foreach ([
-              'teal' => '#0f766e', 'blue' => '#2563eb', 'lightblue' => '#0284c7',
-              'green' => '#16a34a', 'purple' => '#7c3aed', 'orange' => '#ea580c', 'black' => '#111827',
-            ] as $themeKey => $themeColor): ?>
-              <button type="button" class="theme-swatch" data-theme="<?= e($themeKey) ?>" style="background:<?= e($themeColor) ?>" title="<?= e(ucfirst($themeKey)) ?>"></button>
+              'teal' => ['#0f766e', '#06b6d4'], 'blue' => ['#2563eb', '#4f46e5'], 'lightblue' => ['#0ea5e9', '#22d3ee'],
+              'green' => ['#059669', '#84cc16'], 'purple' => ['#7c3aed', '#ec4899'], 'orange' => ['#ea580c', '#f43f5e'],
+              'black' => ['#6366f1', '#a855f7'],
+            ] as $themeKey => $g): ?>
+              <button type="button" class="theme-swatch" data-theme="<?= e($themeKey) ?>" style="background:linear-gradient(135deg,<?= e($g[0]) ?>,<?= e($g[1]) ?>)" title="<?= e(ucfirst($themeKey)) ?>"></button>
             <?php endforeach; ?>
           </div>
         </details>

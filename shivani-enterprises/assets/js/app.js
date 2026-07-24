@@ -27,8 +27,8 @@
     document.querySelectorAll('.theme-swatch').forEach(function (s) {
       s.classList.toggle('active', s.dataset.theme === name);
     });
-    var dot = document.querySelector('.theme-dot');
-    if (dot) dot.style.background = getComputedStyle(document.documentElement).getPropertyValue('--brand');
+    // .theme-dot's background is `var(--brand-grad)` in CSS, so it updates
+    // automatically the moment data-theme changes - no JS needed for it.
   }
 
   document.querySelectorAll('.theme-swatch').forEach(function (btn) {
