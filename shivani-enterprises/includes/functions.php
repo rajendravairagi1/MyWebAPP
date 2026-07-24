@@ -25,6 +25,18 @@ function csrf_token(): string
     return $_SESSION['csrf_token'];
 }
 
+/**
+ * Prevents any layer (browser back/forward cache, LiteSpeed/Varnish/CDN
+ * page cache) from serving a stale copy of a page that has a CSRF token
+ * baked into it - a stale token would never match the live session and
+ * every form submit would fail with "CSRF check failed".
+ */
+function no_store_headers(): void
+{
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+}
+
 function csrf_field(): string
 {
     return '<input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '">';

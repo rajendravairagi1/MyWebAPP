@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/includes/functions.php';
+no_store_headers();
 
 if (current_user()) {
     redirect(is_super_admin() ? 'superadmin/dashboard.php' : 'admin/dashboard.php');

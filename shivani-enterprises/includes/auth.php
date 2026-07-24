@@ -6,7 +6,25 @@ function start_secure_session(): void
     if (session_status() === PHP_SESSION_ACTIVE) {
         return;
     }
-    $secure = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+
+    // Some shared hosts restrict the default session.save_path (open_basedir)
+    // so PHP silently fails to persist sessions between requests - every
+    // request then looks like a brand new session and CSRF tokens never
+    // match. Fall back to a writable folder inside this app if needed.
+    $savePath = session_save_path();
+    if ($savePath === '' || !is_writable($savePath)) {
+        $fallback = __DIR__ . '/../storage/sessions';
+        if (!is_dir($fallback)) {
+            @mkdir($fallback, 0755, true);
+        }
+        if (is_dir($fallback) && is_writable($fallback)) {
+            session_save_path($fallback);
+        }
+    }
+
+    $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')
+        || (($_SERVER['SERVER_PORT'] ?? '') === '443');
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',

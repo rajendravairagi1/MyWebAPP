@@ -4,6 +4,7 @@
  * Requires functions.php already loaded and user already authenticated
  * by the calling page.
  */
+no_store_headers();
 $u = current_user();
 $pageTitle = $pageTitle ?? APP_NAME;
 ?>
