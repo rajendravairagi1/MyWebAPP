@@ -172,6 +172,21 @@ function whatsapp_link(string $mobile, string $message): string
     return 'https://wa.me/' . $digits . '?text=' . rawurlencode($message);
 }
 
+/** Central list of theme keys -> [gradient-start, gradient-end, display name]. */
+function theme_palette(): array
+{
+    return [
+        'teal' => ['#0f766e', '#06b6d4', 'Teal'],
+        'blue' => ['#2563eb', '#4f46e5', 'Blue'],
+        'lightblue' => ['#0ea5e9', '#22d3ee', 'Light Blue'],
+        'green' => ['#059669', '#84cc16', 'Green'],
+        'purple' => ['#7c3aed', '#ec4899', 'Purple'],
+        'orange' => ['#ea580c', '#f43f5e', 'Orange'],
+        'black' => ['#6366f1', '#a855f7', 'Black'],
+        'darkpro' => ['#5eead4', '#22d3ee', 'Dark Pro'],
+    ];
+}
+
 function normalize_mobile(string $mobile): string
 {
     $digits = preg_replace('/\D+/', '', $mobile);

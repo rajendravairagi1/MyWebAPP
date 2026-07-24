@@ -42,12 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h1><?= e(APP_NAME) ?></h1>
     <p class="sub">Sales Ledger &amp; CRM Login</p>
     <div class="login-theme-row">
-      <?php foreach ([
-        'teal' => ['#0f766e', '#06b6d4'], 'blue' => ['#2563eb', '#4f46e5'], 'lightblue' => ['#0ea5e9', '#22d3ee'],
-        'green' => ['#059669', '#84cc16'], 'purple' => ['#7c3aed', '#ec4899'], 'orange' => ['#ea580c', '#f43f5e'],
-        'black' => ['#6366f1', '#a855f7'],
-      ] as $themeKey => $g): ?>
-        <button type="button" class="theme-swatch" data-theme="<?= e($themeKey) ?>" style="background:linear-gradient(135deg,<?= e($g[0]) ?>,<?= e($g[1]) ?>);width:30px;height:30px" title="<?= e(ucfirst($themeKey)) ?>"></button>
+      <?php foreach (theme_palette() as $themeKey => $g): ?>
+        <button type="button" class="theme-swatch" data-theme="<?= e($themeKey) ?>" style="background:linear-gradient(135deg,<?= e($g[0]) ?>,<?= e($g[1]) ?>);width:30px;height:30px" title="<?= e($g[2]) ?>"></button>
       <?php endforeach; ?>
     </div>
     <?php if ($error): ?><div class="alert error"><?= e($error) ?></div><?php endif; ?>

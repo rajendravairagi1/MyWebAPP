@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/charts.php';
 $u = require_role('admin');
 $pageTitle = 'Dashboard';
 
@@ -10,6 +11,7 @@ $totalSales = (float)$stmt->fetchColumn();
 $stmt = db()->prepare('SELECT COALESCE(SUM(amount),0) FROM payments WHERE admin_id = ?');
 $stmt->execute([$u['id']]);
 $totalPaid = (float)$stmt->fetchColumn();
+$collectionPct = $totalSales > 0 ? min(100, ($totalPaid / $totalSales) * 100) : 0;
 
 $stmt = db()->prepare('SELECT COUNT(*) FROM customers WHERE admin_id = ?');
 $stmt->execute([$u['id']]);
@@ -36,14 +38,51 @@ $stmt = db()->prepare("
 $stmt->execute([$u['id']]);
 $todayFollowups = $stmt->fetchAll();
 
+$stmt = db()->prepare('
+  SELECT DATE(sale_date) d, SUM(total_amount) amt FROM sales
+  WHERE admin_id = ? AND sale_date >= CURDATE() - INTERVAL 13 DAY
+  GROUP BY DATE(sale_date)
+');
+$stmt->execute([$u['id']]);
+$trendRows = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+$trendLabels = []; $trendValues = [];
+for ($i = 13; $i >= 0; $i--) {
+    $d = date('Y-m-d', strtotime("-$i day"));
+    $trendLabels[] = date('d M', strtotime($d));
+    $trendValues[] = (float)($trendRows[$d] ?? 0);
+}
+
+$topProdLabels = array_map(fn($p) => $p['product_name'], array_slice($topProducts, 0, 6));
+$topProdValues = array_map(fn($p) => (float)$p['amount'], array_slice($topProducts, 0, 6));
+
 require __DIR__ . '/../includes/header.php';
 ?>
 <div class="stat-grid">
-  <div class="stat-card"><div class="label">Total Sold</div><div class="value"><?= money($totalSales) ?></div></div>
-  <div class="stat-card"><div class="label">Total Collected</div><div class="value"><?= money($totalPaid) ?></div></div>
-  <div class="stat-card"><div class="label">Balance Due</div><div class="value"><?= money($totalSales - $totalPaid) ?></div></div>
-  <div class="stat-card"><div class="label">My Customers</div><div class="value"><?= $totalCustomers ?></div></div>
+  <div class="stat-card has-icon"><div class="stat-icon c1">&#128176;</div><div><div class="label">Total Sold</div><div class="value"><?= money($totalSales) ?></div></div></div>
+  <div class="stat-card has-icon"><div class="stat-icon c2">&#9989;</div><div><div class="label">Total Collected</div><div class="value"><?= money($totalPaid) ?></div></div></div>
+  <div class="stat-card has-icon"><div class="stat-icon c3">&#9203;</div><div><div class="label">Balance Due</div><div class="value"><?= money($totalSales - $totalPaid) ?></div></div></div>
+  <div class="stat-card has-icon"><div class="stat-icon c4">&#128101;</div><div><div class="label">My Customers</div><div class="value"><?= $totalCustomers ?></div></div></div>
   <div class="stat-card"><div class="label">Follow-ups Due</div><div class="value"><?= $duefollowups ?></div></div>
+</div>
+
+<div class="chart-row">
+  <div class="card chart-card">
+    <h3 class="mt-0">My Sales Trend (last 14 days)</h3>
+    <?= svg_area_chart($trendLabels, $trendValues, 600, 200, '#5eead4') ?>
+  </div>
+  <div class="card">
+    <h3 class="mt-0">Collection Rate</h3>
+    <div class="gauge-wrap">
+      <?= svg_gauge($collectionPct, 220, '#5eead4') ?>
+      <div class="gauge-value"><?= round($collectionPct) ?>%</div>
+    </div>
+    <p class="text-muted" style="text-align:center">of my total sales collected so far</p>
+  </div>
+</div>
+
+<div class="card chart-card">
+  <h3 class="mt-0">My Top Products</h3>
+  <?= svg_bar_chart($topProdLabels, $topProdValues, 700, 220, '#f472b6') ?>
 </div>
 
 <div class="card">
@@ -63,7 +102,7 @@ require __DIR__ . '/../includes/header.php';
 </div>
 
 <div class="card">
-  <h3 class="mt-0">My Top Products</h3>
+  <h3 class="mt-0">My Top Products (table)</h3>
   <table>
     <tr><th>Product</th><th>Qty Sold</th><th>Amount</th></tr>
     <?php foreach ($topProducts as $p): ?>
