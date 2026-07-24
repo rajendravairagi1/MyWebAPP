@@ -249,18 +249,31 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
 }
 .stat-card .delta { font-size: 12px; font-weight: 600; margin-top: 4px; color: var(--success); }
 
-/* Icon-badge variant (dashboard hero stats) */
-.stat-card.has-icon { display: flex; align-items: flex-start; gap: 14px; padding: 18px 16px; }
+/* Icon-badge variant (dashboard hero stats) - icon sits above the number
+   so large amounts always have the full card width to render in. */
+.stat-card.has-icon { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 18px 16px; }
 .stat-card.has-icon::before { display: none; }
+.stat-card.has-icon .label { display: block; }
+.stat-card.has-icon .value {
+  display: block;
+  width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
 .stat-icon {
-  width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 21px;
+  font-size: 20px;
 }
 .stat-icon.c1 { background: rgba(251,146,60,.16); }
 .stat-icon.c2 { background: rgba(94,234,212,.16); }
 .stat-icon.c3 { background: rgba(244,114,182,.16); }
 .stat-icon.c4 { background: rgba(96,165,250,.16); }
+
+@media (max-width: 400px) {
+  .stat-card.has-icon .value { font-size: 20px; }
+}
 
 /* ===== Chart cards ===== */
 .chart-card .chart-legend { display: flex; gap: 16px; margin-top: 6px; font-size: 12.5px; color: var(--muted); }
@@ -573,7 +586,7 @@ tr:hover td { background: rgba(127,127,127,.06); }
   .action-bar .btn.small { width: 100%; flex: none; }
 
   .file-field { flex-direction: column; align-items: stretch; }
-  .file-field input[type="file"] { width: 100%; }
+  .file-field input[type="file"] { flex: 0 0 auto; width: 100%; } /* flex-basis:220px from desktop would become HEIGHT in column mode - reset it */
   .file-field .btn { width: 100%; }
 
   .filters { flex-direction: column; align-items: stretch; }
