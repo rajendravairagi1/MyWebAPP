@@ -26,35 +26,72 @@ if (($_GET['pdf'] ?? '') === '1') {
 }
 
 $pageTitle = 'Invoice ' . $sale['invoice_no'];
-$waMsg = "Namaste " . $customer['name'] . ", aapka invoice " . $sale['invoice_no'] . " (Rs. " . number_format($sale['total_amount'], 2) . ") - PDF attach kar ke bhej rahe hain. Dhanyawad - " . get_setting('company_name', APP_NAME);
+$pdfUrl = base_url('sale_view.php?id=' . $id . '&pdf=1');
+$pdfFilename = 'invoice-' . $sale['invoice_no'] . '.pdf';
+$waText = "Namaste " . $customer['name'] . ", aapka invoice " . $sale['invoice_no'] . " (Rs. " . number_format($sale['total_amount'], 2) . ") - " . get_setting('company_name', APP_NAME);
 
 require __DIR__ . '/includes/header.php';
 ?>
 <p><a href="<?= e(base_url('customer_view.php?id=' . $sale['customer_id'])) ?>">&larr; Back to <?= e($customer['name']) ?></a></p>
-<div class="card">
-  <h3 class="mt-0">Invoice <?= e($sale['invoice_no']) ?></h3>
-  <p class="text-muted">
-    Date: <?= e(date('d-M-Y', strtotime($sale['sale_date']))) ?> &middot;
-    Customer: <?= e($customer['name']) ?> (<?= e($customer['mobile']) ?>) &middot;
-    Admin: <?= e($sale['admin_name']) ?>
-  </p>
+
+<div class="card invoice-sheet">
+  <div class="invoice-topbar">
+    <div>
+      <div class="invoice-company"><?= e(get_setting('company_name', APP_NAME)) ?></div>
+      <?php $companyLine = trim(get_setting('company_address', '') . '  ' . get_setting('company_phone', '')); ?>
+      <?php if ($companyLine): ?><div class="text-muted" style="font-size:13px"><?= e($companyLine) ?></div><?php endif; ?>
+    </div>
+    <div class="invoice-badge">TAX INVOICE / CHALAN</div>
+  </div>
+
+  <div class="invoice-meta">
+    <div>
+      <div class="li-head">Invoice No</div>
+      <div class="invoice-meta-value"><?= e($sale['invoice_no']) ?></div>
+    </div>
+    <div>
+      <div class="li-head">Date</div>
+      <div class="invoice-meta-value"><?= e(date('d-M-Y', strtotime($sale['sale_date']))) ?></div>
+    </div>
+    <div>
+      <div class="li-head">Handled By</div>
+      <div class="invoice-meta-value"><?= e($sale['admin_name']) ?></div>
+    </div>
+  </div>
+
+  <div class="invoice-bill-to">
+    <div class="li-head">Bill To</div>
+    <div class="invoice-meta-value"><?= e($customer['name']) ?><?= $customer['shop_name'] ? ' ('.e($customer['shop_name']).')' : '' ?></div>
+    <div class="text-muted" style="font-size:14px">
+      <?= e($customer['place']) ?><?= $customer['place'] ? ' · ' : '' ?>Mobile: <?= e($customer['mobile']) ?>
+    </div>
+  </div>
+
   <table>
     <tr><th>Product</th><th>Qty</th><th>Price</th><th>Amount</th></tr>
     <?php foreach ($items as $it): ?>
     <tr>
-      <td><?= e($it['product_name']) ?></td>
+      <td><?= e($it['product_name']) ?><?= $it['product_id'] === null ? ' <span class="badge gray">custom</span>' : '' ?></td>
       <td><?= rtrim(rtrim(number_format($it['qty'],2),'0'),'.') ?></td>
       <td><?= money($it['price']) ?></td>
       <td><?= money($it['line_total']) ?></td>
     </tr>
     <?php endforeach; ?>
   </table>
-  <p style="text-align:right;font-size:16px"><strong>Total: <?= money($sale['total_amount']) ?></strong></p>
+
+  <div class="invoice-total-box">
+    <div class="invoice-total-row"><span>Total Amount</span><strong><?= money($sale['total_amount']) ?></strong></div>
+  </div>
+
   <?php if ($sale['notes']): ?><p class="text-muted">Note: <?= e($sale['notes']) ?></p><?php endif; ?>
-  <p>
-    <a class="btn small" href="<?= e(base_url('sale_view.php?id=' . $id . '&pdf=1')) ?>" target="_blank">Download PDF</a>
-    <a class="btn small wa" target="_blank" href="<?= e(whatsapp_link($customer['mobile'], $waMsg)) ?>">Share on WhatsApp</a>
-  </p>
-  <p class="text-muted">Tip: WhatsApp does not allow auto-attaching a file via link. Click "Download PDF" first, then click "Share on WhatsApp" and manually attach the downloaded PDF in the chat.</p>
+
+  <div class="invoice-actions">
+    <a class="btn small" href="<?= e($pdfUrl) ?>" target="_blank">Download PDF</a>
+    <button type="button" class="btn small wa"
+      onclick="shareFileToWhatsApp('<?= e($pdfUrl) ?>', '<?= e($pdfFilename) ?>', '<?= e(addslashes($waText)) ?>', this)">
+      Share PDF on WhatsApp
+    </button>
+  </div>
+  <p class="text-muted" style="font-size:13px">Mobile par "Share PDF on WhatsApp" dabate hi PDF taiyar hoke share-menu khulega — wahan WhatsApp choose karke jisko chahe usko bhej sakte ho, alag se download nahi karna padega. (Desktop/purane browser par PDF download hokar WhatsApp chat khulega, wahan file manually attach karni hogi.)</p>
 </div>
 <?php require __DIR__ . '/includes/footer.php'; ?>

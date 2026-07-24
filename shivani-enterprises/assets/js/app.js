@@ -51,4 +51,43 @@
       panel.removeAttribute('open');
     }
   });
+
+  // ---- Share a generated PDF straight to WhatsApp (or any app) ----
+  // On phones (Chrome/Android, Safari/iOS over HTTPS) this opens the native
+  // share sheet with the PDF already attached - the admin just taps
+  // WhatsApp and picks who to send it to. No manual download needed.
+  // On desktops/browsers without file-sharing support, it falls back to
+  // downloading the PDF and opening a WhatsApp chat with the message
+  // pre-filled, so the admin attaches the file manually.
+  window.shareFileToWhatsApp = async function (url, filename, text, btn) {
+    var originalLabel = btn ? btn.innerHTML : '';
+    try {
+      if (btn) { btn.disabled = true; btn.textContent = 'Preparing PDF…'; }
+      var res = await fetch(url, { credentials: 'same-origin' });
+      if (!res.ok) throw new Error('Could not generate the PDF (server error).');
+      var blob = await res.blob();
+      var file = new File([blob], filename, { type: 'application/pdf' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: filename, text: text });
+      } else {
+        var blobUrl = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 10000);
+        window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+        alert('PDF download ho gayi hai aur WhatsApp khul raha hai — chat me PDF file manually attach kar dijiye (is browser me direct file-share support nahi hai; mobile Chrome/Safari par seedha chalta hai).');
+      }
+    } catch (err) {
+      if (err && err.name !== 'AbortError') { // AbortError = user cancelled the share sheet, not an error
+        alert('PDF share nahi ho paya: ' + (err && err.message ? err.message : err));
+      }
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
+    }
+  };
 })();

@@ -93,13 +93,13 @@ CREATE TABLE IF NOT EXISTS sales (
 CREATE TABLE IF NOT EXISTS sale_items (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   sale_id INT UNSIGNED NOT NULL,
-  product_id INT UNSIGNED NOT NULL,
+  product_id INT UNSIGNED DEFAULT NULL COMMENT 'NULL for a one-off "Other / Custom Product" line not in the catalog',
   product_name VARCHAR(150) NOT NULL,
   qty DECIMAL(10,2) NOT NULL DEFAULT 1,
   price DECIMAL(12,2) NOT NULL DEFAULT 0,
   line_total DECIMAL(12,2) NOT NULL DEFAULT 0,
   CONSTRAINT fk_items_sale FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
-  CONSTRAINT fk_items_product FOREIGN KEY (product_id) REFERENCES products(id)
+  CONSTRAINT fk_items_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------

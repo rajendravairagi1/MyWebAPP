@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $saleDate = $_POST['sale_date'] ?? date('Y-m-d');
     $notes = trim($_POST['notes'] ?? '');
     $productIds = $_POST['product_id'] ?? [];
+    $customNames = $_POST['custom_name'] ?? [];
     $qtys = $_POST['qty'] ?? [];
     $prices = $_POST['price'] ?? [];
 
@@ -29,12 +30,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pid = (int)$pid;
         $qty = (float)($qtys[$i] ?? 0);
         $price = (float)($prices[$i] ?? 0);
-        if ($pid <= 0 || $qty <= 0) continue;
-        $lineTotal = round($qty * $price, 2);
-        $items[] = ['product_id' => $pid, 'qty' => $qty, 'price' => $price, 'line_total' => $lineTotal];
+        $customName = trim($customNames[$i] ?? '');
+        if ($qty <= 0) continue;
+        if ($pid <= 0) {
+            // "Other / Custom Product" line - not tied to the products catalog.
+            if ($customName === '') continue;
+            $lineTotal = round($qty * $price, 2);
+            $items[] = ['product_id' => null, 'product_name' => $customName, 'qty' => $qty, 'price' => $price, 'line_total' => $lineTotal];
+        } else {
+            $lineTotal = round($qty * $price, 2);
+            $items[] = ['product_id' => $pid, 'product_name' => null, 'qty' => $qty, 'price' => $price, 'line_total' => $lineTotal];
+        }
         $total += $lineTotal;
     }
-    if (!$items) $errors[] = 'Add at least one product line with quantity and price.';
+    if (!$items) $errors[] = 'Add at least one product line with quantity and price (or use "Other" for a custom item).';
 
     if (!$errors) {
         $db = db();
@@ -48,8 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $prodNameStmt = $db->prepare('SELECT name FROM products WHERE id = ?');
             $itemStmt = $db->prepare('INSERT INTO sale_items (sale_id, product_id, product_name, qty, price, line_total) VALUES (?,?,?,?,?,?)');
             foreach ($items as $it) {
-                $prodNameStmt->execute([$it['product_id']]);
-                $pname = $prodNameStmt->fetchColumn() ?: 'Product';
+                if ($it['product_id'] === null) {
+                    $pname = $it['product_name'];
+                } else {
+                    $prodNameStmt->execute([$it['product_id']]);
+                    $pname = $prodNameStmt->fetchColumn() ?: 'Product';
+                }
                 $itemStmt->execute([$saleId, $it['product_id'], $pname, $it['qty'], $it['price'], $it['line_total']]);
             }
             $db->commit();
@@ -76,27 +89,35 @@ require __DIR__ . '/includes/header.php';
       <div class="form-group"><label>Notes</label><input name="notes" placeholder="Optional"></div>
     </div>
 
-    <table id="lineTable">
-      <tr><th>Product</th><th>Qty</th><th>Price (Rs.)</th><th>Line Total</th><th></th></tr>
-      <tr class="line-row">
-        <td>
+    <div class="line-items" id="lineItems">
+      <div class="line-item-row">
+        <div class="li-head">Product</div>
+        <div class="li-head">Qty</div>
+        <div class="li-head">Price (Rs.)</div>
+        <div class="li-head">Amount</div>
+        <div class="li-head"></div>
+      </div>
+      <div class="line-item-row line-row">
+        <div class="li-field li-product">
           <select name="product_id[]" class="prod-select" required>
-            <option value="">-- select --</option>
+            <option value="">-- select product --</option>
             <?php foreach ($products as $p): ?>
               <option value="<?= (int)$p['id'] ?>" data-price="<?= e($p['default_price']) ?>"><?= e($p['name']) ?> (<?= e($p['unit']) ?>)</option>
             <?php endforeach; ?>
+            <option value="0">&#10022; Other / Custom Product</option>
           </select>
-        </td>
-        <td><input type="number" step="0.01" min="0.01" name="qty[]" class="qty" value="1" required style="width:80px"></td>
-        <td><input type="number" step="0.01" name="price[]" class="price" required style="width:100px"></td>
-        <td class="line-total">0.00</td>
-        <td><button type="button" class="btn small danger remove-row">X</button></td>
-      </tr>
-    </table>
+          <input type="text" name="custom_name[]" class="custom-name" placeholder="Enter product name" style="display:none;margin-top:8px">
+        </div>
+        <div class="li-field"><input type="number" step="0.01" min="0.01" name="qty[]" class="qty" value="1" placeholder="Qty" required></div>
+        <div class="li-field"><input type="number" step="0.01" name="price[]" class="price" placeholder="Price (Rs.)" required></div>
+        <div class="li-field li-total-field"><span class="li-mobile-label">Amount: </span><span class="line-total">0.00</span></div>
+        <div class="li-field li-remove-field"><button type="button" class="li-remove remove-row" title="Remove line">&times;</button></div>
+      </div>
+    </div>
     <p><button type="button" class="btn small secondary" id="addRow">+ Add Product Line</button></p>
-    <p><strong>Total: Rs. <span id="grandTotal">0.00</span></strong></p>
-    <p class="text-muted">Note: price per line is editable — manually adjust for bargaining/discounts as needed.</p>
-    <button class="btn" type="submit">Save Sale</button>
+    <p style="font-size:18px"><strong>Total: Rs. <span id="grandTotal">0.00</span></strong></p>
+    <p class="text-muted">Note: price per line is editable — manually adjust for bargaining/discounts. Agar koi product list me nahi hai to "Other / Custom Product" chun kar naam type kar do.</p>
+    <button class="btn" type="submit">Save Sale &amp; Generate Invoice</button>
   </form>
 </div>
 
@@ -113,23 +134,41 @@ function recalc() {
   document.getElementById('grandTotal').textContent = grand.toFixed(2);
 }
 function wireRow(row) {
-  row.querySelector('.prod-select').addEventListener('change', e => {
+  const select = row.querySelector('.prod-select');
+  const customInput = row.querySelector('.custom-name');
+  select.addEventListener('change', e => {
     const opt = e.target.selectedOptions[0];
-    if (opt && opt.dataset.price) row.querySelector('.price').value = opt.dataset.price;
+    if (select.value === '0') {
+      customInput.style.display = 'block';
+      customInput.required = true;
+      row.querySelector('.price').value = '';
+    } else {
+      customInput.style.display = 'none';
+      customInput.required = false;
+      customInput.value = '';
+      if (opt && opt.dataset.price) row.querySelector('.price').value = opt.dataset.price;
+    }
     recalc();
   });
   row.querySelectorAll('.qty,.price').forEach(inp => inp.addEventListener('input', recalc));
-  row.querySelector('.remove-row').addEventListener('click', () => { row.remove(); recalc(); });
+  row.querySelector('.remove-row').addEventListener('click', () => {
+    if (document.querySelectorAll('.line-row').length > 1) { row.remove(); recalc(); }
+  });
 }
 document.querySelectorAll('.line-row').forEach(wireRow);
 document.getElementById('addRow').addEventListener('click', () => {
-  const table = document.getElementById('lineTable');
+  const container = document.getElementById('lineItems');
   const first = document.querySelector('.line-row');
   const clone = first.cloneNode(true);
-  clone.querySelectorAll('input').forEach(i => { if (i.classList.contains('qty')) i.value = 1; else i.value = ''; });
+  clone.querySelectorAll('input').forEach(i => {
+    if (i.classList.contains('qty')) i.value = 1;
+    else i.value = '';
+  });
+  clone.querySelector('.custom-name').style.display = 'none';
+  clone.querySelector('.custom-name').required = false;
   clone.querySelector('.prod-select').value = '';
   clone.querySelector('.line-total').textContent = '0.00';
-  table.appendChild(clone);
+  container.appendChild(clone);
   wireRow(clone);
 });
 </script>

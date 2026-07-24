@@ -82,8 +82,12 @@ require __DIR__ . '/includes/header.php';
       <a class="btn small" href="<?= e(base_url('payment_form.php?customer_id=' . $id)) ?>">+ Record Payment</a>
       <a class="btn small" href="<?= e(base_url('followup_form.php?customer_id=' . $id)) ?>">+ Add Follow-up</a>
       <a class="btn small" href="<?= e(base_url('customer_view.php?id=' . $id . '&statement=pdf')) ?>" target="_blank">Statement PDF</a>
+      <button type="button" class="btn small wa"
+        onclick="shareFileToWhatsApp('<?= e(base_url('customer_view.php?id=' . $id . '&statement=pdf')) ?>', 'statement-<?= e(preg_replace('/\s+/', '-', $customer['name'])) ?>.pdf', '<?= e(addslashes($waMsg)) ?>', this)">
+        Share Statement on WhatsApp
+      </button>
       <?php if ($balance > 0): ?>
-        <a class="btn small wa" target="_blank" href="<?= e(whatsapp_link($customer['mobile'], $waMsg)) ?>">Send WhatsApp Reminder</a>
+        <a class="btn small wa" target="_blank" href="<?= e(whatsapp_link($customer['mobile'], $waMsg)) ?>">Send Text Reminder</a>
       <?php endif; ?>
     </p>
   </div>

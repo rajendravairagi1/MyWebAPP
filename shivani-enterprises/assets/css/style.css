@@ -320,6 +320,99 @@ tr:hover td { background: rgba(127,127,127,.06); }
 .text-muted { color: var(--muted); }
 .mt-0 { margin-top: 0; }
 
+/* ===== Sale line items (card-style rows, not a raw table) ===== */
+.line-items { margin-top: 6px; }
+.line-item-row {
+  display: grid;
+  grid-template-columns: 2.2fr .8fr 1fr 1fr 44px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.line-item-row.li-header-row { display: none; } /* unused placeholder, kept for spacing parity */
+.line-items > .line-item-row:first-child {
+  padding-top: 0; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.li-head { color: var(--muted); font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: .04em; }
+.li-field input, .li-field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  background: var(--card);
+  color: var(--text);
+  min-height: 42px;
+}
+.li-field input:focus, .li-field select:focus {
+  outline: none;
+  border-color: var(--brand-a);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-a) 20%, transparent);
+}
+.li-total-field { font-weight: 700; font-size: 15.5px; }
+.li-mobile-label { display: none; color: var(--muted); font-weight: 500; font-size: 13px; }
+.li-remove {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: none;
+  background: #fee2e2;
+  color: var(--danger);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .12s ease, transform .12s ease;
+}
+.li-remove:hover { background: #fecaca; transform: scale(1.06); }
+
+/* ===== Invoice / Chalan sheet ===== */
+.invoice-sheet { border-top: 5px solid transparent; border-image: var(--brand-grad) 1; padding-top: 22px; }
+.invoice-topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.invoice-company {
+  font-size: 21px; font-weight: 800;
+  background-image: var(--brand-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.invoice-badge {
+  background-image: var(--brand-grad); color: #fff; font-weight: 700; font-size: 12px;
+  letter-spacing: .04em; padding: 8px 14px; border-radius: 999px; white-space: nowrap;
+}
+.invoice-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; padding: 14px; background: rgba(127,127,127,.06); border-radius: 12px; }
+.invoice-meta-value { font-size: 15px; font-weight: 700; margin-top: 3px; }
+.invoice-bill-to { margin-bottom: 18px; }
+.invoice-total-box { display: flex; justify-content: flex-end; margin: 16px 0; }
+.invoice-total-row {
+  display: flex; align-items: center; gap: 18px;
+  background-image: var(--brand-grad); color: #fff;
+  padding: 12px 20px; border-radius: 12px; font-size: 16px;
+}
+.invoice-total-row strong { font-size: 19px; }
+.invoice-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+@media (max-width: 860px) {
+  .invoice-meta { grid-template-columns: 1fr 1fr; }
+  .invoice-badge { font-size: 11px; padding: 6px 10px; }
+  .invoice-total-row { width: 100%; justify-content: space-between; }
+  .invoice-actions .btn { width: 100%; }
+
+  .line-items > .line-item-row:first-child { display: none; } /* header labels hidden, shown inline instead */
+  .line-item-row {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "product product"
+      "qty price"
+      "total remove";
+    gap: 10px;
+    padding: 14px 0;
+  }
+  .line-item-row .li-product { grid-area: product; }
+  .line-item-row .li-field:nth-of-type(2) { grid-area: qty; }
+  .line-item-row .li-field:nth-of-type(3) { grid-area: price; }
+  .li-total-field { grid-area: total; }
+  .li-remove-field { grid-area: remove; display: flex; justify-content: flex-end; }
+  .li-mobile-label { display: inline; }
+}
+
 /* ===== Mobile layout ===== */
 @media (max-width: 860px) {
   .menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
