@@ -30,24 +30,66 @@ class SimplePDF
         return $s;
     }
 
-    public function text(float $x, float $y, string $text, int $size = 10, bool $bold = false): void
+    public function text(float $x, float $y, string $text, int $size = 10, bool $bold = false, string $color = '#000000'): void
     {
         $this->setFont($bold);
         $py = $this->pageH - $y;
-        $this->ops[] = sprintf('BT /%s %d Tf %.2F %.2F Td (%s) Tj ET', $this->font, $size, $x, $py, $this->esc($text));
+        [$r, $g, $b] = $this->hexToRgb($color);
+        $this->ops[] = sprintf('%.3F %.3F %.3F rg BT /%s %d Tf %.2F %.2F Td (%s) Tj ET', $r, $g, $b, $this->font, $size, $x, $py, $this->esc($text));
     }
 
-    public function line(float $x1, float $y1, float $x2, float $y2, float $width = 0.5): void
+    /** Same as text(), but $xRight is the RIGHT edge to align the text against (for numbers/amounts). */
+    public function textRight(float $xRight, float $y, string $text, int $size = 10, bool $bold = false, string $color = '#000000'): void
     {
+        $this->text($xRight - $this->textWidth($text, $size), $y, $text, $size, $bold, $color);
+    }
+
+    /**
+     * Approximate rendered width of $text at $size using standard Helvetica
+     * AFM glyph widths (per 1000 units of em) for the characters we
+     * actually use in tables (digits, currency punctuation, letters).
+     */
+    public function textWidth(string $text, int $size): float
+    {
+        static $widths = [
+            '0'=>556,'1'=>556,'2'=>556,'3'=>556,'4'=>556,'5'=>556,'6'=>556,'7'=>556,'8'=>556,'9'=>556,
+            ','=>278, '.'=>278, '-'=>333, ' '=>278, ':'=>278, '/'=>278,
+            'R'=>722, 's'=>500,
+        ];
+        $w = 0;
+        foreach (str_split($text) as $ch) {
+            $w += ($widths[$ch] ?? 560) / 1000 * $size;
+        }
+        return $w;
+    }
+
+    private function hexToRgb(string $hex): array
+    {
+        $hex = ltrim($hex, '#');
+        return [hexdec(substr($hex, 0, 2)) / 255, hexdec(substr($hex, 2, 2)) / 255, hexdec(substr($hex, 4, 2)) / 255];
+    }
+
+    public function line(float $x1, float $y1, float $x2, float $y2, float $width = 0.5, string $color = '#000000'): void
+    {
+        [$r, $g, $b] = $this->hexToRgb($color);
         $y1 = $this->pageH - $y1;
         $y2 = $this->pageH - $y2;
-        $this->ops[] = sprintf('%.2F w %.2F %.2F m %.2F %.2F l S', $width, $x1, $y1, $x2, $y2);
+        $this->ops[] = sprintf('%.3F %.3F %.3F RG %.2F w %.2F %.2F m %.2F %.2F l S', $r, $g, $b, $width, $x1, $y1, $x2, $y2);
     }
 
-    public function rect(float $x, float $y, float $w, float $h, float $lineWidth = 0.5): void
+    public function rect(float $x, float $y, float $w, float $h, float $lineWidth = 0.5, string $color = '#000000'): void
     {
+        [$r, $g, $b] = $this->hexToRgb($color);
         $py = $this->pageH - $y - $h;
-        $this->ops[] = sprintf('%.2F w %.2F %.2F %.2F %.2F re S', $lineWidth, $x, $py, $w, $h);
+        $this->ops[] = sprintf('%.3F %.3F %.3F RG %.2F w %.2F %.2F %.2F %.2F re S', $r, $g, $b, $lineWidth, $x, $py, $w, $h);
+    }
+
+    /** A solid filled rectangle - used for the dark summary/total boxes. */
+    public function rectFilled(float $x, float $y, float $w, float $h, string $color): void
+    {
+        [$r, $g, $b] = $this->hexToRgb($color);
+        $py = $this->pageH - $y - $h;
+        $this->ops[] = sprintf('%.3F %.3F %.3F rg %.2F %.2F %.2F %.2F re f', $r, $g, $b, $x, $py, $w, $h);
     }
 
     public function pageWidth(): float { return $this->pageW; }
