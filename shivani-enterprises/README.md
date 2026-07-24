@@ -73,15 +73,18 @@ run on ordinary shared hosting (cPanel). Two roles: **Super Admin** and
    - Password: `Admin@123`
    - **Change this password immediately after first login** (use the
      "Change Password" link in the sidebar).
-3. **Upload the files**: upload the whole `shivani-enterprises` folder
-   (or its contents) to a subdomain/folder on your hosting, e.g.
-   `app.yourdomain.com` or `yourdomain.com/shivani`.
+3. **Upload the files**: this build is pre-configured for
+   `shivani.oneweblink.com`. In cPanel, create that subdomain (Domains →
+   Create A New Domain → `shivani.oneweblink.com`), then upload the
+   *contents* of the `shivani-enterprises` folder into that subdomain's
+   document root (e.g. `~/shivani.oneweblink.com/`) — not into a further
+   subfolder, so `login.php` sits directly in that folder.
 4. **Configure the app**: copy `config/config.sample.php` to
-   `config/config.php` and fill in your real DB host/name/user/password,
-   `APP_URL` (the exact URL where you uploaded this), and a random
-   `APP_SECRET` string.
-5. Visit your URL, e.g. `https://app.yourdomain.com/login.php`, and log
-   in with the super admin account.
+   `config/config.php`. `APP_URL` and `APP_SECRET` are already filled in
+   for `shivani.oneweblink.com` — you only need to fill in the real DB
+   host/name/user/password from step 1.
+5. Visit `https://shivani.oneweblink.com/login.php` and log in with the
+   super admin account.
 6. In **Settings**, set your real company name/phone/address and invoice
    prefix.
 7. In **Admins**, create your admin user accounts.
