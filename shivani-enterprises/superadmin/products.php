@@ -10,11 +10,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? '');
         $unit = trim($_POST['unit'] ?? '') ?: 'Piece';
         $price = (float)($_POST['default_price'] ?? 0);
+        $cost = (float)($_POST['cost_price'] ?? 0);
         if ($name === '') {
             flash('error', 'Product name is required.');
         } else {
-            $stmt = db()->prepare('INSERT INTO products (name, unit, default_price) VALUES (?,?,?)');
-            $stmt->execute([$name, $unit, $price]);
+            $stmt = db()->prepare('INSERT INTO products (name, unit, default_price, cost_price) VALUES (?,?,?,?)');
+            $stmt->execute([$name, $unit, $price, $cost]);
             flash('success', 'Product added.');
         }
     } elseif ($action === 'update') {
@@ -22,8 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? '');
         $unit = trim($_POST['unit'] ?? '') ?: 'Piece';
         $price = (float)($_POST['default_price'] ?? 0);
-        $stmt = db()->prepare('UPDATE products SET name=?, unit=?, default_price=? WHERE id=?');
-        $stmt->execute([$name, $unit, $price, $id]);
+        $cost = (float)($_POST['cost_price'] ?? 0);
+        $stmt = db()->prepare('UPDATE products SET name=?, unit=?, default_price=?, cost_price=? WHERE id=?');
+        $stmt->execute([$name, $unit, $price, $cost, $id]);
         flash('success', 'Product updated.');
     } elseif ($action === 'toggle') {
         $id = (int)($_POST['id'] ?? 0);
@@ -45,8 +47,12 @@ require __DIR__ . '/../includes/header.php';
     <div class="form-row">
       <div class="form-group"><label>Product Name</label><input name="name" required placeholder="e.g. Desert Cooler 55L"></div>
       <div class="form-group"><label>Unit</label><input name="unit" value="Piece"></div>
-      <div class="form-group"><label>Default Price (Rs.)</label><input type="number" step="0.01" name="default_price" required></div>
     </div>
+    <div class="form-row">
+      <div class="form-group"><label>Default Selling Price (Rs.)</label><input type="number" step="0.01" name="default_price" required></div>
+      <div class="form-group"><label>Cost Price (Rs.) - kya price me khareeda</label><input type="number" step="0.01" name="cost_price" placeholder="0.00"></div>
+    </div>
+    <p class="text-muted" style="font-size:13px">Cost price sirf profit calculate karne ke liye hai - customer ko kabhi nahi dikhega, sirf app ke andar (aap/admin ke liye).</p>
     <button class="btn" type="submit">Add Product</button>
   </form>
 </div>
@@ -57,7 +63,8 @@ require __DIR__ . '/../includes/header.php';
     <div class="product-row">
       <div class="li-head">Name</div>
       <div class="li-head">Unit</div>
-      <div class="li-head">Default Price</div>
+      <div class="li-head">Selling Price</div>
+      <div class="li-head">Cost Price</div>
       <div class="li-head">Status</div>
       <div class="li-head"></div>
     </div>
@@ -71,6 +78,7 @@ require __DIR__ . '/../includes/header.php';
       <div class="li-field pr-name"><input form="<?= $fid ?>" name="name" value="<?= e($p['name']) ?>"></div>
       <div class="li-field pr-unit"><input form="<?= $fid ?>" name="unit" value="<?= e($p['unit']) ?>"></div>
       <div class="li-field pr-price"><input form="<?= $fid ?>" type="number" step="0.01" name="default_price" value="<?= e($p['default_price']) ?>"></div>
+      <div class="li-field pr-cost"><input form="<?= $fid ?>" type="number" step="0.01" name="cost_price" value="<?= e($p['cost_price']) ?>"></div>
       <div class="pr-status"><span class="badge <?= $p['is_active'] ? 'green' : 'gray' ?>"><?= $p['is_active'] ? 'Active' : 'Inactive' ?></span></div>
       <div class="pr-actions">
         <button form="<?= $fid ?>" class="btn small" type="submit">Save</button>

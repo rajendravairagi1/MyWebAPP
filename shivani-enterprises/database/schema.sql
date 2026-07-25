@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS products (
   name VARCHAR(150) NOT NULL,
   unit VARCHAR(30) NOT NULL DEFAULT 'Piece',
   default_price DECIMAL(12,2) NOT NULL DEFAULT 0,
+  cost_price DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT 'What this costs us to buy - used to work out profit, never shown to the customer',
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -97,6 +98,7 @@ CREATE TABLE IF NOT EXISTS sale_items (
   product_name VARCHAR(150) NOT NULL,
   qty DECIMAL(10,2) NOT NULL DEFAULT 1,
   price DECIMAL(12,2) NOT NULL DEFAULT 0,
+  cost_price DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT 'Actual cost for this sale (decided at sale time, can differ from the product default) - internal only, never printed on the customer invoice',
   line_total DECIMAL(12,2) NOT NULL DEFAULT 0,
   CONSTRAINT fk_items_sale FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
   CONSTRAINT fk_items_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
