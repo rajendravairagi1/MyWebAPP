@@ -73,14 +73,14 @@ require __DIR__ . '/../includes/header.php';
       <div class="li-field pr-name"><input form="<?= $fid ?>" name="name" value="<?= e($p['name']) ?>"></div>
       <div class="li-field pr-unit"><input form="<?= $fid ?>" name="unit" value="<?= e($p['unit']) ?>"></div>
       <div class="li-field pr-price"><input form="<?= $fid ?>" type="number" step="0.01" name="default_price" value="<?= e($p['default_price']) ?>"></div>
-      <div class="pr-status"><span class="badge <?= $p['is_active'] ? 'green' : 'gray' ?>"><?= $p['is_active'] ? 'Active' : 'Inactive' ?></span></div>
+      <div class="pr-status"><span class="badge <?= $p['is_active'] ? 'green' : 'gray' ?>"><?= $p['is_active'] ? 'In Stock' : 'Out of Stock' ?></span></div>
       <div class="pr-actions">
         <button form="<?= $fid ?>" class="btn small" type="submit">Save</button>
-        <form method="post" onsubmit="return confirm('Change status?')">
+        <form method="post" onsubmit="return confirm('Change stock status?')">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="toggle">
           <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
-          <button class="btn small secondary" type="submit"><?= $p['is_active'] ? 'Deactivate' : 'Activate' ?></button>
+          <button class="btn small secondary" type="submit"><?= $p['is_active'] ? 'Mark Out of Stock' : 'Mark In Stock' ?></button>
         </form>
       </div>
     </div>
