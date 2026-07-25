@@ -9,6 +9,59 @@
     });
   }
 
+  // ---- Due-today follow-up reminder popup ----
+  // Shown once per browser session (right after login, since the
+  // dashboard is the first page landed on) rather than on every single
+  // page load, so it doesn't nag while working through the app.
+  (function () {
+    var popup = document.getElementById('followupPopup');
+    if (!popup) return;
+
+    var shownKey = 'shivani_followup_popup_shown';
+    var alreadyShown = false;
+    try { alreadyShown = sessionStorage.getItem(shownKey) === '1'; } catch (e) {}
+    if (alreadyShown) return;
+    try { sessionStorage.setItem(shownKey, '1'); } catch (e) {}
+
+    popup.hidden = false;
+
+    function closeIfEmpty() {
+      var list = document.getElementById('followupPopupList');
+      if (list && !list.children.length) popup.hidden = true;
+    }
+
+    window.followupPopupSkip = function (btn) {
+      var item = btn.closest('.followup-popup-item');
+      if (item) item.remove();
+      closeIfEmpty();
+    };
+
+    window.followupPopupDone = function (id, btn) {
+      var item = btn.closest('.followup-popup-item');
+      var actions = item ? item.querySelectorAll('button') : [];
+      actions.forEach(function (b) { b.disabled = true; });
+      var body = 'csrf_token=' + encodeURIComponent(popup.dataset.csrf) +
+        '&id=' + encodeURIComponent(id) +
+        '&status=done';
+      fetch(popup.dataset.action, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body,
+      }).then(function (res) {
+        if (!res.ok) throw new Error('bad response');
+        if (item) item.remove();
+        closeIfEmpty();
+      }).catch(function () {
+        actions.forEach(function (b) { b.disabled = false; });
+        alert('Update nahi ho paya, dubara try karein.');
+      });
+    };
+
+    var closeAllBtn = document.getElementById('followupPopupCloseAll');
+    if (closeAllBtn) closeAllBtn.addEventListener('click', function () { popup.hidden = true; });
+  })();
+
   // ---- PWA "Install App" button: one tap to add a home-screen icon,
   // instead of digging through the browser menu every time. ----
   (function () {

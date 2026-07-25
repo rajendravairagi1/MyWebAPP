@@ -224,7 +224,18 @@ require __DIR__ . '/includes/header.php';
         <span class="badge <?= $f['status'] === 'done' ? 'green' : ($f['status'] === 'cancelled' ? 'gray' : 'orange') ?>"><?= e($f['status']) ?></span>
       </td>
       <td><?= e($f['remarks']) ?></td>
-      <td><a href="<?= e(base_url('followup_form.php?id=' . $f['id'])) ?>">Edit</a></td>
+      <td>
+        <?php if ($f['status'] === 'pending'): ?>
+        <form method="post" action="<?= e(base_url('followup_status.php')) ?>" style="display:inline-block;margin-right:6px">
+          <?= csrf_field() ?>
+          <input type="hidden" name="id" value="<?= (int)$f['id'] ?>">
+          <input type="hidden" name="status" value="done">
+          <input type="hidden" name="return_to" value="customer_view.php?id=<?= (int)$id ?>">
+          <button class="btn small" type="submit">Done</button>
+        </form>
+        <?php endif; ?>
+        <a href="<?= e(base_url('followup_form.php?id=' . $f['id'])) ?>">Edit</a>
+      </td>
     </tr>
     <?php endforeach; ?>
     <?php if (!$followups): ?><tr><td colspan="6" class="text-muted">No follow-ups yet.</td></tr><?php endif; ?>

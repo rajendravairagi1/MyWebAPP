@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/charts.php';
-require_role('super_admin');
+$u = require_role('super_admin');
 $pageTitle = 'Super Admin Dashboard';
 
 $totalSales = (float)db()->query('SELECT COALESCE(SUM(total_amount),0) FROM sales')->fetchColumn();
@@ -39,6 +39,17 @@ for ($i = 13; $i >= 0; $i--) {
 
 $topProdLabels = array_map(fn($p) => $p['product_name'], array_slice($topProducts, 0, 6));
 $topProdValues = array_map(fn($p) => (float)$p['amount'], array_slice($topProducts, 0, 6));
+
+// Due-today/overdue follow-ups, shown as a reminder popup once per login
+// session (see includes/header.php + assets/js/app.js).
+$dueFollowupsForPopup = db()->query("
+  SELECT f.*, c.name AS customer_name, c.mobile, u.name AS admin_name
+  FROM followups f
+  JOIN customers c ON c.id = f.customer_id
+  JOIN users u ON u.id = f.admin_id
+  WHERE f.status = 'pending' AND f.follow_up_date <= CURDATE()
+  ORDER BY f.follow_up_date ASC, f.id ASC LIMIT 20
+")->fetchAll();
 
 require __DIR__ . '/../includes/header.php';
 ?>

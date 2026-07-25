@@ -40,6 +40,34 @@ function nav_active(string $file): string
 </script>
 </head>
 <body data-sw-url="<?= e(base_url('sw.js')) ?>">
+<?php if (!empty($dueFollowupsForPopup)): ?>
+<div class="modal-overlay" id="followupPopup" data-csrf="<?= e(csrf_token()) ?>" data-action="<?= e(base_url('followup_status.php')) ?>" hidden>
+  <div class="modal-box">
+    <h3 class="mt-0">&#128197; Aaj ke Follow-ups</h3>
+    <p class="text-muted" style="font-size:13px">Ye commitments due hai — customer se baat karke "Done" karo, ya baad ke liye "Skip" karo.</p>
+    <div id="followupPopupList">
+      <?php foreach ($dueFollowupsForPopup as $f): $overdue = $f['follow_up_date'] < date('Y-m-d'); ?>
+        <div class="followup-popup-item" data-id="<?= (int)$f['id'] ?>">
+          <div class="followup-popup-head">
+            <div>
+              <strong><?= e($f['customer_name']) ?></strong>
+              <?php if (!empty($f['admin_name'])): ?><span class="text-muted"> &middot; <?= e($f['admin_name']) ?></span><?php endif; ?>
+              <div class="text-muted" style="font-size:12.5px"><?= e(date('d-M-Y', strtotime($f['follow_up_date']))) ?><?= $f['follow_up_time'] ? ' · ' . e(date('h:i A', strtotime($f['follow_up_time']))) : '' ?><?= $overdue ? ' <span class="badge red">overdue</span>' : '' ?></div>
+            </div>
+          </div>
+          <?php if (!empty($f['commitment'])): ?><p class="followup-popup-commitment"><?= e($f['commitment']) ?></p><?php endif; ?>
+          <div class="followup-popup-actions">
+            <a class="btn small secondary" target="_blank" href="<?= e(base_url('customer_view.php?id=' . $f['customer_id'])) ?>">View Customer</a>
+            <button type="button" class="btn small" onclick="followupPopupDone(<?= (int)$f['id'] ?>, this)">&#10003; Done</button>
+            <button type="button" class="btn small secondary" onclick="followupPopupSkip(this)">Skip</button>
+          </div>
+        </div>
+      <?php endforeach; ?>
+    </div>
+    <button type="button" class="btn small secondary" id="followupPopupCloseAll" style="width:100%;margin-top:8px">Close</button>
+  </div>
+</div>
+<?php endif; ?>
 <div class="sidebar-overlay"></div>
 <div class="app-shell">
   <aside class="sidebar">

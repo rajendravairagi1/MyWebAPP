@@ -37,6 +37,9 @@ $stmt = db()->prepare("
 ");
 $stmt->execute([$u['id']]);
 $todayFollowups = $stmt->fetchAll();
+// Same list, shown as a reminder popup once per login session (see
+// includes/header.php + assets/js/app.js).
+$dueFollowupsForPopup = $todayFollowups;
 
 $stmt = db()->prepare('
   SELECT DATE(sale_date) d, SUM(total_amount) amt FROM sales
