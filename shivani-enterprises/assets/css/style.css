@@ -603,6 +603,7 @@ tr:hover td { background: rgba(127,127,127,.06); }
 
   .filters { flex-direction: column; align-items: stretch; }
   .filters .form-group { min-width: 0; }
+  .filters .search-group { flex: 0 0 auto; } /* flex-basis:280px from desktop would become HEIGHT in column mode - reset it */
   .filters .btn { width: 100%; }
 
   table { font-size: 14px; }
