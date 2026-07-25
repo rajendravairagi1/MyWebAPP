@@ -61,6 +61,7 @@ function nav_active(string $file): string
         <a<?= nav_active('ledger.php') ?> href="<?= e(base_url($base.'ledger.php')) ?>">Global Ledger</a>
         <a<?= nav_active('reports_admin_wise.php') ?> href="<?= e(base_url($base.'reports_admin_wise.php')) ?>">Admin-wise Report</a>
         <a<?= nav_active('followups.php') ?> href="<?= e(base_url($base.'followups.php')) ?>">Follow-ups / Commitments</a>
+        <a<?= nav_active('investors.php') ?> href="<?= e(base_url('investors.php')) ?>">Investors</a>
         <a<?= nav_active('backup.php') ?> href="<?= e(base_url($base.'backup.php')) ?>">Backup</a>
         <a<?= nav_active('settings.php') ?> href="<?= e(base_url($base.'settings.php')) ?>">Settings</a>
         <a<?= nav_active('change_password.php') ?> href="<?= e(base_url('change_password.php')) ?>">Change Password</a>
@@ -70,6 +71,7 @@ function nav_active(string $file): string
         <a<?= nav_active('sales.php') ?> href="<?= e(base_url($base.'sales.php')) ?>">Sales / Invoices</a>
         <a<?= nav_active('payments.php') ?> href="<?= e(base_url($base.'payments.php')) ?>">Payments</a>
         <a<?= nav_active('followups.php') ?> href="<?= e(base_url($base.'followups.php')) ?>">Follow-ups</a>
+        <a<?= nav_active('investors.php') ?> href="<?= e(base_url('investors.php')) ?>">Investors</a>
         <a<?= nav_active('reports.php') ?> href="<?= e(base_url($base.'reports.php')) ?>">My Reports</a>
         <a<?= nav_active('change_password.php') ?> href="<?= e(base_url('change_password.php')) ?>">Change Password</a>
       <?php endif; ?>

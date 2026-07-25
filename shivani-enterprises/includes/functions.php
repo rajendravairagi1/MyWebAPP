@@ -223,3 +223,9 @@ function statement_verify_url(array $customer): string
     $sig = verify_sign(['statement', $customer['id']]);
     return base_url('verify.php') . '?c=' . $customer['id'] . '&s=' . $sig;
 }
+
+function investor_statement_verify_url(array $investor): string
+{
+    $sig = verify_sign(['investor', $investor['id']]);
+    return base_url('verify.php') . '?inv=' . $investor['id'] . '&s=' . $sig;
+}

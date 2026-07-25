@@ -25,10 +25,6 @@ if (($_GET['pdf'] ?? '') === '1') {
     exit;
 }
 
-$totalCost = 0;
-foreach ($items as $it) { $totalCost += (float)$it['qty'] * (float)$it['cost_price']; }
-$totalProfit = (float)$sale['total_amount'] - $totalCost;
-
 $pageTitle = 'Invoice ' . $sale['invoice_no'];
 $pdfUrl = base_url('sale_view.php?id=' . $id . '&pdf=1');
 $pdfFilename = 'invoice-' . $sale['invoice_no'] . '.pdf';
@@ -97,27 +93,5 @@ require __DIR__ . '/includes/header.php';
     </button>
   </div>
   <p class="text-muted" style="font-size:13px">Mobile par "Share PDF on WhatsApp" dabate hi PDF taiyar hoke share-menu khulega — wahan WhatsApp choose karke jisko chahe usko bhej sakte ho, alag se download nahi karna padega. (Desktop/purane browser par PDF download hokar WhatsApp chat khulega, wahan file manually attach karni hogi.)</p>
-</div>
-
-<div class="card">
-  <h3 class="mt-0">Internal: Cost &amp; Profit <span class="badge gray">not on invoice</span></h3>
-  <p class="text-muted" style="font-size:13px">Ye sirf aapko (admin/super admin) dikhta hai — customer invoice ya PDF me kabhi nahi jaata.</p>
-  <table>
-    <tr><th>Product</th><th>Qty</th><th>Cost/unit</th><th>Total Cost</th><th>Profit</th></tr>
-    <?php foreach ($items as $it): $lineCost = (float)$it['qty'] * (float)$it['cost_price']; $lineProfit = (float)$it['line_total'] - $lineCost; ?>
-    <tr>
-      <td><?= e($it['product_name']) ?></td>
-      <td><?= rtrim(rtrim(number_format($it['qty'],2),'0'),'.') ?></td>
-      <td><?= money($it['cost_price']) ?></td>
-      <td><?= money($lineCost) ?></td>
-      <td style="color:<?= $lineProfit >= 0 ? '#16a34a' : '#dc2626' ?>"><?= money($lineProfit) ?></td>
-    </tr>
-    <?php endforeach; ?>
-  </table>
-  <div class="stat-grid" style="margin-top:14px">
-    <div class="stat-card"><div class="label">Total Sold</div><div class="value"><?= money($sale['total_amount']) ?></div></div>
-    <div class="stat-card"><div class="label">Total Cost</div><div class="value"><?= money($totalCost) ?></div></div>
-    <div class="stat-card"><div class="label">Profit</div><div class="value" style="color:<?= $totalProfit >= 0 ? '#16a34a' : '#dc2626' ?>"><?= money($totalProfit) ?></div></div>
-  </div>
 </div>
 <?php require __DIR__ . '/includes/footer.php'; ?>

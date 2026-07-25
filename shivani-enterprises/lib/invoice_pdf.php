@@ -232,3 +232,100 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
 
     $pdf->output('statement-' . preg_replace('/\s+/', '-', $customer['name']) . '.pdf', $dest);
 }
+
+/**
+ * Renders an investor's ledger (all investment / profit-payout entries +
+ * running net) as a PDF, same visual style as the customer statement.
+ */
+function render_investor_statement_pdf(array $investor, array $transactions, string $dest = 'I'): void
+{
+    $pdf = new SimplePDF();
+    $margin = 40;
+    $y = $margin;
+    $tableW = $pdf->pageWidth() - 2 * $margin;
+
+    $rows = [];
+    foreach ($transactions as $t) {
+        $desc = $t['type'] === 'investment' ? 'Investment' : 'Profit Paid';
+        if (!empty($t['note'])) $desc .= ' - ' . $t['note'];
+        $rows[] = [
+            'date' => $t['txn_date'],
+            'desc' => $desc,
+            'invested' => $t['type'] === 'investment' ? (float)$t['amount'] : 0,
+            'paid' => $t['type'] === 'payout' ? (float)$t['amount'] : 0,
+        ];
+    }
+    usort($rows, fn($a, $b) => strcmp($a['date'], $b['date']));
+    $totalInvested = array_sum(array_column($rows, 'invested'));
+    $totalPaid = array_sum(array_column($rows, 'paid'));
+    $finalNet = $totalInvested - $totalPaid;
+
+    pdf_verify_qr($pdf, $margin, investor_statement_verify_url($investor), $margin - 4);
+
+    $pdf->text($margin, $y, get_setting('company_name', APP_NAME), 18, true);
+    $y += 26;
+    $pdf->text($margin, $y, 'Investor Statement', 14, true);
+    $y += 20;
+    $pdf->text($margin, $y, $investor['name'] . (!empty($investor['mobile']) ? ' - ' . $investor['mobile'] : ''), 11);
+    $y += 24;
+    $pdf->line($margin, $y, $pdf->pageWidth() - $margin, $y);
+    $y += 20;
+
+    // Column widths sized so large amounts (lakhs, e.g. 10,00,000.00) never
+    // cross the outer border.
+    $colW = ['date' => 62, 'desc' => 0, 'invested' => 100, 'paid' => 100, 'net' => 95];
+    $colW['desc'] = $tableW - $colW['date'] - $colW['invested'] - $colW['paid'] - $colW['net'];
+    $colX = [
+        $margin,
+        $margin + $colW['date'],
+        $margin + $colW['date'] + $colW['desc'],
+        $margin + $colW['date'] + $colW['desc'] + $colW['invested'],
+        $margin + $colW['date'] + $colW['desc'] + $colW['invested'] + $colW['paid'],
+    ];
+    $investedRight = $colX[3] - 6;
+    $paidRight = $colX[4] - 6;
+    $netRight = $margin + $tableW - 6;
+
+    $pdf->rect($margin, $y, $tableW, 20);
+    $pdf->text($colX[0] + 4, $y + 14, 'Date', 10, true);
+    $pdf->text($colX[1] + 4, $y + 14, 'Description', 10, true);
+    $pdf->text($colX[2] + 4, $y + 14, 'Investment (Rs.)', 10, true);
+    $pdf->text($colX[3] + 4, $y + 14, 'Profit Paid (Rs.)', 10, true);
+    $pdf->textRight($netRight, $y + 14, 'Net', 10, true);
+    $y += 20;
+
+    $net = 0;
+    foreach ($rows as $r) {
+        if ($y > $pdf->pageHeight() - 240) { break; } // leave room for the summary boxes + signature + footer
+        $net += $r['invested'] - $r['paid'];
+        $rowH = 18;
+        $pdf->rect($margin, $y, $tableW, $rowH);
+        $pdf->text($colX[0] + 4, $y + 13, date('d-M-y', strtotime($r['date'])), 9);
+        $pdf->text($colX[1] + 4, $y + 13, pdf_truncate($r['desc'], 30), 9);
+        $pdf->textRight($investedRight, $y + 13, $r['invested'] > 0 ? number_format($r['invested'], 2) : '-', 9);
+        $pdf->textRight($paidRight, $y + 13, $r['paid'] > 0 ? number_format($r['paid'], 2) : '-', 9);
+        $pdf->textRight($netRight, $y + 13, number_format($net, 2), 9);
+        $y += $rowH;
+    }
+    $y += 14;
+
+    // Total Investment / Total Profit Paid / Net, each as its own dark box
+    // with the label on the left and the amount right-aligned opposite it.
+    $summary = [
+        ['Total Investment', $totalInvested],
+        ['Total Profit Paid', $totalPaid],
+        ['Net (Investment - Paid)', $finalNet],
+    ];
+    $boxH = 26;
+    foreach ($summary as [$label, $amount]) {
+        $pdf->rectFilled($margin, $y, $tableW, $boxH, PDF_DARK);
+        $pdf->text($margin + 12, $y + 17, $label, 11, true, PDF_WHITE);
+        $pdf->textRight($margin + $tableW - 12, $y + 17, 'Rs. ' . number_format($amount, 2), 12, true, PDF_WHITE);
+        $y += $boxH + 8;
+    }
+
+    $y = pdf_signature_box($pdf, $margin, $tableW, $y + 8);
+    pdf_footer($pdf, $margin, 'This is a computer generated statement');
+
+    $pdf->output('investor-statement-' . preg_replace('/\s+/', '-', $investor['name']) . '.pdf', $dest);
+}

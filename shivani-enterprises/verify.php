@@ -52,6 +52,31 @@ if (isset($_GET['i'])) {
             ];
         }
     }
+} elseif (isset($_GET['inv'])) {
+    // Investor statement verification - shows the investor's live totals.
+    $id = (int)$_GET['inv'];
+    $sig = (string)($_GET['s'] ?? '');
+    if ($sig !== '' && hash_equals(verify_sign(['investor', $id]), $sig)) {
+        $stmt = db()->prepare('SELECT * FROM investors WHERE id = ?');
+        $stmt->execute([$id]);
+        $investor = $stmt->fetch();
+        if ($investor) {
+            $stmt = db()->prepare("SELECT COALESCE(SUM(amount),0) FROM investor_transactions WHERE investor_id = ? AND type = 'investment'");
+            $stmt->execute([$id]);
+            $invested = (float)$stmt->fetchColumn();
+            $stmt = db()->prepare("SELECT COALESCE(SUM(amount),0) FROM investor_transactions WHERE investor_id = ? AND type = 'payout'");
+            $stmt->execute([$id]);
+            $paidOut = (float)$stmt->fetchColumn();
+            $valid = true;
+            $title = 'Investor Statement';
+            $details = [
+                'Investor' => $investor['name'],
+                'Total Investment' => 'Rs. ' . number_format($invested, 2),
+                'Total Profit Paid' => 'Rs. ' . number_format($paidOut, 2),
+                'Net (as of now)' => 'Rs. ' . number_format($invested - $paidOut, 2),
+            ];
+        }
+    }
 }
 ?>
 <!DOCTYPE html>

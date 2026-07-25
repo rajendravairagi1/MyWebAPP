@@ -28,7 +28,6 @@ CREATE TABLE IF NOT EXISTS products (
   name VARCHAR(150) NOT NULL,
   unit VARCHAR(30) NOT NULL DEFAULT 'Piece',
   default_price DECIMAL(12,2) NOT NULL DEFAULT 0,
-  cost_price DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT 'What this costs us to buy - used to work out profit, never shown to the customer',
   is_active TINYINT(1) NOT NULL DEFAULT 1,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -98,7 +97,6 @@ CREATE TABLE IF NOT EXISTS sale_items (
   product_name VARCHAR(150) NOT NULL,
   qty DECIMAL(10,2) NOT NULL DEFAULT 1,
   price DECIMAL(12,2) NOT NULL DEFAULT 0,
-  cost_price DECIMAL(12,2) NOT NULL DEFAULT 0 COMMENT 'Actual cost for this sale (decided at sale time, can differ from the product default) - internal only, never printed on the customer invoice',
   line_total DECIMAL(12,2) NOT NULL DEFAULT 0,
   CONSTRAINT fk_items_sale FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE,
   CONSTRAINT fk_items_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
@@ -141,6 +139,42 @@ CREATE TABLE IF NOT EXISTS followups (
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_fu_customer FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
   CONSTRAINT fk_fu_admin FOREIGN KEY (admin_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------
+-- Investors - people who give capital to an admin/super admin to trade
+-- with, in return for a (manually decided, deal-to-deal) profit share.
+-- Strictly owned by the user who added them (owner_id) - an admin's
+-- investors are never visible to another admin or to super admin, and
+-- vice versa; each keeps their own separate investor book.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS investors (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  owner_id INT UNSIGNED NOT NULL COMMENT 'The admin/super admin this investor belongs to - never shared across users',
+  name VARCHAR(150) NOT NULL,
+  mobile VARCHAR(20) DEFAULT NULL,
+  notes TEXT DEFAULT NULL,
+  status ENUM('active','inactive') NOT NULL DEFAULT 'active',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_investors_owner FOREIGN KEY (owner_id) REFERENCES users(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------------------------------------------------------------------
+-- Investor ledger entries: money the investor put in (investment), and
+-- profit share paid back to them (payout). Balance = investment - payout.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS investor_transactions (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  investor_id INT UNSIGNED NOT NULL,
+  type ENUM('investment','payout') NOT NULL,
+  amount DECIMAL(12,2) NOT NULL,
+  txn_date DATE NOT NULL,
+  note VARCHAR(255) DEFAULT NULL,
+  created_by INT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_itxn_investor FOREIGN KEY (investor_id) REFERENCES investors(id) ON DELETE CASCADE,
+  CONSTRAINT fk_itxn_created_by FOREIGN KEY (created_by) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
