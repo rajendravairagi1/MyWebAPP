@@ -118,7 +118,8 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
   background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.12));
   pointer-events: none;
 }
-.sidebar .brand-text { position: relative; z-index: 1; }
+.sidebar .brand-inner { display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; }
+.sidebar .brand-logo { width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
 .sidebar .brand-text small { display: block; font-weight: 500; color: rgba(255,255,255,.85); font-size: 12px; margin-top: 2px; }
 .sidebar nav { padding: 0 10px; }
 .sidebar nav a {
@@ -385,6 +386,7 @@ tr:hover td { background: rgba(127,127,127,.06); }
   100% { background-position: 0% 50%; }
 }
 .login-box { background: var(--card); color: var(--text); padding: 34px 32px; border-radius: 18px; width: 100%; max-width: 350px; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.login-logo { display: block; width: 68px; height: 68px; margin: 0 auto 14px; }
 .login-box h1 {
   font-size: 22px; text-align: center; margin-bottom: 4px; font-weight: 800;
   background-image: var(--brand-grad); -webkit-background-clip: text; background-clip: text; color: transparent;

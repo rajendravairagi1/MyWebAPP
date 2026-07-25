@@ -44,7 +44,10 @@ function nav_active(string $file): string
 <div class="app-shell">
   <aside class="sidebar">
     <div class="brand">
-      <span class="brand-text"><?= e(APP_NAME) ?><small>Sales Ledger</small></span>
+      <div class="brand-inner">
+        <img class="brand-logo" src="<?= e(base_url('assets/icons/logo-badge.png')) ?>" alt="">
+        <span class="brand-text"><?= e(APP_NAME) ?><small>Sales Ledger</small></span>
+      </div>
       <button type="button" class="sidebar-close" aria-label="Close menu">&times;</button>
     </div>
     <nav>

@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body data-sw-url="<?= e(base_url('sw.js')) ?>">
 <div class="login-wrap">
   <div class="login-box">
+    <img src="<?= e(base_url('assets/icons/logo-badge.png')) ?>" alt="" class="login-logo">
     <h1><?= e(APP_NAME) ?></h1>
     <p class="sub">Sales Ledger &amp; CRM Login</p>
     <div class="login-theme-row">
