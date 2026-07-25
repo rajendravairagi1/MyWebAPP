@@ -14,6 +14,33 @@ if ($u['role'] !== 'super_admin' && (int)$customer['admin_id'] !== (int)$u['id']
 $backBase = $u['role'] === 'super_admin' ? 'superadmin/' : 'admin/';
 $pageTitle = 'Customer: ' . $customer['name'];
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggle_status') {
+    verify_csrf();
+    $stmt = db()->prepare("UPDATE customers SET status = IF(status = 'active', 'inactive', 'active') WHERE id = ?");
+    $stmt->execute([$id]);
+    flash('success', 'Customer status updated.');
+    redirect('customer_view.php?id=' . $id);
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
+    verify_csrf();
+    $saleCountStmt = db()->prepare('SELECT COUNT(*) FROM sales WHERE customer_id = ?');
+    $saleCountStmt->execute([$id]);
+    $saleCount = (int)$saleCountStmt->fetchColumn();
+    $paymentCountStmt = db()->prepare('SELECT COUNT(*) FROM payments WHERE customer_id = ?');
+    $paymentCountStmt->execute([$id]);
+    $paymentCount = (int)$paymentCountStmt->fetchColumn();
+
+    if ($saleCount > 0 || $paymentCount > 0) {
+        flash('error', 'Is customer ke sales/payments records hai, isliye delete nahi ho sakta (records surakshit rakhne ke liye). Iske bajaye "Deactivate" use karein.');
+        redirect('customer_view.php?id=' . $id);
+    }
+
+    db()->prepare('DELETE FROM customers WHERE id = ?')->execute([$id]);
+    flash('success', 'Customer deleted.');
+    redirect($backBase . 'customers.php');
+}
+
 // Document upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'upload_document') {
     verify_csrf();
@@ -70,7 +97,10 @@ require __DIR__ . '/includes/header.php';
     <img class="customer-photo" src="<?= e(base_url($customer['photo'])) ?>">
   <?php endif; ?>
   <div style="flex:1">
-    <h2 class="mt-0"><?= e($customer['name']) ?> <?= $customer['shop_name'] ? '('.e($customer['shop_name']).')' : '' ?></h2>
+    <h2 class="mt-0">
+      <?= e($customer['name']) ?> <?= $customer['shop_name'] ? '('.e($customer['shop_name']).')' : '' ?>
+      <?php if ($customer['status'] === 'inactive'): ?><span class="badge gray">Inactive</span><?php endif; ?>
+    </h2>
     <p class="text-muted">
       <?= e($customer['place']) ?> &middot; Mobile: <?= e($customer['mobile']) ?>
       <?php if ($customer['alt_mobile']): ?> / <?= e($customer['alt_mobile']) ?><?php endif; ?>
@@ -89,7 +119,22 @@ require __DIR__ . '/includes/header.php';
       <?php if ($balance > 0): ?>
         <a class="btn small wa" target="_blank" href="<?= e(whatsapp_link($customer['mobile'], $waMsg)) ?>">Send Text Reminder</a>
       <?php endif; ?>
+      <form method="post" onsubmit="return confirm('<?= $customer['status'] === 'active' ? 'Deactivate' : 'Activate' ?> this customer?')">
+        <?= csrf_field() ?>
+        <input type="hidden" name="action" value="toggle_status">
+        <button class="btn small secondary" type="submit"><?= $customer['status'] === 'active' ? 'Deactivate' : 'Activate' ?></button>
+      </form>
+      <?php if (!$sales && !$payments): ?>
+        <form method="post" onsubmit="return confirm('Delete this customer permanently? This cannot be undone.')">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="delete">
+          <button class="btn small danger" type="submit">Delete Customer</button>
+        </form>
+      <?php endif; ?>
     </div>
+    <?php if ($sales || $payments): ?>
+      <p class="text-muted" style="font-size:12px;margin-top:8px">Is customer ke sales/payments records hai, isliye permanently delete nahi ho sakta - "Deactivate" use karein.</p>
+    <?php endif; ?>
   </div>
 </div>
 

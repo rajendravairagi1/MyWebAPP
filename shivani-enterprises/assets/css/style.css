@@ -589,13 +589,14 @@ tr:hover td { background: rgba(127,127,127,.06); }
 
   .card { padding: 15px; border-radius: 14px; }
 
-  .btn { width: 100%; }
-  .btn.small { width: auto; }
+  .btn { width: 100%; margin-bottom: 10px; }
+  .btn.small { width: auto; margin-bottom: 0; }
   form .btn[type="submit"] { width: 100%; }
 
   /* Action-bar buttons: neat 2-column grid instead of ragged wrapping */
   .action-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .action-bar .btn.small { width: 100%; flex: none; }
+  .action-bar .btn { margin-bottom: 0; } /* grid gap already spaces these - avoid doubling it */
 
   .file-field { flex-direction: column; align-items: stretch; }
   .file-field input[type="file"] { flex: 0 0 auto; width: 100%; } /* flex-basis:220px from desktop would become HEIGHT in column mode - reset it */

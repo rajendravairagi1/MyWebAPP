@@ -13,6 +13,13 @@ if ((int)$investor['owner_id'] !== (int)$u['id']) {
 }
 $pageTitle = 'Investor: ' . $investor['name'];
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
+    verify_csrf();
+    db()->prepare('DELETE FROM investors WHERE id = ?')->execute([$id]);
+    flash('success', 'Investor and all their entries deleted.');
+    redirect('investors.php');
+}
+
 if (($_GET['statement'] ?? '') === 'pdf') {
     $txns = db()->prepare('SELECT * FROM investor_transactions WHERE investor_id = ? ORDER BY txn_date');
     $txns->execute([$id]);
@@ -54,6 +61,11 @@ require __DIR__ . '/includes/header.php';
       onclick="shareFileToWhatsApp('<?= e(base_url('investor_view.php?id=' . $id . '&statement=pdf')) ?>', 'investor-statement-<?= e(preg_replace('/\s+/', '-', $investor['name'])) ?>.pdf', '<?= e(addslashes($waMsg)) ?>', this)">
       Share Statement on WhatsApp
     </button>
+    <form method="post" onsubmit="return confirm('Delete this investor and ALL their investment/profit/payment entries? This cannot be undone.')">
+      <?= csrf_field() ?>
+      <input type="hidden" name="action" value="delete">
+      <button class="btn small danger" type="submit">Delete Investor</button>
+    </form>
   </div>
 </div>
 
