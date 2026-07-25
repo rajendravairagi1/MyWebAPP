@@ -124,10 +124,8 @@ function render_invoice_pdf(array $sale, array $items, array $customer, string $
     $pdf->textRight($margin + $tableW - 12, $y + 20, 'Rs. ' . number_format((float)$sale['total_amount'], 2), 13, true, PDF_WHITE);
     $y += $boxH + 16;
 
-    if (!empty($sale['notes'])) {
-        $pdf->text($margin, $y, 'Note: ' . $sale['notes'], 10);
-        $y += 20;
-    }
+    // sale['notes'] is an internal admin note (not customer-facing) and is
+    // intentionally never printed on the invoice PDF.
 
     $y = pdf_signature_box($pdf, $margin, $tableW, $y + 6);
     pdf_footer($pdf, $margin, 'This is a computer generated invoice');
@@ -154,7 +152,9 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
         $rows[] = ['date' => $s['sale_date'], 'desc' => 'Invoice ' . $s['invoice_no'], 'debit' => (float)$s['total_amount'], 'credit' => 0];
     }
     foreach ($payments as $p) {
-        $rows[] = ['date' => $p['payment_date'], 'desc' => 'Payment (' . $p['mode'] . ')' . (!empty($p['note']) ? ' - ' . $p['note'] : ''), 'debit' => 0, 'credit' => (float)$p['amount']];
+        // p['note'] is an internal admin note (not customer-facing) and is
+        // intentionally never printed on the statement.
+        $rows[] = ['date' => $p['payment_date'], 'desc' => 'Payment (' . $p['mode'] . ')', 'debit' => 0, 'credit' => (float)$p['amount']];
     }
     usort($rows, fn($a, $b) => strcmp($a['date'], $b['date']));
     $totalGiven = array_sum(array_column($rows, 'debit'));
@@ -248,8 +248,9 @@ function render_investor_statement_pdf(array $investor, array $transactions, str
     $descLabels = ['investment' => 'Investment', 'profit' => 'Profit Credited', 'payment' => 'Payment Paid'];
     $rows = [];
     foreach ($transactions as $t) {
+        // t['note'] is an internal admin note (not investor-facing) and is
+        // intentionally never printed on the statement.
         $desc = $descLabels[$t['type']] ?? $t['type'];
-        if (!empty($t['note'])) $desc .= ' - ' . $t['note'];
         $rows[] = [
             'date' => $t['txn_date'],
             'desc' => $desc,
