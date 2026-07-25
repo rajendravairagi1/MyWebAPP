@@ -10,6 +10,22 @@ function pdf_truncate(string $text, int $maxChars): string
 
 const PDF_DARK = '#141826';
 const PDF_WHITE = '#ffffff';
+const PDF_HEADER_BG = '#f1f5f9';
+const PDF_ROW_ALT = '#f8fafc';
+const PDF_BORDER = '#cbd5e1';
+
+/**
+ * Draws vertical column separators through the whole table (header row
+ * + all data rows) so numeric columns visually line up with their
+ * headers. $xs is the list of internal x-positions (i.e. NOT the outer
+ * left/right edges - the outer rectangle already draws those).
+ */
+function pdf_col_dividers(SimplePDF $pdf, array $xs, float $yTop, float $yBottom): void
+{
+    foreach ($xs as $x) {
+        $pdf->line($x, $yTop, $x, $yBottom, 0.5, PDF_BORDER);
+    }
+}
 
 /**
  * Draws a bordered signature box (with sign-here lines) right after the
@@ -94,27 +110,47 @@ function render_invoice_pdf(array $sale, array $items, array $customer, string $
 
     // Column widths sized so numbers never cross the outer border, even
     // for amounts up to several lakh.
-    $colW = ['product' => $tableW - 70 - 95 - 135, 'qty' => 70, 'price' => 95, 'amount' => 135];
-    $colX = [$margin, $margin + $colW['product'], $margin + $colW['product'] + $colW['qty'], $margin + $colW['product'] + $colW['qty'] + $colW['price']];
-    $rightEdge = $margin + $tableW - 6;
+    $colW = ['product' => $tableW - 60 - 95 - 120, 'qty' => 60, 'price' => 95, 'amount' => 120];
+    $colX = [
+        $margin,
+        $margin + $colW['product'],
+        $margin + $colW['product'] + $colW['qty'],
+        $margin + $colW['product'] + $colW['qty'] + $colW['price'],
+    ];
+    $qtyRight = $colX[2] - 6;
     $priceRight = $colX[3] - 6;
+    $rightEdge = $margin + $tableW - 6;
+    $tableTop = $y;
 
-    $pdf->rect($margin, $y, $tableW, 20);
-    $pdf->text($colX[0] + 4, $y + 14, 'Product', 10, true);
-    $pdf->text($colX[1] + 4, $y + 14, 'Qty', 10, true);
-    $pdf->text($colX[2] + 4, $y + 14, 'Price', 10, true);
-    $pdf->text($colX[3] + 4, $y + 14, 'Amount', 10, true);
-    $y += 20;
+    // Header row with light background + right-aligned numeric column
+    // headers (so they line up with the right-aligned numbers below).
+    $headerH = 22;
+    $pdf->rectFilled($margin, $y, $tableW, $headerH, PDF_HEADER_BG);
+    $pdf->text($colX[0] + 6, $y + 15, 'Product', 10, true);
+    $pdf->textRight($qtyRight, $y + 15, 'Qty', 10, true);
+    $pdf->textRight($priceRight, $y + 15, 'Price (Rs.)', 10, true);
+    $pdf->textRight($rightEdge, $y + 15, 'Amount (Rs.)', 10, true);
+    $y += $headerH;
 
+    $rowIdx = 0;
     foreach ($items as $item) {
         $rowH = 20;
-        $pdf->rect($margin, $y, $tableW, $rowH);
-        $pdf->text($colX[0] + 4, $y + 14, pdf_truncate($item['product_name'], 34), 10);
-        $pdf->text($colX[1] + 4, $y + 14, rtrim(rtrim(number_format((float)$item['qty'], 2), '0'), '.'), 10);
+        if ($rowIdx % 2 === 1) {
+            $pdf->rectFilled($margin, $y, $tableW, $rowH, PDF_ROW_ALT);
+        }
+        $pdf->text($colX[0] + 6, $y + 14, pdf_truncate($item['product_name'], 34), 10);
+        $pdf->textRight($qtyRight, $y + 14, rtrim(rtrim(number_format((float)$item['qty'], 2), '0'), '.'), 10);
         $pdf->textRight($priceRight, $y + 14, number_format((float)$item['price'], 2), 10);
         $pdf->textRight($rightEdge, $y + 14, number_format((float)$item['line_total'], 2), 10);
         $y += $rowH;
+        $rowIdx++;
     }
+
+    // Outer border + vertical dividers span the header + all rows.
+    $pdf->rect($margin, $tableTop, $tableW, $y - $tableTop, 0.7, PDF_BORDER);
+    pdf_col_dividers($pdf, [$colX[1], $colX[2], $colX[3]], $tableTop, $y);
+    // Header underline (separates the header row from data rows).
+    $pdf->line($margin, $tableTop + $headerH, $margin + $tableW, $tableTop + $headerH, 0.7, PDF_BORDER);
     $y += 10;
 
     // Total, in a dark highlight box.
@@ -189,27 +225,38 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
     $paidRight = $colX[4] - 6;
     $balanceRight = $margin + $tableW - 6;
 
-    $pdf->rect($margin, $y, $tableW, 20);
-    $pdf->text($colX[0] + 4, $y + 14, 'Date', 10, true);
-    $pdf->text($colX[1] + 4, $y + 14, 'Description', 10, true);
-    $pdf->text($colX[2] + 4, $y + 14, 'Given (Rs.)', 10, true);
-    $pdf->text($colX[3] + 4, $y + 14, 'Paid (Rs.)', 10, true);
-    $pdf->textRight($balanceRight, $y + 14, 'Balance', 10, true);
-    $y += 20;
+    $tableTop = $y;
+    $headerH = 22;
+    $pdf->rectFilled($margin, $y, $tableW, $headerH, PDF_HEADER_BG);
+    $pdf->text($colX[0] + 6, $y + 15, 'Date', 10, true);
+    $pdf->text($colX[1] + 6, $y + 15, 'Description', 10, true);
+    $pdf->textRight($givenRight, $y + 15, 'Given (Rs.)', 10, true);
+    $pdf->textRight($paidRight, $y + 15, 'Paid (Rs.)', 10, true);
+    $pdf->textRight($balanceRight, $y + 15, 'Balance (Rs.)', 10, true);
+    $y += $headerH;
 
     $balance = 0;
+    $rowIdx = 0;
     foreach ($rows as $r) {
         if ($y > $pdf->pageHeight() - 240) { break; } // leave room for the 3 summary boxes + signature + footer
         $balance += $r['debit'] - $r['credit'];
         $rowH = 18;
-        $pdf->rect($margin, $y, $tableW, $rowH);
-        $pdf->text($colX[0] + 4, $y + 13, date('d-M-y', strtotime($r['date'])), 9);
-        $pdf->text($colX[1] + 4, $y + 13, pdf_truncate($r['desc'], 26), 9);
+        if ($rowIdx % 2 === 1) {
+            $pdf->rectFilled($margin, $y, $tableW, $rowH, PDF_ROW_ALT);
+        }
+        $pdf->text($colX[0] + 6, $y + 13, date('d-M-y', strtotime($r['date'])), 9);
+        $pdf->text($colX[1] + 6, $y + 13, pdf_truncate($r['desc'], 30), 9);
         $pdf->textRight($givenRight, $y + 13, $r['debit'] > 0 ? number_format($r['debit'], 2) : '-', 9);
         $pdf->textRight($paidRight, $y + 13, $r['credit'] > 0 ? number_format($r['credit'], 2) : '-', 9);
         $pdf->textRight($balanceRight, $y + 13, number_format($balance, 2), 9);
         $y += $rowH;
+        $rowIdx++;
     }
+
+    // Outer border + vertical dividers + header underline.
+    $pdf->rect($margin, $tableTop, $tableW, $y - $tableTop, 0.7, PDF_BORDER);
+    pdf_col_dividers($pdf, [$colX[1], $colX[2], $colX[3], $colX[4]], $tableTop, $y);
+    $pdf->line($margin, $tableTop + $headerH, $margin + $tableW, $tableTop + $headerH, 0.7, PDF_BORDER);
     $y += 14;
 
     // Total Given / Total Paid / Balance Due, each as its own dark box
@@ -290,27 +337,38 @@ function render_investor_statement_pdf(array $investor, array $transactions, str
     $paidRight = $colX[4] - 6;
     $balanceRight = $margin + $tableW - 6;
 
-    $pdf->rect($margin, $y, $tableW, 20);
-    $pdf->text($colX[0] + 4, $y + 14, 'Date', 10, true);
-    $pdf->text($colX[1] + 4, $y + 14, 'Description', 10, true);
-    $pdf->text($colX[2] + 4, $y + 14, 'Credited (Rs.)', 10, true);
-    $pdf->text($colX[3] + 4, $y + 14, 'Paid (Rs.)', 10, true);
-    $pdf->textRight($balanceRight, $y + 14, 'Balance', 10, true);
-    $y += 20;
+    $tableTop = $y;
+    $headerH = 22;
+    $pdf->rectFilled($margin, $y, $tableW, $headerH, PDF_HEADER_BG);
+    $pdf->text($colX[0] + 6, $y + 15, 'Date', 10, true);
+    $pdf->text($colX[1] + 6, $y + 15, 'Description', 10, true);
+    $pdf->textRight($creditRight, $y + 15, 'Credited (Rs.)', 10, true);
+    $pdf->textRight($paidRight, $y + 15, 'Paid (Rs.)', 10, true);
+    $pdf->textRight($balanceRight, $y + 15, 'Balance (Rs.)', 10, true);
+    $y += $headerH;
 
     $balance = 0;
+    $rowIdx = 0;
     foreach ($rows as $r) {
         if ($y > $pdf->pageHeight() - 260) { break; } // leave room for the summary boxes + signature + footer
         $balance += $r['credit'] - $r['paid'];
         $rowH = 18;
-        $pdf->rect($margin, $y, $tableW, $rowH);
-        $pdf->text($colX[0] + 4, $y + 13, date('d-M-y', strtotime($r['date'])), 9);
-        $pdf->text($colX[1] + 4, $y + 13, pdf_truncate($r['desc'], 30), 9);
+        if ($rowIdx % 2 === 1) {
+            $pdf->rectFilled($margin, $y, $tableW, $rowH, PDF_ROW_ALT);
+        }
+        $pdf->text($colX[0] + 6, $y + 13, date('d-M-y', strtotime($r['date'])), 9);
+        $pdf->text($colX[1] + 6, $y + 13, pdf_truncate($r['desc'], 30), 9);
         $pdf->textRight($creditRight, $y + 13, $r['credit'] > 0 ? number_format($r['credit'], 2) : '-', 9);
         $pdf->textRight($paidRight, $y + 13, $r['paid'] > 0 ? number_format($r['paid'], 2) : '-', 9);
         $pdf->textRight($balanceRight, $y + 13, number_format($balance, 2), 9);
         $y += $rowH;
+        $rowIdx++;
     }
+
+    // Outer border + vertical dividers + header underline.
+    $pdf->rect($margin, $tableTop, $tableW, $y - $tableTop, 0.7, PDF_BORDER);
+    pdf_col_dividers($pdf, [$colX[1], $colX[2], $colX[3], $colX[4]], $tableTop, $y);
+    $pdf->line($margin, $tableTop + $headerH, $margin + $tableW, $tableTop + $headerH, 0.7, PDF_BORDER);
     $y += 14;
 
     // Total Investment / Total Profit Credited / Total Paid / Balance,
