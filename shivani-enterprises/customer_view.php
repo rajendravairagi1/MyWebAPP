@@ -57,6 +57,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'uploa
     redirect('customer_view.php?id=' . $id);
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_document') {
+    verify_csrf();
+    $docId = (int)($_POST['document_id'] ?? 0);
+    $docStmt = db()->prepare('SELECT * FROM customer_documents WHERE id = ? AND customer_id = ?');
+    $docStmt->execute([$docId, $id]);
+    $doc = $docStmt->fetch();
+    if ($doc) {
+        $filePath = __DIR__ . '/' . $doc['file_path'];
+        if (is_file($filePath)) { @unlink($filePath); }
+        db()->prepare('DELETE FROM customer_documents WHERE id = ?')->execute([$docId]);
+        flash('success', 'Document deleted.');
+    }
+    redirect('customer_view.php?id=' . $id);
+}
+
 if (($_GET['statement'] ?? '') === 'pdf') {
     $sales = db()->prepare('SELECT * FROM sales WHERE customer_id = ? ORDER BY sale_date');
     $sales->execute([$id]);
@@ -169,7 +184,7 @@ require __DIR__ . '/includes/header.php';
       <td><?= e(date('d-M-Y', strtotime($s['sale_date']))) ?></td>
       <td><?= e($s['invoice_no']) ?></td>
       <td><?= money($s['total_amount']) ?></td>
-      <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a></td>
+      <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a> &middot; <a href="<?= e(base_url('sale_form.php?id=' . $s['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
     <?php if (!$pendingSales): ?><tr><td colspan="4" class="text-muted">No pending invoices.</td></tr><?php endif; ?>
@@ -186,7 +201,7 @@ require __DIR__ . '/includes/header.php';
       <td><?= e(date('d-M-Y', strtotime($s['sale_date']))) ?></td>
       <td><?= e($s['invoice_no']) ?></td>
       <td><?= money($s['total_amount']) ?></td>
-      <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a></td>
+      <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a> &middot; <a href="<?= e(base_url('sale_form.php?id=' . $s['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
     <?php if (!$historySales): ?><tr><td colspan="4" class="text-muted">No paid invoices yet.</td></tr><?php endif; ?>
@@ -196,23 +211,24 @@ require __DIR__ . '/includes/header.php';
 <div class="card">
   <h3 class="mt-0">Payments</h3>
   <table>
-    <tr><th>Date</th><th>Amount</th><th>Mode</th><th>Note</th></tr>
+    <tr><th>Date</th><th>Amount</th><th>Mode</th><th>Note</th><th></th></tr>
     <?php foreach ($payments as $p): ?>
     <tr>
       <td><?= e(date('d-M-Y', strtotime($p['payment_date']))) ?></td>
       <td><?= money($p['amount']) ?></td>
       <td><?= e($p['mode']) ?></td>
       <td><?= e($p['note']) ?></td>
+      <td><a href="<?= e(base_url('payment_form.php?id=' . $p['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
-    <?php if (!$payments): ?><tr><td colspan="4" class="text-muted">No payments yet.</td></tr><?php endif; ?>
+    <?php if (!$payments): ?><tr><td colspan="5" class="text-muted">No payments yet.</td></tr><?php endif; ?>
   </table>
 </div>
 
 <div class="card">
   <h3 class="mt-0">Follow-ups / Commitments</h3>
   <table>
-    <tr><th>Date</th><th>Time</th><th>Commitment</th><th>Status</th><th>Remarks</th></tr>
+    <tr><th>Date</th><th>Time</th><th>Commitment</th><th>Status</th><th>Remarks</th><th></th></tr>
     <?php foreach ($followups as $f): ?>
     <tr>
       <td><?= e(date('d-M-Y', strtotime($f['follow_up_date']))) ?></td>
@@ -222,9 +238,10 @@ require __DIR__ . '/includes/header.php';
         <span class="badge <?= $f['status'] === 'done' ? 'green' : ($f['status'] === 'cancelled' ? 'gray' : 'orange') ?>"><?= e($f['status']) ?></span>
       </td>
       <td><?= e($f['remarks']) ?></td>
+      <td><a href="<?= e(base_url('followup_form.php?id=' . $f['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
-    <?php if (!$followups): ?><tr><td colspan="5" class="text-muted">No follow-ups yet.</td></tr><?php endif; ?>
+    <?php if (!$followups): ?><tr><td colspan="6" class="text-muted">No follow-ups yet.</td></tr><?php endif; ?>
   </table>
 </div>
 
@@ -237,14 +254,22 @@ require __DIR__ . '/includes/header.php';
     <button class="btn small" type="submit">Upload Document</button>
   </form>
   <table>
-    <tr><th>File</th><th>Uploaded</th></tr>
+    <tr><th>File</th><th>Uploaded</th><th></th></tr>
     <?php foreach ($documents as $d): ?>
     <tr>
       <td><a href="<?= e(base_url($d['file_path'])) ?>" target="_blank"><?= e($d['original_name']) ?></a></td>
       <td><?= e(date('d-M-Y H:i', strtotime($d['created_at']))) ?></td>
+      <td>
+        <form method="post" onsubmit="return confirm('Delete this document?')">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="delete_document">
+          <input type="hidden" name="document_id" value="<?= (int)$d['id'] ?>">
+          <button class="btn small danger" type="submit">Delete</button>
+        </form>
+      </td>
     </tr>
     <?php endforeach; ?>
-    <?php if (!$documents): ?><tr><td colspan="2" class="text-muted">No documents uploaded.</td></tr><?php endif; ?>
+    <?php if (!$documents): ?><tr><td colspan="3" class="text-muted">No documents uploaded.</td></tr><?php endif; ?>
   </table>
 </div>
 <?php require __DIR__ . '/includes/footer.php'; ?>

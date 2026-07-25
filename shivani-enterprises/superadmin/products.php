@@ -30,6 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = db()->prepare('UPDATE products SET is_active = 1 - is_active WHERE id = ?');
         $stmt->execute([$id]);
         flash('success', 'Product status updated.');
+    } elseif ($action === 'delete') {
+        $id = (int)($_POST['id'] ?? 0);
+        // Safe to delete outright - sale_items.product_id is ON DELETE SET NULL,
+        // so past invoices keep their product_name text and just lose the link.
+        db()->prepare('DELETE FROM products WHERE id = ?')->execute([$id]);
+        flash('success', 'Product deleted.');
     }
     redirect('superadmin/products.php');
 }
@@ -81,6 +87,12 @@ require __DIR__ . '/../includes/header.php';
           <input type="hidden" name="action" value="toggle">
           <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
           <button class="btn small secondary" type="submit"><?= $p['is_active'] ? 'Mark Out of Stock' : 'Mark In Stock' ?></button>
+        </form>
+        <form method="post" onsubmit="return confirm('Delete product <?= e(addslashes($p['name'])) ?> permanently? Past invoices keep their product name, just unlinked.')">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="delete">
+          <input type="hidden" name="id" value="<?= (int)$p['id'] ?>">
+          <button class="btn small danger" type="submit">Delete</button>
         </form>
       </div>
     </div>

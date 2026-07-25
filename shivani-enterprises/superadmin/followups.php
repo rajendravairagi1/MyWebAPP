@@ -64,6 +64,7 @@ require __DIR__ . '/../includes/header.php';
           <button class="btn small" type="submit">Mark Done</button>
         </form>
         <?php endif; ?>
+        <a class="btn small secondary" href="<?= e(base_url('followup_form.php?id=' . $f['id'])) ?>">Edit</a>
       </td>
     </tr>
     <?php endforeach; ?>

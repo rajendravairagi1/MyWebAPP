@@ -1,9 +1,23 @@
 <?php
 require_once __DIR__ . '/includes/functions.php';
 $u = require_login();
-$pageTitle = 'New Sale / Invoice';
 
-$customerId = (int)($_GET['customer_id'] ?? $_POST['customer_id'] ?? 0);
+$saleId = (int)($_GET['id'] ?? 0);
+$sale = null;
+$existingItems = [];
+if ($saleId) {
+    $stmt = db()->prepare('SELECT * FROM sales WHERE id = ?');
+    $stmt->execute([$saleId]);
+    $sale = $stmt->fetch();
+    if (!$sale) { http_response_code(404); die('Sale not found.'); }
+    $customerId = (int)$sale['customer_id'];
+    $itemsStmt = db()->prepare('SELECT * FROM sale_items WHERE sale_id = ?');
+    $itemsStmt->execute([$saleId]);
+    $existingItems = $itemsStmt->fetchAll();
+} else {
+    $customerId = (int)($_GET['customer_id'] ?? $_POST['customer_id'] ?? 0);
+}
+
 $stmt = db()->prepare('SELECT * FROM customers WHERE id = ?');
 $stmt->execute([$customerId]);
 $customer = $stmt->fetch();
@@ -11,11 +25,19 @@ if (!$customer) { http_response_code(404); die('Customer not found.'); }
 if ($u['role'] !== 'super_admin' && (int)$customer['admin_id'] !== (int)$u['id']) {
     http_response_code(403); die('Access denied.');
 }
+$pageTitle = $sale ? 'Edit Invoice ' . $sale['invoice_no'] : 'New Sale / Invoice';
 
 $products = db()->query('SELECT * FROM products WHERE is_active = 1 ORDER BY name')->fetchAll();
 $errors = [];
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($sale && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
+    verify_csrf();
+    db()->prepare('DELETE FROM sales WHERE id = ?')->execute([$saleId]); // sale_items cascades; payments.sale_id -> NULL
+    flash('success', 'Invoice deleted.');
+    redirect('customer_view.php?id=' . $customerId);
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 'save') {
     verify_csrf();
     $saleDate = $_POST['sale_date'] ?? date('Y-m-d');
     $notes = trim($_POST['notes'] ?? '');
@@ -49,13 +71,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db = db();
         $db->beginTransaction();
         try {
-            $invoiceNo = next_invoice_no();
-            $stmt = $db->prepare('INSERT INTO sales (invoice_no, customer_id, admin_id, sale_date, total_amount, notes, created_by) VALUES (?,?,?,?,?,?,?)');
-            $stmt->execute([$invoiceNo, $customerId, $customer['admin_id'], $saleDate, $total, $notes ?: null, $u['id']]);
-            $saleId = (int)$db->lastInsertId();
-
             $prodNameStmt = $db->prepare('SELECT name FROM products WHERE id = ?');
             $itemStmt = $db->prepare('INSERT INTO sale_items (sale_id, product_id, product_name, qty, price, line_total) VALUES (?,?,?,?,?,?)');
+
+            if ($sale) {
+                $stmt = $db->prepare('UPDATE sales SET sale_date=?, total_amount=?, notes=? WHERE id=?');
+                $stmt->execute([$saleDate, $total, $notes ?: null, $saleId]);
+                $db->prepare('DELETE FROM sale_items WHERE sale_id = ?')->execute([$saleId]);
+                $newSaleId = $saleId;
+                $invoiceNo = $sale['invoice_no'];
+            } else {
+                $invoiceNo = next_invoice_no();
+                $stmt = $db->prepare('INSERT INTO sales (invoice_no, customer_id, admin_id, sale_date, total_amount, notes, created_by) VALUES (?,?,?,?,?,?,?)');
+                $stmt->execute([$invoiceNo, $customerId, $customer['admin_id'], $saleDate, $total, $notes ?: null, $u['id']]);
+                $newSaleId = (int)$db->lastInsertId();
+            }
+
             foreach ($items as $it) {
                 if ($it['product_id'] === null) {
                     $pname = $it['product_name'];
@@ -63,11 +94,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $prodNameStmt->execute([$it['product_id']]);
                     $pname = $prodNameStmt->fetchColumn() ?: 'Product';
                 }
-                $itemStmt->execute([$saleId, $it['product_id'], $pname, $it['qty'], $it['price'], $it['line_total']]);
+                $itemStmt->execute([$newSaleId, $it['product_id'], $pname, $it['qty'], $it['price'], $it['line_total']]);
             }
             $db->commit();
-            flash('success', 'Sale recorded. Invoice ' . $invoiceNo . ' generated.');
-            redirect('sale_view.php?id=' . $saleId);
+            flash('success', $sale ? 'Invoice ' . $invoiceNo . ' updated.' : 'Sale recorded. Invoice ' . $invoiceNo . ' generated.');
+            redirect('sale_view.php?id=' . $newSaleId);
         } catch (Throwable $e) {
             $db->rollBack();
             $errors[] = 'Could not save sale: ' . $e->getMessage();
@@ -77,16 +108,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 require __DIR__ . '/includes/header.php';
 ?>
-<p><a href="<?= e(base_url('customer_view.php?id=' . $customerId)) ?>">&larr; Back to <?= e($customer['name']) ?></a></p>
+<p><a href="<?= e(base_url($sale ? 'sale_view.php?id=' . $saleId : 'customer_view.php?id=' . $customerId)) ?>">&larr; Back</a></p>
 <div class="card">
-  <h3 class="mt-0">New Sale for <?= e($customer['name']) ?></h3>
+  <h3 class="mt-0"><?= $sale ? 'Edit Invoice ' . e($sale['invoice_no']) : 'New Sale' ?> for <?= e($customer['name']) ?></h3>
   <?php foreach ($errors as $err): ?><div class="alert error"><?= e($err) ?></div><?php endforeach; ?>
   <form method="post" id="saleForm">
     <?= csrf_field() ?>
+    <input type="hidden" name="action" value="save">
     <input type="hidden" name="customer_id" value="<?= (int)$customerId ?>">
     <div class="form-row">
-      <div class="form-group"><label>Sale Date</label><input type="date" name="sale_date" value="<?= date('Y-m-d') ?>" required></div>
-      <div class="form-group"><label>Notes</label><input name="notes" placeholder="Optional"></div>
+      <div class="form-group"><label>Sale Date</label><input type="date" name="sale_date" value="<?= e($sale['sale_date'] ?? date('Y-m-d')) ?>" required></div>
+      <div class="form-group"><label>Notes</label><input name="notes" placeholder="Optional" value="<?= e($sale['notes'] ?? '') ?>"></div>
     </div>
 
     <div class="line-items" id="lineItems">
@@ -97,28 +129,39 @@ require __DIR__ . '/includes/header.php';
         <div class="li-head">Amount</div>
         <div class="li-head"></div>
       </div>
+      <?php $rows = $existingItems ?: [null]; foreach ($rows as $row): ?>
       <div class="line-item-row line-row">
         <div class="li-field li-product">
           <select name="product_id[]" class="prod-select" required>
             <option value="">-- select product --</option>
             <?php foreach ($products as $p): ?>
-              <option value="<?= (int)$p['id'] ?>" data-price="<?= e($p['default_price']) ?>"><?= e($p['name']) ?> (<?= e($p['unit']) ?>)</option>
+              <option value="<?= (int)$p['id'] ?>" data-price="<?= e($p['default_price']) ?>" <?= ($row && (int)$row['product_id'] === (int)$p['id']) ? 'selected' : '' ?>><?= e($p['name']) ?> (<?= e($p['unit']) ?>)</option>
             <?php endforeach; ?>
-            <option value="0">&#10022; Other / Custom Product</option>
+            <option value="0" <?= ($row && $row['product_id'] === null) ? 'selected' : '' ?>>&#10022; Other / Custom Product</option>
           </select>
-          <input type="text" name="custom_name[]" class="custom-name" placeholder="Enter product name" style="display:none;margin-top:8px">
+          <input type="text" name="custom_name[]" class="custom-name" placeholder="Enter product name"
+            style="<?= ($row && $row['product_id'] === null) ? 'display:block' : 'display:none' ?>;margin-top:8px"
+            value="<?= ($row && $row['product_id'] === null) ? e($row['product_name']) : '' ?>">
         </div>
-        <div class="li-field"><input type="number" step="0.01" min="0.01" name="qty[]" class="qty" value="1" placeholder="Qty" required></div>
-        <div class="li-field"><input type="number" step="0.01" name="price[]" class="price" placeholder="Price (Rs.)" required></div>
-        <div class="li-field li-total-field"><span class="li-mobile-label">Amount: </span><span class="line-total">0.00</span></div>
+        <div class="li-field"><input type="number" step="0.01" min="0.01" name="qty[]" class="qty" value="<?= e($row['qty'] ?? '1') ?>" placeholder="Qty" required></div>
+        <div class="li-field"><input type="number" step="0.01" name="price[]" class="price" placeholder="Price (Rs.)" required value="<?= e($row['price'] ?? '') ?>"></div>
+        <div class="li-field li-total-field"><span class="li-mobile-label">Amount: </span><span class="line-total"><?= e(number_format((float)($row['line_total'] ?? 0), 2)) ?></span></div>
         <div class="li-field li-remove-field"><button type="button" class="li-remove remove-row" title="Remove line">&times;</button></div>
       </div>
+      <?php endforeach; ?>
     </div>
     <p><button type="button" class="btn small secondary" id="addRow">+ Add Product Line</button></p>
-    <p style="font-size:18px"><strong>Total: Rs. <span id="grandTotal">0.00</span></strong></p>
+    <p style="font-size:18px"><strong>Total: Rs. <span id="grandTotal"><?= e(number_format((float)($sale['total_amount'] ?? 0), 2)) ?></span></strong></p>
     <p class="text-muted">Note: price per line editable hai — bargaining ya alag-alag deal ke hisaab se adjust kar sakte ho. Agar koi product list me nahi hai to "Other / Custom Product" chun kar naam type kar do.</p>
-    <button class="btn" type="submit">Save Sale &amp; Generate Invoice</button>
+    <button class="btn" type="submit"><?= $sale ? 'Save Changes' : 'Save Sale & Generate Invoice' ?></button>
   </form>
+  <?php if ($sale): ?>
+    <form method="post" style="margin-top:10px" onsubmit="return doubleConfirm('Delete invoice <?= e(addslashes($sale['invoice_no'])) ?> permanently?', 'Are you absolutely sure? This is PERMANENT and cannot be undone.')">
+      <?= csrf_field() ?>
+      <input type="hidden" name="action" value="delete">
+      <button class="btn small danger" type="submit">Delete Invoice</button>
+    </form>
+  <?php endif; ?>
 </div>
 
 <script>
@@ -171,5 +214,6 @@ document.getElementById('addRow').addEventListener('click', () => {
   container.appendChild(clone);
   wireRow(clone);
 });
+recalc();
 </script>
 <?php require __DIR__ . '/includes/footer.php'; ?>

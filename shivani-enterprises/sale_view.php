@@ -91,6 +91,12 @@ require __DIR__ . '/includes/header.php';
       onclick="shareFileToWhatsApp('<?= e($pdfUrl) ?>', '<?= e($pdfFilename) ?>', '<?= e(addslashes($waText)) ?>', this)">
       Share PDF on WhatsApp
     </button>
+    <a class="btn small secondary" href="<?= e(base_url('sale_form.php?id=' . $id)) ?>">Edit Invoice</a>
+    <form method="post" action="<?= e(base_url('sale_form.php?id=' . $id)) ?>" onsubmit="return doubleConfirm('Delete invoice <?= e(addslashes($sale['invoice_no'])) ?> permanently?', 'Are you absolutely sure? This is PERMANENT and cannot be undone.')">
+      <?= csrf_field() ?>
+      <input type="hidden" name="action" value="delete">
+      <button class="btn small danger" type="submit">Delete Invoice</button>
+    </form>
   </div>
   <p class="text-muted" style="font-size:13px">Mobile par "Share PDF on WhatsApp" dabate hi PDF taiyar hoke share-menu khulega — wahan WhatsApp choose karke jisko chahe usko bhej sakte ho, alag se download nahi karna padega. (Desktop/purane browser par PDF download hokar WhatsApp chat khulega, wahan file manually attach karni hogi.)</p>
 </div>

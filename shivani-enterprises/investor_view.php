@@ -80,16 +80,17 @@ require __DIR__ . '/includes/header.php';
 <div class="card">
   <h3 class="mt-0">Ledger</h3>
   <table>
-    <tr><th>Date</th><th>Type</th><th>Amount</th><th>Note</th></tr>
+    <tr><th>Date</th><th>Type</th><th>Amount</th><th>Note</th><th></th></tr>
     <?php foreach ($txns as $t): ?>
     <tr>
       <td><?= e(date('d-M-Y', strtotime($t['txn_date']))) ?></td>
       <td><span class="badge <?= e($typeBadges[$t['type']] ?? 'gray') ?>"><?= e($typeLabels[$t['type']] ?? $t['type']) ?></span></td>
       <td><?= money($t['amount']) ?></td>
       <td><?= e($t['note']) ?></td>
+      <td><a href="<?= e(base_url('investor_txn_form.php?id=' . $t['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
-    <?php if (!$txns): ?><tr><td colspan="4" class="text-muted">No entries yet.</td></tr><?php endif; ?>
+    <?php if (!$txns): ?><tr><td colspan="5" class="text-muted">No entries yet.</td></tr><?php endif; ?>
   </table>
 </div>
 <?php require __DIR__ . '/includes/footer.php'; ?>

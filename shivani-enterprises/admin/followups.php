@@ -53,6 +53,7 @@ require __DIR__ . '/../includes/header.php';
         </form>
         <a class="btn small wa" target="_blank" href="<?= e(whatsapp_link($f['mobile'], 'Namaste ' . $f['customer_name'] . ', payment/order ke sambandh me follow-up. - ' . get_setting('company_name', APP_NAME))) ?>">WhatsApp</a>
         <?php endif; ?>
+        <a class="btn small secondary" href="<?= e(base_url('followup_form.php?id=' . $f['id'])) ?>">Edit</a>
       </td>
     </tr>
     <?php endforeach; ?>

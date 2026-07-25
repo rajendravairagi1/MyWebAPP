@@ -28,6 +28,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 flash('success', 'Admin created successfully.');
             }
         }
+    } elseif ($action === 'update') {
+        $id = (int)($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        if ($name === '') {
+            flash('error', 'Name is required.');
+        } else {
+            $stmt = db()->prepare('UPDATE users SET name=?, email=?, phone=? WHERE id = ? AND role = "admin"');
+            $stmt->execute([$name, $email ?: null, $phone ?: null, $id]);
+            flash('success', 'Admin updated.');
+        }
     } elseif ($action === 'toggle_status') {
         $id = (int)($_POST['id'] ?? 0);
         $stmt = db()->prepare('UPDATE users SET status = IF(status="active","disabled","active") WHERE id = ? AND role = "admin"');
@@ -68,16 +80,25 @@ require __DIR__ . '/../includes/header.php';
   </form>
 </div>
 
+<?php foreach ($admins as $a): $fid = 'edit-admin-' . (int)$a['id']; ?>
+<form id="<?= $fid ?>" method="post" class="hidden-form">
+  <?= csrf_field() ?>
+  <input type="hidden" name="action" value="update">
+  <input type="hidden" name="id" value="<?= (int)$a['id'] ?>">
+</form>
+<?php endforeach; ?>
 <div class="card">
   <h3 class="mt-0">All Admins</h3>
   <table>
-    <tr><th>Name</th><th>Username</th><th>Phone</th><th>Status</th><th>Reset Password</th><th></th></tr>
-    <?php foreach ($admins as $a): ?>
+    <tr><th>Name</th><th>Username</th><th>Email</th><th>Phone</th><th>Status</th><th></th><th>Reset Password</th><th></th></tr>
+    <?php foreach ($admins as $a): $fid = 'edit-admin-' . (int)$a['id']; ?>
     <tr>
-      <td><?= e($a['name']) ?></td>
+      <td><input form="<?= $fid ?>" name="name" value="<?= e($a['name']) ?>" style="min-width:120px"></td>
       <td><?= e($a['username']) ?></td>
-      <td><?= e($a['phone']) ?></td>
+      <td><input form="<?= $fid ?>" type="email" name="email" value="<?= e($a['email']) ?>" style="min-width:140px"></td>
+      <td><input form="<?= $fid ?>" name="phone" value="<?= e($a['phone']) ?>" style="min-width:110px"></td>
       <td><span class="badge <?= $a['status'] === 'active' ? 'green' : 'red' ?>"><?= e($a['status']) ?></span></td>
+      <td><button form="<?= $fid ?>" class="btn small" type="submit">Save</button></td>
       <td>
         <form method="post" style="display:flex;gap:6px">
           <?= csrf_field() ?>
