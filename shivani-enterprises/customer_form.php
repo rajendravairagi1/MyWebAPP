@@ -32,10 +32,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $adminId = $u['role'] === 'super_admin' ? (int)($_POST['admin_id'] ?? 0) : (int)$u['id'];
 
     if ($name === '') $errors[] = 'Name is required.';
-    if ($mobileRaw === '' || !preg_match('/^\d{10}$/', normalize_mobile($mobileRaw))) $errors[] = 'A valid 10-digit mobile number is required.';
+    if ($mobileRaw === '' || !is_valid_mobile($mobileRaw)) $errors[] = 'Mobile Number: enter a valid 10-digit Indian mobile number (e.g. 9876543210). Country code (+91) is fine too.';
+    if ($altMobile !== '' && !is_valid_mobile($altMobile)) $errors[] = 'Alternate Mobile: not a valid 10-digit mobile number.';
     if ($adminId <= 0) $errors[] = 'Please select the admin this customer belongs to.';
 
     $mobile = normalize_mobile($mobileRaw);
+    $altMobile = $altMobile !== '' ? normalize_mobile($altMobile) : '';
 
     if (!$errors) {
         $dupStmt = db()->prepare('SELECT id, name FROM customers WHERE mobile = ? AND id != ?');
@@ -86,8 +88,8 @@ require __DIR__ . '/includes/header.php';
       <div class="form-group"><label>Place / Area</label><input name="place" value="<?= e($customer['place'] ?? '') ?>"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Mobile Number *</label><input name="mobile" required value="<?= e($customer['mobile'] ?? '') ?>" placeholder="10 digit mobile"></div>
-      <div class="form-group"><label>Alternate Mobile</label><input name="alt_mobile" value="<?= e($customer['alt_mobile'] ?? '') ?>"></div>
+      <div class="form-group"><label>Mobile Number *</label><input name="mobile" required value="<?= e($customer['mobile'] ?? '') ?>" placeholder="10 digit mobile" inputmode="tel" autocomplete="tel" data-validate="mobile"></div>
+      <div class="form-group"><label>Alternate Mobile</label><input name="alt_mobile" value="<?= e($customer['alt_mobile'] ?? '') ?>" placeholder="Optional" inputmode="tel" autocomplete="tel" data-validate="mobile"></div>
       <?php if ($u['role'] === 'super_admin'): ?>
       <div class="form-group">
         <label>Allot to Admin *</label>

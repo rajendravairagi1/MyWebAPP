@@ -16,14 +16,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($name === '' || $username === '' || strlen($password) < 6) {
             flash('error', 'Name, username and a password of at least 6 characters are required.');
+        } elseif (!is_valid_username($username)) {
+            flash('error', 'Username: sirf letters, numbers, dot (.) ya underscore (_) allowed - koi space nahi (3-30 characters).');
+        } elseif ($phone !== '' && !is_valid_mobile($phone)) {
+            flash('error', 'Phone: enter a valid 10-digit mobile number (country code jaise +91 chalega).');
         } else {
             $stmt = db()->prepare('SELECT id FROM users WHERE username = ?');
             $stmt->execute([$username]);
             if ($stmt->fetch()) {
                 flash('error', 'Username already exists.');
             } else {
+                $phoneNorm = $phone !== '' ? normalize_mobile($phone) : '';
                 $stmt = db()->prepare('INSERT INTO users (role, name, username, email, phone, password_hash) VALUES ("admin",?,?,?,?,?)');
-                $stmt->execute([$name, $username, $email ?: null, $phone ?: null, password_hash($password, PASSWORD_DEFAULT)]);
+                $stmt->execute([$name, $username, $email ?: null, $phoneNorm ?: null, password_hash($password, PASSWORD_DEFAULT)]);
                 log_activity(current_user()['id'], 'admin_created', 'username=' . $username);
                 flash('success', 'Admin created successfully.');
             }
@@ -35,9 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $phone = trim($_POST['phone'] ?? '');
         if ($name === '') {
             flash('error', 'Name is required.');
+        } elseif ($phone !== '' && !is_valid_mobile($phone)) {
+            flash('error', 'Phone: enter a valid 10-digit mobile number (country code jaise +91 chalega).');
         } else {
+            $phoneNorm = $phone !== '' ? normalize_mobile($phone) : '';
             $stmt = db()->prepare('UPDATE users SET name=?, email=?, phone=? WHERE id = ? AND role = "admin"');
-            $stmt->execute([$name, $email ?: null, $phone ?: null, $id]);
+            $stmt->execute([$name, $email ?: null, $phoneNorm ?: null, $id]);
             flash('success', 'Admin updated.');
         }
     } elseif ($action === 'toggle_status') {
@@ -69,11 +77,11 @@ require __DIR__ . '/../includes/header.php';
     <input type="hidden" name="action" value="create">
     <div class="form-row">
       <div class="form-group"><label>Name</label><input name="name" required></div>
-      <div class="form-group"><label>Username</label><input name="username" required></div>
+      <div class="form-group"><label>Username</label><input name="username" required autocapitalize="off" autocorrect="off" spellcheck="false" data-validate="username"></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Email</label><input type="email" name="email"></div>
-      <div class="form-group"><label>Phone</label><input name="phone"></div>
+      <div class="form-group"><label>Phone</label><input name="phone" placeholder="Optional" inputmode="tel" autocomplete="tel" data-validate="mobile"></div>
       <div class="form-group"><label>Password</label><input type="password" name="password" required minlength="6"></div>
     </div>
     <button class="btn" type="submit">Create Admin</button>
@@ -89,35 +97,56 @@ require __DIR__ . '/../includes/header.php';
 <?php endforeach; ?>
 <div class="card">
   <h3 class="mt-0">All Admins</h3>
-  <table>
-    <tr><th>Name</th><th>Username</th><th>Email</th><th>Phone</th><th>Status</th><th></th><th>Reset Password</th><th></th></tr>
+  <div class="admin-rows">
     <?php foreach ($admins as $a): $fid = 'edit-admin-' . (int)$a['id']; ?>
-    <tr>
-      <td><input form="<?= $fid ?>" name="name" value="<?= e($a['name']) ?>" style="min-width:120px"></td>
-      <td><?= e($a['username']) ?></td>
-      <td><input form="<?= $fid ?>" type="email" name="email" value="<?= e($a['email']) ?>" style="min-width:140px"></td>
-      <td><input form="<?= $fid ?>" name="phone" value="<?= e($a['phone']) ?>" style="min-width:110px"></td>
-      <td><span class="badge <?= $a['status'] === 'active' ? 'green' : 'red' ?>"><?= e($a['status']) ?></span></td>
-      <td><button form="<?= $fid ?>" class="btn small" type="submit">Save</button></td>
-      <td>
-        <form method="post" style="display:flex;gap:6px">
+    <div class="admin-row">
+      <div class="admin-row-top">
+        <div class="admin-row-name">
+          <span class="admin-avatar"><?= e(mb_strtoupper(mb_substr($a['name'], 0, 1))) ?></span>
+          <div>
+            <div class="admin-row-fullname"><?= e($a['name']) ?></div>
+            <div class="admin-row-username">@<?= e($a['username']) ?></div>
+          </div>
+        </div>
+        <span class="badge <?= $a['status'] === 'active' ? 'green' : 'red' ?>"><?= e($a['status']) ?></span>
+      </div>
+
+      <div class="admin-row-fields">
+        <div class="li-field">
+          <label class="li-head">Name</label>
+          <input form="<?= $fid ?>" name="name" value="<?= e($a['name']) ?>">
+        </div>
+        <div class="li-field">
+          <label class="li-head">Email</label>
+          <input form="<?= $fid ?>" type="email" name="email" value="<?= e($a['email']) ?>" placeholder="Optional">
+        </div>
+        <div class="li-field">
+          <label class="li-head">Phone</label>
+          <input form="<?= $fid ?>" name="phone" value="<?= e($a['phone']) ?>" placeholder="Optional" inputmode="tel" autocomplete="tel" data-validate="mobile">
+        </div>
+      </div>
+
+      <div class="admin-row-actions">
+        <button form="<?= $fid ?>" class="btn small" type="submit">Save</button>
+
+        <form method="post" class="admin-reset-form">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="reset_password">
           <input type="hidden" name="id" value="<?= (int)$a['id'] ?>">
-          <input type="password" name="new_password" placeholder="New password" minlength="6" style="width:130px">
-          <button class="btn small" type="submit">Reset</button>
+          <input type="password" name="new_password" placeholder="New password" minlength="6">
+          <button class="btn small secondary" type="submit">Reset Password</button>
         </form>
-      </td>
-      <td>
+
         <form method="post" onsubmit="return confirm('Change status of this admin?')">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="toggle_status">
           <input type="hidden" name="id" value="<?= (int)$a['id'] ?>">
           <button class="btn small <?= $a['status'] === 'active' ? 'danger' : '' ?>" type="submit"><?= $a['status'] === 'active' ? 'Disable' : 'Enable' ?></button>
         </form>
-      </td>
-    </tr>
+      </div>
+    </div>
     <?php endforeach; ?>
-  </table>
+    <?php if (!$admins): ?><p class="text-muted">No admins yet.</p><?php endif; ?>
+  </div>
 </div>
 <?php require __DIR__ . '/../includes/footer.php'; ?>

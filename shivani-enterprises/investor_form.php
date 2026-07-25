@@ -19,10 +19,13 @@ $errors = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
     $name = trim($_POST['name'] ?? '');
-    $mobile = trim($_POST['mobile'] ?? '');
+    $mobileRaw = trim($_POST['mobile'] ?? '');
     $notes = trim($_POST['notes'] ?? '');
 
     if ($name === '') $errors[] = 'Name is required.';
+    if ($mobileRaw !== '' && !is_valid_mobile($mobileRaw)) $errors[] = 'Mobile: enter a valid 10-digit mobile number (e.g. 9876543210). Country code (+91) is fine too.';
+
+    $mobile = $mobileRaw !== '' ? normalize_mobile($mobileRaw) : '';
 
     if (!$errors) {
         if ($id) {
@@ -48,7 +51,7 @@ require __DIR__ . '/includes/header.php';
     <?= csrf_field() ?>
     <div class="form-row">
       <div class="form-group"><label>Name *</label><input name="name" required value="<?= e($investor['name'] ?? '') ?>"></div>
-      <div class="form-group"><label>Mobile</label><input name="mobile" value="<?= e($investor['mobile'] ?? '') ?>"></div>
+      <div class="form-group"><label>Mobile</label><input name="mobile" value="<?= e($investor['mobile'] ?? '') ?>" placeholder="Optional" inputmode="tel" autocomplete="tel" data-validate="mobile"></div>
     </div>
     <div class="form-group"><label>Notes</label><textarea name="notes" rows="2" placeholder="Optional"><?= e($investor['notes'] ?? '') ?></textarea></div>
     <button class="btn" type="submit"><?= $investor ? 'Save Changes' : 'Add Investor' ?></button>

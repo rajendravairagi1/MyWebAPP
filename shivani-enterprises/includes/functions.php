@@ -195,6 +195,24 @@ function normalize_mobile(string $mobile): string
 }
 
 /**
+ * True for a real 10-digit Indian mobile number (starts 6-9), however it
+ * was typed - with spaces, dashes, +91, a leading 0, or pasted straight
+ * from a contact card. normalize_mobile() already strips all of that down
+ * to the last 10 digits, so this just checks the result looks like a
+ * mobile number and not, say, a landline or a typo.
+ */
+function is_valid_mobile(string $raw): bool
+{
+    return (bool)preg_match('/^[6-9]\d{9}$/', normalize_mobile($raw));
+}
+
+/** Username: letters/numbers/dot/underscore only, no spaces, 3-30 chars. */
+function is_valid_username(string $username): bool
+{
+    return (bool)preg_match('/^[a-zA-Z0-9_.]{3,30}$/', $username);
+}
+
+/**
  * Stateless, tamper-proof "verify this document is genuine" signature.
  * No database column needed - the signature is an HMAC over the exact
  * values printed on the invoice/statement, keyed with APP_SECRET. verify.php

@@ -62,6 +62,81 @@
     }
   });
 
+  // ---- Live validation for mobile / username fields ----
+  // Mark a field with data-validate="mobile" or data-validate="username" and
+  // it gets: real-time feedback as the user types, and a submit-blocking
+  // check (so bad data never reaches the server in the first place).
+  // Mobile accepts any format - with spaces/dashes, a leading 0, +91, 91,
+  // pasted straight off a contact card - as long as the last 10 digits
+  // form a real Indian mobile number (starts 6-9). Most data entry here
+  // happens on a phone, so this has to tolerate copy-paste formatting,
+  // not just a clean 10-digit string.
+  function digitsOnly(v) { return v.replace(/\D+/g, ''); }
+  function isValidMobileLoose(v) {
+    var digits = digitsOnly(v);
+    if (digits.length < 10) return false;
+    return /^[6-9]\d{9}$/.test(digits.slice(-10));
+  }
+  function isValidUsernameLoose(v) {
+    return /^[a-zA-Z0-9_.]{3,30}$/.test(v);
+  }
+  var VALIDATORS = {
+    mobile: { test: isValidMobileLoose, msg: 'Sahi 10-digit mobile number dalein (jaise 9876543210) - country code (+91) ke saath bhi chalega.' },
+    username: { test: isValidUsernameLoose, msg: 'Username me space allowed nahi - sirf letters, numbers, dot (.) ya underscore (_), 3-30 characters.' },
+  };
+  function fieldMessageEl(input) {
+    var el = input.nextElementSibling;
+    if (el && el.classList && el.classList.contains('field-error')) return el;
+    el = document.createElement('div');
+    el.className = 'field-error';
+    input.insertAdjacentElement('afterend', el);
+    return el;
+  }
+  function validateField(input) {
+    var rule = VALIDATORS[input.dataset.validate];
+    if (!rule) return true;
+    var val = input.value.trim();
+    var msgEl = fieldMessageEl(input);
+    if (val === '') {
+      input.classList.remove('invalid');
+      msgEl.textContent = '';
+      return !input.required;
+    }
+    if (rule.test(val)) {
+      input.classList.remove('invalid');
+      msgEl.textContent = '';
+      return true;
+    }
+    input.classList.add('invalid');
+    msgEl.textContent = rule.msg;
+    return false;
+  }
+  document.querySelectorAll('[data-validate]').forEach(function (input) {
+    input.addEventListener('input', function () { validateField(input); });
+    input.addEventListener('blur', function () { validateField(input); });
+  });
+  // Capture phase so this runs before the double-submit-guard below and
+  // before any onsubmit="return confirm(...)" on the form itself - a bad
+  // field blocks submission before the user even sees a confirm dialog.
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    var invalid = null;
+    form.querySelectorAll('[data-validate]').forEach(function (input) {
+      if (!validateField(input) && !invalid) invalid = input;
+    });
+    if (form.id) {
+      document.querySelectorAll('[data-validate][form="' + form.id + '"]').forEach(function (input) {
+        if (!validateField(input) && !invalid) invalid = input;
+      });
+    }
+    if (invalid) {
+      e.preventDefault();
+      invalid.focus();
+      invalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, true);
+
   // ---- Two-step confirmation for permanent/destructive actions (delete) ----
   window.doubleConfirm = function (msg1, msg2) {
     if (!confirm(msg1)) return false;
