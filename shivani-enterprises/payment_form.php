@@ -41,6 +41,13 @@ $sales = array_filter($salesStmt->fetchAll(), function ($s) use ($payment) {
     $isCurrentlyTagged = $payment && (int)$payment['sale_id'] === (int)$s['id'];
     return $stillPending || $isCurrentlyTagged;
 });
+// Remaining balance per invoice, shown in the dropdown so it's clear at a
+// glance how much is still due - prevents accidentally tagging a payment
+// to the wrong invoice when two have similar totals.
+foreach ($sales as &$s) {
+    $s['remaining'] = max(0, (float)$s['total_amount'] - (float)$s['paid_for_sale']);
+}
+unset($s);
 
 if ($payment && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     verify_csrf();
@@ -100,12 +107,13 @@ require __DIR__ . '/includes/header.php';
     <div class="form-row">
       <div class="form-group">
         <label>Against Invoice (optional)</label>
-        <select name="sale_id">
+        <select name="sale_id" id="saleIdSelect" data-remaining="<?= e(json_encode(array_column($sales, 'remaining', 'id'))) ?>">
           <option value="">-- general payment --</option>
           <?php foreach ($sales as $s): ?>
-            <option value="<?= (int)$s['id'] ?>" <?= (int)($payment['sale_id'] ?? 0) === (int)$s['id'] ? 'selected' : '' ?>><?= e($s['invoice_no']) ?> (<?= money($s['total_amount']) ?>, <?= e(date('d-M-Y', strtotime($s['sale_date']))) ?>)</option>
+            <option value="<?= (int)$s['id'] ?>" <?= (int)($payment['sale_id'] ?? 0) === (int)$s['id'] ? 'selected' : '' ?>><?= e($s['invoice_no']) ?> (Due <?= money($s['remaining']) ?> of <?= money($s['total_amount']) ?>, <?= e(date('d-M-Y', strtotime($s['sale_date']))) ?>)</option>
           <?php endforeach; ?>
         </select>
+        <p class="text-muted" id="remainingHint" style="font-size:13px;margin:6px 0 0"></p>
       </div>
       <div class="form-group"><label>Note</label><input name="note" placeholder="Optional" value="<?= e($payment['note'] ?? '') ?>"></div>
     </div>
@@ -119,4 +127,35 @@ require __DIR__ . '/includes/header.php';
     </form>
   <?php endif; ?>
 </div>
+<script>
+(function () {
+  var sel = document.getElementById('saleIdSelect');
+  var amountInput = document.querySelector('input[name="amount"]');
+  var hint = document.getElementById('remainingHint');
+  if (!sel || !amountInput || !hint) return;
+  var remaining = {};
+  try { remaining = JSON.parse(sel.dataset.remaining || '{}'); } catch (e) {}
+
+  function fmt(n) {
+    return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function update() {
+    var due = remaining[sel.value];
+    if (due === undefined) { hint.textContent = ''; return; }
+    var paid = parseFloat(amountInput.value) || 0;
+    var left = Math.max(0, due - paid);
+    if (paid <= 0) {
+      hint.textContent = 'Is invoice par abhi bacha hua balance: Rs. ' + fmt(due);
+    } else if (left <= 0.01) {
+      hint.textContent = 'Ye payment invoice pura clear kar dega.';
+    } else {
+      hint.textContent = 'Is payment ke baad bhi Rs. ' + fmt(left) + ' bacha rahega (invoice Pending hi rahegi).';
+    }
+  }
+  sel.addEventListener('change', update);
+  amountInput.addEventListener('input', update);
+  update();
+})();
+</script>
 <?php require __DIR__ . '/includes/footer.php'; ?>
