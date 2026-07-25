@@ -66,9 +66,25 @@ if (($_GET['statement'] ?? '') === 'pdf') {
     exit;
 }
 
-$sales = db()->prepare('SELECT * FROM sales WHERE customer_id = ? ORDER BY sale_date DESC, id DESC');
+// Invoice-wise "paid" (only payments explicitly tagged against that
+// invoice count - a general/untagged payment can't be attributed to one
+// specific invoice) - once an invoice's tagged payments cover its total,
+// it moves from Pending into History.
+$sales = db()->prepare(
+    "SELECT s.*, COALESCE((SELECT SUM(p.amount) FROM payments p WHERE p.sale_id = s.id), 0) AS paid_for_sale
+     FROM sales s WHERE s.customer_id = ? ORDER BY s.sale_date DESC, s.id DESC"
+);
 $sales->execute([$id]);
 $sales = $sales->fetchAll();
+$pendingSales = [];
+$historySales = [];
+foreach ($sales as $s) {
+    if ((float)$s['paid_for_sale'] >= (float)$s['total_amount'] - 0.01) {
+        $historySales[] = $s;
+    } else {
+        $pendingSales[] = $s;
+    }
+}
 
 $payments = db()->prepare('SELECT * FROM payments WHERE customer_id = ? ORDER BY payment_date DESC, id DESC');
 $payments->execute([$id]);
@@ -125,7 +141,7 @@ require __DIR__ . '/includes/header.php';
         <button class="btn small secondary" type="submit"><?= $customer['status'] === 'active' ? 'Deactivate' : 'Activate' ?></button>
       </form>
       <?php if (!$sales && !$payments): ?>
-        <form method="post" onsubmit="return confirm('Delete this customer permanently? This cannot be undone.')">
+        <form method="post" onsubmit="return doubleConfirm('Delete this customer permanently?', 'Are you absolutely sure? This is PERMANENT and cannot be undone.')">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="delete">
           <button class="btn small danger" type="submit">Delete Customer</button>
@@ -145,10 +161,10 @@ require __DIR__ . '/includes/header.php';
 </div>
 
 <div class="card">
-  <h3 class="mt-0">Sales / Invoices</h3>
+  <h3 class="mt-0">Pending Invoices</h3>
   <table>
     <tr><th>Date</th><th>Invoice No</th><th>Amount</th><th></th></tr>
-    <?php foreach ($sales as $s): ?>
+    <?php foreach ($pendingSales as $s): ?>
     <tr>
       <td><?= e(date('d-M-Y', strtotime($s['sale_date']))) ?></td>
       <td><?= e($s['invoice_no']) ?></td>
@@ -156,7 +172,24 @@ require __DIR__ . '/includes/header.php';
       <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a></td>
     </tr>
     <?php endforeach; ?>
-    <?php if (!$sales): ?><tr><td colspan="4" class="text-muted">No sales yet.</td></tr><?php endif; ?>
+    <?php if (!$pendingSales): ?><tr><td colspan="4" class="text-muted">No pending invoices.</td></tr><?php endif; ?>
+  </table>
+</div>
+
+<div class="card">
+  <h3 class="mt-0">History <span class="badge gray">Paid Invoices</span></h3>
+  <p class="text-muted" style="font-size:13px">Jo invoice pura paid ho chuka hai (payment "against invoice" tagged hokar) wo yaha aa jaata hai — records hamesha ke liye surakshit rehte hai.</p>
+  <table>
+    <tr><th>Date</th><th>Invoice No</th><th>Amount</th><th></th></tr>
+    <?php foreach ($historySales as $s): ?>
+    <tr>
+      <td><?= e(date('d-M-Y', strtotime($s['sale_date']))) ?></td>
+      <td><?= e($s['invoice_no']) ?></td>
+      <td><?= money($s['total_amount']) ?></td>
+      <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a></td>
+    </tr>
+    <?php endforeach; ?>
+    <?php if (!$historySales): ?><tr><td colspan="4" class="text-muted">No paid invoices yet.</td></tr><?php endif; ?>
   </table>
 </div>
 

@@ -38,6 +38,7 @@ $balance = $totalInvested + $totalProfit - $totalPaid;
 
 $typeLabels = ['investment' => 'Investment', 'profit' => 'Profit Credited', 'payment' => 'Payment Paid'];
 $typeBadges = ['investment' => 'green', 'profit' => 'orange', 'payment' => 'red'];
+$isSettled = $totalInvested > 0 && abs($balance) < 0.01;
 
 $waMsg = "Namaste " . $investor['name'] . ", aapka " . get_setting('company_name', APP_NAME) . " ke saath investment statement - Total Investment Rs. " . number_format($totalInvested, 2) . ", Total Profit Credited Rs. " . number_format($totalProfit, 2) . ", Total Paid Rs. " . number_format($totalPaid, 2) . ", Balance Rs. " . number_format($balance, 2) . ". Dhanyawad.";
 
@@ -46,7 +47,7 @@ require __DIR__ . '/includes/header.php';
 <p><a href="<?= e(base_url('investors.php')) ?>">&larr; Back to investors</a></p>
 
 <div class="card">
-  <h2 class="mt-0"><?= e($investor['name']) ?></h2>
+  <h2 class="mt-0"><?= e($investor['name']) ?> <?php if ($isSettled): ?><span class="badge gray">Settled - in History</span><?php endif; ?></h2>
   <p class="text-muted">
     <?php if ($investor['mobile']): ?>Mobile: <?= e($investor['mobile']) ?><?php endif; ?>
   </p>
@@ -61,7 +62,7 @@ require __DIR__ . '/includes/header.php';
       onclick="shareFileToWhatsApp('<?= e(base_url('investor_view.php?id=' . $id . '&statement=pdf')) ?>', 'investor-statement-<?= e(preg_replace('/\s+/', '-', $investor['name'])) ?>.pdf', '<?= e(addslashes($waMsg)) ?>', this)">
       Share Statement on WhatsApp
     </button>
-    <form method="post" onsubmit="return confirm('Delete this investor and ALL their investment/profit/payment entries? This cannot be undone.')">
+    <form method="post" onsubmit="return doubleConfirm('Delete this investor and ALL their investment/profit/payment entries?', 'Are you absolutely sure? This is PERMANENT and cannot be undone.')">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="delete">
       <button class="btn small danger" type="submit">Delete Investor</button>

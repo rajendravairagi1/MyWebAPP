@@ -62,6 +62,12 @@
     }
   });
 
+  // ---- Two-step confirmation for permanent/destructive actions (delete) ----
+  window.doubleConfirm = function (msg1, msg2) {
+    if (!confirm(msg1)) return false;
+    return confirm(msg2);
+  };
+
   // ---- Share a generated PDF straight to WhatsApp (or any app) ----
   // On phones (Chrome/Android, Safari/iOS over HTTPS) this opens the native
   // share sheet with the PDF already attached - the admin just taps
