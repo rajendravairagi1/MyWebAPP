@@ -53,24 +53,6 @@ function pdf_footer(SimplePDF $pdf, float $margin, string $label): void
     $pdf->text($margin, $y + 16, $label . ' - ' . get_setting('company_name', APP_NAME), 8, false, '#6b7280');
 }
 
-const PDF_NAVY = '#1a2847';
-const PDF_GOLD = '#c99b3c';
-
-/**
- * Draws a small navy/gold "SE" monogram badge at the given top-left corner
- * (SimplePDF has no circle/image primitives, so this is a flat rect badge
- * rather than the app's ring logo). Returns the x position where the
- * company name text should start (badge width + gap).
- */
-function pdf_logo_badge(SimplePDF $pdf, float $x, float $y): float
-{
-    $box = 30;
-    $pdf->rectFilled($x, $y, $box, $box, PDF_NAVY);
-    $pdf->text($x + 5, $y + 21, 'S', 15, true, PDF_WHITE);
-    $pdf->text($x + 16, $y + 21, 'E', 15, true, PDF_GOLD);
-    return $x + $box + 10;
-}
-
 /**
  * Renders a single sale/invoice as a PDF and streams it to the browser.
  */
@@ -81,9 +63,8 @@ function render_invoice_pdf(array $sale, array $items, array $customer, string $
     $y = $margin;
     $tableW = $pdf->pageWidth() - 2 * $margin;
 
-    $logoTextX = pdf_logo_badge($pdf, $margin, $y);
-    $pdf->text($logoTextX, $y + 21, get_setting('company_name', APP_NAME), 18, true);
-    $y += 34;
+    $pdf->text($margin, $y, get_setting('company_name', APP_NAME), 18, true);
+    $y += 18;
     $companyLine = trim(get_setting('company_address', '') . '  ' . get_setting('company_phone', ''));
     if ($companyLine !== '') {
         $pdf->text($margin, $y, $companyLine, 10);
@@ -182,9 +163,8 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
 
     pdf_verify_qr($pdf, $margin, statement_verify_url($customer), $margin - 4);
 
-    $logoTextX = pdf_logo_badge($pdf, $margin, $y);
-    $pdf->text($logoTextX, $y + 21, get_setting('company_name', APP_NAME), 18, true);
-    $y += 42;
+    $pdf->text($margin, $y, get_setting('company_name', APP_NAME), 18, true);
+    $y += 26;
     $pdf->text($margin, $y, 'Customer Statement', 14, true);
     $y += 20;
     $pdf->text($margin, $y, $customer['name'] . ($customer['shop_name'] ? ' (' . $customer['shop_name'] . ')' : '') . ' - ' . $customer['mobile'], 11);
