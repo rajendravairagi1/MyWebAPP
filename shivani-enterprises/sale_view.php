@@ -20,6 +20,15 @@ $itemsStmt = db()->prepare('SELECT * FROM sale_items WHERE sale_id = ?');
 $itemsStmt->execute([$id]);
 $items = $itemsStmt->fetchAll();
 
+// Payments explicitly tagged against this invoice - shown so it's clear
+// exactly which payments make up the "paid" total that moves an invoice
+// into History (customer_view.php / customer_invoice_history.php use the
+// same sale_id-tagged sum).
+$payStmt = db()->prepare('SELECT * FROM payments WHERE sale_id = ? ORDER BY payment_date, id');
+$payStmt->execute([$id]);
+$taggedPayments = $payStmt->fetchAll();
+$taggedTotal = array_sum(array_column($taggedPayments, 'amount'));
+
 if (($_GET['pdf'] ?? '') === '1') {
     render_invoice_pdf($sale, $items, $customer);
     exit;
@@ -84,6 +93,28 @@ require __DIR__ . '/includes/header.php';
   </div>
 
   <?php if ($sale['notes']): ?><p class="text-muted">Note: <?= e($sale['notes']) ?></p><?php endif; ?>
+</div>
+
+<div class="card">
+  <h3 class="mt-0">Payments Tagged to This Invoice</h3>
+  <p class="text-muted" style="font-size:13px">Yehi payments jodkar tay hota hai ki ye invoice Pending hai ya History (pura paid) me ja chuki hai. Agar koi payment yaha galti se dikh raha hai, use "Edit" karke uski invoice badal sakte ho ya "-- general payment --" kar sakte ho.</p>
+  <table>
+    <tr><th>Date</th><th>Amount</th><th>Mode</th><th>Note</th><th></th></tr>
+    <?php foreach ($taggedPayments as $p): ?>
+    <tr>
+      <td><?= e(date('d-M-Y', strtotime($p['payment_date']))) ?></td>
+      <td><?= money($p['amount']) ?></td>
+      <td><?= e($p['mode']) ?></td>
+      <td><?= e($p['note']) ?></td>
+      <td><a href="<?= e(base_url('payment_form.php?id=' . $p['id'])) ?>">Edit</a></td>
+    </tr>
+    <?php endforeach; ?>
+    <?php if (!$taggedPayments): ?><tr><td colspan="5" class="text-muted">Is invoice par abhi koi payment tag nahi hai.</td></tr><?php endif; ?>
+  </table>
+  <p style="margin-top:10px"><strong>Total Tagged Paid: <?= money($taggedTotal) ?></strong> of <?= money($sale['total_amount']) ?>
+    <?php $due = max(0, (float)$sale['total_amount'] - (float)$taggedTotal); ?>
+    <?php if ($due > 0.01): ?><span class="badge orange">Due <?= money($due) ?></span><?php else: ?><span class="badge green">Fully Paid</span><?php endif; ?>
+  </p>
 
   <div class="invoice-actions">
     <a class="btn small" href="<?= e($pdfUrl) ?>" target="_blank">Download PDF</a>
