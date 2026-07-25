@@ -1,4 +1,14 @@
 (function () {
+  // ---- PWA: register service worker so the browser offers "Add to Home
+  // Screen" / "Install app" (Android Chrome needs one registered for this;
+  // iOS Safari doesn't need it but it's harmless there). ----
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      var swUrl = document.body.getAttribute('data-sw-url');
+      if (swUrl) navigator.serviceWorker.register(swUrl).catch(function () {});
+    });
+  }
+
   // ---- Mobile sidebar (hamburger) ----
   var sidebar = document.querySelector('.sidebar');
   var overlay = document.querySelector('.sidebar-overlay');

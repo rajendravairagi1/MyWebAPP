@@ -27,6 +27,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 <title>Login · <?= e(APP_NAME) ?></title>
 <link rel="stylesheet" href="<?= e(base_url('assets/css/style.css')) ?>">
+<link rel="manifest" href="<?= e(base_url('manifest.json')) ?>">
+<link rel="apple-touch-icon" href="<?= e(base_url('assets/icons/apple-touch-icon.png')) ?>">
+<link rel="icon" href="<?= e(base_url('assets/icons/icon-192.png')) ?>">
+<meta name="theme-color" content="#0f766e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="<?= e(APP_NAME) ?>">
 <script>
   (function () {
     try {
@@ -36,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   })();
 </script>
 </head>
-<body>
+<body data-sw-url="<?= e(base_url('sw.js')) ?>">
 <div class="login-wrap">
   <div class="login-box">
     <h1><?= e(APP_NAME) ?></h1>

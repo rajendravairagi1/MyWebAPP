@@ -21,6 +21,14 @@ function nav_active(string $file): string
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 <title><?= e($pageTitle) ?> · <?= e(APP_NAME) ?></title>
 <link rel="stylesheet" href="<?= e(base_url('assets/css/style.css')) ?>">
+<link rel="manifest" href="<?= e(base_url('manifest.json')) ?>">
+<link rel="apple-touch-icon" href="<?= e(base_url('assets/icons/apple-touch-icon.png')) ?>">
+<link rel="icon" href="<?= e(base_url('assets/icons/icon-192.png')) ?>">
+<meta name="theme-color" content="#0f766e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="<?= e(APP_NAME) ?>">
 <script>
   // Applied before CSS paints so the page never flashes the wrong theme.
   (function () {
@@ -31,7 +39,7 @@ function nav_active(string $file): string
   })();
 </script>
 </head>
-<body>
+<body data-sw-url="<?= e(base_url('sw.js')) ?>">
 <div class="sidebar-overlay"></div>
 <div class="app-shell">
   <aside class="sidebar">
