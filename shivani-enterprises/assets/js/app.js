@@ -68,6 +68,28 @@
     return confirm(msg2);
   };
 
+  // ---- Stop double-click / slow-network double submit on every form ----
+  // (payments, sales, investor entries, etc. - anywhere a Save/Record
+  // button exists). Runs after any onsubmit="return confirm(...)" handler,
+  // so a cancelled confirm (e.defaultPrevented) doesn't lock the form.
+  document.addEventListener('submit', function (e) {
+    if (e.defaultPrevented) return;
+    var form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    if (form.dataset.submitted === '1') { e.preventDefault(); return; }
+    form.dataset.submitted = '1';
+    setTimeout(function () {
+      form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function (btn) {
+        btn.disabled = true;
+      });
+      if (form.id) {
+        document.querySelectorAll('button[form="' + form.id + '"], input[form="' + form.id + '"]').forEach(function (btn) {
+          btn.disabled = true;
+        });
+      }
+    }, 0);
+  });
+
   // ---- Share a generated PDF straight to WhatsApp (or any app) ----
   // On phones (Chrome/Android, Safari/iOS over HTTPS) this opens the native
   // share sheet with the PDF already attached - the admin just taps
