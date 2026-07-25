@@ -181,16 +181,18 @@ require __DIR__ . '/includes/header.php';
     <a class="btn small secondary" href="<?= e(base_url('customer_invoice_history.php?id=' . $id)) ?>">History (Paid Invoices)<?= $historySales ? ' (' . count($historySales) . ')' : '' ?></a>
   </div>
   <table>
-    <tr><th>Date</th><th>Invoice No</th><th>Amount</th><th></th></tr>
-    <?php foreach ($pendingSales as $s): ?>
+    <tr><th>Date</th><th>Invoice No</th><th>Amount</th><th>Paid</th><th>Due</th><th></th></tr>
+    <?php foreach ($pendingSales as $s): $paidS = (float)$s['paid_for_sale']; $dueS = max(0, (float)$s['total_amount'] - $paidS); ?>
     <tr>
       <td><?= e(date('d-M-Y', strtotime($s['sale_date']))) ?></td>
       <td><?= e($s['invoice_no']) ?></td>
       <td><?= money($s['total_amount']) ?></td>
+      <td><?= $paidS > 0 ? money($paidS) : '-' ?></td>
+      <td style="color:#dc2626;font-weight:600"><?= money($dueS) ?></td>
       <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a> &middot; <a href="<?= e(base_url('sale_form.php?id=' . $s['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
-    <?php if (!$pendingSales): ?><tr><td colspan="4" class="text-muted">No pending invoices.</td></tr><?php endif; ?>
+    <?php if (!$pendingSales): ?><tr><td colspan="6" class="text-muted">No pending invoices.</td></tr><?php endif; ?>
   </table>
 </div>
 
