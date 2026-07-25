@@ -23,9 +23,24 @@ if ($u['role'] !== 'super_admin' && (int)$customer['admin_id'] !== (int)$u['id']
 }
 $pageTitle = $payment ? 'Edit Payment' : 'Record Payment';
 
-$sales = db()->prepare('SELECT id, invoice_no, total_amount, sale_date FROM sales WHERE customer_id = ? ORDER BY sale_date DESC');
-$sales->execute([$customerId]);
-$sales = $sales->fetchAll();
+// Only offer invoices that still need payment - a fully paid invoice has
+// moved to History and shouldn't need (or accept) more payment against it.
+// When editing an existing payment, its own amount is excluded from the
+// "already paid" check (otherwise the very payment that completed an
+// invoice would make that invoice disappear from its own edit form), and
+// its currently-tagged invoice always stays in the list even if other
+// payments have since fully covered it.
+$salesStmt = db()->prepare(
+    "SELECT s.id, s.invoice_no, s.total_amount, s.sale_date,
+      COALESCE((SELECT SUM(p.amount) FROM payments p WHERE p.sale_id = s.id AND p.id != ?), 0) AS paid_for_sale
+     FROM sales s WHERE s.customer_id = ? ORDER BY s.sale_date DESC"
+);
+$salesStmt->execute([$paymentId ?: 0, $customerId]);
+$sales = array_filter($salesStmt->fetchAll(), function ($s) use ($payment) {
+    $stillPending = (float)$s['paid_for_sale'] < (float)$s['total_amount'] - 0.01;
+    $isCurrentlyTagged = $payment && (int)$payment['sale_id'] === (int)$s['id'];
+    return $stillPending || $isCurrentlyTagged;
+});
 
 if ($payment && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     verify_csrf();

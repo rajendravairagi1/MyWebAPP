@@ -176,7 +176,10 @@ require __DIR__ . '/includes/header.php';
 </div>
 
 <div class="card">
-  <h3 class="mt-0">Pending Invoices</h3>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <h3 class="mt-0">Pending Invoices</h3>
+    <a class="btn small secondary" href="<?= e(base_url('customer_invoice_history.php?id=' . $id)) ?>">History (Paid Invoices)<?= $historySales ? ' (' . count($historySales) . ')' : '' ?></a>
+  </div>
   <table>
     <tr><th>Date</th><th>Invoice No</th><th>Amount</th><th></th></tr>
     <?php foreach ($pendingSales as $s): ?>
@@ -188,23 +191,6 @@ require __DIR__ . '/includes/header.php';
     </tr>
     <?php endforeach; ?>
     <?php if (!$pendingSales): ?><tr><td colspan="4" class="text-muted">No pending invoices.</td></tr><?php endif; ?>
-  </table>
-</div>
-
-<div class="card">
-  <h3 class="mt-0">History <span class="badge gray">Paid Invoices</span></h3>
-  <p class="text-muted" style="font-size:13px">Jo invoice pura paid ho chuka hai (payment "against invoice" tagged hokar) wo yaha aa jaata hai — records hamesha ke liye surakshit rehte hai.</p>
-  <table>
-    <tr><th>Date</th><th>Invoice No</th><th>Amount</th><th></th></tr>
-    <?php foreach ($historySales as $s): ?>
-    <tr>
-      <td><?= e(date('d-M-Y', strtotime($s['sale_date']))) ?></td>
-      <td><?= e($s['invoice_no']) ?></td>
-      <td><?= money($s['total_amount']) ?></td>
-      <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a> &middot; <a href="<?= e(base_url('sale_form.php?id=' . $s['id'])) ?>">Edit</a></td>
-    </tr>
-    <?php endforeach; ?>
-    <?php if (!$historySales): ?><tr><td colspan="4" class="text-muted">No paid invoices yet.</td></tr><?php endif; ?>
   </table>
 </div>
 
