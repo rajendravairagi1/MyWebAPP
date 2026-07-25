@@ -50,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <img src="<?= e(base_url('assets/icons/logo-badge.png')) ?>" alt="" class="login-logo">
     <h1><?= e(APP_NAME) ?></h1>
     <p class="sub">Sales Ledger &amp; CRM Login</p>
+    <button type="button" id="installAppBtn" class="btn small secondary" style="display:none;margin-bottom:14px;width:100%">&#128241; Install App (Home Screen Shortcut)</button>
     <div class="login-theme-row">
       <?php foreach (theme_palette() as $themeKey => $g): ?>
         <button type="button" class="theme-swatch" data-theme="<?= e($themeKey) ?>" style="background:linear-gradient(135deg,<?= e($g[0]) ?>,<?= e($g[1]) ?>);width:30px;height:30px" title="<?= e($g[2]) ?>"></button>

@@ -89,6 +89,7 @@ function nav_active(string $file): string
       </form>
       <?php endif; ?>
       <div class="topbar-right">
+        <button type="button" id="installAppBtn" class="btn small install-app-btn" style="display:none">&#128241; Install App</button>
         <details class="theme-switcher">
           <summary title="Change theme"><span class="theme-dot"></span></summary>
           <div class="theme-panel">

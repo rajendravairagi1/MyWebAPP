@@ -9,6 +9,50 @@
     });
   }
 
+  // ---- PWA "Install App" button: one tap to add a home-screen icon,
+  // instead of digging through the browser menu every time. ----
+  (function () {
+    var installBtn = document.getElementById('installAppBtn');
+    if (!installBtn) return;
+
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone) return; // already installed and running as an app - nothing to do
+
+    var isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+    var deferredPrompt = null;
+
+    // Android Chrome/Edge fire this when the app is installable - we grab
+    // it and hold it until the button is tapped, instead of letting the
+    // browser show its own mini-infobar.
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = '';
+    });
+
+    // iOS Safari never fires beforeinstallprompt - there is no
+    // programmatic install API there, so show the button anyway and walk
+    // the user through the manual Share > Add to Home Screen steps.
+    if (isIOS) installBtn.style.display = '';
+
+    installBtn.addEventListener('click', async function () {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        var choice = await deferredPrompt.userChoice;
+        deferredPrompt = null;
+        if (choice.outcome === 'accepted') installBtn.style.display = 'none';
+      } else if (isIOS) {
+        alert('iPhone/iPad par install karne ke liye:\n\n1. Neeche wale Share button (□ ke upar ↑) par tap karo\n2. "Add to Home Screen" choose karo\n3. "Add" par tap karo\n\nUske baad app ka icon seedha home screen par aa jayega.');
+      } else {
+        alert('Is browser me one-tap install available nahi hai. Chrome/Edge me address bar ke paas install (⊕) icon dekho, ya menu (⋮) me "Install app" / "Add to Home Screen" option try karo.');
+      }
+    });
+
+    window.addEventListener('appinstalled', function () {
+      installBtn.style.display = 'none';
+    });
+  })();
+
   // ---- Mobile sidebar (hamburger) ----
   var sidebar = document.querySelector('.sidebar');
   var overlay = document.querySelector('.sidebar-overlay');

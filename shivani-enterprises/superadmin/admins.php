@@ -63,11 +63,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([password_hash($password, PASSWORD_DEFAULT), $id]);
             flash('success', 'Password reset.');
         }
+    } elseif ($action === 'delete') {
+        $id = (int)($_POST['id'] ?? 0);
+        $custCountStmt = db()->prepare('SELECT COUNT(*) FROM customers WHERE admin_id = ?');
+        $custCountStmt->execute([$id]);
+        $custCount = (int)$custCountStmt->fetchColumn();
+        $invCountStmt = db()->prepare('SELECT COUNT(*) FROM investors WHERE owner_id = ?');
+        $invCountStmt->execute([$id]);
+        $invCount = (int)$invCountStmt->fetchColumn();
+
+        if ($custCount > 0 || $invCount > 0) {
+            flash('error', 'Is admin ke naam customers/investors records hai, isliye delete nahi ho sakta (records surakshit rakhne ke liye). Iske bajaye "Disable" use karein.');
+        } else {
+            db()->prepare('DELETE FROM users WHERE id = ? AND role = "admin"')->execute([$id]);
+            flash('success', 'Admin deleted.');
+        }
     }
     redirect('superadmin/admins.php');
 }
 
-$admins = db()->query('SELECT * FROM users WHERE role = "admin" ORDER BY created_at DESC')->fetchAll();
+$admins = db()->query(
+    "SELECT u.*,
+      (SELECT COUNT(*) FROM customers WHERE admin_id = u.id) AS customer_count,
+      (SELECT COUNT(*) FROM investors WHERE owner_id = u.id) AS investor_count
+     FROM users u WHERE u.role = 'admin' ORDER BY u.created_at DESC"
+)->fetchAll();
 require __DIR__ . '/../includes/header.php';
 ?>
 <div class="card">
@@ -143,7 +163,19 @@ require __DIR__ . '/../includes/header.php';
           <input type="hidden" name="id" value="<?= (int)$a['id'] ?>">
           <button class="btn small <?= $a['status'] === 'active' ? 'danger' : '' ?>" type="submit"><?= $a['status'] === 'active' ? 'Disable' : 'Enable' ?></button>
         </form>
+
+        <?php if ((int)$a['customer_count'] === 0 && (int)$a['investor_count'] === 0): ?>
+        <form method="post" onsubmit="return doubleConfirm('Delete admin <?= e(addslashes($a['name'])) ?> permanently?', 'Are you absolutely sure? This is PERMANENT and cannot be undone.')">
+          <?= csrf_field() ?>
+          <input type="hidden" name="action" value="delete">
+          <input type="hidden" name="id" value="<?= (int)$a['id'] ?>">
+          <button class="btn small danger" type="submit">Delete</button>
+        </form>
+        <?php endif; ?>
       </div>
+      <?php if ((int)$a['customer_count'] > 0 || (int)$a['investor_count'] > 0): ?>
+        <p class="text-muted" style="font-size:12px;margin-top:8px">Is admin ke naam <?= (int)$a['customer_count'] ?> customer(s) / <?= (int)$a['investor_count'] ?> investor(s) hai, isliye delete nahi ho sakta - "Disable" use karein.</p>
+      <?php endif; ?>
     </div>
     <?php endforeach; ?>
     <?php if (!$admins): ?><p class="text-muted">No admins yet.</p><?php endif; ?>
