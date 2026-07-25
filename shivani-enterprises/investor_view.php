@@ -25,10 +25,14 @@ $txns->execute([$id]);
 $txns = $txns->fetchAll();
 
 $totalInvested = array_sum(array_map(fn($t) => $t['type'] === 'investment' ? (float)$t['amount'] : 0, $txns));
-$totalPaid = array_sum(array_map(fn($t) => $t['type'] === 'payout' ? (float)$t['amount'] : 0, $txns));
-$net = $totalInvested - $totalPaid;
+$totalProfit = array_sum(array_map(fn($t) => $t['type'] === 'profit' ? (float)$t['amount'] : 0, $txns));
+$totalPaid = array_sum(array_map(fn($t) => $t['type'] === 'payment' ? (float)$t['amount'] : 0, $txns));
+$balance = $totalInvested + $totalProfit - $totalPaid;
 
-$waMsg = "Namaste " . $investor['name'] . ", aapka " . get_setting('company_name', APP_NAME) . " ke saath investment statement - Total Investment Rs. " . number_format($totalInvested, 2) . ", Total Profit Paid Rs. " . number_format($totalPaid, 2) . ". Dhanyawad.";
+$typeLabels = ['investment' => 'Investment', 'profit' => 'Profit Credited', 'payment' => 'Payment Paid'];
+$typeBadges = ['investment' => 'green', 'profit' => 'orange', 'payment' => 'red'];
+
+$waMsg = "Namaste " . $investor['name'] . ", aapka " . get_setting('company_name', APP_NAME) . " ke saath investment statement - Total Investment Rs. " . number_format($totalInvested, 2) . ", Total Profit Credited Rs. " . number_format($totalProfit, 2) . ", Total Paid Rs. " . number_format($totalPaid, 2) . ", Balance Rs. " . number_format($balance, 2) . ". Dhanyawad.";
 
 require __DIR__ . '/includes/header.php';
 ?>
@@ -43,7 +47,8 @@ require __DIR__ . '/includes/header.php';
   <div class="action-bar">
     <a class="btn small" href="<?= e(base_url('investor_form.php?id=' . $id)) ?>">Edit</a>
     <a class="btn small" href="<?= e(base_url('investor_txn_form.php?investor_id=' . $id . '&type=investment')) ?>">+ Add Investment</a>
-    <a class="btn small" href="<?= e(base_url('investor_txn_form.php?investor_id=' . $id . '&type=payout')) ?>">+ Add Profit Payout</a>
+    <a class="btn small" href="<?= e(base_url('investor_txn_form.php?investor_id=' . $id . '&type=profit')) ?>">+ Add Profit Credited</a>
+    <a class="btn small" href="<?= e(base_url('investor_txn_form.php?investor_id=' . $id . '&type=payment')) ?>">+ Add Payment Paid</a>
     <a class="btn small" href="<?= e(base_url('investor_view.php?id=' . $id . '&statement=pdf')) ?>" target="_blank">Statement PDF</a>
     <button type="button" class="btn small wa"
       onclick="shareFileToWhatsApp('<?= e(base_url('investor_view.php?id=' . $id . '&statement=pdf')) ?>', 'investor-statement-<?= e(preg_replace('/\s+/', '-', $investor['name'])) ?>.pdf', '<?= e(addslashes($waMsg)) ?>', this)">
@@ -54,8 +59,9 @@ require __DIR__ . '/includes/header.php';
 
 <div class="stat-grid">
   <div class="stat-card"><div class="label">Total Investment</div><div class="value"><?= money($totalInvested) ?></div></div>
-  <div class="stat-card"><div class="label">Total Profit Paid</div><div class="value"><?= money($totalPaid) ?></div></div>
-  <div class="stat-card"><div class="label">Net</div><div class="value"><?= money($net) ?></div></div>
+  <div class="stat-card"><div class="label">Total Profit Credited</div><div class="value"><?= money($totalProfit) ?></div></div>
+  <div class="stat-card"><div class="label">Total Paid</div><div class="value"><?= money($totalPaid) ?></div></div>
+  <div class="stat-card"><div class="label">Balance (Owed to Investor)</div><div class="value"><?= money($balance) ?></div></div>
 </div>
 
 <div class="card">
@@ -65,7 +71,7 @@ require __DIR__ . '/includes/header.php';
     <?php foreach ($txns as $t): ?>
     <tr>
       <td><?= e(date('d-M-Y', strtotime($t['txn_date']))) ?></td>
-      <td><span class="badge <?= $t['type'] === 'investment' ? 'green' : 'orange' ?>"><?= $t['type'] === 'investment' ? 'Investment' : 'Profit Paid' ?></span></td>
+      <td><span class="badge <?= e($typeBadges[$t['type']] ?? 'gray') ?>"><?= e($typeLabels[$t['type']] ?? $t['type']) ?></span></td>
       <td><?= money($t['amount']) ?></td>
       <td><?= e($t['note']) ?></td>
     </tr>

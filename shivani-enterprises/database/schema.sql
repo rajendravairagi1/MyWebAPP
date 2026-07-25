@@ -161,13 +161,17 @@ CREATE TABLE IF NOT EXISTS investors (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ---------------------------------------------------------------------
--- Investor ledger entries: money the investor put in (investment), and
--- profit share paid back to them (payout). Balance = investment - payout.
+-- Investor ledger entries:
+--   investment - money the investor put in (adds to balance owed to them)
+--   profit     - their profit share, credited/accrued but not yet handed
+--                over (also adds to balance owed to them)
+--   payment    - actual cash paid out to the investor (subtracts)
+-- Balance owed to investor = investment + profit - payment.
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS investor_transactions (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   investor_id INT UNSIGNED NOT NULL,
-  type ENUM('investment','payout') NOT NULL,
+  type ENUM('investment','profit','payment') NOT NULL,
   amount DECIMAL(12,2) NOT NULL,
   txn_date DATE NOT NULL,
   note VARCHAR(255) DEFAULT NULL,

@@ -234,8 +234,9 @@ function render_statement_pdf(array $customer, array $sales, array $payments, st
 }
 
 /**
- * Renders an investor's ledger (all investment / profit-payout entries +
- * running net) as a PDF, same visual style as the customer statement.
+ * Renders an investor's ledger (investment + profit-credited entries add
+ * to the balance owed to them; payment entries subtract) as a PDF, same
+ * visual style as the customer statement.
  */
 function render_investor_statement_pdf(array $investor, array $transactions, string $dest = 'I'): void
 {
@@ -244,21 +245,23 @@ function render_investor_statement_pdf(array $investor, array $transactions, str
     $y = $margin;
     $tableW = $pdf->pageWidth() - 2 * $margin;
 
+    $descLabels = ['investment' => 'Investment', 'profit' => 'Profit Credited', 'payment' => 'Payment Paid'];
     $rows = [];
     foreach ($transactions as $t) {
-        $desc = $t['type'] === 'investment' ? 'Investment' : 'Profit Paid';
+        $desc = $descLabels[$t['type']] ?? $t['type'];
         if (!empty($t['note'])) $desc .= ' - ' . $t['note'];
         $rows[] = [
             'date' => $t['txn_date'],
             'desc' => $desc,
-            'invested' => $t['type'] === 'investment' ? (float)$t['amount'] : 0,
-            'paid' => $t['type'] === 'payout' ? (float)$t['amount'] : 0,
+            'credit' => $t['type'] !== 'payment' ? (float)$t['amount'] : 0,
+            'paid' => $t['type'] === 'payment' ? (float)$t['amount'] : 0,
         ];
     }
     usort($rows, fn($a, $b) => strcmp($a['date'], $b['date']));
-    $totalInvested = array_sum(array_column($rows, 'invested'));
-    $totalPaid = array_sum(array_column($rows, 'paid'));
-    $finalNet = $totalInvested - $totalPaid;
+    $totalInvested = array_sum(array_map(fn($t) => $t['type'] === 'investment' ? (float)$t['amount'] : 0, $transactions));
+    $totalProfit = array_sum(array_map(fn($t) => $t['type'] === 'profit' ? (float)$t['amount'] : 0, $transactions));
+    $totalPaid = array_sum(array_map(fn($t) => $t['type'] === 'payment' ? (float)$t['amount'] : 0, $transactions));
+    $finalBalance = $totalInvested + $totalProfit - $totalPaid;
 
     pdf_verify_qr($pdf, $margin, investor_statement_verify_url($investor), $margin - 4);
 
@@ -273,48 +276,50 @@ function render_investor_statement_pdf(array $investor, array $transactions, str
 
     // Column widths sized so large amounts (lakhs, e.g. 10,00,000.00) never
     // cross the outer border.
-    $colW = ['date' => 62, 'desc' => 0, 'invested' => 100, 'paid' => 100, 'net' => 95];
-    $colW['desc'] = $tableW - $colW['date'] - $colW['invested'] - $colW['paid'] - $colW['net'];
+    $colW = ['date' => 62, 'desc' => 0, 'credit' => 90, 'paid' => 90, 'balance' => 95];
+    $colW['desc'] = $tableW - $colW['date'] - $colW['credit'] - $colW['paid'] - $colW['balance'];
     $colX = [
         $margin,
         $margin + $colW['date'],
         $margin + $colW['date'] + $colW['desc'],
-        $margin + $colW['date'] + $colW['desc'] + $colW['invested'],
-        $margin + $colW['date'] + $colW['desc'] + $colW['invested'] + $colW['paid'],
+        $margin + $colW['date'] + $colW['desc'] + $colW['credit'],
+        $margin + $colW['date'] + $colW['desc'] + $colW['credit'] + $colW['paid'],
     ];
-    $investedRight = $colX[3] - 6;
+    $creditRight = $colX[3] - 6;
     $paidRight = $colX[4] - 6;
-    $netRight = $margin + $tableW - 6;
+    $balanceRight = $margin + $tableW - 6;
 
     $pdf->rect($margin, $y, $tableW, 20);
     $pdf->text($colX[0] + 4, $y + 14, 'Date', 10, true);
     $pdf->text($colX[1] + 4, $y + 14, 'Description', 10, true);
-    $pdf->text($colX[2] + 4, $y + 14, 'Investment (Rs.)', 10, true);
-    $pdf->text($colX[3] + 4, $y + 14, 'Profit Paid (Rs.)', 10, true);
-    $pdf->textRight($netRight, $y + 14, 'Net', 10, true);
+    $pdf->text($colX[2] + 4, $y + 14, 'Credited (Rs.)', 10, true);
+    $pdf->text($colX[3] + 4, $y + 14, 'Paid (Rs.)', 10, true);
+    $pdf->textRight($balanceRight, $y + 14, 'Balance', 10, true);
     $y += 20;
 
-    $net = 0;
+    $balance = 0;
     foreach ($rows as $r) {
-        if ($y > $pdf->pageHeight() - 240) { break; } // leave room for the summary boxes + signature + footer
-        $net += $r['invested'] - $r['paid'];
+        if ($y > $pdf->pageHeight() - 260) { break; } // leave room for the summary boxes + signature + footer
+        $balance += $r['credit'] - $r['paid'];
         $rowH = 18;
         $pdf->rect($margin, $y, $tableW, $rowH);
         $pdf->text($colX[0] + 4, $y + 13, date('d-M-y', strtotime($r['date'])), 9);
         $pdf->text($colX[1] + 4, $y + 13, pdf_truncate($r['desc'], 30), 9);
-        $pdf->textRight($investedRight, $y + 13, $r['invested'] > 0 ? number_format($r['invested'], 2) : '-', 9);
+        $pdf->textRight($creditRight, $y + 13, $r['credit'] > 0 ? number_format($r['credit'], 2) : '-', 9);
         $pdf->textRight($paidRight, $y + 13, $r['paid'] > 0 ? number_format($r['paid'], 2) : '-', 9);
-        $pdf->textRight($netRight, $y + 13, number_format($net, 2), 9);
+        $pdf->textRight($balanceRight, $y + 13, number_format($balance, 2), 9);
         $y += $rowH;
     }
     $y += 14;
 
-    // Total Investment / Total Profit Paid / Net, each as its own dark box
-    // with the label on the left and the amount right-aligned opposite it.
+    // Total Investment / Total Profit Credited / Total Paid / Balance,
+    // each as its own dark box with the label on the left and the amount
+    // right-aligned opposite it.
     $summary = [
         ['Total Investment', $totalInvested],
-        ['Total Profit Paid', $totalPaid],
-        ['Net (Investment - Paid)', $finalNet],
+        ['Total Profit Credited', $totalProfit],
+        ['Total Paid', $totalPaid],
+        ['Balance (Owed to Investor)', $finalBalance],
     ];
     $boxH = 26;
     foreach ($summary as [$label, $amount]) {

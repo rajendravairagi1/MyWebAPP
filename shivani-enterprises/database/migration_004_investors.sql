@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS investors (
 CREATE TABLE IF NOT EXISTS investor_transactions (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   investor_id INT UNSIGNED NOT NULL,
-  type ENUM('investment','payout') NOT NULL,
+  type ENUM('investment','profit','payment') NOT NULL,
   amount DECIMAL(12,2) NOT NULL,
   txn_date DATE NOT NULL,
   note VARCHAR(255) DEFAULT NULL,

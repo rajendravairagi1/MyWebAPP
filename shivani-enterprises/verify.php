@@ -64,7 +64,10 @@ if (isset($_GET['i'])) {
             $stmt = db()->prepare("SELECT COALESCE(SUM(amount),0) FROM investor_transactions WHERE investor_id = ? AND type = 'investment'");
             $stmt->execute([$id]);
             $invested = (float)$stmt->fetchColumn();
-            $stmt = db()->prepare("SELECT COALESCE(SUM(amount),0) FROM investor_transactions WHERE investor_id = ? AND type = 'payout'");
+            $stmt = db()->prepare("SELECT COALESCE(SUM(amount),0) FROM investor_transactions WHERE investor_id = ? AND type = 'profit'");
+            $stmt->execute([$id]);
+            $profit = (float)$stmt->fetchColumn();
+            $stmt = db()->prepare("SELECT COALESCE(SUM(amount),0) FROM investor_transactions WHERE investor_id = ? AND type = 'payment'");
             $stmt->execute([$id]);
             $paidOut = (float)$stmt->fetchColumn();
             $valid = true;
@@ -72,8 +75,9 @@ if (isset($_GET['i'])) {
             $details = [
                 'Investor' => $investor['name'],
                 'Total Investment' => 'Rs. ' . number_format($invested, 2),
-                'Total Profit Paid' => 'Rs. ' . number_format($paidOut, 2),
-                'Net (as of now)' => 'Rs. ' . number_format($invested - $paidOut, 2),
+                'Total Profit Credited' => 'Rs. ' . number_format($profit, 2),
+                'Total Paid' => 'Rs. ' . number_format($paidOut, 2),
+                'Balance (as of now)' => 'Rs. ' . number_format($invested + $profit - $paidOut, 2),
             ];
         }
     }
