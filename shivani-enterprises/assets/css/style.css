@@ -278,16 +278,18 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
    the raw browser checkbox, which read as a big empty square on desktop
    and looked equally awkward on mobile. */
 .switch {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   cursor: pointer;
   user-select: none;
-  padding: 8px 12px;
+  padding: 8px 14px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--input-bg, #fff);
   height: 42px;
+  width: 100%;
   box-sizing: border-box;
   transition: background .15s, border-color .15s;
 }
