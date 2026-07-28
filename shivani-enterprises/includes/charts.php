@@ -34,28 +34,28 @@ function svg_area_chart(array $labels, array $values, int $width = 600, int $hei
         $yv = $niceMax * ($t / $ticks);
         $y = $padT + $plotH - ($yv / $niceMax) * $plotH;
         $grid .= '<line x1="' . $padL . '" y1="' . round($y, 2) . '" x2="' . ($padL + $plotW) . '" y2="' . round($y, 2) . '" stroke="currentColor" stroke-opacity="0.1" stroke-width="1"/>';
-        $grid .= '<text x="' . ($padL - 8) . '" y="' . round($y + 4, 2) . '" font-size="11" fill="currentColor" opacity="0.7" text-anchor="end">' . _short_money($yv) . '</text>';
+        $grid .= '<text x="' . ($padL - 8) . '" y="' . round($y + 4, 2) . '" class="tick" font-size="11" text-anchor="end">' . _short_money($yv) . '</text>';
     }
 
     // Dots on each data point + X-axis date labels at a few positions.
     $dots = '';
     foreach ($points as $i => $p) {
-        if ($values[$i] > 0) $dots .= '<circle cx="' . $p[0] . '" cy="' . $p[1] . '" r="3" fill="' . $color . '"/>';
+        if ($values[$i] > 0) $dots .= '<circle cx="' . $p[0] . '" cy="' . $p[1] . '" r="3" style="fill: ' . $color . '"/>';
     }
     $labelSvg = '';
     foreach (array_unique([0, intdiv($n, 2), $n - 1]) as $i) {
         if (!isset($labels[$i])) continue;
-        $labelSvg .= '<text x="' . $points[$i][0] . '" y="' . ($height - 8) . '" font-size="11" fill="currentColor" opacity="0.7" text-anchor="middle">' . htmlspecialchars($labels[$i]) . '</text>';
+        $labelSvg .= '<text class="axis" x="' . $points[$i][0] . '" y="' . ($height - 8) . '" font-size="11.5" text-anchor="middle">' . htmlspecialchars($labels[$i]) . '</text>';
     }
 
     return '<svg viewBox="0 0 ' . $width . ' ' . $height . '" width="100%" class="chart-svg" style="height:auto;max-height:' . $height . 'px">
       <defs><linearGradient id="' . $id . '" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="' . $color . '" stop-opacity="0.55"/>
-        <stop offset="100%" stop-color="' . $color . '" stop-opacity="0"/>
+        <stop offset="0%" style="stop-color: ' . $color . '" stop-opacity="0.55"/>
+        <stop offset="100%" style="stop-color: ' . $color . '" stop-opacity="0"/>
       </linearGradient></defs>
       ' . $grid . '
       <path d="' . $areaPath . '" fill="url(#' . $id . ')" stroke="none"/>
-      <polyline points="' . $polyline . '" fill="none" stroke="' . $color . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline points="' . $polyline . '" fill="none" style="stroke: ' . $color . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
       ' . $dots . '
       ' . $labelSvg . '
     </svg>';
@@ -91,8 +91,8 @@ function svg_bar_chart(array $labels, array $values, int $width = 700, int $heig
     $id = 'bg' . substr(md5(implode(',', $values) . microtime()), 0, 8);
 
     $svg = '<defs><linearGradient id="' . $id . '" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="' . $color . '" stop-opacity="1"/>
-        <stop offset="100%" stop-color="' . $color . '" stop-opacity="0.55"/>
+        <stop offset="0%" style="stop-color: ' . $color . '" stop-opacity="1"/>
+        <stop offset="100%" style="stop-color: ' . $color . '" stop-opacity="0.55"/>
       </linearGradient></defs>';
 
     // Horizontal gridlines + Y-axis tick labels (₹ short form).
@@ -100,7 +100,7 @@ function svg_bar_chart(array $labels, array $values, int $width = 700, int $heig
         $yv = $niceMax * ($t / $ticks);
         $y = $padT + $plotH - ($yv / $niceMax) * $plotH;
         $svg .= '<line x1="' . $padL . '" y1="' . round($y, 2) . '" x2="' . ($padL + $plotW) . '" y2="' . round($y, 2) . '" stroke="currentColor" stroke-opacity="0.12" stroke-width="1"/>';
-        $svg .= '<text x="' . ($padL - 8) . '" y="' . round($y + 4, 2) . '" font-size="11" fill="currentColor" opacity="0.7" text-anchor="end">' . _short_money($yv) . '</text>';
+        $svg .= '<text x="' . ($padL - 8) . '" y="' . round($y + 4, 2) . '" class="tick" font-size="11" text-anchor="end">' . _short_money($yv) . '</text>';
     }
     // Baseline (X axis) — a slightly bolder line for grounding.
     $svg .= '<line x1="' . $padL . '" y1="' . ($padT + $plotH) . '" x2="' . ($padL + $plotW) . '" y2="' . ($padT + $plotH) . '" stroke="currentColor" stroke-opacity="0.35" stroke-width="1"/>';
@@ -113,14 +113,14 @@ function svg_bar_chart(array $labels, array $values, int $width = 700, int $heig
         $svg .= '<rect x="' . round($x, 2) . '" y="' . round($y, 2) . '" width="' . round($barW, 2) . '" height="' . round($h, 2) . '" rx="6" fill="url(#' . $id . ')"/>';
 
         // Value label sitting on top of each bar.
-        $svg .= '<text x="' . round($x + $barW / 2, 2) . '" y="' . round($y - 6, 2) . '" font-size="11.5" font-weight="600" fill="currentColor" opacity="0.9" text-anchor="middle">' . _short_money((float)$v) . '</text>';
+        $svg .= '<text class="bar-value" x="' . round($x + $barW / 2, 2) . '" y="' . round($y - 6, 2) . '" font-size="12" text-anchor="middle">' . _short_money((float)$v) . '</text>';
 
         // X-axis label under the bar, rotated 30° so long product names fit.
         $lbl = (string)($labels[$i] ?? '');
         if (mb_strlen($lbl) > 14) $lbl = mb_substr($lbl, 0, 13) . '…';
         $lx = round($x + $barW / 2, 2);
         $ly = $padT + $plotH + 14;
-        $svg .= '<text x="' . $lx . '" y="' . $ly . '" font-size="11" fill="currentColor" opacity="0.75" text-anchor="end" transform="rotate(-30 ' . $lx . ' ' . $ly . ')">' . htmlspecialchars($lbl) . '</text>';
+        $svg .= '<text class="axis" x="' . $lx . '" y="' . $ly . '" font-size="11.5" text-anchor="end" transform="rotate(-30 ' . $lx . ' ' . $ly . ')">' . htmlspecialchars($lbl) . '</text>';
     }
     return '<svg viewBox="0 0 ' . $width . ' ' . $height . '" width="100%" class="chart-svg" style="height:auto;max-height:' . $height . 'px">' . $svg . '</svg>';
 }
@@ -169,6 +169,6 @@ function svg_gauge(float $percent, int $size = 200, string $color = '#5eead4'): 
     $viewH = (int)($size / 2 + 22);
     return '<svg viewBox="0 0 ' . $size . ' ' . $viewH . '" width="100%" height="' . $viewH . '">
       <path d="' . $bgPath . '" fill="none" stroke="currentColor" stroke-opacity="0.12" stroke-width="16" stroke-linecap="round"/>
-      <path d="' . $fgPath . '" fill="none" stroke="' . $color . '" stroke-width="16" stroke-linecap="round"/>
+      <path d="' . $fgPath . '" fill="none" style="stroke: ' . $color . '" stroke-width="16" stroke-linecap="round"/>
     </svg>';
 }

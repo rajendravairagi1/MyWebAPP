@@ -326,7 +326,15 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
 /* ===== Chart cards ===== */
 .chart-card .chart-legend { display: flex; gap: 16px; margin-top: 6px; font-size: 12.5px; color: var(--muted); }
 .chart-legend .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
-.chart-svg { color: var(--border); display: block; }
+/* Chart SVG theming: currentColor drives BOTH gridlines and label text,
+ * but with --border it becomes invisible on white cards. Split them:
+ * gridlines get the muted color at low opacity, labels get full text
+ * color so they stay legible across every theme (light + dark). */
+.chart-svg { color: var(--muted); display: block; }
+.chart-svg line { stroke: var(--border); }
+.chart-svg text { fill: var(--text) !important; opacity: 1 !important; font-weight: 500; }
+.chart-svg text.axis, .chart-svg text.tick { opacity: 0.75 !important; font-weight: 400; }
+.chart-svg .bar-value { font-weight: 700 !important; opacity: 1 !important; }
 .gauge-wrap { position: relative; text-align: center; }
 .gauge-value {
   position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%);

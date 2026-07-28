@@ -65,12 +65,12 @@ require __DIR__ . '/../includes/header.php';
 <div class="chart-row">
   <div class="card chart-card">
     <h3 class="mt-0">Sales Trend (last 14 days)</h3>
-    <?= svg_area_chart($trendLabels, $trendValues, 600, 200, '#5eead4') ?>
+    <?= svg_area_chart($trendLabels, $trendValues, 600, 200, 'var(--brand-a)') ?>
   </div>
   <div class="card">
     <h3 class="mt-0">Collection Rate</h3>
     <div class="gauge-wrap">
-      <?= svg_gauge($collectionPct, 220, '#5eead4') ?>
+      <?= svg_gauge($collectionPct, 220, 'var(--brand-a)') ?>
       <div class="gauge-value"><?= round($collectionPct) ?>%</div>
     </div>
     <p class="text-muted" style="text-align:center">of total sales collected so far</p>
@@ -79,7 +79,7 @@ require __DIR__ . '/../includes/header.php';
 
 <div class="card chart-card">
   <h3 class="mt-0">Top Products by Sales Value</h3>
-  <?= svg_bar_chart($topProdLabels, $topProdValues, 800, 340, '#ec4899') ?>
+  <?= svg_bar_chart($topProdLabels, $topProdValues, 800, 340, 'var(--brand-b)') ?>
 </div>
 
 <div class="card">
