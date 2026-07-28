@@ -194,7 +194,7 @@ require __DIR__ . '/includes/header.php';
             value="<?= ($row && $row['product_id'] === null) ? e($row['product_name']) : '' ?>">
           <?php if ($godams): ?>
           <select name="godam_id[]" class="godam-select" style="margin-top:8px">
-            <option value="">-- Godam (kis se maal utha) --</option>
+            <option value="">-- Godown (kis se maal utha) --</option>
             <?php foreach ($godams as $g): ?>
               <option value="<?= (int)$g['id'] ?>" <?= ($row && (int)$row['godam_id'] === (int)$g['id']) ? 'selected' : '' ?>><?= e($g['name']) ?></option>
             <?php endforeach; ?>
@@ -257,19 +257,19 @@ function updateGodamHint(row) {
   if (!pid || pid === '0') { hint.textContent = ''; return; }
   const perGodam = STOCK_LOOKUP[pid] || {};
   if (!gid) {
-    const parts = Object.keys(perGodam).map(k => (GODAM_NAMES[k] || 'Godam') + ': ' + perGodam[k]);
-    hint.textContent = parts.length ? 'Available — ' + parts.join(', ') : 'Is product ka kisi bhi godam me stock nahi hai.';
+    const parts = Object.keys(perGodam).map(k => (GODAM_NAMES[k] || 'Godown') + ': ' + perGodam[k]);
+    hint.textContent = parts.length ? 'Available — ' + parts.join(', ') : 'Is product ka kisi bhi Godown me stock nahi hai.';
     hint.style.color = '';
   } else {
     const rawHave = perGodam[gid] || 0;
     const claimed = otherRowsClaim(row, pid, gid);
     const effectiveHave = rawHave - claimed;
     if (effectiveHave <= 0) {
-      hint.textContent = 'Stock khatam: is godam me ' + rawHave + ' tha, upar ki lines me poora liya ja chuka hai. Dusra godam chunein.';
+      hint.textContent = 'Stock khatam: is Godown me ' + rawHave + ' tha, upar ki lines me poora liya ja chuka hai. Dusra Godown chunein.';
       hint.style.color = '#dc2626';
     } else if (qtyWanted > effectiveHave) {
       const claimedNote = claimed > 0 ? ' (' + claimed + ' upar ki lines me pehle se liya)' : '';
-      hint.textContent = 'Warning: is godam me sirf ' + effectiveHave + ' bacha hai' + claimedNote + ', aap ' + qtyWanted + ' bech rahe ho.';
+      hint.textContent = 'Warning: is Godown me sirf ' + effectiveHave + ' bacha hai' + claimedNote + ', aap ' + qtyWanted + ' bech rahe ho.';
       hint.style.color = '#dc2626';
     } else {
       const claimedNote = claimed > 0 ? ' (' + rawHave + ' me se ' + claimed + ' upar ki lines me liya)' : '';

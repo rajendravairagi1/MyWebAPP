@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Invalid stock entry type.';
     }
     if ($productId <= 0) $errors[] = 'Product select karein.';
-    if ($godamId <= 0)   $errors[] = 'Godam select karein.';
+    if ($godamId <= 0)   $errors[] = 'Godown select karein.';
     if ($qty == 0)       $errors[] = 'Qty zero nahi ho sakti (adjustment ke liye negative bhi de sakte ho).';
 
     if (!$errors) {
@@ -42,12 +42,12 @@ $godams = db()->query('SELECT id, name FROM godams WHERE is_active = 1 ORDER BY 
 
 require __DIR__ . '/../includes/header.php';
 ?>
-<p><a href="<?= e(base_url('superadmin/godams.php')) ?>">&larr; Back to Godams</a></p>
+<p><a href="<?= e(base_url('superadmin/godams.php')) ?>">&larr; Back to Godowns</a></p>
 <div class="card">
   <h3 class="mt-0">Add Stock Entry</h3>
   <?php foreach ($errors as $err): ?><div class="alert error"><?= e($err) ?></div><?php endforeach; ?>
   <?php if (!$godams): ?>
-    <div class="alert error">Pehle ek Godam add karein — <a href="<?= e(base_url('superadmin/godams.php')) ?>">Godams page</a>.</div>
+    <div class="alert error">Pehle ek Godown add karein — <a href="<?= e(base_url('superadmin/godams.php')) ?>">Godowns page</a>.</div>
   <?php elseif (!$products): ?>
     <div class="alert error">Pehle Products add karein.</div>
   <?php else: ?>
@@ -63,7 +63,7 @@ require __DIR__ . '/../includes/header.php';
         </select>
       </div>
       <div class="form-group">
-        <label>Godam *</label>
+        <label>Godown *</label>
         <select name="godam_id" required>
           <?php foreach ($godams as $g): ?><option value="<?= (int)$g['id'] ?>"><?= e($g['name']) ?></option><?php endforeach; ?>
         </select>

@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
 require_role('super_admin');
-$pageTitle = 'Stock — All Godams';
+$pageTitle = 'Stock — All Godowns';
 
 $rows = db()->query("
   SELECT p.id AS product_id, p.name AS product_name, p.unit,
@@ -31,7 +31,7 @@ $movements = db()->query("
 
 require __DIR__ . '/../includes/header.php';
 ?>
-<p><a href="<?= e(base_url('superadmin/godams.php')) ?>">&larr; Back to Godams</a>
+<p><a href="<?= e(base_url('superadmin/godams.php')) ?>">&larr; Back to Godowns</a>
 &middot; <a href="<?= e(base_url('superadmin/stock_entry.php')) ?>">+ Add Stock Entry</a></p>
 
 <div class="card">
@@ -40,7 +40,7 @@ require __DIR__ . '/../includes/header.php';
     <p class="text-muted">Abhi tak koi stock entry nahi.</p>
   <?php else: ?>
     <table>
-      <tr><th>Product</th><th>Godam-wise Stock</th><th>Total Qty</th></tr>
+      <tr><th>Product</th><th>Godown-wise Stock</th><th>Total Qty</th></tr>
       <?php foreach ($grouped as $g): ?>
       <tr>
         <td><?= e($g['product']) ?></td>
@@ -62,7 +62,7 @@ require __DIR__ . '/../includes/header.php';
     <p class="text-muted">Abhi tak koi movement nahi.</p>
   <?php else: ?>
     <table>
-      <tr><th>Date</th><th>Product</th><th>Godam</th><th>Type</th><th>Qty Change</th><th>Note</th><th>By</th></tr>
+      <tr><th>Date</th><th>Product</th><th>Godown</th><th>Type</th><th>Qty Change</th><th>Note</th><th>By</th></tr>
       <?php foreach ($movements as $m): ?>
       <tr>
         <td><?= e(date('d-M-Y', strtotime($m['created_at']))) ?></td>

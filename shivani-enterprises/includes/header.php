@@ -83,7 +83,7 @@ function nav_active(string $file): string
         <a<?= nav_active('dashboard.php') ?> href="<?= e(base_url($base.'dashboard.php')) ?>">Dashboard</a>
         <a<?= nav_active('admins.php') ?> href="<?= e(base_url($base.'admins.php')) ?>">Admins</a>
         <a<?= nav_active('products.php') ?> href="<?= e(base_url($base.'products.php')) ?>">Products</a>
-        <a<?= nav_active('godams.php') ?> href="<?= e(base_url($base.'godams.php')) ?>">Godams / Stock</a>
+        <a<?= nav_active('godams.php') ?> href="<?= e(base_url($base.'godams.php')) ?>">Godowns / Stock</a>
         <a<?= nav_active('customers.php') ?> href="<?= e(base_url($base.'customers.php')) ?>">All Customers</a>
         <a<?= nav_active('sales.php') ?> href="<?= e(base_url($base.'sales.php')) ?>">All Sales</a>
         <a<?= nav_active('payments.php') ?> href="<?= e(base_url($base.'payments.php')) ?>">All Payments</a>

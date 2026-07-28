@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
 require_role('super_admin');
-$pageTitle = 'Godams / Warehouses';
+$pageTitle = 'Godowns / Warehouses';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
@@ -10,13 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? '');
         $address = trim($_POST['address'] ?? '');
         if ($name === '') {
-            flash('error', 'Godam name is required.');
+            flash('error', 'Godown name is required.');
         } else {
             try {
                 db()->prepare('INSERT INTO godams (name, address) VALUES (?, ?)')->execute([$name, $address ?: null]);
-                flash('success', 'Godam added.');
+                flash('success', 'Godown added.');
             } catch (Throwable $e) {
-                flash('error', 'Ye godam name pehle se hai.');
+                flash('error', 'Ye Godown name pehle se hai.');
             }
         }
     } elseif ($action === 'update') {
@@ -24,19 +24,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name = trim($_POST['name'] ?? '');
         $address = trim($_POST['address'] ?? '');
         db()->prepare('UPDATE godams SET name=?, address=? WHERE id=?')->execute([$name, $address ?: null, $id]);
-        flash('success', 'Godam updated.');
+        flash('success', 'Godown updated.');
     } elseif ($action === 'toggle') {
         $id = (int)($_POST['id'] ?? 0);
         db()->prepare('UPDATE godams SET is_active = 1 - is_active WHERE id = ?')->execute([$id]);
-        flash('success', 'Godam status updated.');
+        flash('success', 'Godown status updated.');
     } elseif ($action === 'delete') {
         $id = (int)($_POST['id'] ?? 0);
         $hasStock = (int)db()->query('SELECT COUNT(*) FROM stock_movements WHERE godam_id = ' . $id)->fetchColumn();
         if ($hasStock) {
-            flash('error', 'Is godam par movements hai - permanently delete nahi ho sakta. "Deactivate" karo.');
+            flash('error', 'Is Godown par movements hai - permanently delete nahi ho sakta. "Deactivate" karo.');
         } else {
             db()->prepare('DELETE FROM godams WHERE id = ?')->execute([$id]);
-            flash('success', 'Godam deleted.');
+            flash('success', 'Godown deleted.');
         }
     }
     redirect('superadmin/godams.php');
@@ -62,21 +62,21 @@ foreach ($stockRows as $r) { $stockByGodam[(int)$r['godam_id']][] = $r; }
 require __DIR__ . '/../includes/header.php';
 ?>
 <div class="card">
-  <h3 class="mt-0">Add Godam / Warehouse</h3>
+  <h3 class="mt-0">Add Godown / Warehouse</h3>
   <form method="post">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="create">
     <div class="form-row">
-      <div class="form-group"><label>Godam Name *</label><input name="name" required placeholder="e.g. Main Godam"></div>
+      <div class="form-group"><label>Godown Name *</label><input name="name" required placeholder="e.g. Main Godown"></div>
       <div class="form-group"><label>Address (optional)</label><input name="address" placeholder="e.g. Sanjay Nagar, Indore"></div>
     </div>
-    <button class="btn" type="submit">Add Godam</button>
+    <button class="btn" type="submit">Add Godown</button>
   </form>
 </div>
 
-<h3 style="margin:8px 4px 12px">All Godams</h3>
+<h3 style="margin:8px 4px 12px">All Godowns</h3>
 <?php if (!$godams): ?>
-  <div class="card"><p class="text-muted mt-0">No godams yet. Pehla godam add karein.</p></div>
+  <div class="card"><p class="text-muted mt-0">No Godowns yet. Pehla Godown add karein.</p></div>
 <?php else: foreach ($godams as $g): $fid = 'gd-' . (int)$g['id']; $stk = $stockByGodam[(int)$g['id']] ?? []; ?>
   <details class="card godam-card" <?= $g['is_active'] ? 'open' : '' ?> style="padding:0;overflow:hidden">
     <summary style="cursor:pointer;list-style:none;padding:16px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -91,9 +91,9 @@ require __DIR__ . '/../includes/header.php';
 
     <div style="padding:0 18px 18px;border-top:1px solid rgba(148,163,184,.18)">
 
-      <h4 style="margin:18px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:#64748b">Is godam me rakha maal</h4>
+      <h4 style="margin:18px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:#64748b">Is Godown me rakha maal</h4>
       <?php if (!$stk): ?>
-        <p class="text-muted" style="margin:6px 0 14px">Abhi tak is godam me koi stock nahi rakha. <a href="<?= e(base_url('superadmin/stock_entry.php')) ?>">+ Add Stock Entry</a></p>
+        <p class="text-muted" style="margin:6px 0 14px">Abhi tak is Godown me koi stock nahi rakha. <a href="<?= e(base_url('superadmin/stock_entry.php')) ?>">+ Add Stock Entry</a></p>
       <?php else: ?>
         <table style="margin-bottom:14px">
           <tr><th>Product</th><th style="text-align:right">Qty</th></tr>
@@ -112,25 +112,25 @@ require __DIR__ . '/../includes/header.php';
         </table>
       <?php endif; ?>
 
-      <h4 style="margin:18px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:#64748b">Edit godam</h4>
+      <h4 style="margin:18px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:#64748b">Edit Godown</h4>
       <form id="<?= $fid ?>" method="post" style="margin:0">
         <?= csrf_field() ?>
         <input type="hidden" name="action" value="update">
         <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
         <div class="form-row">
-          <div class="form-group"><label>Godam Name</label><input name="name" value="<?= e($g['name']) ?>" required></div>
+          <div class="form-group"><label>Godown Name</label><input name="name" value="<?= e($g['name']) ?>" required></div>
           <div class="form-group"><label>Address</label><input name="address" value="<?= e($g['address']) ?>" placeholder="—"></div>
         </div>
       </form>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
         <button form="<?= $fid ?>" class="btn small" type="submit">Save Changes</button>
-        <form method="post" style="margin:0" onsubmit="return confirm('Change godam status?')">
+        <form method="post" style="margin:0" onsubmit="return confirm('Change Godown status?')">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="toggle">
           <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
           <button class="btn small secondary" type="submit"><?= $g['is_active'] ? 'Deactivate' : 'Activate' ?></button>
         </form>
-        <form method="post" style="margin:0" onsubmit="return doubleConfirm('Delete godam <?= e(addslashes($g['name'])) ?> permanently?', 'Are you absolutely sure? This CANNOT be undone.')">
+        <form method="post" style="margin:0" onsubmit="return doubleConfirm('Delete Godown <?= e(addslashes($g['name'])) ?> permanently?', 'Are you absolutely sure? This CANNOT be undone.')">
           <?= csrf_field() ?>
           <input type="hidden" name="action" value="delete">
           <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
