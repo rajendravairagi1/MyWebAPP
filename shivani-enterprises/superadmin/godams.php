@@ -66,44 +66,45 @@ require __DIR__ . '/../includes/header.php';
 
 <div class="card">
   <h3 class="mt-0">All Godams</h3>
-  <div class="admin-rows">
-    <div class="admin-row admin-row-head">
-      <div>Name</div>
-      <div>Address</div>
-      <div>Products / Total Qty</div>
-      <div>Status</div>
-      <div></div>
-    </div>
+  <?php if (!$godams): ?>
+    <p class="text-muted">No godams yet. Pehla godam add karein.</p>
+  <?php else: ?>
+  <table>
+    <tr><th>Name</th><th>Address</th><th>Products / Total Qty</th><th>Status</th><th style="min-width:220px">Actions</th></tr>
     <?php foreach ($godams as $g): $fid = 'gd-' . (int)$g['id']; ?>
-    <form id="<?= $fid ?>" method="post" class="hidden-form">
-      <?= csrf_field() ?>
-      <input type="hidden" name="action" value="update">
-      <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
-    </form>
-    <div class="admin-row">
-      <div class="ar-field"><input form="<?= $fid ?>" name="name" value="<?= e($g['name']) ?>"></div>
-      <div class="ar-field"><input form="<?= $fid ?>" name="address" value="<?= e($g['address']) ?>" placeholder="—"></div>
-      <div><?= (int)$g['product_count'] ?> products &middot; <?= rtrim(rtrim(number_format((float)$g['total_qty'], 2), '0'), '.') ?> qty</div>
-      <div><span class="badge <?= $g['is_active'] ? 'green' : 'gray' ?>"><?= $g['is_active'] ? 'Active' : 'Inactive' ?></span></div>
-      <div class="ar-actions">
-        <button form="<?= $fid ?>" class="btn small" type="submit">Save</button>
-        <form method="post" onsubmit="return confirm('Change godam status?')">
+    <tr>
+      <td>
+        <form id="<?= $fid ?>" method="post" style="margin:0">
           <?= csrf_field() ?>
-          <input type="hidden" name="action" value="toggle">
+          <input type="hidden" name="action" value="update">
           <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
-          <button class="btn small secondary" type="submit"><?= $g['is_active'] ? 'Deactivate' : 'Activate' ?></button>
+          <input form="<?= $fid ?>" name="name" value="<?= e($g['name']) ?>" style="width:100%">
         </form>
-        <form method="post" onsubmit="return doubleConfirm('Delete godam <?= e(addslashes($g['name'])) ?> permanently?', 'Are you absolutely sure? This CANNOT be undone.')">
-          <?= csrf_field() ?>
-          <input type="hidden" name="action" value="delete">
-          <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
-          <button class="btn small danger" type="submit">Delete</button>
-        </form>
-      </div>
-    </div>
+      </td>
+      <td><input form="<?= $fid ?>" name="address" value="<?= e($g['address']) ?>" placeholder="—" style="width:100%"></td>
+      <td><?= (int)$g['product_count'] ?> products<br><span class="text-muted"><?= rtrim(rtrim(number_format((float)$g['total_qty'], 2), '0'), '.') ?> qty</span></td>
+      <td><span class="badge <?= $g['is_active'] ? 'green' : 'gray' ?>"><?= $g['is_active'] ? 'Active' : 'Inactive' ?></span></td>
+      <td>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button form="<?= $fid ?>" class="btn small" type="submit">Save</button>
+          <form method="post" style="margin:0" onsubmit="return confirm('Change godam status?')">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="toggle">
+            <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
+            <button class="btn small secondary" type="submit"><?= $g['is_active'] ? 'Deactivate' : 'Activate' ?></button>
+          </form>
+          <form method="post" style="margin:0" onsubmit="return doubleConfirm('Delete godam <?= e(addslashes($g['name'])) ?> permanently?', 'Are you absolutely sure? This CANNOT be undone.')">
+            <?= csrf_field() ?>
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
+            <button class="btn small danger" type="submit">Delete</button>
+          </form>
+        </div>
+      </td>
+    </tr>
     <?php endforeach; ?>
-    <?php if (!$godams): ?><p class="text-muted">No godams yet. Pehla godam add karein.</p><?php endif; ?>
-  </div>
+  </table>
+  <?php endif; ?>
 </div>
 
 <div class="card">

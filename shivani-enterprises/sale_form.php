@@ -229,6 +229,24 @@ require __DIR__ . '/includes/header.php';
 const STOCK_LOOKUP = <?= json_encode($stockLookup) ?>;
 const GODAM_NAMES = <?= json_encode(array_column($godams, 'name', 'id')) ?>;
 
+// Sum qty already claimed by OTHER rows for the same (product, godam) pair
+// so line 2 doesn't advertise stock that line 1 is already consuming.
+function otherRowsClaim(selfRow, pid, gid) {
+  let sum = 0;
+  document.querySelectorAll('.line-row').forEach(r => {
+    if (r === selfRow) return;
+    const rp = r.querySelector('.prod-select').value;
+    const gs = r.querySelector('.godam-select');
+    const rg = gs ? gs.value : '';
+    if (rp === pid && rg === gid) sum += parseFloat(r.querySelector('.qty').value) || 0;
+  });
+  return sum;
+}
+
+function refreshAllHints() {
+  document.querySelectorAll('.line-row').forEach(updateGodamHint);
+}
+
 function updateGodamHint(row) {
   const hint = row.querySelector('.godam-stock-hint');
   if (!hint) return;
@@ -243,12 +261,19 @@ function updateGodamHint(row) {
     hint.textContent = parts.length ? 'Available — ' + parts.join(', ') : 'Is product ka kisi bhi godam me stock nahi hai.';
     hint.style.color = '';
   } else {
-    const have = perGodam[gid] || 0;
-    if (qtyWanted > have) {
-      hint.textContent = 'Warning: is godam me sirf ' + have + ' bacha hai (aap ' + qtyWanted + ' bech rahe ho).';
+    const rawHave = perGodam[gid] || 0;
+    const claimed = otherRowsClaim(row, pid, gid);
+    const effectiveHave = rawHave - claimed;
+    if (effectiveHave <= 0) {
+      hint.textContent = 'Stock khatam: is godam me ' + rawHave + ' tha, upar ki lines me poora liya ja chuka hai. Dusra godam chunein.';
+      hint.style.color = '#dc2626';
+    } else if (qtyWanted > effectiveHave) {
+      const claimedNote = claimed > 0 ? ' (' + claimed + ' upar ki lines me pehle se liya)' : '';
+      hint.textContent = 'Warning: is godam me sirf ' + effectiveHave + ' bacha hai' + claimedNote + ', aap ' + qtyWanted + ' bech rahe ho.';
       hint.style.color = '#dc2626';
     } else {
-      hint.textContent = 'Stock available: ' + have;
+      const claimedNote = claimed > 0 ? ' (' + rawHave + ' me se ' + claimed + ' upar ki lines me liya)' : '';
+      hint.textContent = 'Stock available: ' + effectiveHave + claimedNote;
       hint.style.color = '#16a34a';
     }
   }
@@ -282,12 +307,12 @@ function wireRow(row) {
       if (opt && opt.dataset.price) row.querySelector('.price').value = opt.dataset.price;
     }
     recalc();
-    updateGodamHint(row);
+    refreshAllHints();
   });
-  row.querySelectorAll('.qty,.price').forEach(inp => inp.addEventListener('input', () => { recalc(); updateGodamHint(row); }));
-  if (godamSel) godamSel.addEventListener('change', () => updateGodamHint(row));
+  row.querySelectorAll('.qty,.price').forEach(inp => inp.addEventListener('input', () => { recalc(); refreshAllHints(); }));
+  if (godamSel) godamSel.addEventListener('change', refreshAllHints);
   row.querySelector('.remove-row').addEventListener('click', () => {
-    if (document.querySelectorAll('.line-row').length > 1) { row.remove(); recalc(); }
+    if (document.querySelectorAll('.line-row').length > 1) { row.remove(); recalc(); refreshAllHints(); }
   });
   updateGodamHint(row);
 }
@@ -308,6 +333,7 @@ document.getElementById('addRow').addEventListener('click', () => {
   const gh = clone.querySelector('.godam-stock-hint'); if (gh) { gh.textContent=''; gh.style.color=''; }
   container.appendChild(clone);
   wireRow(clone);
+  refreshAllHints();
 });
 recalc();
 </script>
