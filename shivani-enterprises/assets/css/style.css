@@ -274,6 +274,49 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
 .stat-icon.c5 { background: rgba(168,85,247,.16); }
 .stat-icon.c6 { background: rgba(250,204,21,.18); }
 
+/* Toggle switch — used for filter flags like "Only balance due" instead of
+   the raw browser checkbox, which read as a big empty square on desktop
+   and looked equally awkward on mobile. */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--input-bg, #fff);
+  height: 42px;
+  box-sizing: border-box;
+  transition: background .15s, border-color .15s;
+}
+.switch input { position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0; }
+.switch .switch-slider {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 22px;
+  flex: 0 0 38px;
+  background: #cbd5e1;
+  border-radius: 999px;
+  transition: background .15s;
+}
+.switch .switch-slider::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,.25);
+  transition: transform .15s;
+}
+.switch input:checked ~ .switch-slider { background: var(--brand, #14b8a6); }
+.switch input:checked ~ .switch-slider::after { transform: translateX(16px); }
+.switch input:focus-visible ~ .switch-slider { box-shadow: 0 0 0 3px rgba(20,184,166,.35); }
+.switch .switch-label { font-size: 14px; color: var(--text, #0f172a); white-space: nowrap; }
+
 @media (max-width: 400px) {
   .stat-card.has-icon .value { font-size: 20px; }
 }

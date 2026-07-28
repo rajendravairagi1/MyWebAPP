@@ -47,7 +47,12 @@ require __DIR__ . '/../includes/header.php';
     </select>
   </div>
   <div class="form-group">
-    <label><input type="checkbox" name="only_due" value="1" <?= $onlyDue ? 'checked' : '' ?>> Only balance due</label>
+    <label>Show</label>
+    <label class="switch">
+      <input type="checkbox" name="only_due" value="1" <?= $onlyDue ? 'checked' : '' ?>>
+      <span class="switch-slider" aria-hidden="true"></span>
+      <span class="switch-label">Only balance due</span>
+    </label>
   </div>
   <div class="form-group"><button class="btn" type="submit">Filter</button></div>
 </form>
