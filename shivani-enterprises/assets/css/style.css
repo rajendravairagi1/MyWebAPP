@@ -271,6 +271,8 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
 .stat-icon.c2 { background: rgba(94,234,212,.16); }
 .stat-icon.c3 { background: rgba(244,114,182,.16); }
 .stat-icon.c4 { background: rgba(96,165,250,.16); }
+.stat-icon.c5 { background: rgba(168,85,247,.16); }
+.stat-icon.c6 { background: rgba(250,204,21,.18); }
 
 @media (max-width: 400px) {
   .stat-card.has-icon .value { font-size: 20px; }

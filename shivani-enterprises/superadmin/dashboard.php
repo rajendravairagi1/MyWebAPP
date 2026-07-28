@@ -58,8 +58,8 @@ require __DIR__ . '/../includes/header.php';
   <div class="stat-card has-icon"><div class="stat-icon c2">&#9989;</div><div><div class="label">Total Collected</div><div class="value"><?= money($totalPaid) ?></div></div></div>
   <div class="stat-card has-icon"><div class="stat-icon c3">&#9203;</div><div><div class="label">Balance Due</div><div class="value"><?= money($balanceDue) ?></div></div></div>
   <div class="stat-card has-icon"><div class="stat-icon c4">&#128101;</div><div><div class="label">Customers</div><div class="value"><?= $totalCustomers ?></div></div></div>
-  <div class="stat-card"><div class="label">Admins</div><div class="value"><?= $totalAdmins ?></div></div>
-  <div class="stat-card"><div class="label">Pending Follow-ups (due)</div><div class="value"><?= $pendingFollowups ?></div></div>
+  <div class="stat-card has-icon"><div class="stat-icon c5">&#128100;</div><div><div class="label">Admins</div><div class="value"><?= $totalAdmins ?></div></div></div>
+  <div class="stat-card has-icon"><div class="stat-icon c6">&#128276;</div><div><div class="label">Pending Follow-ups (due)</div><div class="value"><?= $pendingFollowups ?></div></div></div>
 </div>
 
 <div class="chart-row">
@@ -79,7 +79,7 @@ require __DIR__ . '/../includes/header.php';
 
 <div class="card chart-card">
   <h3 class="mt-0">Top Products by Sales Value</h3>
-  <?= svg_bar_chart($topProdLabels, $topProdValues, 700, 220, '#f472b6') ?>
+  <?= svg_bar_chart($topProdLabels, $topProdValues, 800, 340, '#ec4899') ?>
 </div>
 
 <div class="card">

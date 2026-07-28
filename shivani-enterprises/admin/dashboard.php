@@ -65,7 +65,7 @@ require __DIR__ . '/../includes/header.php';
   <div class="stat-card has-icon"><div class="stat-icon c2">&#9989;</div><div><div class="label">Total Collected</div><div class="value"><?= money($totalPaid) ?></div></div></div>
   <div class="stat-card has-icon"><div class="stat-icon c3">&#9203;</div><div><div class="label">Balance Due</div><div class="value"><?= money($totalSales - $totalPaid) ?></div></div></div>
   <div class="stat-card has-icon"><div class="stat-icon c4">&#128101;</div><div><div class="label">My Customers</div><div class="value"><?= $totalCustomers ?></div></div></div>
-  <div class="stat-card"><div class="label">Follow-ups Due</div><div class="value"><?= $duefollowups ?></div></div>
+  <div class="stat-card has-icon"><div class="stat-icon c6">&#128276;</div><div><div class="label">Follow-ups Due</div><div class="value"><?= $duefollowups ?></div></div></div>
 </div>
 
 <div class="chart-row">
@@ -85,7 +85,7 @@ require __DIR__ . '/../includes/header.php';
 
 <div class="card chart-card">
   <h3 class="mt-0">My Top Products</h3>
-  <?= svg_bar_chart($topProdLabels, $topProdValues, 700, 220, '#f472b6') ?>
+  <?= svg_bar_chart($topProdLabels, $topProdValues, 800, 340, '#ec4899') ?>
 </div>
 
 <div class="card">
