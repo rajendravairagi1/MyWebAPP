@@ -28,11 +28,41 @@ if ($u['role'] !== 'super_admin' && (int)$customer['admin_id'] !== (int)$u['id']
 $pageTitle = $sale ? 'Edit Invoice ' . $sale['invoice_no'] : 'New Sale / Invoice';
 
 $products = db()->query('SELECT * FROM products WHERE is_active = 1 ORDER BY name')->fetchAll();
+$godams = db()->query('SELECT id, name FROM godams WHERE is_active = 1 ORDER BY name')->fetchAll();
 $errors = [];
+
+// Current per-godam stock lookup: [product_id][godam_id] = qty. Feeds the
+// mobile-friendly stock hint under each sale line so the admin knows how
+// much is available at each godam before picking one.
+$stockLookup = [];
+if ($godams) {
+    foreach (db()->query('SELECT product_id, godam_id, qty FROM product_stock')->fetchAll() as $s) {
+        $stockLookup[(int)$s['product_id']][(int)$s['godam_id']] = (float)$s['qty'];
+    }
+}
 
 if ($sale && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
     verify_csrf();
-    db()->prepare('DELETE FROM sales WHERE id = ?')->execute([$saleId]); // sale_items cascades; payments.sale_id -> NULL
+    // Return stock to whichever godams the sale lines came from, and record
+    // reversing movements, before deleting the sale itself.
+    $db = db();
+    $db->beginTransaction();
+    try {
+        $lines = $db->prepare('SELECT product_id, godam_id, qty FROM sale_items WHERE sale_id = ? AND product_id IS NOT NULL AND godam_id IS NOT NULL');
+        $lines->execute([$saleId]);
+        $upd = $db->prepare('UPDATE product_stock SET qty = qty + ? WHERE product_id = ? AND godam_id = ?');
+        $mov = $db->prepare('INSERT INTO stock_movements (product_id, godam_id, movement_type, qty_change, ref_type, ref_id, admin_id, note) VALUES (?,?,?,?,?,?,?,?)');
+        foreach ($lines->fetchAll() as $ln) {
+            $upd->execute([(float)$ln['qty'], (int)$ln['product_id'], (int)$ln['godam_id']]);
+            $mov->execute([(int)$ln['product_id'], (int)$ln['godam_id'], 'adjustment', (float)$ln['qty'], 'sale_delete', $saleId, $u['id'], 'Invoice deleted — stock returned']);
+        }
+        $db->prepare('DELETE FROM sales WHERE id = ?')->execute([$saleId]);
+        $db->commit();
+    } catch (Throwable $e) {
+        $db->rollBack();
+        flash('error', 'Could not delete invoice: ' . $e->getMessage());
+        redirect('sale_view.php?id=' . $saleId);
+    }
     flash('success', 'Invoice deleted.');
     redirect('customer_view.php?id=' . $customerId);
 }
@@ -45,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 's
     $customNames = $_POST['custom_name'] ?? [];
     $qtys = $_POST['qty'] ?? [];
     $prices = $_POST['price'] ?? [];
+    $godamIds = $_POST['godam_id'] ?? [];
 
     $items = [];
     $total = 0;
@@ -53,15 +84,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 's
         $qty = (float)($qtys[$i] ?? 0);
         $price = (float)($prices[$i] ?? 0);
         $customName = trim($customNames[$i] ?? '');
+        $gid = (int)($godamIds[$i] ?? 0) ?: null;
         if ($qty <= 0) continue;
         if ($pid <= 0) {
-            // "Other / Custom Product" line - not tied to the products catalog.
+            // "Other / Custom Product" line - not tied to the products catalog,
+            // so no stock deduction either.
             if ($customName === '') continue;
             $lineTotal = round($qty * $price, 2);
-            $items[] = ['product_id' => null, 'product_name' => $customName, 'qty' => $qty, 'price' => $price, 'line_total' => $lineTotal];
+            $items[] = ['product_id' => null, 'godam_id' => null, 'product_name' => $customName, 'qty' => $qty, 'price' => $price, 'line_total' => $lineTotal];
         } else {
             $lineTotal = round($qty * $price, 2);
-            $items[] = ['product_id' => $pid, 'product_name' => null, 'qty' => $qty, 'price' => $price, 'line_total' => $lineTotal];
+            $items[] = ['product_id' => $pid, 'godam_id' => $gid, 'product_name' => null, 'qty' => $qty, 'price' => $price, 'line_total' => $lineTotal];
         }
         $total += $lineTotal;
     }
@@ -72,9 +105,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 's
         $db->beginTransaction();
         try {
             $prodNameStmt = $db->prepare('SELECT name FROM products WHERE id = ?');
-            $itemStmt = $db->prepare('INSERT INTO sale_items (sale_id, product_id, product_name, qty, price, line_total) VALUES (?,?,?,?,?,?)');
+            $itemStmt = $db->prepare('INSERT INTO sale_items (sale_id, product_id, product_name, godam_id, qty, price, line_total) VALUES (?,?,?,?,?,?,?)');
+            $stockUpsert = $db->prepare('INSERT INTO product_stock (product_id, godam_id, qty) VALUES (?,?,?) ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty)');
+            $movStmt = $db->prepare('INSERT INTO stock_movements (product_id, godam_id, movement_type, qty_change, ref_type, ref_id, admin_id, note) VALUES (?,?,?,?,?,?,?,?)');
 
             if ($sale) {
+                // Editing an existing invoice: return the old lines' stock first,
+                // then re-deduct according to the new lines. Simpler and always
+                // correct vs. trying to diff line-by-line.
+                $old = $db->prepare('SELECT product_id, godam_id, qty FROM sale_items WHERE sale_id = ? AND product_id IS NOT NULL AND godam_id IS NOT NULL');
+                $old->execute([$saleId]);
+                foreach ($old->fetchAll() as $o) {
+                    $stockUpsert->execute([(int)$o['product_id'], (int)$o['godam_id'], (float)$o['qty']]);
+                    $movStmt->execute([(int)$o['product_id'], (int)$o['godam_id'], 'adjustment', (float)$o['qty'], 'sale_edit', $saleId, $u['id'], 'Invoice edited — old stock returned']);
+                }
                 $stmt = $db->prepare('UPDATE sales SET sale_date=?, total_amount=?, notes=? WHERE id=?');
                 $stmt->execute([$saleDate, $total, $notes ?: null, $saleId]);
                 $db->prepare('DELETE FROM sale_items WHERE sale_id = ?')->execute([$saleId]);
@@ -94,7 +138,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 's
                     $prodNameStmt->execute([$it['product_id']]);
                     $pname = $prodNameStmt->fetchColumn() ?: 'Product';
                 }
-                $itemStmt->execute([$newSaleId, $it['product_id'], $pname, $it['qty'], $it['price'], $it['line_total']]);
+                $itemStmt->execute([$newSaleId, $it['product_id'], $pname, $it['godam_id'], $it['qty'], $it['price'], $it['line_total']]);
+                // Deduct stock + log movement only for real catalog products
+                // that have a godam picked. Custom/other lines skip stock.
+                if ($it['product_id'] && $it['godam_id']) {
+                    $stockUpsert->execute([$it['product_id'], $it['godam_id'], -$it['qty']]);
+                    $movStmt->execute([$it['product_id'], $it['godam_id'], 'sale', -$it['qty'], 'sale', $newSaleId, $u['id'], 'Invoice ' . $invoiceNo]);
+                }
             }
             $db->commit();
             flash('success', $sale ? 'Invoice ' . $invoiceNo . ' updated.' : 'Sale recorded. Invoice ' . $invoiceNo . ' generated.');
@@ -142,6 +192,17 @@ require __DIR__ . '/includes/header.php';
           <input type="text" name="custom_name[]" class="custom-name" placeholder="Enter product name"
             style="<?= ($row && $row['product_id'] === null) ? 'display:block' : 'display:none' ?>;margin-top:8px"
             value="<?= ($row && $row['product_id'] === null) ? e($row['product_name']) : '' ?>">
+          <?php if ($godams): ?>
+          <select name="godam_id[]" class="godam-select" style="margin-top:8px">
+            <option value="">-- Godam (kis se maal utha) --</option>
+            <?php foreach ($godams as $g): ?>
+              <option value="<?= (int)$g['id'] ?>" <?= ($row && (int)$row['godam_id'] === (int)$g['id']) ? 'selected' : '' ?>><?= e($g['name']) ?></option>
+            <?php endforeach; ?>
+          </select>
+          <div class="godam-stock-hint text-muted" style="font-size:12px;margin-top:4px"></div>
+          <?php else: ?>
+            <input type="hidden" name="godam_id[]" value="">
+          <?php endif; ?>
         </div>
         <div class="li-field"><input type="number" step="0.01" min="0.01" name="qty[]" class="qty" value="<?= e($row['qty'] ?? '1') ?>" placeholder="Qty" required></div>
         <div class="li-field"><input type="number" step="0.01" name="price[]" class="price" placeholder="Price (Rs.)" required value="<?= e($row['price'] ?? '') ?>"></div>
@@ -165,6 +226,34 @@ require __DIR__ . '/includes/header.php';
 </div>
 
 <script>
+const STOCK_LOOKUP = <?= json_encode($stockLookup) ?>;
+const GODAM_NAMES = <?= json_encode(array_column($godams, 'name', 'id')) ?>;
+
+function updateGodamHint(row) {
+  const hint = row.querySelector('.godam-stock-hint');
+  if (!hint) return;
+  const pid = row.querySelector('.prod-select').value;
+  const gsel = row.querySelector('.godam-select');
+  const gid = gsel ? gsel.value : '';
+  const qtyWanted = parseFloat(row.querySelector('.qty').value) || 0;
+  if (!pid || pid === '0') { hint.textContent = ''; return; }
+  const perGodam = STOCK_LOOKUP[pid] || {};
+  if (!gid) {
+    const parts = Object.keys(perGodam).map(k => (GODAM_NAMES[k] || 'Godam') + ': ' + perGodam[k]);
+    hint.textContent = parts.length ? 'Available — ' + parts.join(', ') : 'Is product ka kisi bhi godam me stock nahi hai.';
+    hint.style.color = '';
+  } else {
+    const have = perGodam[gid] || 0;
+    if (qtyWanted > have) {
+      hint.textContent = 'Warning: is godam me sirf ' + have + ' bacha hai (aap ' + qtyWanted + ' bech rahe ho).';
+      hint.style.color = '#dc2626';
+    } else {
+      hint.textContent = 'Stock available: ' + have;
+      hint.style.color = '#16a34a';
+    }
+  }
+}
+
 function recalc() {
   let grand = 0;
   document.querySelectorAll('.line-row').forEach(row => {
@@ -179,6 +268,7 @@ function recalc() {
 function wireRow(row) {
   const select = row.querySelector('.prod-select');
   const customInput = row.querySelector('.custom-name');
+  const godamSel = row.querySelector('.godam-select');
   select.addEventListener('change', e => {
     const opt = e.target.selectedOptions[0];
     if (select.value === '0') {
@@ -192,11 +282,14 @@ function wireRow(row) {
       if (opt && opt.dataset.price) row.querySelector('.price').value = opt.dataset.price;
     }
     recalc();
+    updateGodamHint(row);
   });
-  row.querySelectorAll('.qty,.price').forEach(inp => inp.addEventListener('input', recalc));
+  row.querySelectorAll('.qty,.price').forEach(inp => inp.addEventListener('input', () => { recalc(); updateGodamHint(row); }));
+  if (godamSel) godamSel.addEventListener('change', () => updateGodamHint(row));
   row.querySelector('.remove-row').addEventListener('click', () => {
     if (document.querySelectorAll('.line-row').length > 1) { row.remove(); recalc(); }
   });
+  updateGodamHint(row);
 }
 document.querySelectorAll('.line-row').forEach(wireRow);
 document.getElementById('addRow').addEventListener('click', () => {
@@ -211,6 +304,8 @@ document.getElementById('addRow').addEventListener('click', () => {
   clone.querySelector('.custom-name').required = false;
   clone.querySelector('.prod-select').value = '';
   clone.querySelector('.line-total').textContent = '0.00';
+  const gs = clone.querySelector('.godam-select'); if (gs) gs.value = '';
+  const gh = clone.querySelector('.godam-stock-hint'); if (gh) { gh.textContent=''; gh.style.color=''; }
   container.appendChild(clone);
   wireRow(clone);
 });

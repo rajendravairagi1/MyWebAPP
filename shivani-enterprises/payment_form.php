@@ -88,6 +88,13 @@ require __DIR__ . '/includes/header.php';
 <div class="card">
   <h3 class="mt-0"><?= $payment ? 'Edit Payment' : 'Record Payment' ?> - <?= e($customer['name']) ?></h3>
   <?php foreach ($errors as $err): ?><div class="alert error"><?= e($err) ?></div><?php endforeach; ?>
+  <?php $isDirect = $payment ? empty($payment['sale_id']) : true; ?>
+  <div class="pay-mode-toggle" style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <button type="button" class="btn <?= $isDirect ? 'secondary' : '' ?>" id="modeInvoiceBtn" style="flex:1 1 200px">Against Invoice</button>
+    <button type="button" class="btn <?= $isDirect ? '' : 'secondary' ?>" id="modeDirectBtn" style="flex:1 1 200px">Direct Payment</button>
+  </div>
+  <p class="text-muted" style="font-size:13px;margin-top:-8px" id="modeHint"></p>
+
   <form method="post">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="save">
@@ -104,18 +111,20 @@ require __DIR__ . '/includes/header.php';
         </select>
       </div>
     </div>
-    <div class="form-row">
+    <div class="form-row" id="invoicePickerRow" style="<?= $isDirect ? 'display:none' : '' ?>">
       <div class="form-group">
-        <label>Against Invoice (optional)</label>
+        <label>Against Invoice</label>
         <select name="sale_id" id="saleIdSelect" data-remaining="<?= e(json_encode(array_column($sales, 'remaining', 'id'))) ?>">
-          <option value="">-- general payment --</option>
+          <option value="">-- select invoice --</option>
           <?php foreach ($sales as $s): ?>
             <option value="<?= (int)$s['id'] ?>" <?= (int)($payment['sale_id'] ?? 0) === (int)$s['id'] ? 'selected' : '' ?>><?= e($s['invoice_no']) ?> (Due <?= money($s['remaining']) ?> of <?= money($s['total_amount']) ?>, <?= e(date('d-M-Y', strtotime($s['sale_date']))) ?>)</option>
           <?php endforeach; ?>
         </select>
         <p class="text-muted" id="remainingHint" style="font-size:13px;margin:6px 0 0"></p>
       </div>
-      <div class="form-group"><label>Note</label><input name="note" placeholder="Optional" value="<?= e($payment['note'] ?? '') ?>"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Note (internal, PDF me nahi aayega)</label><input name="note" placeholder="Optional" value="<?= e($payment['note'] ?? '') ?>"></div>
     </div>
     <button class="btn" type="submit"><?= $payment ? 'Save Changes' : 'Save Payment' ?></button>
   </form>
@@ -129,9 +138,36 @@ require __DIR__ . '/includes/header.php';
 </div>
 <script>
 (function () {
+  var invBtn = document.getElementById('modeInvoiceBtn');
+  var dirBtn = document.getElementById('modeDirectBtn');
+  var pickerRow = document.getElementById('invoicePickerRow');
+  var modeHint = document.getElementById('modeHint');
   var sel = document.getElementById('saleIdSelect');
+
+  function setMode(direct) {
+    if (direct) {
+      pickerRow.style.display = 'none';
+      if (sel) sel.value = '';
+      invBtn.classList.add('secondary');
+      dirBtn.classList.remove('secondary');
+      modeHint.textContent = 'Direct payment — customer ke total balance mese seedha minus hoga (kisi specific invoice se tag nahi).';
+    } else {
+      pickerRow.style.display = '';
+      invBtn.classList.remove('secondary');
+      dirBtn.classList.add('secondary');
+      modeHint.textContent = 'Kis invoice ke against payment aya hai wo select karein — us invoice ka balance kam hoga.';
+    }
+    if (hint) hint.textContent = '';
+    if (sel) update();
+  }
+  invBtn.addEventListener('click', function () { setMode(false); });
+  dirBtn.addEventListener('click', function () { setMode(true); });
+
   var amountInput = document.querySelector('input[name="amount"]');
   var hint = document.getElementById('remainingHint');
+  // initialise hint copy for whichever mode is active on page load
+  modeHint.textContent = <?= $isDirect ? "'Direct payment — customer ke total balance mese seedha minus hoga (kisi specific invoice se tag nahi).'" : "'Kis invoice ke against payment aya hai wo select karein — us invoice ka balance kam hoga.'" ?>;
+
   if (!sel || !amountInput || !hint) return;
   var remaining = {};
   try { remaining = JSON.parse(sel.dataset.remaining || '{}'); } catch (e) {}

@@ -196,20 +196,34 @@ require __DIR__ . '/includes/header.php';
   </table>
 </div>
 
+<?php
+// Invoice number lookup for the Type column on each payment - tagged
+// payments show the invoice they're linked to, everything else is a
+// "Direct" payment against the customer's overall balance.
+$invNoLookup = [];
+foreach ($sales as $s) { $invNoLookup[(int)$s['id']] = $s['invoice_no']; }
+?>
 <div class="card">
   <h3 class="mt-0">Payments</h3>
   <table>
-    <tr><th>Date</th><th>Amount</th><th>Mode</th><th>Note</th><th></th></tr>
+    <tr><th>Date</th><th>Amount</th><th>Type</th><th>Mode</th><th>Note</th><th></th></tr>
     <?php foreach ($payments as $p): ?>
     <tr>
       <td><?= e(date('d-M-Y', strtotime($p['payment_date']))) ?></td>
       <td><?= money($p['amount']) ?></td>
+      <td>
+        <?php if (!empty($p['sale_id']) && isset($invNoLookup[(int)$p['sale_id']])): ?>
+          <span class="badge green">Invoice <?= e($invNoLookup[(int)$p['sale_id']]) ?></span>
+        <?php else: ?>
+          <span class="badge orange">Direct</span>
+        <?php endif; ?>
+      </td>
       <td><?= e($p['mode']) ?></td>
       <td><?= e($p['note']) ?></td>
       <td><a href="<?= e(base_url('payment_form.php?id=' . $p['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
-    <?php if (!$payments): ?><tr><td colspan="5" class="text-muted">No payments yet.</td></tr><?php endif; ?>
+    <?php if (!$payments): ?><tr><td colspan="6" class="text-muted">No payments yet.</td></tr><?php endif; ?>
   </table>
 </div>
 
