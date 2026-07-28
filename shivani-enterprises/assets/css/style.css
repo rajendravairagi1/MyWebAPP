@@ -317,7 +317,7 @@ h1, h2, h3 { line-height: 1.25; letter-spacing: -0.01em; }
 .switch input:checked ~ .switch-slider { background: var(--brand, #14b8a6); }
 .switch input:checked ~ .switch-slider::after { transform: translateX(16px); }
 .switch input:focus-visible ~ .switch-slider { box-shadow: 0 0 0 3px rgba(20,184,166,.35); }
-.switch .switch-label { font-size: 14px; color: var(--text, #0f172a); white-space: nowrap; line-height: 1; display: inline-flex; align-items: center; height: 22px; position: relative; top: -1px; }
+.switch .switch-label { font-size: 14px; color: var(--text, #0f172a); white-space: nowrap; line-height: 1; display: inline-flex; align-items: center; height: 22px; position: relative; top: -3px; }
 
 @media (max-width: 400px) {
   .stat-card.has-icon .value { font-size: 20px; }
