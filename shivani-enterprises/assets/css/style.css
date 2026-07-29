@@ -407,6 +407,53 @@ tr:hover td { background: rgba(127,127,127,.06); }
 .form-row { display: flex; gap: 14px; flex-wrap: wrap; }
 .form-row .form-group { flex: 1; min-width: 200px; }
 
+/* Stock rows inside a Godown card — a clean row per product with an editable
+ * qty input styled like the rest of the app's form controls (same border,
+ * radius, focus ring) and Save/Delete pill buttons on the right.
+ * Collapses to a stacked 2-line card on narrow screens so the input stays
+ * touch-friendly. */
+.stock-rows { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.stock-row {
+  display: grid;
+  grid-template-columns: 1fr 140px auto;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card) 92%, transparent);
+  transition: border-color .15s, background .15s;
+}
+.stock-row:hover { border-color: color-mix(in srgb, var(--brand-a) 40%, var(--border)); }
+.stock-row .sr-title { font-weight: 600; font-size: 15px; }
+.stock-row .sr-sub { font-size: 12.5px; margin-top: 2px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.stock-row .sr-qty { margin: 0; }
+.stock-row .sr-qty input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  background: var(--card);
+  color: var(--text);
+  min-height: 42px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  transition: border-color .15s, box-shadow .15s;
+}
+.stock-row .sr-qty input:focus {
+  outline: none;
+  border-color: var(--brand-a);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-a) 20%, transparent);
+}
+.stock-row .sr-actions { display: flex; gap: 6px; flex-wrap: nowrap; }
+@media (max-width: 640px) {
+  .stock-row { grid-template-columns: 1fr auto; grid-template-areas: 'name name' 'qty actions'; }
+  .stock-row .sr-name { grid-area: name; }
+  .stock-row .sr-qty { grid-area: qty; }
+  .stock-row .sr-actions { grid-area: actions; }
+}
+
 /* Live-validation feedback (data-validate="mobile"/"username" fields in app.js) */
 input.invalid { border-color: var(--danger) !important; }
 input.invalid:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 20%, transparent) !important; }

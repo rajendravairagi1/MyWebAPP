@@ -147,37 +147,37 @@ require __DIR__ . '/../includes/header.php';
       <?php if (!$stk): ?>
         <p class="text-muted" style="margin:6px 0 14px">Abhi tak is Godown me koi stock nahi rakha. <a href="<?= e(base_url('superadmin/stock_entry.php')) ?>">+ Add Stock Entry</a></p>
       <?php else: ?>
-        <table style="margin-bottom:14px">
-          <tr><th>Product</th><th style="width:160px">Qty (editable)</th><th style="width:1%;white-space:nowrap"></th></tr>
+        <div class="stock-rows">
           <?php foreach ($stk as $s): $q = (float)$s['qty']; $low = $q > 0 && $q < 5; $sfid = 'sf-' . (int)$s['godam_id'] . '-' . (int)$s['product_id']; ?>
-            <tr>
-              <td>
-                <?= e($s['product_name']) ?> <span class="text-muted">(<?= e($s['unit']) ?>)</span>
-                <?php if ($q <= 0): ?><span class="badge gray" style="margin-left:6px">Out of stock</span>
-                <?php elseif ($low): ?><span class="badge orange" style="margin-left:6px">Low</span><?php endif; ?>
-              </td>
-              <td>
-                <form id="<?= $sfid ?>" method="post" style="margin:0;display:flex;align-items:center;gap:6px">
-                  <?= csrf_field() ?>
-                  <input type="hidden" name="action" value="stock_update">
-                  <input type="hidden" name="godam_id" value="<?= (int)$s['godam_id'] ?>">
-                  <input type="hidden" name="product_id" value="<?= (int)$s['product_id'] ?>">
-                  <input type="number" step="0.01" name="qty" value="<?= rtrim(rtrim(number_format($q, 2, '.', ''), '0'), '.') ?>" style="width:100px" required>
-                </form>
-              </td>
-              <td style="white-space:nowrap">
+            <div class="stock-row">
+              <div class="sr-name">
+                <div class="sr-title"><?= e($s['product_name']) ?></div>
+                <div class="sr-sub">
+                  <span class="text-muted">(<?= e($s['unit']) ?>)</span>
+                  <?php if ($q <= 0): ?><span class="badge gray">Out of stock</span>
+                  <?php elseif ($low): ?><span class="badge orange">Low</span><?php endif; ?>
+                </div>
+              </div>
+              <form id="<?= $sfid ?>" method="post" class="sr-qty">
+                <?= csrf_field() ?>
+                <input type="hidden" name="action" value="stock_update">
+                <input type="hidden" name="godam_id" value="<?= (int)$s['godam_id'] ?>">
+                <input type="hidden" name="product_id" value="<?= (int)$s['product_id'] ?>">
+                <input type="number" step="0.01" name="qty" value="<?= rtrim(rtrim(number_format($q, 2, '.', ''), '0'), '.') ?>" required>
+              </form>
+              <div class="sr-actions">
                 <button form="<?= $sfid ?>" class="btn small" type="submit">Save</button>
-                <form method="post" style="margin:0;display:inline" onsubmit="return confirm('Is product ka stock is Godown se poora hata dein? (movements history rahegi)')">
+                <form method="post" style="margin:0" onsubmit="return confirm('Is product ka stock is Godown se poora hata dein? (movements history rahegi)')">
                   <?= csrf_field() ?>
                   <input type="hidden" name="action" value="stock_delete">
                   <input type="hidden" name="godam_id" value="<?= (int)$s['godam_id'] ?>">
                   <input type="hidden" name="product_id" value="<?= (int)$s['product_id'] ?>">
                   <button class="btn small danger" type="submit">Delete</button>
                 </form>
-              </td>
-            </tr>
+              </div>
+            </div>
           <?php endforeach; ?>
-        </table>
+        </div>
       <?php endif; ?>
 
       <h4 style="margin:18px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.4px;color:#64748b">Edit Godown</h4>
