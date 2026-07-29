@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../includes/functions.php';
-require_role('super_admin');
+$u = require_role('super_admin');
 $pageTitle = 'Godowns / Warehouses';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -38,6 +38,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             db()->prepare('DELETE FROM godams WHERE id = ?')->execute([$id]);
             flash('success', 'Godown deleted.');
         }
+    } elseif ($action === 'stock_update') {
+        // Manual edit of a product's qty in a specific godown - jump the
+        // stock straight to the new number and record an adjustment
+        // movement for the delta so history stays intact.
+        $pid  = (int)($_POST['product_id'] ?? 0);
+        $gid  = (int)($_POST['godam_id'] ?? 0);
+        $newQ = (float)($_POST['qty'] ?? 0);
+        if ($pid > 0 && $gid > 0) {
+            $db = db();
+            $db->beginTransaction();
+            try {
+                $curStmt = $db->prepare('SELECT qty FROM product_stock WHERE product_id = ? AND godam_id = ?');
+                $curStmt->execute([$pid, $gid]);
+                $cur = (float)($curStmt->fetchColumn() ?: 0);
+                $delta = $newQ - $cur;
+                $db->prepare('INSERT INTO product_stock (product_id, godam_id, qty) VALUES (?,?,?) ON DUPLICATE KEY UPDATE qty = VALUES(qty)')
+                   ->execute([$pid, $gid, $newQ]);
+                if (abs($delta) > 0.0001) {
+                    $db->prepare('INSERT INTO stock_movements (product_id, godam_id, movement_type, qty_change, ref_type, admin_id, note) VALUES (?,?,?,?,?,?,?)')
+                       ->execute([$pid, $gid, 'adjustment', $delta, 'manual_edit', $u['id'], 'Manual edit: ' . rtrim(rtrim(number_format($cur,2),'0'),'.') . ' -> ' . rtrim(rtrim(number_format($newQ,2),'0'),'.')]);
+                }
+                $db->commit();
+                flash('success', 'Stock qty update ho gayi.');
+            } catch (Throwable $e) {
+                $db->rollBack();
+                flash('error', 'Update fail: ' . $e->getMessage());
+            }
+        }
+    } elseif ($action === 'stock_delete') {
+        // Remove the product_stock row entirely (product no longer stored
+        // in this godown). Log the removal as an adjustment for history.
+        $pid = (int)($_POST['product_id'] ?? 0);
+        $gid = (int)($_POST['godam_id'] ?? 0);
+        if ($pid > 0 && $gid > 0) {
+            $db = db();
+            $db->beginTransaction();
+            try {
+                $curStmt = $db->prepare('SELECT qty FROM product_stock WHERE product_id = ? AND godam_id = ?');
+                $curStmt->execute([$pid, $gid]);
+                $cur = (float)($curStmt->fetchColumn() ?: 0);
+                $db->prepare('DELETE FROM product_stock WHERE product_id = ? AND godam_id = ?')->execute([$pid, $gid]);
+                if (abs($cur) > 0.0001) {
+                    $db->prepare('INSERT INTO stock_movements (product_id, godam_id, movement_type, qty_change, ref_type, admin_id, note) VALUES (?,?,?,?,?,?,?)')
+                       ->execute([$pid, $gid, 'adjustment', -$cur, 'manual_delete', $u['id'], 'Manual delete: product hataya, ' . rtrim(rtrim(number_format($cur,2),'0'),'.') . ' qty nikali']);
+                }
+                $db->commit();
+                flash('success', 'Product is Godown se hata diya.');
+            } catch (Throwable $e) {
+                $db->rollBack();
+                flash('error', 'Delete fail: ' . $e->getMessage());
+            }
+        }
     }
     redirect('superadmin/godams.php');
 }
@@ -51,7 +103,7 @@ $godams = db()->query("
 
 // Products in each godam for the expandable "kaun kaun sa maal rakha hai" panel.
 $stockRows = db()->query("
-  SELECT ps.godam_id, ps.qty, p.name AS product_name, p.unit
+  SELECT ps.godam_id, ps.product_id, ps.qty, p.name AS product_name, p.unit
   FROM product_stock ps
   JOIN products p ON p.id = ps.product_id
   ORDER BY p.name
@@ -96,16 +148,32 @@ require __DIR__ . '/../includes/header.php';
         <p class="text-muted" style="margin:6px 0 14px">Abhi tak is Godown me koi stock nahi rakha. <a href="<?= e(base_url('superadmin/stock_entry.php')) ?>">+ Add Stock Entry</a></p>
       <?php else: ?>
         <table style="margin-bottom:14px">
-          <tr><th>Product</th><th style="text-align:right">Qty</th></tr>
-          <?php foreach ($stk as $s): $q = (float)$s['qty']; $low = $q > 0 && $q < 5; ?>
+          <tr><th>Product</th><th style="width:160px">Qty (editable)</th><th style="width:1%;white-space:nowrap"></th></tr>
+          <?php foreach ($stk as $s): $q = (float)$s['qty']; $low = $q > 0 && $q < 5; $sfid = 'sf-' . (int)$s['godam_id'] . '-' . (int)$s['product_id']; ?>
             <tr>
-              <td><?= e($s['product_name']) ?> <span class="text-muted">(<?= e($s['unit']) ?>)</span></td>
-              <td style="text-align:right">
-                <strong style="color:<?= $q <= 0 ? '#dc2626' : ($low ? '#ea580c' : 'inherit') ?>">
-                  <?= rtrim(rtrim(number_format($q, 2), '0'), '.') ?>
-                </strong>
+              <td>
+                <?= e($s['product_name']) ?> <span class="text-muted">(<?= e($s['unit']) ?>)</span>
                 <?php if ($q <= 0): ?><span class="badge gray" style="margin-left:6px">Out of stock</span>
                 <?php elseif ($low): ?><span class="badge orange" style="margin-left:6px">Low</span><?php endif; ?>
+              </td>
+              <td>
+                <form id="<?= $sfid ?>" method="post" style="margin:0;display:flex;align-items:center;gap:6px">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="action" value="stock_update">
+                  <input type="hidden" name="godam_id" value="<?= (int)$s['godam_id'] ?>">
+                  <input type="hidden" name="product_id" value="<?= (int)$s['product_id'] ?>">
+                  <input type="number" step="0.01" name="qty" value="<?= rtrim(rtrim(number_format($q, 2, '.', ''), '0'), '.') ?>" style="width:100px" required>
+                </form>
+              </td>
+              <td style="white-space:nowrap">
+                <button form="<?= $sfid ?>" class="btn small" type="submit">Save</button>
+                <form method="post" style="margin:0;display:inline" onsubmit="return confirm('Is product ka stock is Godown se poora hata dein? (movements history rahegi)')">
+                  <?= csrf_field() ?>
+                  <input type="hidden" name="action" value="stock_delete">
+                  <input type="hidden" name="godam_id" value="<?= (int)$s['godam_id'] ?>">
+                  <input type="hidden" name="product_id" value="<?= (int)$s['product_id'] ?>">
+                  <button class="btn small danger" type="submit">Delete</button>
+                </form>
               </td>
             </tr>
           <?php endforeach; ?>
