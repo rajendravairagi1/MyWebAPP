@@ -45,6 +45,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pid  = (int)($_POST['product_id'] ?? 0);
         $gid  = (int)($_POST['godam_id'] ?? 0);
         $newQ = (float)($_POST['qty'] ?? 0);
+        if ($newQ < 0) {
+            flash('error', 'Stock qty negative nahi ho sakti. 0 ya usse zyada daalein.');
+            redirect('superadmin/godams.php');
+        }
         if ($pid > 0 && $gid > 0) {
             $db = db();
             $db->beginTransaction();
@@ -163,7 +167,7 @@ require __DIR__ . '/../includes/header.php';
                 <input type="hidden" name="action" value="stock_update">
                 <input type="hidden" name="godam_id" value="<?= (int)$s['godam_id'] ?>">
                 <input type="hidden" name="product_id" value="<?= (int)$s['product_id'] ?>">
-                <input type="number" step="0.01" name="qty" value="<?= rtrim(rtrim(number_format($q, 2, '.', ''), '0'), '.') ?>" required>
+                <input type="number" step="0.01" min="0" name="qty" value="<?= rtrim(rtrim(number_format($q, 2, '.', ''), '0'), '.') ?>" required>
               </form>
               <div class="sr-actions">
                 <button form="<?= $sfid ?>" class="btn small" type="submit">Save</button>

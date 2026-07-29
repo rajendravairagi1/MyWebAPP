@@ -100,6 +100,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 's
     }
     if (!$items) $errors[] = 'Add at least one product line with quantity and price (or use "Other" for a custom item).';
 
+    // Server-side stock check: reject the whole sale if any line would push
+    // a godown below zero. When editing, the old sale's lines are being
+    // returned to stock first, so we net (existing sale contribution) out
+    // of the required qty per (product, godam) pair.
+    if (!$errors) {
+        $existingContrib = []; // [pid][gid] => qty currently held by this sale
+        if ($sale) {
+            $stmt = db()->prepare('SELECT product_id, godam_id, qty FROM sale_items WHERE sale_id = ? AND product_id IS NOT NULL AND godam_id IS NOT NULL');
+            $stmt->execute([$saleId]);
+            foreach ($stmt->fetchAll() as $o) {
+                $existingContrib[(int)$o['product_id']][(int)$o['godam_id']] = ($existingContrib[(int)$o['product_id']][(int)$o['godam_id']] ?? 0) + (float)$o['qty'];
+            }
+        }
+        $wanted = []; // aggregate new lines per (pid, gid)
+        foreach ($items as $it) {
+            if (!$it['product_id'] || !$it['godam_id']) continue;
+            $wanted[$it['product_id']][$it['godam_id']] = ($wanted[$it['product_id']][$it['godam_id']] ?? 0) + $it['qty'];
+        }
+        foreach ($wanted as $pid => $perG) {
+            foreach ($perG as $gid => $qtyNeeded) {
+                $c = db()->prepare('SELECT qty FROM product_stock WHERE product_id = ? AND godam_id = ?');
+                $c->execute([$pid, $gid]);
+                $available = (float)($c->fetchColumn() ?: 0) + ($existingContrib[$pid][$gid] ?? 0);
+                if ($qtyNeeded > $available) {
+                    $pn = db()->prepare('SELECT name FROM products WHERE id = ?');
+                    $pn->execute([$pid]);
+                    $gn = db()->prepare('SELECT name FROM godams WHERE id = ?');
+                    $gn->execute([$gid]);
+                    $errors[] = ($pn->fetchColumn() ?: 'Product') . ' — ' . ($gn->fetchColumn() ?: 'Godown') . ' me sirf ' . rtrim(rtrim(number_format($available, 2), '0'), '.') . ' bacha hai, aap ' . rtrim(rtrim(number_format($qtyNeeded, 2), '0'), '.') . ' bech rahe ho. Stock 0 se neeche nahi ja sakta.';
+                }
+            }
+        }
+    }
+
     if (!$errors) {
         $db = db();
         $db->beginTransaction();

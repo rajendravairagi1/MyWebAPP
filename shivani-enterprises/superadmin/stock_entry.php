@@ -31,6 +31,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ? ('Direct sale (no bill)' . ($note !== '' ? ' — ' . $note : ''))
             : ($note ?: null);
 
+        // Never let stock cross zero from below - block the entry if the
+        // resulting qty would be negative.
+        $curStmt = db()->prepare('SELECT qty FROM product_stock WHERE product_id = ? AND godam_id = ?');
+        $curStmt->execute([$productId, $godamId]);
+        $curQ = (float)($curStmt->fetchColumn() ?: 0);
+        if ($curQ + $delta < 0) {
+            $errors[] = 'Godown me sirf ' . rtrim(rtrim(number_format($curQ, 2), '0'), '.') . ' bacha hai — utni hi qty nikal sakte ho, uske se zyada nahi (stock 0 se neeche nahi ja sakta).';
+        }
+    }
+
+    if (!$errors) {
         $db = db();
         $db->beginTransaction();
         try {
