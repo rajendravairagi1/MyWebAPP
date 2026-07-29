@@ -89,7 +89,7 @@ require __DIR__ . '/../includes/header.php';
     <tr><th>Customer</th><th>Mobile</th><th>Given</th><th>Paid</th><th>Balance</th></tr>
     <?php foreach ($customers as $c): $bal = $c['total_given'] - $c['total_paid']; ?>
     <tr>
-      <td><a href="<?= e(base_url('customer_view.php?id=' . $c['id'])) ?>"><strong><?= e($c['name']) ?></strong></a></td>
+      <td><a href="<?= e(id_url('customer_view.php', 'customer', $c['id'])) ?>"><strong><?= e($c['name']) ?></strong></a></td>
       <td><?= e($c['mobile']) ?></td>
       <td><?= money($c['total_given']) ?></td>
       <td><?= money($c['total_paid']) ?></td>

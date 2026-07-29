@@ -3,7 +3,7 @@ require_once __DIR__ . '/includes/functions.php';
 $u = require_login();
 $pageTitle = 'Investor';
 
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$id = resolve_id('investor');
 $investor = null;
 if ($id) {
     $stmt = db()->prepare('SELECT * FROM investors WHERE id = ?');
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int)db()->lastInsertId();
             flash('success', 'Investor added.');
         }
-        redirect('investor_view.php?id=' . $id);
+        redirect('investor_view.php?c=' . sign_id('investor', $id));
     }
 }
 

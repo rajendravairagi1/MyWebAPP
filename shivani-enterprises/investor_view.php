@@ -3,7 +3,7 @@ require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/lib/invoice_pdf.php';
 $u = require_login();
 
-$id = (int)($_GET['id'] ?? 0);
+$id = resolve_id('investor');
 $stmt = db()->prepare('SELECT * FROM investors WHERE id = ?');
 $stmt->execute([$id]);
 $investor = $stmt->fetch();
@@ -53,13 +53,13 @@ require __DIR__ . '/includes/header.php';
   </p>
   <?php if ($investor['notes']): ?><p class="text-muted"><?= e($investor['notes']) ?></p><?php endif; ?>
   <div class="action-bar">
-    <a class="btn small" href="<?= e(base_url('investor_form.php?id=' . $id)) ?>">Edit</a>
-    <a class="btn small" href="<?= e(base_url('investor_txn_form.php?investor_id=' . $id . '&type=investment')) ?>">+ Add Investment</a>
-    <a class="btn small" href="<?= e(base_url('investor_txn_form.php?investor_id=' . $id . '&type=profit')) ?>">+ Add Profit Credited</a>
-    <a class="btn small" href="<?= e(base_url('investor_txn_form.php?investor_id=' . $id . '&type=payment')) ?>">+ Add Payment Paid</a>
-    <a class="btn small" href="<?= e(base_url('investor_view.php?id=' . $id . '&statement=pdf')) ?>" target="_blank">Statement PDF</a>
+    <a class="btn small" href="<?= e(id_url('investor_form.php', 'investor', $id)) ?>">Edit</a>
+    <a class="btn small" href="<?= e(id_url_as('investor_txn_form.php', 'investor_id', 'investor', $id, ['type' => 'investment'])) ?>">+ Add Investment</a>
+    <a class="btn small" href="<?= e(id_url_as('investor_txn_form.php', 'investor_id', 'investor', $id, ['type' => 'profit'])) ?>">+ Add Profit Credited</a>
+    <a class="btn small" href="<?= e(id_url_as('investor_txn_form.php', 'investor_id', 'investor', $id, ['type' => 'payment'])) ?>">+ Add Payment Paid</a>
+    <a class="btn small" href="<?= e(id_url('investor_view.php', 'investor', $id, ['statement' => 'pdf'])) ?>" target="_blank">Statement PDF</a>
     <button type="button" class="btn small wa"
-      onclick="shareFileToWhatsApp('<?= e(base_url('investor_view.php?id=' . $id . '&statement=pdf')) ?>', 'investor-statement-<?= e(preg_replace('/\s+/', '-', $investor['name'])) ?>.pdf', '<?= e(addslashes($waMsg)) ?>', this)">
+      onclick="shareFileToWhatsApp('<?= e(id_url('investor_view.php', 'investor', $id, ['statement' => 'pdf'])) ?>', 'investor-statement-<?= e(preg_replace('/\s+/', '-', $investor['name'])) ?>.pdf', '<?= e(addslashes($waMsg)) ?>', this)">
       Share Statement on WhatsApp
     </button>
     <form method="post" onsubmit="return doubleConfirm('Delete this investor and ALL their investment/profit/payment entries?', 'Are you absolutely sure? This is PERMANENT and cannot be undone.')">
@@ -87,7 +87,7 @@ require __DIR__ . '/includes/header.php';
       <td><span class="badge <?= e($typeBadges[$t['type']] ?? 'gray') ?>"><?= e($typeLabels[$t['type']] ?? $t['type']) ?></span></td>
       <td><?= money($t['amount']) ?></td>
       <td><?= e($t['note']) ?></td>
-      <td><a href="<?= e(base_url('investor_txn_form.php?id=' . $t['id'])) ?>">Edit</a></td>
+      <td><a href="<?= e(id_url('investor_txn_form.php', 'investor_txn', $t['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
     <?php if (!$txns): ?><tr><td colspan="5" class="text-muted">No entries yet.</td></tr><?php endif; ?>

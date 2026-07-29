@@ -50,7 +50,7 @@ require __DIR__ . '/../includes/header.php';
       <div class="followup-row-top">
         <div>
           <div class="followup-row-customer">
-            <a href="<?= e(base_url('customer_view.php?id=' . $f['customer_id'])) ?>"><?= e($f['customer_name']) ?></a>
+            <a href="<?= e(id_url('customer_view.php', 'customer', $f['customer_id'])) ?>"><?= e($f['customer_name']) ?></a>
           </div>
           <div class="followup-row-meta">
             <?= e($f['mobile']) ?> &middot; Admin: <?= e($f['admin_name']) ?><br>
@@ -72,7 +72,7 @@ require __DIR__ . '/../includes/header.php';
           <button class="btn small" type="submit">Mark Done</button>
         </form>
         <?php endif; ?>
-        <a class="btn small secondary" href="<?= e(base_url('followup_form.php?id=' . $f['id'])) ?>">Edit</a>
+        <a class="btn small secondary" href="<?= e(id_url('followup_form.php', 'followup', $f['id'])) ?>">Edit</a>
       </div>
     </div>
     <?php endforeach; ?>

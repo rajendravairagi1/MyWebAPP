@@ -56,7 +56,7 @@ require __DIR__ . '/includes/header.php';
     <tr><th>Name</th><th>Mobile</th><th>Total Investment</th><th>Total Profit Credited</th><th>Total Paid</th><th>Balance</th></tr>
     <?php foreach ($investors as $i): $balance = (float)$i['total_invested'] + (float)$i['total_profit'] - (float)$i['total_paid']; ?>
     <tr>
-      <td><a href="<?= e(base_url('investor_view.php?id=' . $i['id'])) ?>"><strong><?= e($i['name']) ?></strong></a></td>
+      <td><a href="<?= e(id_url('investor_view.php', 'investor', $i['id'])) ?>"><strong><?= e($i['name']) ?></strong></a></td>
       <td><?= e($i['mobile']) ?></td>
       <td><?= money($i['total_invested']) ?></td>
       <td><?= money($i['total_profit']) ?></td>

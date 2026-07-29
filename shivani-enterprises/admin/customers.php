@@ -77,7 +77,7 @@ require __DIR__ . '/../includes/header.php';
     <tr><th>Name</th><th>Mobile</th><th>Place</th><th>Last Purchase</th><th>Given</th><th>Paid</th><th>Balance</th></tr>
     <?php foreach ($customers as $c): $bal = $c['total_given'] - $c['total_paid']; ?>
     <tr>
-      <td><a href="<?= e(base_url('customer_view.php?id=' . $c['id'])) ?>"><strong><?= e($c['name']) ?></strong></a><?= $c['shop_name'] ? ' <span class="text-muted">('.e($c['shop_name']).')</span>' : '' ?></td>
+      <td><a href="<?= e(id_url('customer_view.php', 'customer', $c['id'])) ?>"><strong><?= e($c['name']) ?></strong></a><?= $c['shop_name'] ? ' <span class="text-muted">('.e($c['shop_name']).')</span>' : '' ?></td>
       <td><?= e($c['mobile']) ?></td>
       <td><?= e($c['place']) ?></td>
       <td><?= $c['last_sale_date'] ? e(date('d-M-Y', strtotime($c['last_sale_date']))) : '<span class="text-muted">-</span>' ?></td>

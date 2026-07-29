@@ -2,7 +2,7 @@
 require_once __DIR__ . '/includes/functions.php';
 $u = require_login();
 
-$paymentId = (int)($_GET['id'] ?? 0);
+$paymentId = resolve_id('payment');
 $payment = null;
 if ($paymentId) {
     $stmt = db()->prepare('SELECT * FROM payments WHERE id = ?');
@@ -11,7 +11,7 @@ if ($paymentId) {
     if (!$payment) { http_response_code(404); die('Payment not found.'); }
     $customerId = (int)$payment['customer_id'];
 } else {
-    $customerId = (int)($_GET['customer_id'] ?? $_POST['customer_id'] ?? 0);
+    $customerId = resolve_id_from('customer', 'customer_id');
 }
 
 $stmt = db()->prepare('SELECT * FROM customers WHERE id = ?');
@@ -53,7 +53,7 @@ if ($payment && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? ''
     verify_csrf();
     db()->prepare('DELETE FROM payments WHERE id = ?')->execute([$paymentId]);
     flash('success', 'Payment deleted.');
-    redirect('customer_view.php?id=' . $customerId);
+    redirect('customer_view.php?c=' . sign_id('customer', $customerId));
 }
 
 $errors = [];
@@ -78,13 +78,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 's
             $stmt->execute([$customerId, $saleId, $customer['admin_id'], $amount, $date, $mode, $note ?: null, $u['id']]);
             flash('success', 'Payment of ' . money($amount) . ' recorded.');
         }
-        redirect('customer_view.php?id=' . $customerId);
+        redirect('customer_view.php?c=' . sign_id('customer', $customerId));
     }
 }
 
 require __DIR__ . '/includes/header.php';
 ?>
-<p><a href="<?= e(base_url('customer_view.php?id=' . $customerId)) ?>">&larr; Back to <?= e($customer['name']) ?></a></p>
+<p><a href="<?= e(id_url('customer_view.php', 'customer', $customerId)) ?>">&larr; Back to <?= e($customer['name']) ?></a></p>
 <div class="card">
   <h3 class="mt-0"><?= $payment ? 'Edit Payment' : 'Record Payment' ?> - <?= e($customer['name']) ?></h3>
   <?php foreach ($errors as $err): ?><div class="alert error"><?= e($err) ?></div><?php endforeach; ?>
@@ -98,7 +98,7 @@ require __DIR__ . '/includes/header.php';
   <form method="post">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="save">
-    <input type="hidden" name="customer_id" value="<?= (int)$customerId ?>">
+    <input type="hidden" name="customer_id" value="<?= e(sign_id('customer', $customerId)) ?>">
     <div class="form-row">
       <div class="form-group"><label>Amount (Rs.) *</label><input type="number" step="0.01" min="0.01" name="amount" required value="<?= e($payment['amount'] ?? '') ?>"></div>
       <div class="form-group"><label>Payment Date</label><input type="date" name="payment_date" value="<?= e($payment['payment_date'] ?? date('Y-m-d')) ?>" required></div>

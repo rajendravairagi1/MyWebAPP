@@ -38,7 +38,7 @@ require __DIR__ . '/../includes/header.php';
       <div class="followup-row-top">
         <div>
           <div class="followup-row-customer">
-            <a href="<?= e(base_url('customer_view.php?id=' . $f['customer_id'])) ?>"><?= e($f['customer_name']) ?></a>
+            <a href="<?= e(id_url('customer_view.php', 'customer', $f['customer_id'])) ?>"><?= e($f['customer_name']) ?></a>
           </div>
           <div class="followup-row-meta">
             <?= e($f['mobile']) ?><br>
@@ -61,7 +61,7 @@ require __DIR__ . '/../includes/header.php';
         </form>
         <a class="btn small wa" target="_blank" href="<?= e(whatsapp_link($f['mobile'], 'Namaste ' . $f['customer_name'] . ', payment/order ke sambandh me follow-up. - ' . get_setting('company_name', APP_NAME))) ?>">WhatsApp</a>
         <?php endif; ?>
-        <a class="btn small secondary" href="<?= e(base_url('followup_form.php?id=' . $f['id'])) ?>">Edit</a>
+        <a class="btn small secondary" href="<?= e(id_url('followup_form.php', 'followup', $f['id'])) ?>">Edit</a>
       </div>
     </div>
     <?php endforeach; ?>

@@ -2,7 +2,7 @@
 require_once __DIR__ . '/includes/functions.php';
 $u = require_login();
 
-$fuId = (int)($_GET['id'] ?? 0);
+$fuId = resolve_id('followup');
 $followup = null;
 if ($fuId) {
     $stmt = db()->prepare('SELECT * FROM followups WHERE id = ?');
@@ -11,7 +11,7 @@ if ($fuId) {
     if (!$followup) { http_response_code(404); die('Follow-up not found.'); }
     $customerId = (int)$followup['customer_id'];
 } else {
-    $customerId = (int)($_GET['customer_id'] ?? $_POST['customer_id'] ?? 0);
+    $customerId = resolve_id_from('customer', 'customer_id');
 }
 
 $stmt = db()->prepare('SELECT * FROM customers WHERE id = ?');
@@ -27,7 +27,7 @@ if ($followup && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '
     verify_csrf();
     db()->prepare('DELETE FROM followups WHERE id = ?')->execute([$fuId]);
     flash('success', 'Follow-up deleted.');
-    redirect('customer_view.php?id=' . $customerId);
+    redirect('customer_view.php?c=' . sign_id('customer', $customerId));
 }
 
 $errors = [];
@@ -50,20 +50,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 's
             $stmt->execute([$customerId, $customer['admin_id'], $commitment ?: null, $date, $time, $remarks ?: null, $u['id']]);
             flash('success', 'Follow-up added.');
         }
-        redirect('customer_view.php?id=' . $customerId);
+        redirect('customer_view.php?c=' . sign_id('customer', $customerId));
     }
 }
 
 require __DIR__ . '/includes/header.php';
 ?>
-<p><a href="<?= e(base_url('customer_view.php?id=' . $customerId)) ?>">&larr; Back to <?= e($customer['name']) ?></a></p>
+<p><a href="<?= e(id_url('customer_view.php', 'customer', $customerId)) ?>">&larr; Back to <?= e($customer['name']) ?></a></p>
 <div class="card">
   <h3 class="mt-0"><?= $followup ? 'Edit' : 'Add' ?> Follow-up / Commitment - <?= e($customer['name']) ?></h3>
   <?php foreach ($errors as $err): ?><div class="alert error"><?= e($err) ?></div><?php endforeach; ?>
   <form method="post">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="save">
-    <input type="hidden" name="customer_id" value="<?= (int)$customerId ?>">
+    <input type="hidden" name="customer_id" value="<?= e(sign_id('customer', $customerId)) ?>">
     <div class="form-group"><label>Commitment (what was promised / discussed)</label><textarea name="commitment" rows="2" placeholder="e.g. 3 coolers @ Rs.2500 promised next week"><?= e($followup['commitment'] ?? '') ?></textarea></div>
     <div class="form-row">
       <div class="form-group"><label>Follow-up Date *</label><input type="date" name="follow_up_date" required value="<?= e($followup['follow_up_date'] ?? date('Y-m-d')) ?>"></div>

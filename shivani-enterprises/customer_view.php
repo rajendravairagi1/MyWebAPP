@@ -3,7 +3,7 @@ require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/lib/invoice_pdf.php';
 $u = require_login();
 
-$id = (int)($_GET['id'] ?? 0);
+$id = resolve_id('customer');
 $stmt = db()->prepare('SELECT c.*, ad.name AS admin_name FROM customers c JOIN users ad ON ad.id = c.admin_id WHERE c.id = ?');
 $stmt->execute([$id]);
 $customer = $stmt->fetch();
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggl
     $stmt = db()->prepare("UPDATE customers SET status = IF(status = 'active', 'inactive', 'active') WHERE id = ?");
     $stmt->execute([$id]);
     flash('success', 'Customer status updated.');
-    redirect('customer_view.php?id=' . $id);
+    redirect('customer_view.php?c=' . sign_id('customer', $id));
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 
     if ($saleCount > 0 || $paymentCount > 0) {
         flash('error', 'Is customer ke sales/payments records hai, isliye delete nahi ho sakta (records surakshit rakhne ke liye). Iske bajaye "Deactivate" use karein.');
-        redirect('customer_view.php?id=' . $id);
+        redirect('customer_view.php?c=' . sign_id('customer', $id));
     }
 
     db()->prepare('DELETE FROM customers WHERE id = ?')->execute([$id]);
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'uploa
     } catch (RuntimeException $e) {
         flash('error', $e->getMessage());
     }
-    redirect('customer_view.php?id=' . $id);
+    redirect('customer_view.php?c=' . sign_id('customer', $id));
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_document') {
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
         db()->prepare('DELETE FROM customer_documents WHERE id = ?')->execute([$docId]);
         flash('success', 'Document deleted.');
     }
-    redirect('customer_view.php?id=' . $id);
+    redirect('customer_view.php?c=' . sign_id('customer', $id));
 }
 
 if (($_GET['statement'] ?? '') === 'pdf') {
@@ -138,13 +138,13 @@ require __DIR__ . '/includes/header.php';
       <?php if ($u['role'] === 'super_admin'): ?> &middot; Admin: <strong><?= e($customer['admin_name']) ?></strong><?php endif; ?>
     </p>
     <div class="action-bar">
-      <a class="btn small" href="<?= e(base_url('customer_form.php?id=' . $id)) ?>">Edit</a>
-      <a class="btn small" href="<?= e(base_url('sale_form.php?customer_id=' . $id)) ?>">+ New Sale / Invoice</a>
-      <a class="btn small" href="<?= e(base_url('payment_form.php?customer_id=' . $id)) ?>">+ Record Payment</a>
-      <a class="btn small" href="<?= e(base_url('followup_form.php?customer_id=' . $id)) ?>">+ Add Follow-up</a>
-      <a class="btn small" href="<?= e(base_url('customer_view.php?id=' . $id . '&statement=pdf')) ?>" target="_blank">Statement PDF</a>
+      <a class="btn small" href="<?= e(id_url('customer_form.php', 'customer', $id)) ?>">Edit</a>
+      <a class="btn small" href="<?= e(id_url_as('sale_form.php', 'customer_id', 'customer', $id)) ?>">+ New Sale / Invoice</a>
+      <a class="btn small" href="<?= e(id_url_as('payment_form.php', 'customer_id', 'customer', $id)) ?>">+ Record Payment</a>
+      <a class="btn small" href="<?= e(id_url_as('followup_form.php', 'customer_id', 'customer', $id)) ?>">+ Add Follow-up</a>
+      <a class="btn small" href="<?= e(id_url('customer_view.php', 'customer', $id, ['statement' => 'pdf'])) ?>" target="_blank">Statement PDF</a>
       <button type="button" class="btn small wa"
-        onclick="shareFileToWhatsApp('<?= e(base_url('customer_view.php?id=' . $id . '&statement=pdf')) ?>', 'statement-<?= e(preg_replace('/\s+/', '-', $customer['name'])) ?>.pdf', '<?= e(addslashes($waMsg)) ?>', this)">
+        onclick="shareFileToWhatsApp('<?= e(id_url('customer_view.php', 'customer', $id, ['statement' => 'pdf'])) ?>', 'statement-<?= e(preg_replace('/\s+/', '-', $customer['name'])) ?>.pdf', '<?= e(addslashes($waMsg)) ?>', this)">
         Share Statement on WhatsApp
       </button>
       <?php if ($balance > 0): ?>
@@ -178,7 +178,7 @@ require __DIR__ . '/includes/header.php';
 <div class="card">
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
     <h3 class="mt-0">Pending Invoices</h3>
-    <a class="btn small secondary" href="<?= e(base_url('customer_invoice_history.php?id=' . $id)) ?>">History (Paid Invoices)<?= $historySales ? ' (' . count($historySales) . ')' : '' ?></a>
+    <a class="btn small secondary" href="<?= e(id_url('customer_invoice_history.php', 'customer', $id)) ?>">History (Paid Invoices)<?= $historySales ? ' (' . count($historySales) . ')' : '' ?></a>
   </div>
   <table>
     <tr><th>Date</th><th>Invoice No</th><th>Amount</th><th>Paid</th><th>Due</th><th></th></tr>
@@ -189,7 +189,7 @@ require __DIR__ . '/includes/header.php';
       <td><?= money($s['total_amount']) ?></td>
       <td><?= $paidS > 0 ? money($paidS) : '-' ?></td>
       <td style="color:#dc2626;font-weight:600"><?= money($dueS) ?></td>
-      <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a> &middot; <a href="<?= e(base_url('sale_form.php?id=' . $s['id'])) ?>">Edit</a></td>
+      <td><a href="<?= e(id_url('sale_view.php', 'sale', $s['id'])) ?>">View</a> &middot; <a href="<?= e(id_url('sale_form.php', 'sale', $s['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
     <?php if (!$pendingSales): ?><tr><td colspan="6" class="text-muted">No pending invoices.</td></tr><?php endif; ?>
@@ -220,7 +220,7 @@ foreach ($sales as $s) { $invNoLookup[(int)$s['id']] = $s['invoice_no']; }
       </td>
       <td><?= e($p['mode']) ?></td>
       <td><?= e($p['note']) ?></td>
-      <td><a href="<?= e(base_url('payment_form.php?id=' . $p['id'])) ?>">Edit</a></td>
+      <td><a href="<?= e(id_url('payment_form.php', 'payment', $p['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
     <?php if (!$payments): ?><tr><td colspan="6" class="text-muted">No payments yet.</td></tr><?php endif; ?>
@@ -246,11 +246,11 @@ foreach ($sales as $s) { $invNoLookup[(int)$s['id']] = $s['invoice_no']; }
           <?= csrf_field() ?>
           <input type="hidden" name="id" value="<?= (int)$f['id'] ?>">
           <input type="hidden" name="status" value="done">
-          <input type="hidden" name="return_to" value="customer_view.php?id=<?= (int)$id ?>">
+          <input type="hidden" name="return_to" value="customer_view.php?c=<?= e(sign_id('customer', $id)) ?>">
           <button class="btn small" type="submit">Done</button>
         </form>
         <?php endif; ?>
-        <a href="<?= e(base_url('followup_form.php?id=' . $f['id'])) ?>">Edit</a>
+        <a href="<?= e(id_url('followup_form.php', 'followup', $f['id'])) ?>">Edit</a>
       </td>
     </tr>
     <?php endforeach; ?>

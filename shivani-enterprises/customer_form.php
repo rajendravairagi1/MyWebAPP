@@ -3,7 +3,7 @@ require_once __DIR__ . '/includes/functions.php';
 $u = require_login();
 $pageTitle = 'Customer';
 
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$id = resolve_id('customer');
 $customer = null;
 if ($id) {
     $stmt = db()->prepare('SELECT * FROM customers WHERE id = ?');
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = (int)db()->lastInsertId();
             flash('success', 'Customer added.');
         }
-        redirect('customer_view.php?id=' . $id);
+        redirect('customer_view.php?c=' . sign_id('customer', $id));
     }
 }
 

@@ -6,6 +6,100 @@ function base_url(string $path = ''): string
     return rtrim(APP_URL, '/') . '/' . ltrim($path, '/');
 }
 
+/**
+ * Opaque signed IDs for URLs — so links like customer_view.php?id=2 stop
+ * exposing sequential row ids that anyone can enumerate. Encode with
+ * sign_id('customer', 2) -> short base64url token like "A_7xB9mQ";
+ * decode with resolve_id('customer') at the top of view/form pages.
+ * Falls back to raw ?id= for super_admin only, so pasted debug URLs
+ * still work for the owner but public/admin URLs use the token.
+ */
+function sign_id(string $type, int $id): string
+{
+    if ($id <= 0) return '';
+    // Compact payload: type-prefix + id in base36. 5-byte HMAC-SHA256 of
+    // "type|id" keyed with APP_SECRET makes it unforgeable but only ~7
+    // extra chars, so tokens stay short and URL-friendly.
+    $body = strtolower($type[0] ?? 'x') . base_convert((string)$id, 10, 36);
+    $mac  = substr(hash_hmac('sha256', $type . '|' . $id, APP_SECRET, true), 0, 5);
+    $raw  = $body . '.' . rtrim(strtr(base64_encode($mac), '+/', '-_'), '=');
+    return $raw;
+}
+
+function verify_id(string $type, string $token): ?int
+{
+    if ($token === '' || strpos($token, '.') === false) return null;
+    [$body, $macB64] = explode('.', $token, 2);
+    if ($body === '' || $body[0] !== strtolower($type[0] ?? 'x')) return null;
+    $id = (int)base_convert(substr($body, 1), 36, 10);
+    if ($id <= 0) return null;
+    $expected = substr(hash_hmac('sha256', $type . '|' . $id, APP_SECRET, true), 0, 5);
+    $given    = base64_decode(strtr($macB64, '-_', '+/') . str_repeat('=', (4 - strlen($macB64) % 4) % 4), true);
+    if (!is_string($given) || !hash_equals($expected, $given)) return null;
+    return $id;
+}
+
+/**
+ * Read an id from ?c=SIGNED_TOKEN, or (for super_admin only) legacy ?id=N.
+ * Returns 0 if nothing valid was passed.
+ */
+function resolve_id(string $type): int
+{
+    $tok = $_GET['c'] ?? '';
+    if ($tok !== '') {
+        $id = verify_id($type, $tok);
+        if ($id) return $id;
+    }
+    if (isset($_GET['id'])) {
+        // Legacy raw id is only honored for the super_admin (debug/link
+        // parity). Regular admins get a 404 rather than being able to
+        // enumerate rows.
+        $u = current_user();
+        if ($u && ($u['role'] ?? '') === 'super_admin') return (int)$_GET['id'];
+    }
+    return 0;
+}
+
+/** Build a URL that carries a signed id ("?c=TOKEN"). */
+function id_url(string $file, string $type, int $id, array $extra = []): string
+{
+    $qs = ['c' => sign_id($type, $id)];
+    foreach ($extra as $k => $v) $qs[$k] = $v;
+    return base_url($file) . '?' . http_build_query($qs);
+}
+
+/**
+ * Same as id_url but under a custom query key — used for "new sale for
+ * this customer" style links where the receiver reads `customer_id` and
+ * we still want to hide the raw row id.
+ */
+function id_url_as(string $file, string $key, string $type, int $id, array $extra = []): string
+{
+    $qs = [$key => sign_id($type, $id)];
+    foreach ($extra as $k => $v) $qs[$k] = $v;
+    return base_url($file) . '?' . http_build_query($qs);
+}
+
+/**
+ * Read an int id from an arbitrary query key ($_GET or $_POST) that may
+ * carry either a signed token or (for super_admin only) a raw integer.
+ * Used by sale_form/payment_form/followup_form to accept "customer_id"
+ * in either form during the migration to signed URLs.
+ */
+function resolve_id_from(string $type, string $key): int
+{
+    $v = $_GET[$key] ?? $_POST[$key] ?? '';
+    if ($v === '' || $v === null) return 0;
+    $v = (string)$v;
+    if (strpos($v, '.') !== false) {
+        $id = verify_id($type, $v);
+        if ($id) return $id;
+    }
+    $u = current_user();
+    if ($u && ($u['role'] ?? '') === 'super_admin') return (int)$v;
+    return 0;
+}
+
 function e($value): string
 {
     return htmlspecialchars((string)($value ?? ''), ENT_QUOTES, 'UTF-8');

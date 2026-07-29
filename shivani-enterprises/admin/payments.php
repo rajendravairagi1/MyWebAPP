@@ -42,7 +42,7 @@ require __DIR__ . '/../includes/header.php';
     <?php foreach ($payments as $p): ?>
     <tr>
       <td><?= e(date('d-M-Y', strtotime($p['payment_date']))) ?></td>
-      <td><a href="<?= e(base_url('customer_view.php?id=' . $p['customer_id'])) ?>"><?= e($p['customer_name']) ?></a> (<?= e($p['mobile']) ?>)</td>
+      <td><a href="<?= e(id_url('customer_view.php', 'customer', $p['customer_id'])) ?>"><?= e($p['customer_name']) ?></a> (<?= e($p['mobile']) ?>)</td>
       <td><?= money($p['amount']) ?></td>
       <td><?= e($p['mode']) ?></td>
       <td><?= e($p['note']) ?></td>

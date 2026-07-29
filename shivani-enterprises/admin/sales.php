@@ -45,7 +45,7 @@ require __DIR__ . '/../includes/header.php';
       <td><?= e($s['invoice_no']) ?></td>
       <td><?= e($s['customer_name']) ?> (<?= e($s['mobile']) ?>)</td>
       <td><?= money($s['total_amount']) ?></td>
-      <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a></td>
+      <td><a href="<?= e(id_url('sale_view.php', 'sale', $s['id'])) ?>">View</a></td>
     </tr>
     <?php endforeach; ?>
     <?php if (!$sales): ?><tr><td colspan="5" class="text-muted">No sales yet. Open a customer to create one.</td></tr><?php endif; ?>

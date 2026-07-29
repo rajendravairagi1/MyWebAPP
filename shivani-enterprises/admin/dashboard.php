@@ -95,7 +95,7 @@ require __DIR__ . '/../includes/header.php';
     <?php foreach ($todayFollowups as $f): ?>
     <tr>
       <td><?= e(date('d-M-Y', strtotime($f['follow_up_date']))) ?></td>
-      <td><a href="<?= e(base_url('customer_view.php?id=' . $f['customer_id'])) ?>"><?= e($f['customer_name']) ?></a></td>
+      <td><a href="<?= e(id_url('customer_view.php', 'customer', $f['customer_id'])) ?>"><?= e($f['customer_name']) ?></a></td>
       <td><?= e($f['commitment']) ?></td>
       <td><a class="btn small wa" target="_blank" href="<?= e(whatsapp_link($f['mobile'], 'Namaste ' . $f['customer_name'] . ', payment/order follow-up ke liye sampark kar rahe hain. - ' . get_setting('company_name', APP_NAME))) ?>">WhatsApp</a></td>
     </tr>

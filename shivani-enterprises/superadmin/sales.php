@@ -70,7 +70,7 @@ require __DIR__ . '/../includes/header.php';
       <td><?= e($s['customer_name']) ?> (<?= e($s['mobile']) ?>)</td>
       <td><?= e($s['admin_name']) ?></td>
       <td><?= money($s['total_amount']) ?></td>
-      <td><a href="<?= e(base_url('sale_view.php?id=' . $s['id'])) ?>">View</a></td>
+      <td><a href="<?= e(id_url('sale_view.php', 'sale', $s['id'])) ?>">View</a></td>
     </tr>
     <?php endforeach; ?>
     <?php if (!$sales): ?><tr><td colspan="6" class="text-muted">No sales found.</td></tr><?php endif; ?>

@@ -2,7 +2,7 @@
 require_once __DIR__ . '/includes/functions.php';
 $u = require_login();
 
-$txnId = (int)($_GET['id'] ?? 0);
+$txnId = resolve_id('investor_txn');
 $txn = null;
 if ($txnId) {
     $stmt = db()->prepare('SELECT * FROM investor_transactions WHERE id = ?');
@@ -11,7 +11,7 @@ if ($txnId) {
     if (!$txn) { http_response_code(404); die('Entry not found.'); }
     $investorId = (int)$txn['investor_id'];
 } else {
-    $investorId = (int)($_GET['investor_id'] ?? $_POST['investor_id'] ?? 0);
+    $investorId = resolve_id_from('investor', 'investor_id');
 }
 
 $stmt = db()->prepare('SELECT * FROM investors WHERE id = ?');
@@ -38,7 +38,7 @@ if ($txn && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') ==
     verify_csrf();
     db()->prepare('DELETE FROM investor_transactions WHERE id = ?')->execute([$txnId]);
     flash('success', 'Entry deleted.');
-    redirect('investor_view.php?id=' . $investorId);
+    redirect('investor_view.php?c=' . sign_id('investor', $investorId));
 }
 
 $errors = [];
@@ -61,20 +61,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 's
             $stmt->execute([$investorId, $type, $amount, $date, $note ?: null, $u['id']]);
             flash('success', $labels[$type] . ' of ' . money($amount) . ' recorded.');
         }
-        redirect('investor_view.php?id=' . $investorId);
+        redirect('investor_view.php?c=' . sign_id('investor', $investorId));
     }
 }
 
 require __DIR__ . '/includes/header.php';
 ?>
-<p><a href="<?= e(base_url('investor_view.php?id=' . $investorId)) ?>">&larr; Back to <?= e($investor['name']) ?></a></p>
+<p><a href="<?= e(id_url('investor_view.php', 'investor', $investorId)) ?>">&larr; Back to <?= e($investor['name']) ?></a></p>
 <div class="card">
   <h3 class="mt-0"><?= $txn ? 'Edit Entry' : 'Add Entry' ?> - <?= e($investor['name']) ?></h3>
   <?php foreach ($errors as $err): ?><div class="alert error"><?= e($err) ?></div><?php endforeach; ?>
   <form method="post">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="save">
-    <input type="hidden" name="investor_id" value="<?= (int)$investorId ?>">
+    <input type="hidden" name="investor_id" value="<?= e(sign_id('investor', $investorId)) ?>">
     <div class="form-row">
       <div class="form-group">
         <label>Entry Type</label>

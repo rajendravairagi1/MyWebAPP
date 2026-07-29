@@ -2,7 +2,7 @@
 require_once __DIR__ . '/includes/functions.php';
 $u = require_login();
 
-$saleId = (int)($_GET['id'] ?? 0);
+$saleId = resolve_id('sale');
 $sale = null;
 $existingItems = [];
 if ($saleId) {
@@ -15,7 +15,7 @@ if ($saleId) {
     $itemsStmt->execute([$saleId]);
     $existingItems = $itemsStmt->fetchAll();
 } else {
-    $customerId = (int)($_GET['customer_id'] ?? $_POST['customer_id'] ?? 0);
+    $customerId = resolve_id_from('customer', 'customer_id');
 }
 
 $stmt = db()->prepare('SELECT * FROM customers WHERE id = ?');
@@ -61,10 +61,10 @@ if ($sale && $_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') =
     } catch (Throwable $e) {
         $db->rollBack();
         flash('error', 'Could not delete invoice: ' . $e->getMessage());
-        redirect('sale_view.php?id=' . $saleId);
+        redirect('sale_view.php?c=' . sign_id('sale', $saleId));
     }
     flash('success', 'Invoice deleted.');
-    redirect('customer_view.php?id=' . $customerId);
+    redirect('customer_view.php?c=' . sign_id('customer', $customerId));
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 'save') {
@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 's
             }
             $db->commit();
             flash('success', $sale ? 'Invoice ' . $invoiceNo . ' updated.' : 'Sale recorded. Invoice ' . $invoiceNo . ' generated.');
-            redirect('sale_view.php?id=' . $newSaleId);
+            redirect('sale_view.php?c=' . sign_id('sale', $newSaleId));
         } catch (Throwable $e) {
             $db->rollBack();
             $errors[] = 'Could not save sale: ' . $e->getMessage();
@@ -192,14 +192,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? 'save') === 's
 
 require __DIR__ . '/includes/header.php';
 ?>
-<p><a href="<?= e(base_url($sale ? 'sale_view.php?id=' . $saleId : 'customer_view.php?id=' . $customerId)) ?>">&larr; Back</a></p>
+<p><a href="<?= e(base_url($sale ? 'sale_view.php?c=' . sign_id('sale', $saleId) : 'customer_view.php?c=' . sign_id('customer', $customerId))) ?>">&larr; Back</a></p>
 <div class="card">
   <h3 class="mt-0"><?= $sale ? 'Edit Invoice ' . e($sale['invoice_no']) : 'New Sale' ?> for <?= e($customer['name']) ?></h3>
   <?php foreach ($errors as $err): ?><div class="alert error"><?= e($err) ?></div><?php endforeach; ?>
   <form method="post" id="saleForm">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="save">
-    <input type="hidden" name="customer_id" value="<?= (int)$customerId ?>">
+    <input type="hidden" name="customer_id" value="<?= e(sign_id('customer', $customerId)) ?>">
     <div class="form-row">
       <div class="form-group"><label>Sale Date</label><input type="date" name="sale_date" value="<?= e($sale['sale_date'] ?? date('Y-m-d')) ?>" required></div>
       <div class="form-group"><label>Notes</label><input name="notes" placeholder="Optional" value="<?= e($sale['notes'] ?? '') ?>"></div>

@@ -3,7 +3,7 @@ require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/lib/invoice_pdf.php';
 $u = require_login();
 
-$id = (int)($_GET['id'] ?? 0);
+$id = resolve_id('sale');
 $stmt = db()->prepare('SELECT s.*, u.name AS admin_name FROM sales s JOIN users u ON u.id = s.admin_id WHERE s.id = ?');
 $stmt->execute([$id]);
 $sale = $stmt->fetch();
@@ -35,13 +35,13 @@ if (($_GET['pdf'] ?? '') === '1') {
 }
 
 $pageTitle = 'Invoice ' . $sale['invoice_no'];
-$pdfUrl = base_url('sale_view.php?id=' . $id . '&pdf=1');
+$pdfUrl = id_url('sale_view.php', 'sale', $id, ['pdf' => '1']);
 $pdfFilename = 'invoice-' . $sale['invoice_no'] . '.pdf';
 $waText = "Namaste " . $customer['name'] . ", aapka invoice " . $sale['invoice_no'] . " (Rs. " . number_format($sale['total_amount'], 2) . ") - " . get_setting('company_name', APP_NAME);
 
 require __DIR__ . '/includes/header.php';
 ?>
-<p><a href="<?= e(base_url('customer_view.php?id=' . $sale['customer_id'])) ?>">&larr; Back to <?= e($customer['name']) ?></a></p>
+<p><a href="<?= e(id_url('customer_view.php', 'customer', $sale['customer_id'])) ?>">&larr; Back to <?= e($customer['name']) ?></a></p>
 
 <div class="card invoice-sheet">
   <div class="invoice-topbar">
@@ -106,7 +106,7 @@ require __DIR__ . '/includes/header.php';
       <td><?= money($p['amount']) ?></td>
       <td><?= e($p['mode']) ?></td>
       <td><?= e($p['note']) ?></td>
-      <td><a href="<?= e(base_url('payment_form.php?id=' . $p['id'])) ?>">Edit</a></td>
+      <td><a href="<?= e(id_url('payment_form.php', 'payment', $p['id'])) ?>">Edit</a></td>
     </tr>
     <?php endforeach; ?>
     <?php if (!$taggedPayments): ?><tr><td colspan="5" class="text-muted">Is invoice par abhi koi payment tag nahi hai.</td></tr><?php endif; ?>
@@ -122,8 +122,8 @@ require __DIR__ . '/includes/header.php';
       onclick="shareFileToWhatsApp('<?= e($pdfUrl) ?>', '<?= e($pdfFilename) ?>', '<?= e(addslashes($waText)) ?>', this)">
       Share PDF on WhatsApp
     </button>
-    <a class="btn small secondary" href="<?= e(base_url('sale_form.php?id=' . $id)) ?>">Edit Invoice</a>
-    <form method="post" action="<?= e(base_url('sale_form.php?id=' . $id)) ?>" onsubmit="return doubleConfirm('Delete invoice <?= e(addslashes($sale['invoice_no'])) ?> permanently?', 'Are you absolutely sure? This is PERMANENT and cannot be undone.')">
+    <a class="btn small secondary" href="<?= e(id_url('sale_form.php', 'sale', $id)) ?>">Edit Invoice</a>
+    <form method="post" action="<?= e(id_url('sale_form.php', 'sale', $id)) ?>" onsubmit="return doubleConfirm('Delete invoice <?= e(addslashes($sale['invoice_no'])) ?> permanently?', 'Are you absolutely sure? This is PERMANENT and cannot be undone.')">
       <?= csrf_field() ?>
       <input type="hidden" name="action" value="delete">
       <button class="btn small danger" type="submit">Delete Invoice</button>

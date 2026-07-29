@@ -57,7 +57,7 @@ function nav_active(string $file): string
           </div>
           <?php if (!empty($f['commitment'])): ?><p class="followup-popup-commitment"><?= e($f['commitment']) ?></p><?php endif; ?>
           <div class="followup-popup-actions">
-            <a class="btn small secondary" target="_blank" href="<?= e(base_url('customer_view.php?id=' . $f['customer_id'])) ?>">View Customer</a>
+            <a class="btn small secondary" target="_blank" href="<?= e(id_url('customer_view.php', 'customer', $f['customer_id'])) ?>">View Customer</a>
             <button type="button" class="btn small" onclick="followupPopupDone(<?= (int)$f['id'] ?>, this)">&#10003; Done</button>
             <button type="button" class="btn small secondary" onclick="followupPopupSkip(this)">Skip</button>
           </div>
