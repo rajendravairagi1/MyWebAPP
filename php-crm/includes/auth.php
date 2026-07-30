@@ -12,11 +12,29 @@ function isHttpsRequest(): bool
     return !empty($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443;
 }
 
+/**
+ * Some cPanel/PHP-FPM setups point session.save_path at a directory the
+ * site's user can't write to, which makes every session silently fail to
+ * persist (this is what caused the CSRF errors). Use a writable folder
+ * inside the app itself instead.
+ */
+function ensureWritableSessionPath(): void
+{
+    $customPath = __DIR__ . '/../data/sessions';
+    if (!is_dir($customPath)) {
+        @mkdir($customPath, 0700, true);
+    }
+    if (is_dir($customPath) && is_writable($customPath)) {
+        session_save_path($customPath);
+    }
+}
+
 function startSecureSession(): void
 {
     if (session_status() === PHP_SESSION_ACTIVE) {
         return;
     }
+    ensureWritableSessionPath();
     // Auto-detect HTTPS so the session cookie isn't marked "secure" on a
     // plain-HTTP site (a secure cookie is silently dropped by the browser
     // over HTTP, which breaks login/CSRF with "Invalid CSRF token").
