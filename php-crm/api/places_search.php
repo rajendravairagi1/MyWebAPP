@@ -15,28 +15,33 @@ if ($apiKey === '') {
     apiJson(['ok' => false, 'error' => 'Google Places API key not set. Add it in Settings first.'], 400);
 }
 
-$url = 'https://maps.googleapis.com/maps/api/place/textsearch/json'
-    . '?query=' . urlencode($query)
-    . '&key=' . urlencode($apiKey);
+// Uses the Places API (New) Text Search endpoint.
+$url = 'https://places.googleapis.com/v1/places:searchText';
+$headers = [
+    'Content-Type: application/json',
+    'X-Goog-Api-Key: ' . $apiKey,
+    'X-Goog-FieldMask: places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount',
+];
+$data = httpJsonRequest('POST', $url, $headers, ['textQuery' => $query]);
 
-$data = httpGetJson($url);
-
-if (!$data || !isset($data['status'])) {
+if ($data === null) {
     apiJson(['ok' => false, 'error' => 'Could not reach Google Places API.'], 502);
 }
 
-if ($data['status'] !== 'OK' && $data['status'] !== 'ZERO_RESULTS') {
-    apiJson(['ok' => false, 'error' => 'Google Places error: ' . $data['status']], 502);
+if (isset($data['error'])) {
+    $status = $data['error']['status'] ?? 'ERROR';
+    $message = $data['error']['message'] ?? 'Unknown error';
+    apiJson(['ok' => false, 'error' => "Google Places error: $status - $message"], 502);
 }
 
 $results = [];
-foreach ($data['results'] ?? [] as $r) {
+foreach ($data['places'] ?? [] as $r) {
     $results[] = [
-        'place_id' => $r['place_id'] ?? null,
-        'name' => $r['name'] ?? '',
-        'address' => $r['formatted_address'] ?? '',
+        'place_id' => $r['id'] ?? null,
+        'name' => $r['displayName']['text'] ?? '',
+        'address' => $r['formattedAddress'] ?? '',
         'rating' => $r['rating'] ?? null,
-        'reviews_count' => $r['user_ratings_total'] ?? 0,
+        'reviews_count' => $r['userRatingCount'] ?? 0,
     ];
 }
 

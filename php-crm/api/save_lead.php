@@ -21,34 +21,39 @@ if ($apiKey === '') {
     apiJson(['ok' => false, 'error' => 'Google Places API key not set. Add it in Settings first.'], 400);
 }
 
-$fields = 'name,formatted_address,formatted_phone_number,international_phone_number,website,rating,user_ratings_total,url';
-$url = 'https://maps.googleapis.com/maps/api/place/details/json'
-    . '?place_id=' . urlencode($placeId)
-    . '&fields=' . urlencode($fields)
-    . '&key=' . urlencode($apiKey);
+// Uses the Places API (New) Place Details endpoint.
+$url = 'https://places.googleapis.com/v1/places/' . urlencode($placeId);
+$headers = [
+    'X-Goog-Api-Key: ' . $apiKey,
+    'X-Goog-FieldMask: id,displayName,formattedAddress,nationalPhoneNumber,internationalPhoneNumber,websiteUri,rating,userRatingCount,googleMapsUri',
+];
+$details = httpJsonRequest('GET', $url, $headers);
 
-$data = httpGetJson($url);
-if (!$data || ($data['status'] ?? '') !== 'OK') {
-    apiJson(['ok' => false, 'error' => 'Could not fetch place details: ' . ($data['status'] ?? 'unknown error')], 502);
+if ($details === null) {
+    apiJson(['ok' => false, 'error' => 'Could not reach Google Places API.'], 502);
+}
+if (isset($details['error'])) {
+    $status = $details['error']['status'] ?? 'ERROR';
+    $message = $details['error']['message'] ?? 'Unknown error';
+    apiJson(['ok' => false, 'error' => "Could not fetch place details: $status - $message"], 502);
 }
 
-$details = $data['result'];
-$website = $details['website'] ?? null;
+$website = $details['websiteUri'] ?? null;
 
 $webInfo = $website ? analyzeWebsite($website) : ['email' => null, 'facebook_url' => null, 'linkedin_url' => null, 'instagram_url' => null];
 
 $lead = [
     'place_id' => $placeId,
-    'company_name' => $details['name'] ?? 'Unknown',
-    'address' => $details['formatted_address'] ?? null,
-    'phone' => $details['formatted_phone_number'] ?? ($details['international_phone_number'] ?? null),
+    'company_name' => $details['displayName']['text'] ?? 'Unknown',
+    'address' => $details['formattedAddress'] ?? null,
+    'phone' => $details['nationalPhoneNumber'] ?? ($details['internationalPhoneNumber'] ?? null),
     'website' => $website,
     'email' => $webInfo['email'],
     'facebook_url' => $webInfo['facebook_url'],
     'linkedin_url' => $webInfo['linkedin_url'],
     'instagram_url' => $webInfo['instagram_url'],
-    'google_profile_url' => $details['url'] ?? null,
-    'reviews_count' => $details['user_ratings_total'] ?? 0,
+    'google_profile_url' => $details['googleMapsUri'] ?? null,
+    'reviews_count' => $details['userRatingCount'] ?? 0,
     'rating' => $details['rating'] ?? null,
     'search_query' => $searchQuery,
 ];

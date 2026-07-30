@@ -116,13 +116,28 @@ function urgencyScoreFromGaps(array $gaps): int
 // ---------- HTTP helper (cURL) ----------
 function httpGetJson(string $url): ?array
 {
+    return httpJsonRequest('GET', $url);
+}
+
+/**
+ * Generic JSON HTTP request, used for the Places API (New) which needs
+ * custom headers (X-Goog-Api-Key / X-Goog-FieldMask) and POST bodies.
+ */
+function httpJsonRequest(string $method, string $url, array $headers = [], ?array $body = null): ?array
+{
     $ch = curl_init($url);
-    curl_setopt_array($ch, [
+    $opts = [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 15,
         CURLOPT_SSL_VERIFYPEER => true,
         CURLOPT_USERAGENT => 'LeadCRM/1.0',
-    ]);
+        CURLOPT_HTTPHEADER => $headers,
+    ];
+    if ($method === 'POST') {
+        $opts[CURLOPT_POST] = true;
+        $opts[CURLOPT_POSTFIELDS] = json_encode($body ?? []);
+    }
+    curl_setopt_array($ch, $opts);
     $response = curl_exec($ch);
     $error = curl_error($ch);
     curl_close($ch);
