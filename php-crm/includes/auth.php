@@ -32,6 +32,15 @@ function startSecureSession(): void
         'secure' => $secureCookie,
     ]);
     session_start();
+
+    // Some shared hosts (LiteSpeed/cPanel, Cloudflare, etc.) cache full HTML
+    // pages by default. A cached login page keeps serving an old CSRF token
+    // forever, so every submit fails with "Invalid CSRF token". These
+    // headers stop that page from being cached anywhere.
+    if (!headers_sent()) {
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+    }
 }
 
 function currentUser(): ?array
