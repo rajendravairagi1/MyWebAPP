@@ -1,0 +1,11 @@
+# Block direct access to sensitive files
+<FilesMatch "\.(sql|md)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_php.c>
+    php_flag display_errors off
+    php_flag session.cookie_httponly on
+</IfModule>
+
+Options -Indexes
