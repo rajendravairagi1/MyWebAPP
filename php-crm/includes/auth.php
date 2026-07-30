@@ -1,17 +1,35 @@
 <?php
 require_once __DIR__ . '/../db.php';
 
+function isHttpsRequest(): bool
+{
+    if (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
+        return true;
+    }
+    if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') {
+        return true;
+    }
+    return !empty($_SERVER['SERVER_PORT']) && (int) $_SERVER['SERVER_PORT'] === 443;
+}
+
 function startSecureSession(): void
 {
     if (session_status() === PHP_SESSION_ACTIVE) {
         return;
+    }
+    // Auto-detect HTTPS so the session cookie isn't marked "secure" on a
+    // plain-HTTP site (a secure cookie is silently dropped by the browser
+    // over HTTP, which breaks login/CSRF with "Invalid CSRF token").
+    $secureCookie = isHttpsRequest();
+    if (defined('APP_FORCE_HTTPS_COOKIE') && APP_FORCE_HTTPS_COOKIE === false) {
+        $secureCookie = false;
     }
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',
         'httponly' => true,
         'samesite' => 'Lax',
-        'secure' => defined('APP_FORCE_HTTPS_COOKIE') ? APP_FORCE_HTTPS_COOKIE : true,
+        'secure' => $secureCookie,
     ]);
     session_start();
 }

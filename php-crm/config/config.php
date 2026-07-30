@@ -17,8 +17,10 @@ define('DB_PASS', 'your_cpanel_dbpassword');
 // Change this to any long random string before going live.
 define('APP_SECRET', 'change-this-to-a-long-random-string');
 
-// Set true only while testing on localhost without HTTPS.
-// Live hosting (HTTPS) par hamesha true rakhna cookie security ke liye.
+// App apne aap detect kar leta hai ki request HTTPS pe hai ya nahi (ise
+// waise hi chhod do - default 'true' rakho). Agar tumhari site abhi bina
+// SSL (plain http://) ke chal rahi hai aur "Invalid CSRF token" / login
+// baar baar fail ho raha hai, to isko 'false' kar do.
 define('APP_FORCE_HTTPS_COOKIE', true);
 
 // ---------- Timezone ----------
