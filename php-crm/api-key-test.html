@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Google Places API Key Tester</title>
+<style>
+  body { font-family: -apple-system, Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 16px; background: #f5f6fa; color: #1f2430; }
+  h1 { font-size: 1.4rem; }
+  label { display: block; font-weight: 600; margin-top: 16px; margin-bottom: 6px; font-size: 0.9rem; }
+  input { width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem; box-sizing: border-box; }
+  button { margin-top: 18px; padding: 10px 20px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 0.95rem; cursor: pointer; }
+  button:hover { background: #1e40af; }
+  pre { background: #111827; color: #d1d5db; padding: 16px; border-radius: 8px; margin-top: 20px; white-space: pre-wrap; word-break: break-word; font-size: 0.85rem; }
+  .ok { color: #22c55e; font-weight: 700; }
+  .fail { color: #f87171; font-weight: 700; }
+</style>
+</head>
+<body>
+  <h1>Google Places API Key Tester</h1>
+  <p>Apni API key daalo aur test karo - ye seedha browser se Google ko call karega, tumhare CRM ke bina.</p>
+
+  <label for="apiKey">API Key</label>
+  <input type="text" id="apiKey" placeholder="AIza...">
+
+  <label for="query">Search Query</label>
+  <input type="text" id="query" value="real estate in california">
+
+  <button onclick="runTest()">Test Places API (New)</button>
+
+  <div id="statusLine" style="margin-top:14px;"></div>
+  <pre id="output">Result yahan dikhega...</pre>
+
+<script>
+async function runTest() {
+  var apiKey = document.getElementById('apiKey').value.trim();
+  var query = document.getElementById('query').value.trim();
+  var status = document.getElementById('statusLine');
+  var out = document.getElementById('output');
+
+  if (!apiKey) {
+    alert('API key daalo pehle');
+    return;
+  }
+
+  status.innerHTML = 'Testing...';
+  out.textContent = '';
+
+  try {
+    var res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': apiKey,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount'
+      },
+      body: JSON.stringify({ textQuery: query })
+    });
+    var data = await res.json();
+    out.textContent = JSON.stringify(data, null, 2);
+
+    if (res.ok && data.places) {
+      status.innerHTML = '<span class="ok">SUCCESS - ' + data.places.length + ' result(s) mile. Key kaam kar rahi hai.</span>';
+    } else if (data.error) {
+      status.innerHTML = '<span class="fail">FAILED - ' + (data.error.status || 'ERROR') + ': ' + (data.error.message || '') + '</span>';
+    } else {
+      status.innerHTML = '<span class="fail">FAILED - unexpected response, neeche dekho.</span>';
+    }
+  } catch (err) {
+    status.innerHTML = '<span class="fail">Network error: ' + err.message + '</span>';
+    out.textContent = String(err);
+  }
+}
+</script>
+</body>
+</html>
