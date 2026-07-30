@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
 
+if (getSetting('google_places_api_enabled', '1') !== '1') {
+    apiJson(['ok' => false, 'error' => 'Google Places API is turned OFF in Settings. Turn it on first.'], 403);
+}
+
 $query = trim($_GET['q'] ?? '');
 if ($query === '') {
     apiJson(['ok' => false, 'error' => 'Query is required'], 400);

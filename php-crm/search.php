@@ -3,6 +3,8 @@ require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/functions.php';
 requireLogin();
 
+$apiEnabled = getSetting('google_places_api_enabled', '1') === '1';
+
 $pageTitle = 'Search & Analyze';
 $csrfToken = csrfToken();
 require __DIR__ . '/includes/header.php';
@@ -10,10 +12,16 @@ require __DIR__ . '/includes/header.php';
 <h1>Search &amp; Analyze</h1>
 <p class="page-subtitle">Search Google Places, then save promising leads straight into your database.</p>
 
+<?php if (!$apiEnabled): ?>
+  <div class="alert alert-error">
+    Google Places API is currently <strong>OFF</strong>. Go to <a href="settings.php">Settings</a> and turn it Active before searching.
+  </div>
+<?php endif; ?>
+
 <div class="card">
   <form id="search-form" class="flex">
-    <input type="text" id="search-query" placeholder="e.g. Real estate agents in Pune" required>
-    <button type="submit" class="btn">Search</button>
+    <input type="text" id="search-query" placeholder="e.g. Real estate agents in Pune" required <?= $apiEnabled ? '' : 'disabled' ?>>
+    <button type="submit" class="btn" <?= $apiEnabled ? '' : 'disabled' ?>>Search</button>
   </form>
 </div>
 

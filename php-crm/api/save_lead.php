@@ -6,6 +6,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 apiVerifyCsrf();
 
+if (getSetting('google_places_api_enabled', '1') !== '1') {
+    apiJson(['ok' => false, 'error' => 'Google Places API is turned OFF in Settings. Turn it on first.'], 403);
+}
+
 $placeId = trim($_POST['place_id'] ?? '');
 $searchQuery = trim($_POST['search_query'] ?? '');
 if ($placeId === '') {

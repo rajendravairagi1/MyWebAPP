@@ -119,6 +119,7 @@ CREATE TABLE IF NOT EXISTS app_settings (
 
 INSERT INTO app_settings (setting_key, setting_value) VALUES
 ('google_places_api_key', ''),
+('google_places_api_enabled', '1'),
 ('min_reviews_threshold', '10'),
 ('min_rating_threshold', '4.0')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
