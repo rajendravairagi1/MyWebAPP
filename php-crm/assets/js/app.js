@@ -44,15 +44,15 @@ document.addEventListener('DOMContentLoaded', function () {
           statusEl.textContent = 'Error: ' + data.error;
           return;
         }
-        var msg = data.results.length + ' weak lead(s) shown for "' + query + '"';
+        var msg = data.results.length + ' matching lead(s) shown for "' + query + '"';
         if (data.stats) {
           msg += ' — Google returned ' + data.stats.total_from_google
-               + ', ' + data.stats.weak_matches + ' matched filter (reviews < ' + data.stats.min_reviews
-               + ' or rating < ' + data.stats.min_rating + '), top ' + data.stats.shown + ' shown.';
+               + ', ' + data.stats.matches + ' matched filter (reviews ≤ ' + data.stats.max_reviews
+               + ' and rating ≥ ' + data.stats.min_rating + '), top ' + data.stats.shown + ' shown.';
         }
         statusEl.textContent = msg;
         if (data.results.length === 0) {
-          resultsEl.innerHTML = '<p class="muted">Koi weak lead nahi mila is search me. Filter loose karna ho to Settings se threshold badha do.</p>';
+          resultsEl.innerHTML = '<p class="muted">Koi matching lead nahi mila. Settings se thresholds adjust karo (max reviews badhao ya min rating ghatao).</p>';
         } else {
           renderResults(data.results);
         }

@@ -86,7 +86,7 @@ function allStatuses(): array
 function computeGaps(array $lead): array
 {
     $gaps = [];
-    $minReviews = (int) getSetting('min_reviews_threshold', '10');
+    $minReviews = (int) getSetting('max_reviews_threshold', getSetting('min_reviews_threshold', '10'));
     $minRating = (float) getSetting('min_rating_threshold', '4.0');
 
     if (empty($lead['website'])) {

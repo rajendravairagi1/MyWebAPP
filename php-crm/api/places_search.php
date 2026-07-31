@@ -34,8 +34,10 @@ if (isset($data['error'])) {
     apiJson(['ok' => false, 'error' => "Google Places error: $status - $message"], 502);
 }
 
-// Filter thresholds (weak leads = better prospects for GMB optimization pitch)
-$minReviews = (int) getSetting('min_reviews_threshold', '10');
+// Ideal prospect = few reviews (weak online presence) BUT good rating
+// (they do good work, just haven't collected reviews - easy to pitch GMB
+// optimization / review-collection service).
+$maxReviews = (int) getSetting('max_reviews_threshold', '10');
 $minRating = (float) getSetting('min_rating_threshold', '4.0');
 $maxResults = (int) getSetting('max_search_results', '10');
 if ($maxResults < 1) { $maxResults = 10; }
@@ -52,22 +54,24 @@ foreach ($data['places'] ?? [] as $r) {
 }
 $totalFromGoogle = count($allResults);
 
-// Keep only "weak" leads: reviews below threshold OR rating below threshold.
-$weakResults = array_values(array_filter($allResults, function ($r) use ($minReviews, $minRating) {
-    $lowReviews = $r['reviews_count'] < $minReviews;
-    $lowRating = $r['rating'] !== null && (float) $r['rating'] > 0 && (float) $r['rating'] < $minRating;
-    return $lowReviews || $lowRating;
+// Keep leads where reviews <= max AND rating >= min.
+// If a place has no rating yet (null / 0), keep it - low reviews is enough.
+$matches = array_values(array_filter($allResults, function ($r) use ($maxReviews, $minRating) {
+    $reviewsOk = $r['reviews_count'] <= $maxReviews;
+    $ratingVal = $r['rating'] !== null ? (float) $r['rating'] : 0.0;
+    $ratingOk = $ratingVal === 0.0 || $ratingVal >= $minRating;
+    return $reviewsOk && $ratingOk;
 }));
 
-// Weakest first: lowest reviews on top, then lowest rating.
-usort($weakResults, function ($a, $b) {
+// Best prospects first: fewest reviews on top, then highest rating.
+usort($matches, function ($a, $b) {
     if ($a['reviews_count'] !== $b['reviews_count']) {
         return $a['reviews_count'] <=> $b['reviews_count'];
     }
-    return (float) ($a['rating'] ?? 5) <=> (float) ($b['rating'] ?? 5);
+    return (float) ($b['rating'] ?? 0) <=> (float) ($a['rating'] ?? 0);
 });
 
-$results = array_slice($weakResults, 0, $maxResults);
+$results = array_slice($matches, 0, $maxResults);
 
 $pdo = getDb();
 $stmt = $pdo->prepare('INSERT INTO search_history (query, results_count) VALUES (?, ?)');
@@ -78,9 +82,9 @@ apiJson([
     'results' => $results,
     'stats' => [
         'total_from_google' => $totalFromGoogle,
-        'weak_matches' => count($weakResults),
+        'matches' => count($matches),
         'shown' => count($results),
-        'min_reviews' => $minReviews,
+        'max_reviews' => $maxReviews,
         'min_rating' => $minRating,
     ],
 ]);

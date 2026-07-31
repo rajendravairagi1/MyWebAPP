@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'save_settings') {
         setSetting('google_places_api_key', trim($_POST['google_places_api_key'] ?? ''));
         setSetting('google_places_api_enabled', isset($_POST['google_places_api_enabled']) ? '1' : '0');
-        setSetting('min_reviews_threshold', (string) max(0, (int) ($_POST['min_reviews_threshold'] ?? 10)));
+        setSetting('max_reviews_threshold', (string) max(0, (int) ($_POST['max_reviews_threshold'] ?? 10)));
         setSetting('min_rating_threshold', (string) max(0, (float) ($_POST['min_rating_threshold'] ?? 4.0)));
         setSetting('max_search_results', (string) max(1, (int) ($_POST['max_search_results'] ?? 10)));
         flash('success', 'Settings saved.');
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $apiKey = getSetting('google_places_api_key');
 $apiEnabled = getSetting('google_places_api_enabled', '1') === '1';
-$minReviews = getSetting('min_reviews_threshold', '10');
+$maxReviews = getSetting('max_reviews_threshold', getSetting('min_reviews_threshold', '10'));
 $minRating = getSetting('min_rating_threshold', '4.0');
 $maxResults = getSetting('max_search_results', '10');
 
@@ -75,17 +75,17 @@ require __DIR__ . '/includes/header.php';
         </div>
         <label>API Key</label>
         <input type="text" name="google_places_api_key" value="<?= h($apiKey) ?>" placeholder="AIza...">
-        <label>Minimum reviews threshold (below this = weak lead, will show in search)</label>
-        <input type="number" name="min_reviews_threshold" value="<?= h($minReviews) ?>">
-        <p class="small muted" style="margin-top:4px;">e.g. 10 &rarr; sirf wo businesses dikhaye jinke reviews 10 se kam hain</p>
+        <label>Maximum reviews (is se kam ya barabar wale hi dikhenge)</label>
+        <input type="number" name="max_reviews_threshold" value="<?= h($maxReviews) ?>" min="0">
+        <p class="small muted" style="margin-top:4px;">e.g. 10 &rarr; sirf wo businesses jinke reviews 10 ya usse kam hain (kamzor online presence).</p>
 
-        <label>Minimum rating threshold (below this = weak lead)</label>
-        <input type="number" step="0.1" name="min_rating_threshold" value="<?= h($minRating) ?>">
-        <p class="small muted" style="margin-top:4px;">e.g. 4.0 &rarr; sirf wo businesses dikhaye jinki rating 4 se kam hai</p>
+        <label>Minimum rating (is se zyada ya barabar wale hi dikhenge)</label>
+        <input type="number" step="0.1" name="min_rating_threshold" value="<?= h($minRating) ?>" min="0" max="5">
+        <p class="small muted" style="margin-top:4px;">e.g. 4.0 &rarr; sirf 4 star ya usse upar wale (achha kaam kar rahe hain, bas reviews kam).</p>
 
-        <label>Max search results to show (API cost bachane ke liye chhota rakho)</label>
+        <label>Max search results to show (API cost bachane ke liye)</label>
         <input type="number" name="max_search_results" value="<?= h($maxResults) ?>" min="1" max="20">
-        <p class="small muted" style="margin-top:4px;">Testing ke liye 2 rakh sakte ho. Note: sirf shown results ki Place Details API call hoti hai jab tum "Analyze &amp; Save" dabaate ho.</p>
+        <p class="small muted" style="margin-top:4px;">Testing ke liye 2 rakh sakte ho. Google har search ki cost same leta hai chahe 1 ya 20 result dikhaye - lekin "Analyze &amp; Save" click karne pe har lead ki alag Details call jaati hai, isliye kam results = kam accidental Details calls.</p>
 
         <button type="submit" class="btn" style="margin-top:14px;">Save Settings</button>
       </form>
