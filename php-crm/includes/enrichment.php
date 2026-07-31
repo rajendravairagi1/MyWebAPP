@@ -65,11 +65,27 @@ function apolloFindContacts(?string $domain, string $companyName, string $apiKey
         return ['ok' => false, 'error' => 'Apollo: ' . (is_string($msg) ? $msg : json_encode($msg)), 'contacts' => []];
     }
 
+    $decisionMakerKeywords = [
+        'owner', 'founder', 'co-founder', 'cofounder', 'ceo', 'chief executive',
+        'president', 'managing director', 'director', 'partner', 'principal',
+        'proprietor', 'chairman', 'md', 'coo', 'chief operating',
+        'vp ', 'vice president', 'head of',
+    ];
+
     $contacts = [];
     foreach (($data['people'] ?? []) as $p) {
         $email = $p['email'] ?? null;
         // Apollo returns "email_not_unlocked@domain.com" for locked emails.
         if ($email && stripos($email, 'email_not_unlocked') !== false) $email = null;
+
+        $title = strtolower($p['title'] ?? '');
+        if ($title !== '') {
+            $isDecisionMaker = false;
+            foreach ($decisionMakerKeywords as $kw) {
+                if (strpos($title, $kw) !== false) { $isDecisionMaker = true; break; }
+            }
+            if (!$isDecisionMaker) continue;
+        }
 
         $name = trim(($p['first_name'] ?? '') . ' ' . ($p['last_name'] ?? '')) ?: ($p['name'] ?? '');
         $contacts[] = [
@@ -104,9 +120,45 @@ function hunterFindContacts(?string $domain, string $apiKey): array
         return ['ok' => false, 'error' => 'Hunter: ' . $msg, 'contacts' => []];
     }
 
+    // Keywords that identify a real decision-maker vs a generic mailbox.
+    $decisionMakerKeywords = [
+        'owner', 'founder', 'co-founder', 'cofounder', 'ceo', 'chief executive',
+        'president', 'managing director', 'director', 'partner', 'principal',
+        'proprietor', 'chairman', 'chairwoman', 'chairperson', 'md', 'coo',
+        'chief operating', 'vp ', 'vice president', 'head of',
+    ];
+    // Local-parts we always skip (generic role mailboxes, not people).
+    $genericLocalParts = [
+        'info', 'contact', 'hello', 'hi', 'support', 'help', 'admin', 'office',
+        'sales', 'marketing', 'hr', 'careers', 'jobs', 'billing', 'accounts',
+        'noreply', 'no-reply', 'donotreply', 'team', 'inquiries', 'enquiries',
+        'service', 'services', 'general', 'mail', 'email',
+    ];
+
     $contacts = [];
     foreach ((($data['data'] ?? [])['emails'] ?? []) as $e) {
         $name = trim(($e['first_name'] ?? '') . ' ' . ($e['last_name'] ?? ''));
+        $title = strtolower($e['position'] ?? '');
+        $email = strtolower($e['value'] ?? '');
+        $localPart = $email ? substr($email, 0, strpos($email, '@')) : '';
+
+        // 1) Drop generic role mailboxes (info@, sales@, hr@ etc).
+        if ($localPart && in_array($localPart, $genericLocalParts, true)) continue;
+
+        // 2) If title exists, only keep decision-maker titles.
+        //    If title is missing but there's a real person name, keep it -
+        //    Hunter sometimes has the name without the title.
+        if ($title !== '') {
+            $isDecisionMaker = false;
+            foreach ($decisionMakerKeywords as $kw) {
+                if (strpos($title, $kw) !== false) { $isDecisionMaker = true; break; }
+            }
+            if (!$isDecisionMaker) continue;
+        } elseif ($name === '') {
+            // No title and no name = useless, skip.
+            continue;
+        }
+
         $contacts[] = [
             'name' => $name,
             'title' => $e['position'] ?? '',
