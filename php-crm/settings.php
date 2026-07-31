@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         setSetting('google_places_api_enabled', isset($_POST['google_places_api_enabled']) ? '1' : '0');
         setSetting('min_reviews_threshold', (string) max(0, (int) ($_POST['min_reviews_threshold'] ?? 10)));
         setSetting('min_rating_threshold', (string) max(0, (float) ($_POST['min_rating_threshold'] ?? 4.0)));
+        setSetting('max_search_results', (string) max(1, (int) ($_POST['max_search_results'] ?? 10)));
         flash('success', 'Settings saved.');
         redirect('settings.php');
     }
@@ -47,6 +48,7 @@ $apiKey = getSetting('google_places_api_key');
 $apiEnabled = getSetting('google_places_api_enabled', '1') === '1';
 $minReviews = getSetting('min_reviews_threshold', '10');
 $minRating = getSetting('min_rating_threshold', '4.0');
+$maxResults = getSetting('max_search_results', '10');
 
 $pageTitle = 'Settings';
 require __DIR__ . '/includes/header.php';
@@ -73,10 +75,18 @@ require __DIR__ . '/includes/header.php';
         </div>
         <label>API Key</label>
         <input type="text" name="google_places_api_key" value="<?= h($apiKey) ?>" placeholder="AIza...">
-        <label>Minimum reviews threshold (below this = gap)</label>
+        <label>Minimum reviews threshold (below this = weak lead, will show in search)</label>
         <input type="number" name="min_reviews_threshold" value="<?= h($minReviews) ?>">
-        <label>Minimum rating threshold (below this = gap)</label>
+        <p class="small muted" style="margin-top:4px;">e.g. 10 &rarr; sirf wo businesses dikhaye jinke reviews 10 se kam hain</p>
+
+        <label>Minimum rating threshold (below this = weak lead)</label>
         <input type="number" step="0.1" name="min_rating_threshold" value="<?= h($minRating) ?>">
+        <p class="small muted" style="margin-top:4px;">e.g. 4.0 &rarr; sirf wo businesses dikhaye jinki rating 4 se kam hai</p>
+
+        <label>Max search results to show (API cost bachane ke liye chhota rakho)</label>
+        <input type="number" name="max_search_results" value="<?= h($maxResults) ?>" min="1" max="20">
+        <p class="small muted" style="margin-top:4px;">Testing ke liye 2 rakh sakte ho. Note: sirf shown results ki Place Details API call hoti hai jab tum "Analyze &amp; Save" dabaate ho.</p>
+
         <button type="submit" class="btn" style="margin-top:14px;">Save Settings</button>
       </form>
     </div>

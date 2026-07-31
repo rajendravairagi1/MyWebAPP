@@ -44,8 +44,18 @@ document.addEventListener('DOMContentLoaded', function () {
           statusEl.textContent = 'Error: ' + data.error;
           return;
         }
-        statusEl.textContent = data.results.length + ' result(s) found for "' + query + '"';
-        renderResults(data.results);
+        var msg = data.results.length + ' weak lead(s) shown for "' + query + '"';
+        if (data.stats) {
+          msg += ' — Google returned ' + data.stats.total_from_google
+               + ', ' + data.stats.weak_matches + ' matched filter (reviews < ' + data.stats.min_reviews
+               + ' or rating < ' + data.stats.min_rating + '), top ' + data.stats.shown + ' shown.';
+        }
+        statusEl.textContent = msg;
+        if (data.results.length === 0) {
+          resultsEl.innerHTML = '<p class="muted">Koi weak lead nahi mila is search me. Filter loose karna ho to Settings se threshold badha do.</p>';
+        } else {
+          renderResults(data.results);
+        }
         resultsEl.dataset.query = query;
       })
       .catch(function () {

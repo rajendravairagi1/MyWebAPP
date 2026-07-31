@@ -4,13 +4,16 @@ require_once __DIR__ . '/includes/functions.php';
 requireLogin();
 
 $apiEnabled = getSetting('google_places_api_enabled', '1') === '1';
+$minReviewsCfg = (int) getSetting('min_reviews_threshold', '10');
+$minRatingCfg = (float) getSetting('min_rating_threshold', '4.0');
+$maxResultsCfg = (int) getSetting('max_search_results', '10');
 
 $pageTitle = 'Search & Analyze';
 $csrfToken = csrfToken();
 require __DIR__ . '/includes/header.php';
 ?>
 <h1>Search &amp; Analyze</h1>
-<p class="page-subtitle">Search Google Places, then save promising leads straight into your database.</p>
+<p class="page-subtitle">Search Google Places &mdash; sirf <strong>kamzor leads</strong> (weak online presence wale) dikhenge, jinhe optimization ki jarurat hai. Filter: reviews &lt; <?= $minReviewsCfg ?> ya rating &lt; <?= $minRatingCfg ?>, max <?= $maxResultsCfg ?> results. <a href="settings.php">Change in Settings</a></p>
 
 <?php if (!$apiEnabled): ?>
   <div class="alert alert-error">
