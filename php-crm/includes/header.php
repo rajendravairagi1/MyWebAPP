@@ -19,6 +19,7 @@ $currentFile = basename($_SERVER['SCRIPT_NAME']);
     <nav class="sidebar-nav">
       <a href="dashboard.php" class="<?= $currentFile === 'dashboard.php' ? 'active' : '' ?>">Dashboard</a>
       <a href="search.php" class="<?= $currentFile === 'search.php' ? 'active' : '' ?>">Search &amp; Analyze</a>
+      <a href="add-lead.php" class="<?= $currentFile === 'add-lead.php' ? 'active' : '' ?>">Add Lead Manually</a>
       <a href="leads.php" class="<?= $currentFile === 'leads.php' || $currentFile === 'lead-detail.php' ? 'active' : '' ?>">All Leads</a>
       <a href="templates.php" class="<?= $currentFile === 'templates.php' ? 'active' : '' ?>">Email Templates</a>
       <a href="settings.php" class="<?= $currentFile === 'settings.php' ? 'active' : '' ?>">Settings</a>

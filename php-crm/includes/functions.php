@@ -113,6 +113,23 @@ function urgencyScoreFromGaps(array $gaps): int
     return min(5, count($gaps));
 }
 
+/**
+ * Ensure the `leads` table has a `source` column ('google_places' or
+ * 'manual'). Older installs won't have it - add it silently, ignore
+ * "column already exists" errors.
+ */
+function ensureLeadSourceColumn(PDO $pdo): void
+{
+    try {
+        $pdo->exec("ALTER TABLE leads ADD COLUMN source VARCHAR(30) NOT NULL DEFAULT 'google_places' AFTER industry");
+    } catch (PDOException $e) {
+        // 1060 = duplicate column name; ignore
+        if (strpos($e->getMessage(), '1060') === false) {
+            throw $e;
+        }
+    }
+}
+
 // ---------- HTTP helper (cURL) ----------
 function httpGetJson(string $url): ?array
 {

@@ -7,6 +7,7 @@ requireLogin();
 $pdo = getDb();
 $id = (int) ($_GET['id'] ?? 0);
 
+ensureLeadSourceColumn($pdo);
 $stmt = $pdo->prepare('SELECT * FROM leads WHERE id = ?');
 $stmt->execute([$id]);
 $lead = $stmt->fetch();
@@ -114,8 +115,11 @@ $searchLinks = [
 $pageTitle = h($lead['company_name']);
 require __DIR__ . '/includes/header.php';
 ?>
+<?php $src = $lead['source'] ?? 'google_places'; ?>
 <div class="flex-between">
-  <h1><?= h($lead['company_name']) ?></h1>
+  <h1><?= h($lead['company_name']) ?>
+    <span class="badge <?= $src === 'manual' ? 'badge-purple' : 'badge-blue' ?>" style="font-size:0.65rem;vertical-align:middle;"><?= $src === 'manual' ? 'Manual' : 'Google' ?></span>
+  </h1>
   <span class="badge <?= statusBadgeClass($lead['status']) ?>"><?= h(statusLabel($lead['status'])) ?></span>
 </div>
 <p class="page-subtitle">Urgency score: <?= (int) $lead['urgency_score'] ?>/5 &middot; Added <?= h($lead['created_at']) ?></p>

@@ -62,13 +62,14 @@ $gaps = computeGaps($lead);
 $urgency = urgencyScoreFromGaps($gaps);
 
 $pdo = getDb();
+ensureLeadSourceColumn($pdo);
 $pdo->beginTransaction();
 try {
     $stmt = $pdo->prepare('
         INSERT INTO leads (place_id, company_name, address, phone, website, email, facebook_url, linkedin_url,
-            instagram_url, google_profile_url, reviews_count, rating, search_query, urgency_score, status)
+            instagram_url, google_profile_url, reviews_count, rating, search_query, urgency_score, source, status)
         VALUES (:place_id, :company_name, :address, :phone, :website, :email, :facebook_url, :linkedin_url,
-            :instagram_url, :google_profile_url, :reviews_count, :rating, :search_query, :urgency_score, "analyzed")
+            :instagram_url, :google_profile_url, :reviews_count, :rating, :search_query, :urgency_score, "google_places", "analyzed")
         ON DUPLICATE KEY UPDATE
             company_name = VALUES(company_name), address = VALUES(address), phone = VALUES(phone),
             website = VALUES(website), email = VALUES(email), facebook_url = VALUES(facebook_url),

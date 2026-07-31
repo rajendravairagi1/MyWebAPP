@@ -4,6 +4,7 @@ require_once __DIR__ . '/includes/functions.php';
 requireLogin();
 
 $pdo = getDb();
+ensureLeadSourceColumn($pdo);
 
 // ---------- Bulk status update ----------
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
@@ -23,12 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_action'])) {
 $status = $_GET['status'] ?? '';
 $q = trim($_GET['q'] ?? '');
 $sort = $_GET['sort'] ?? 'created_desc';
+$source = $_GET['source'] ?? '';
 
 $where = [];
 $params = [];
 if ($status !== '' && in_array($status, allStatuses(), true)) {
     $where[] = 'status = ?';
     $params[] = $status;
+}
+if ($source !== '' && in_array($source, ['google_places', 'manual'], true)) {
+    $where[] = 'source = ?';
+    $params[] = $source;
 }
 if ($q !== '') {
     $where[] = '(company_name LIKE ? OR email LIKE ? OR phone LIKE ?)';
@@ -74,6 +80,14 @@ require __DIR__ . '/includes/header.php';
       </select>
     </div>
     <div class="form-row">
+      <label>Source</label>
+      <select name="source">
+        <option value="">All</option>
+        <option value="google_places" <?= $source === 'google_places' ? 'selected' : '' ?>>Google Places</option>
+        <option value="manual" <?= $source === 'manual' ? 'selected' : '' ?>>Manual</option>
+      </select>
+    </div>
+    <div class="form-row">
       <label>Search</label>
       <input type="text" name="q" value="<?= h($q) ?>" placeholder="Name, email, phone">
     </div>
@@ -106,12 +120,14 @@ require __DIR__ . '/includes/header.php';
     <table>
       <tr>
         <th><input type="checkbox" onclick="document.querySelectorAll('.lead-check').forEach(cb=>cb.checked=this.checked)"></th>
-        <th>Company</th><th>Phone</th><th>Email</th><th>Status</th><th>Urgency</th><th>Last Updated</th><th></th>
+        <th>Company</th><th>Source</th><th>Phone</th><th>Email</th><th>Status</th><th>Urgency</th><th>Last Updated</th><th></th>
       </tr>
       <?php foreach ($leads as $lead): ?>
+      <?php $src = $lead['source'] ?? 'google_places'; ?>
       <tr>
         <td><input type="checkbox" class="lead-check" name="lead_ids[]" value="<?= (int) $lead['id'] ?>"></td>
         <td><?= h($lead['company_name']) ?></td>
+        <td><span class="badge <?= $src === 'manual' ? 'badge-purple' : 'badge-blue' ?>"><?= $src === 'manual' ? 'Manual' : 'Google' ?></span></td>
         <td><?= h($lead['phone']) ?></td>
         <td><?= h($lead['email']) ?></td>
         <td><span class="badge <?= statusBadgeClass($lead['status']) ?>"><?= h(statusLabel($lead['status'])) ?></span></td>
@@ -121,7 +137,7 @@ require __DIR__ . '/includes/header.php';
       </tr>
       <?php endforeach; ?>
       <?php if (empty($leads)): ?>
-      <tr><td colspan="8" class="muted">No leads found. Go to Search &amp; Analyze to add some.</td></tr>
+      <tr><td colspan="9" class="muted">No leads found. <a href="search.php">Search &amp; Analyze</a> ya <a href="add-lead.php">Add Lead Manually</a>.</td></tr>
       <?php endif; ?>
     </table>
   </div>

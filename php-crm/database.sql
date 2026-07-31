@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS leads (
     rating DECIMAL(2,1),
     search_query VARCHAR(255),
     industry VARCHAR(100) DEFAULT 'Real Estate',
+    source VARCHAR(30) NOT NULL DEFAULT 'google_places',
     urgency_score INT DEFAULT 0,
     status ENUM('new','analyzed','contacted','replied','follow_up','closed_won','closed_lost') DEFAULT 'new',
     notes TEXT,
