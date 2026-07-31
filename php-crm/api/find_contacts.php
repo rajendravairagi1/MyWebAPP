@@ -22,11 +22,13 @@ $domain = extractDomain($lead['website'] ?? null);
 
 $apolloEnabled = getSetting('apollo_api_enabled', '0') === '1';
 $hunterEnabled = getSetting('hunter_api_enabled', '0') === '1';
+$serperEnabled = getSetting('serper_api_enabled', '0') === '1';
 $apolloKey = getSetting('apollo_api_key', '');
 $hunterKey = getSetting('hunter_api_key', '');
+$serperKey = getSetting('serper_api_key', '');
 
-if (!$apolloEnabled && !$hunterEnabled) {
-    apiJson(['ok' => false, 'error' => 'Both Apollo and Hunter are OFF in Settings. Turn at least one on.'], 400);
+if (!$apolloEnabled && !$hunterEnabled && !$serperEnabled) {
+    apiJson(['ok' => false, 'error' => 'Sabhi enrichment APIs (Apollo/Hunter/Serper) OFF hain. Kam se kam ek ON karo Settings me.'], 400);
 }
 
 $log = [];
@@ -65,6 +67,41 @@ if ($hunterEnabled) {
             }
             $log[] = "Hunter: " . count($res['contacts']) . " found, $addedHere new";
             $totalAdded += $addedHere;
+        }
+    }
+}
+
+// Serper: Google search se social profiles auto-detect + save on lead.
+$socialsAdded = 0;
+if ($serperEnabled) {
+    if (!$serperKey) {
+        $errors[] = 'Serper key missing';
+    } else {
+        // Extract city from address for a better query, e.g. "Company Name City".
+        $city = null;
+        if (!empty($lead['address'])) {
+            $parts = array_map('trim', explode(',', $lead['address']));
+            if (count($parts) >= 2) $city = $parts[count($parts) - 3] ?? $parts[count($parts) - 2] ?? null;
+        }
+        $res = serperFindSocials($lead['company_name'], $city, $serperKey);
+        if (!$res['ok']) {
+            $errors[] = $res['error'];
+        } else {
+            $fields = ['facebook_url', 'instagram_url', 'linkedin_url'];
+            $updates = [];
+            $params = [];
+            foreach ($fields as $f) {
+                if (!empty($res['socials'][$f]) && empty($lead[$f])) {
+                    $updates[] = "$f = ?";
+                    $params[] = $res['socials'][$f];
+                    $socialsAdded++;
+                }
+            }
+            if ($updates) {
+                $params[] = $leadId;
+                $pdo->prepare('UPDATE leads SET ' . implode(', ', $updates) . ' WHERE id = ?')->execute($params);
+            }
+            $log[] = "Serper: " . count($res['socials']) . " socials found, $socialsAdded saved on lead";
         }
     }
 }

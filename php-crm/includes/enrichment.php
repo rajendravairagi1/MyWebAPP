@@ -172,6 +172,71 @@ function hunterFindContacts(?string $domain, string $apiKey): array
 }
 
 /**
+ * Serper.dev - Google search JSON API. Free tier 2500 searches/month.
+ * Returns knowledgeGraph.profiles when Google shows the "Profiles" side
+ * panel (Instagram/Facebook/LinkedIn/YouTube etc). Also parses organic
+ * results as a fallback.
+ */
+function serperFindSocials(string $companyName, ?string $city, string $apiKey): array
+{
+    if (empty($apiKey)) return ['ok' => false, 'error' => 'Serper API key not set', 'socials' => []];
+    if (empty($companyName)) return ['ok' => false, 'error' => 'Company name required', 'socials' => []];
+
+    $query = $companyName;
+    if ($city) $query .= ' ' . $city;
+
+    $ch = curl_init('https://google.serper.dev/search');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode(['q' => $query, 'num' => 10]),
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_HTTPHEADER => [
+            'Content-Type: application/json',
+            'X-API-KEY: ' . $apiKey,
+        ],
+    ]);
+    $raw = curl_exec($ch);
+    $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($raw === false) return ['ok' => false, 'error' => 'Network error reaching Serper', 'socials' => []];
+    $data = json_decode($raw, true);
+    if (!is_array($data)) return ['ok' => false, 'error' => 'Invalid Serper response', 'socials' => []];
+    if ($status >= 400) return ['ok' => false, 'error' => 'Serper: ' . ($data['message'] ?? "HTTP $status"), 'socials' => []];
+
+    $socials = ['facebook_url' => null, 'instagram_url' => null, 'linkedin_url' => null,
+                'twitter_url' => null, 'youtube_url' => null];
+
+    $classify = function (string $url) use (&$socials) {
+        $u = rtrim($url, '/');
+        if (!$socials['facebook_url']  && preg_match('#https?://(?:www\.|m\.)?facebook\.com/[^/?#]+#i', $u, $m))  $socials['facebook_url']  = $m[0];
+        if (!$socials['instagram_url'] && preg_match('#https?://(?:www\.)?instagram\.com/[^/?#]+#i', $u, $m))     $socials['instagram_url'] = $m[0];
+        if (!$socials['linkedin_url']  && preg_match('#https?://(?:www\.)?linkedin\.com/(?:company|in)/[^/?#]+#i', $u, $m)) $socials['linkedin_url']  = $m[0];
+        if (!$socials['twitter_url']   && preg_match('#https?://(?:www\.)?(?:twitter|x)\.com/[^/?#]+#i', $u, $m)) $socials['twitter_url']   = $m[0];
+        if (!$socials['youtube_url']   && preg_match('#https?://(?:www\.)?youtube\.com/(?:@|c/|channel/|user/)[^/?#]+#i', $u, $m)) $socials['youtube_url']   = $m[0];
+    };
+
+    // 1) Knowledge graph "profiles" panel (matches the screenshot exactly).
+    if (!empty($data['knowledgeGraph']['profiles'])) {
+        foreach ($data['knowledgeGraph']['profiles'] as $p) {
+            if (!empty($p['link'])) $classify($p['link']);
+        }
+    }
+    // 2) Fallback: any organic result on a social domain.
+    foreach (($data['organic'] ?? []) as $r) {
+        if (!empty($r['link'])) $classify($r['link']);
+    }
+    // 3) Sitelinks sometimes have social too.
+    if (!empty($data['knowledgeGraph']['website'])) {
+        // (website is not social but nothing to do here)
+    }
+
+    return ['ok' => true, 'socials' => array_filter($socials)];
+}
+
+/**
  * Make sure lead_contacts table exists. Cheaper than asking user to
  * re-import database.sql after an update.
  */

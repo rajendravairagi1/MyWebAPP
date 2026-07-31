@@ -35,6 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         setSetting('apollo_api_enabled', isset($_POST['apollo_api_enabled']) ? '1' : '0');
         setSetting('hunter_api_key', trim($_POST['hunter_api_key'] ?? ''));
         setSetting('hunter_api_enabled', isset($_POST['hunter_api_enabled']) ? '1' : '0');
+        setSetting('serper_api_key', trim($_POST['serper_api_key'] ?? ''));
+        setSetting('serper_api_enabled', isset($_POST['serper_api_enabled']) ? '1' : '0');
         flash('success', 'Enrichment API settings saved.');
         redirect('settings.php');
     }
@@ -77,6 +79,8 @@ $apolloKey = getSetting('apollo_api_key', '');
 $apolloEnabled = getSetting('apollo_api_enabled', '0') === '1';
 $hunterKey = getSetting('hunter_api_key', '');
 $hunterEnabled = getSetting('hunter_api_enabled', '0') === '1';
+$serperKey = getSetting('serper_api_key', '');
+$serperEnabled = getSetting('serper_api_enabled', '0') === '1';
 
 $pageTitle = 'Settings';
 require __DIR__ . '/includes/header.php';
@@ -171,6 +175,19 @@ require __DIR__ . '/includes/header.php';
         </div>
         <label>Hunter API Key</label>
         <input type="text" name="hunter_api_key" value="<?= h($hunterKey) ?>" placeholder="Paste Hunter API key here">
+
+        <div class="flex-between" style="background:<?= $serperEnabled ? '#dcfce7' : '#fee2e2' ?>;padding:12px 14px;border-radius:8px;margin-top:20px;">
+          <div>
+            <strong>Serper.dev <?= $serperEnabled ? '(Active)' : '(Inactive)' ?></strong>
+            <div class="small muted">Free: 2500 Google searches/month &middot; auto-detects Facebook / Instagram / LinkedIn URLs from Google's "Profiles" panel &middot; <a href="https://serper.dev" target="_blank" rel="noopener">Get API key</a></div>
+          </div>
+          <label style="margin:0;display:flex;align-items:center;gap:8px;font-weight:normal;">
+            <input type="checkbox" name="serper_api_enabled" value="1" style="width:auto;" <?= $serperEnabled ? 'checked' : '' ?>>
+            Active
+          </label>
+        </div>
+        <label>Serper API Key</label>
+        <input type="text" name="serper_api_key" value="<?= h($serperKey) ?>" placeholder="Paste Serper API key here">
 
         <button type="submit" class="btn" style="margin-top:14px;">Save Enrichment Settings</button>
       </form>
