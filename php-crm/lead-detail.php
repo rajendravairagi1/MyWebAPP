@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/enrichment.php';
 requireLogin();
 
 $pdo = getDb();
@@ -71,6 +72,14 @@ foreach ($emailHistory as $e) {
 }
 
 $templates = $pdo->query('SELECT * FROM email_templates ORDER BY name')->fetchAll();
+
+// Load enrichment contacts (owner/CEO/manager) for this lead.
+ensureLeadContactsTable($pdo);
+$contactsStmt = $pdo->prepare('SELECT * FROM lead_contacts WHERE lead_id = ? ORDER BY id DESC');
+$contactsStmt->execute([$id]);
+$leadContacts = $contactsStmt->fetchAll();
+
+$enrichmentAvailable = getSetting('apollo_api_enabled', '0') === '1' || getSetting('hunter_api_enabled', '0') === '1';
 
 // Rich placeholder map used by every template + the personalized pitch.
 $templateVars = buildTemplateVars($lead, $gaps);
@@ -144,6 +153,45 @@ require __DIR__ . '/includes/header.php';
           <span class="gap-tag"><?= h($g['gap_detail']) ?></span>
         <?php endforeach; ?>
       <?php endif; ?>
+    </div>
+
+    <div class="card">
+      <div class="flex-between">
+        <h3 class="mt-0">Owner / Decision-Maker Contacts</h3>
+        <?php if ($enrichmentAvailable): ?>
+          <button type="button" class="btn btn-sm" onclick="findContacts()">Find Owner Contacts</button>
+        <?php else: ?>
+          <a href="settings.php" class="btn btn-sm btn-outline">Enable in Settings</a>
+        <?php endif; ?>
+      </div>
+      <p class="small muted">Apollo/Hunter API se owner, CEO, director dhundhta hai (naam, email, LinkedIn). Free credits use hote hain per call.</p>
+      <div id="find-contacts-status" class="small" style="margin:8px 0;"></div>
+      <div id="contacts-list">
+        <?php if (empty($leadContacts)): ?>
+          <p class="muted">No contacts found yet. Click "Find Owner Contacts" above.</p>
+        <?php endif; ?>
+        <?php foreach ($leadContacts as $c): ?>
+          <div class="history-item" style="border-left-color:#7c3aed;">
+            <div class="flex-between">
+              <div>
+                <strong><?= h($c['contact_name'] ?: '(no name)') ?></strong>
+                <?php if ($c['title']): ?><span class="small muted"> &middot; <?= h($c['title']) ?></span><?php endif; ?>
+                <span class="badge badge-gray" style="margin-left:6px;font-size:0.65rem;"><?= h($c['source']) ?></span>
+              </div>
+            </div>
+            <div class="small" style="margin-top:4px;">
+              <?php if ($c['email']): ?>
+                <a href="mailto:<?= h($c['email']) ?>"><?= h($c['email']) ?></a>
+                <button type="button" class="btn btn-sm btn-outline" style="padding:2px 8px;margin-left:6px;" onclick="useContactEmail('<?= h($c['email']) ?>', '<?= h($c['contact_name']) ?>')">Use in pitch</button>
+              <?php else: ?>
+                <span class="muted">Email locked (Apollo free credits khatam ho sakte hain)</span>
+              <?php endif; ?>
+            </div>
+            <?php if ($c['phone']): ?><div class="small"><strong>Phone:</strong> <?= h($c['phone']) ?></div><?php endif; ?>
+            <?php if ($c['linkedin_url']): ?><div class="small"><a href="<?= h($c['linkedin_url']) ?>" target="_blank" rel="noopener">LinkedIn Profile &rarr;</a></div><?php endif; ?>
+          </div>
+        <?php endforeach; ?>
+      </div>
     </div>
 
     <div class="card">
@@ -248,6 +296,53 @@ require __DIR__ . '/includes/header.php';
     document.getElementById('email-subject').value = renderTemplate(AUTO_PITCH_SUBJECT);
     document.getElementById('email-body').value = renderTemplate(AUTO_PITCH_BODY);
     document.getElementById('template-select').value = '';
+  }
+
+  var LEAD_ID = <?= json_encode($id) ?>;
+  var CSRF_TOKEN = <?= json_encode(csrfToken()) ?>;
+
+  function findContacts() {
+    var status = document.getElementById('find-contacts-status');
+    status.innerHTML = 'Searching Apollo / Hunter...';
+    var body = new URLSearchParams();
+    body.set('lead_id', LEAD_ID);
+    body.set('csrf_token', CSRF_TOKEN);
+
+    fetch('api/find_contacts.php', { method: 'POST', body: body })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.ok) {
+          status.innerHTML = '<span style="color:#dc2626;">Error: ' + data.error + '</span>';
+          return;
+        }
+        var msg = data.added + ' new contact(s) added';
+        if (data.log && data.log.length) msg += ' &mdash; ' + data.log.join(', ');
+        if (data.errors && data.errors.length) msg += '<br><span style="color:#dc2626;">Warnings: ' + data.errors.join(', ') + '</span>';
+        status.innerHTML = msg + '. Reloading...';
+        setTimeout(function () { window.location.reload(); }, 900);
+      })
+      .catch(function (err) {
+        status.innerHTML = '<span style="color:#dc2626;">Network error: ' + err.message + '</span>';
+      });
+  }
+
+  function useContactEmail(email, name) {
+    var currentSubject = document.getElementById('email-subject').value;
+    var currentBody = document.getElementById('email-body').value;
+    if (!currentSubject && !currentBody) {
+      // Nothing composed yet - generate the auto pitch first.
+      fillAutoPitch();
+    }
+    // Update the "Hi Company team" salutation to "Hi <FirstName>" if we can.
+    var firstName = (name || '').split(' ')[0];
+    if (firstName) {
+      var bodyEl = document.getElementById('email-body');
+      bodyEl.value = bodyEl.value.replace(/Hi [^,\n]+ team,/, 'Hi ' + firstName + ',');
+    }
+    var toLine = "\n\n[Send this to: " + email + "]";
+    var bodyEl = document.getElementById('email-body');
+    if (bodyEl.value.indexOf(email) === -1) bodyEl.value = bodyEl.value + toLine;
+    alert('Ready. Send it to: ' + email);
   }
 </script>
 

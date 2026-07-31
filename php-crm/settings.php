@@ -30,6 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('settings.php');
     }
 
+    if ($action === 'save_enrichment') {
+        setSetting('apollo_api_key', trim($_POST['apollo_api_key'] ?? ''));
+        setSetting('apollo_api_enabled', isset($_POST['apollo_api_enabled']) ? '1' : '0');
+        setSetting('hunter_api_key', trim($_POST['hunter_api_key'] ?? ''));
+        setSetting('hunter_api_enabled', isset($_POST['hunter_api_enabled']) ? '1' : '0');
+        flash('success', 'Enrichment API settings saved.');
+        redirect('settings.php');
+    }
+
     if ($action === 'change_password') {
         $current = $_POST['current_password'] ?? '';
         $new = $_POST['new_password'] ?? '';
@@ -64,6 +73,10 @@ $myCompany = getSetting('my_company', '');
 $myEmail = getSetting('my_email', '');
 $myPhone = getSetting('my_phone', '');
 $myPortfolio = getSetting('my_portfolio', '');
+$apolloKey = getSetting('apollo_api_key', '');
+$apolloEnabled = getSetting('apollo_api_enabled', '0') === '1';
+$hunterKey = getSetting('hunter_api_key', '');
+$hunterEnabled = getSetting('hunter_api_enabled', '0') === '1';
 
 $pageTitle = 'Settings';
 require __DIR__ . '/includes/header.php';
@@ -124,6 +137,42 @@ require __DIR__ . '/includes/header.php';
         <label>Your Portfolio URL</label>
         <input type="text" name="my_portfolio" value="<?= h($myPortfolio) ?>" placeholder="https://yourportfolio.com">
         <button type="submit" class="btn" style="margin-top:14px;">Save Contact Info</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3 class="mt-0">Owner/Contact Enrichment APIs</h3>
+      <p class="small muted">Optional. Apollo aur Hunter free tiers use karke owner/CEO ke naam, verified email aur LinkedIn dhundhta hai. Bina inke bhi CRM chalega, lekin ye on karne se lead detail page pe "Find Owner Contacts" button kaam karega.</p>
+      <form method="post">
+        <?= csrfField() ?>
+        <input type="hidden" name="action" value="save_enrichment">
+
+        <div class="flex-between" style="background:<?= $apolloEnabled ? '#dcfce7' : '#fee2e2' ?>;padding:12px 14px;border-radius:8px;margin-top:14px;">
+          <div>
+            <strong>Apollo.io <?= $apolloEnabled ? '(Active)' : '(Inactive)' ?></strong>
+            <div class="small muted">Free: 75 credits/month &middot; <a href="https://app.apollo.io/#/settings/integrations/api" target="_blank" rel="noopener">Get API key</a></div>
+          </div>
+          <label style="margin:0;display:flex;align-items:center;gap:8px;font-weight:normal;">
+            <input type="checkbox" name="apollo_api_enabled" value="1" style="width:auto;" <?= $apolloEnabled ? 'checked' : '' ?>>
+            Active
+          </label>
+        </div>
+        <label>Apollo API Key</label>
+        <input type="text" name="apollo_api_key" value="<?= h($apolloKey) ?>" placeholder="Paste Apollo API key here">
+
+        <div class="flex-between" style="background:<?= $hunterEnabled ? '#dcfce7' : '#fee2e2' ?>;padding:12px 14px;border-radius:8px;margin-top:20px;">
+          <div>
+            <strong>Hunter.io <?= $hunterEnabled ? '(Active)' : '(Inactive)' ?></strong>
+            <div class="small muted">Free: 25 searches/month &middot; <a href="https://hunter.io/api-keys" target="_blank" rel="noopener">Get API key</a></div>
+          </div>
+          <label style="margin:0;display:flex;align-items:center;gap:8px;font-weight:normal;">
+            <input type="checkbox" name="hunter_api_enabled" value="1" style="width:auto;" <?= $hunterEnabled ? 'checked' : '' ?>>
+            Active
+          </label>
+        </div>
+        <label>Hunter API Key</label>
+        <input type="text" name="hunter_api_key" value="<?= h($hunterKey) ?>" placeholder="Paste Hunter API key here">
+
+        <button type="submit" class="btn" style="margin-top:14px;">Save Enrichment Settings</button>
       </form>
     </div>
     <div class="card">

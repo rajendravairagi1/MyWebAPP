@@ -127,7 +127,29 @@ INSERT INTO app_settings (setting_key, setting_value) VALUES
 ('my_company', ''),
 ('my_email', ''),
 ('my_phone', ''),
-('my_portfolio', '')
+('my_portfolio', ''),
+('apollo_api_key', ''),
+('apollo_api_enabled', '0'),
+('hunter_api_key', ''),
+('hunter_api_enabled', '0')
 ON DUPLICATE KEY UPDATE setting_key = setting_key;
+
+-- ============================================
+-- TABLE: lead_contacts (owner/CEO/manager contacts found via Apollo/Hunter)
+-- ============================================
+CREATE TABLE IF NOT EXISTS lead_contacts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    lead_id INT NOT NULL,
+    contact_name VARCHAR(255),
+    title VARCHAR(255),
+    email VARCHAR(255),
+    phone VARCHAR(50),
+    linkedin_url VARCHAR(500),
+    source VARCHAR(50),
+    notes TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_contact_per_lead (lead_id, email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 SET FOREIGN_KEY_CHECKS = 1;
