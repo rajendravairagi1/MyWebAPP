@@ -149,51 +149,163 @@ function httpJsonRequest(string $method, string $url, array $headers = [], ?arra
     return is_array($data) ? $data : null;
 }
 
-/**
- * Fetch a website's homepage HTML and try to extract an email address
- * and social media profile links. Best-effort only.
- */
-function analyzeWebsite(string $url): array
+/** Fetch a URL's HTML (best-effort, short timeout, follows redirects). */
+function fetchHtml(string $url): ?string
 {
-    $result = ['email' => null, 'facebook_url' => null, 'linkedin_url' => null, 'instagram_url' => null];
-
-    if (empty($url)) {
-        return $result;
-    }
-
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 10,
+        CURLOPT_CONNECTTIMEOUT => 5,
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_MAXREDIRS => 3,
-        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_USERAGENT => 'Mozilla/5.0 (compatible; LeadCRM/1.0)',
     ]);
     $html = curl_exec($ch);
     curl_close($ch);
+    return $html ?: null;
+}
 
-    if (!$html) {
-        return $result;
+function extractFirstEmail(string $html): ?string
+{
+    // Prefer mailto: links (more reliable than free-form text).
+    if (preg_match('/mailto:\s*([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/i', $html, $m)) {
+        return strtolower($m[1]);
     }
 
-    if (preg_match('/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/', $html, $m)) {
-        // Skip obvious placeholder/image-related matches
-        if (!preg_match('/\.(png|jpg|jpeg|gif|svg|webp)$/i', $m[0])) {
-            $result['email'] = $m[0];
+    // Fallback: any email-shaped string. Filter out common junk.
+    if (preg_match_all('/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/', $html, $matches)) {
+        $junkDomains = ['sentry.io', 'wixpress.com', 'godaddy.com', 'example.com', 'sentry-next.wixpress.com',
+                        'domain.com', 'yourdomain.com', 'email.com', 'gmail.png', 'gmail.jpg'];
+        foreach ($matches[0] as $email) {
+            $lower = strtolower($email);
+            if (preg_match('/\.(png|jpg|jpeg|gif|svg|webp|ico)$/i', $lower)) continue;
+            if (preg_match('/^[a-f0-9]{16,}@/', $lower)) continue; // hex-only local part = tracking id
+            $domain = substr($lower, strpos($lower, '@') + 1);
+            $skip = false;
+            foreach ($junkDomains as $j) {
+                if ($domain === $j || strpos($domain, $j) !== false) { $skip = true; break; }
+            }
+            if (!$skip) return $lower;
         }
     }
-    if (preg_match('#https?://(www\.)?facebook\.com/[^\s"\'<>]+#i', $html, $m)) {
-        $result['facebook_url'] = $m[0];
+    return null;
+}
+
+function extractSocialLinks(string $html): array
+{
+    $out = ['facebook_url' => null, 'linkedin_url' => null, 'instagram_url' => null,
+            'twitter_url' => null, 'youtube_url' => null];
+    $patterns = [
+        'facebook_url'  => '#https?://(?:www\.|m\.)?facebook\.com/[a-zA-Z0-9._\-/?=&%]+#i',
+        'linkedin_url'  => '#https?://(?:www\.)?linkedin\.com/(?:company|in)/[a-zA-Z0-9._\-/?=&%]+#i',
+        'instagram_url' => '#https?://(?:www\.)?instagram\.com/[a-zA-Z0-9._\-/?=&%]+#i',
+        'twitter_url'   => '#https?://(?:www\.)?(?:twitter|x)\.com/[a-zA-Z0-9._\-/?=&%]+#i',
+        'youtube_url'   => '#https?://(?:www\.)?youtube\.com/(?:@|c/|channel/|user/)?[a-zA-Z0-9._\-/?=&%]+#i',
+    ];
+    foreach ($patterns as $key => $regex) {
+        if (preg_match($regex, $html, $m)) {
+            // Skip sharer/intent URLs (e.g. facebook.com/sharer/... , twitter.com/intent/...)
+            if (preg_match('#/(sharer|share|intent|dialog)#i', $m[0])) continue;
+            $out[$key] = rtrim($m[0], '/');
+        }
     }
-    if (preg_match('#https?://(www\.)?linkedin\.com/[^\s"\'<>]+#i', $html, $m)) {
-        $result['linkedin_url'] = $m[0];
+    return $out;
+}
+
+/**
+ * Fetch a website + likely contact/about pages and combine the scraped
+ * emails and social links. Businesses very often hide the email on a
+ * "Contact Us" page rather than the homepage.
+ */
+function analyzeWebsite(string $url): array
+{
+    $result = [
+        'email' => null,
+        'facebook_url' => null, 'linkedin_url' => null, 'instagram_url' => null,
+        'twitter_url' => null, 'youtube_url' => null,
+    ];
+    if (empty($url)) return $result;
+
+    $base = rtrim($url, '/');
+    // Homepage first, then common contact/about routes.
+    $paths = ['', '/contact', '/contact-us', '/contact.html', '/about', '/about-us', '/about.html'];
+    $combinedHtml = '';
+    foreach ($paths as $path) {
+        $html = fetchHtml($base . $path);
+        if ($html) {
+            $combinedHtml .= "\n" . $html;
+            // Stop early if we already have email + at least one social.
+            if ($result['email'] === null) {
+                $email = extractFirstEmail($html);
+                if ($email) $result['email'] = $email;
+            }
+            $social = extractSocialLinks($html);
+            foreach ($social as $k => $v) {
+                if ($v && !$result[$k]) $result[$k] = $v;
+            }
+            if ($result['email'] && ($result['facebook_url'] || $result['instagram_url'])) break;
+        }
     }
-    if (preg_match('#https?://(www\.)?instagram\.com/[^\s"\'<>]+#i', $html, $m)) {
-        $result['instagram_url'] = $m[0];
+    // Final sweep on everything we collected, in case pieces were split.
+    if ($result['email'] === null && $combinedHtml) {
+        $result['email'] = extractFirstEmail($combinedHtml);
+    }
+    return $result;
+}
+
+/**
+ * Substitute {{placeholder}} tokens in a string. Unknown tokens are left
+ * as-is so the user can spot them.
+ */
+function renderTemplate(string $text, array $vars): string
+{
+    return preg_replace_callback('/\{\{\s*([\w]+)\s*\}\}/', function ($m) use ($vars) {
+        $key = $m[1];
+        return array_key_exists($key, $vars) ? (string) $vars[$key] : $m[0];
+    }, $text);
+}
+
+/**
+ * Build the full placeholder map used by email templates - lead data +
+ * gaps (as a bullet list) + user's own contact info from Settings.
+ */
+function buildTemplateVars(array $lead, array $gaps = []): array
+{
+    $gapsList = '';
+    if (!empty($gaps)) {
+        foreach ($gaps as $g) {
+            $gapsList .= '- ' . $g['gap_detail'] . "\n";
+        }
+        $gapsList = rtrim($gapsList);
     }
 
-    return $result;
+    $website = $lead['website'] ?? '';
+    $websiteLine = $website ? $website : 'no website found';
+    $gmb = $lead['google_profile_url'] ?? '';
+
+    return [
+        'company_name' => $lead['company_name'] ?? '',
+        'address' => $lead['address'] ?? '',
+        'phone' => $lead['phone'] ?? '',
+        'email' => $lead['email'] ?? '',
+        'website' => $website,
+        'website_line' => $websiteLine,
+        'google_profile_url' => $gmb,
+        'gmb_url' => $gmb,
+        'rating' => $lead['rating'] !== null && $lead['rating'] !== '' ? (string) $lead['rating'] : 'no rating',
+        'reviews_count' => (string) (int) ($lead['reviews_count'] ?? 0),
+        'facebook_url' => $lead['facebook_url'] ?? '',
+        'instagram_url' => $lead['instagram_url'] ?? '',
+        'linkedin_url' => $lead['linkedin_url'] ?? '',
+        'gaps_list' => $gapsList,
+        'my_name' => getSetting('my_name', ''),
+        'my_email' => getSetting('my_email', ''),
+        'my_phone' => getSetting('my_phone', ''),
+        'my_portfolio' => getSetting('my_portfolio', ''),
+        'my_company' => getSetting('my_company', ''),
+    ];
 }
 
 // ---------- CSV export ----------

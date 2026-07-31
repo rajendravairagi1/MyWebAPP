@@ -72,6 +72,36 @@ foreach ($emailHistory as $e) {
 
 $templates = $pdo->query('SELECT * FROM email_templates ORDER BY name')->fetchAll();
 
+// Rich placeholder map used by every template + the personalized pitch.
+$templateVars = buildTemplateVars($lead, $gaps);
+
+// A ready-made personalized pitch that mentions the lead's actual rating,
+// reviews, website, GMB link, and what's missing - so it reads like a real
+// human wrote it, not an AI blast.
+$autoPitchSubject = "Quick idea for {{company_name}} - noticed something on your Google profile";
+$autoPitchBody =
+"Hi {{company_name}} team,\n\n" .
+"I was researching real estate businesses in your area and came across your Google Business listing. You have a {{rating}}-star rating from {{reviews_count}} reviews - clearly you're doing quality work.\n\n" .
+"Your website: {{website_line}}\n" .
+"Your Google profile: {{google_profile_url}}\n\n" .
+"I noticed a few areas where a small fix could bring in significantly more customers:\n\n" .
+"{{gaps_list}}\n\n" .
+"For local businesses, these gaps often mean losing customers to competitors who show up higher on Google Maps. I help fix exactly this - build/upgrade websites, collect more genuine reviews, and get your business seen more on Google.\n\n" .
+"If you'd like to see the kind of work I've done for similar businesses: {{my_portfolio}}\n\n" .
+"Would you be open to a quick 10-min chat this week? No pitch - just showing you what could work for {{company_name}}.\n\n" .
+"Best,\n" .
+"{{my_name}}\n" .
+"{{my_company}}\n" .
+"{{my_phone}} | {{my_email}}";
+
+// Helpful Google search URLs for social media when we couldn't auto-detect.
+$companyForSearch = urlencode('"' . $lead['company_name'] . '"');
+$searchLinks = [
+    'Facebook' => "https://www.google.com/search?q=site%3Afacebook.com+$companyForSearch",
+    'Instagram' => "https://www.google.com/search?q=site%3Ainstagram.com+$companyForSearch",
+    'LinkedIn' => "https://www.google.com/search?q=site%3Alinkedin.com+$companyForSearch",
+];
+
 $pageTitle = h($lead['company_name']);
 require __DIR__ . '/includes/header.php';
 ?>
@@ -95,7 +125,12 @@ require __DIR__ . '/includes/header.php';
         <?php foreach (['facebook_url' => 'Facebook', 'linkedin_url' => 'LinkedIn', 'instagram_url' => 'Instagram'] as $key => $label): ?>
           <?php if ($lead[$key]): ?><a href="<?= h($lead[$key]) ?>" target="_blank" rel="noopener"><?= $label ?></a> &nbsp; <?php endif; ?>
         <?php endforeach; ?>
-        <?php if (!$lead['facebook_url'] && !$lead['linkedin_url'] && !$lead['instagram_url']): ?><span class="muted">None found</span><?php endif; ?>
+        <?php if (!$lead['facebook_url'] && !$lead['linkedin_url'] && !$lead['instagram_url']): ?><span class="muted">None auto-detected</span><?php endif; ?>
+      </p>
+      <p class="small muted" style="margin-top:-6px;">Not auto-detected? Manually search Google:
+        <?php foreach ($searchLinks as $label => $url): ?>
+          <a href="<?= h($url) ?>" target="_blank" rel="noopener"><?= h($label) ?></a><?= $label !== 'LinkedIn' ? ' &middot; ' : '' ?>
+        <?php endforeach; ?>
       </p>
       <p><strong>Reviews:</strong> <?= (int) $lead['reviews_count'] ?> &middot; <strong>Rating:</strong> <?= h($lead['rating'] ?: 'N/A') ?></p>
     </div>
@@ -113,6 +148,14 @@ require __DIR__ . '/includes/header.php';
 
     <div class="card">
       <h3 class="mt-0">Send / Log Email</h3>
+      <?php $missingContact = !getSetting('my_name') || !getSetting('my_portfolio'); ?>
+      <?php if ($missingContact): ?>
+        <div class="alert alert-error">Tip: <a href="settings.php">Settings</a> mein apna Name aur Portfolio URL daal do - phir templates aur auto-pitch automatically fill honge.</div>
+      <?php endif; ?>
+      <div class="flex" style="margin-bottom:10px;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="fillAutoPitch()">Generate Personalized Pitch</button>
+        <span class="small muted">Rating, reviews, website, gaps &mdash; sab actual data ke saath fill hoga.</span>
+      </div>
       <form method="post">
         <?= csrfField() ?>
         <input type="hidden" name="action" value="mark_contacted">
@@ -126,7 +169,7 @@ require __DIR__ . '/includes/header.php';
         <label>Subject</label>
         <input type="text" name="subject" id="email-subject" value="">
         <label>Body (copy this into your Gmail/Outlook, then click Mark as Contacted)</label>
-        <textarea name="body" id="email-body" rows="8"></textarea>
+        <textarea name="body" id="email-body" rows="12"></textarea>
         <button type="submit" class="btn btn-success" style="margin-top:14px;">Mark as Contacted</button>
       </form>
     </div>
@@ -185,14 +228,27 @@ require __DIR__ . '/includes/header.php';
 </div>
 
 <script>
-  var companyName = <?= json_encode($lead['company_name']) ?>;
+  var TEMPLATE_VARS = <?= json_encode($templateVars) ?>;
+  var AUTO_PITCH_SUBJECT = <?= json_encode($autoPitchSubject) ?>;
+  var AUTO_PITCH_BODY = <?= json_encode($autoPitchBody) ?>;
+
+  function renderTemplate(str) {
+    return (str || '').replace(/\{\{\s*(\w+)\s*\}\}/g, function (match, key) {
+      return TEMPLATE_VARS.hasOwnProperty(key) ? TEMPLATE_VARS[key] : match;
+    });
+  }
+
   document.getElementById('template-select').addEventListener('change', function () {
     var opt = this.options[this.selectedIndex];
-    var subject = (opt.dataset.subject || '').split('{{company_name}}').join(companyName);
-    var body = (opt.dataset.body || '').split('{{company_name}}').join(companyName);
-    document.getElementById('email-subject').value = subject;
-    document.getElementById('email-body').value = body;
+    document.getElementById('email-subject').value = renderTemplate(opt.dataset.subject || '');
+    document.getElementById('email-body').value = renderTemplate(opt.dataset.body || '');
   });
+
+  function fillAutoPitch() {
+    document.getElementById('email-subject').value = renderTemplate(AUTO_PITCH_SUBJECT);
+    document.getElementById('email-body').value = renderTemplate(AUTO_PITCH_BODY);
+    document.getElementById('template-select').value = '';
+  }
 </script>
 
 <?php require __DIR__ . '/includes/footer.php'; ?>

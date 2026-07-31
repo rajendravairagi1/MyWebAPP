@@ -20,6 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect('settings.php');
     }
 
+    if ($action === 'save_contact_info') {
+        setSetting('my_name', trim($_POST['my_name'] ?? ''));
+        setSetting('my_company', trim($_POST['my_company'] ?? ''));
+        setSetting('my_email', trim($_POST['my_email'] ?? ''));
+        setSetting('my_phone', trim($_POST['my_phone'] ?? ''));
+        setSetting('my_portfolio', trim($_POST['my_portfolio'] ?? ''));
+        flash('success', 'Contact info saved. Templates ab tumhare details ke saath fill honge.');
+        redirect('settings.php');
+    }
+
     if ($action === 'change_password') {
         $current = $_POST['current_password'] ?? '';
         $new = $_POST['new_password'] ?? '';
@@ -49,6 +59,11 @@ $apiEnabled = getSetting('google_places_api_enabled', '1') === '1';
 $maxReviews = getSetting('max_reviews_threshold', getSetting('min_reviews_threshold', '10'));
 $minRating = getSetting('min_rating_threshold', '4.0');
 $maxResults = getSetting('max_search_results', '10');
+$myName = getSetting('my_name', '');
+$myCompany = getSetting('my_company', '');
+$myEmail = getSetting('my_email', '');
+$myPhone = getSetting('my_phone', '');
+$myPortfolio = getSetting('my_portfolio', '');
 
 $pageTitle = 'Settings';
 require __DIR__ . '/includes/header.php';
@@ -92,6 +107,25 @@ require __DIR__ . '/includes/header.php';
     </div>
   </div>
   <div>
+    <div class="card">
+      <h3 class="mt-0">Your Contact Info (for email templates)</h3>
+      <p class="small muted">Ye details automatically email templates mein fill honge (jaise <code>{{my_name}}</code>, <code>{{my_portfolio}}</code>). Isse har pitch personalized aur real lagta hai - AI-jaisa nahi.</p>
+      <form method="post">
+        <?= csrfField() ?>
+        <input type="hidden" name="action" value="save_contact_info">
+        <label>Your Name</label>
+        <input type="text" name="my_name" value="<?= h($myName) ?>" placeholder="Rajendra Vairagi">
+        <label>Your Company / Agency Name (optional)</label>
+        <input type="text" name="my_company" value="<?= h($myCompany) ?>" placeholder="Oneweblink">
+        <label>Your Email</label>
+        <input type="email" name="my_email" value="<?= h($myEmail) ?>" placeholder="you@yourdomain.com">
+        <label>Your Phone / WhatsApp</label>
+        <input type="text" name="my_phone" value="<?= h($myPhone) ?>" placeholder="+91 9XXXXXXXXX">
+        <label>Your Portfolio URL</label>
+        <input type="text" name="my_portfolio" value="<?= h($myPortfolio) ?>" placeholder="https://yourportfolio.com">
+        <button type="submit" class="btn" style="margin-top:14px;">Save Contact Info</button>
+      </form>
+    </div>
     <div class="card">
       <h3 class="mt-0">Change Password</h3>
       <form method="post">
