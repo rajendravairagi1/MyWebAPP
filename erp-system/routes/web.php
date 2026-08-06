@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\JobController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RawMaterialController;
@@ -38,6 +39,18 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('permission:module.store-material')->group(function () {
         Route::resource('raw-materials', RawMaterialController::class)->except(['show']);
+    });
+
+    Route::middleware('permission:module.job-work')->group(function () {
+        Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
+        Route::get('/jobs/create', [JobController::class, 'create'])->name('jobs.create');
+        Route::post('/jobs', [JobController::class, 'store'])->name('jobs.store');
+    });
+
+    Route::middleware('permission:module.job-work|module.quality|module.store-material')->group(function () {
+        Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
+        Route::post('/jobs/{job}/advance-stage', [JobController::class, 'advanceStage'])->name('jobs.advance-stage');
+        Route::post('/jobs/{job}/issue-material', [JobController::class, 'issueMaterial'])->name('jobs.issue-material');
     });
 });
 

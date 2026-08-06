@@ -25,6 +25,12 @@
                         </x-nav-link>
                     @endcan
 
+                    @canany(['module.job-work', 'module.quality'])
+                        <x-nav-link :href="route('jobs.index')" :active="request()->routeIs('jobs.*')">
+                            {{ __('Job Work') }}
+                        </x-nav-link>
+                    @endcanany
+
                     @can('module.hr-employees')
                         <x-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
                             {{ __('Employees') }}
@@ -106,6 +112,12 @@
                     {{ __('Products') }}
                 </x-responsive-nav-link>
             @endcan
+
+            @canany(['module.job-work', 'module.quality'])
+                <x-responsive-nav-link :href="route('jobs.index')" :active="request()->routeIs('jobs.*')">
+                    {{ __('Job Work') }}
+                </x-responsive-nav-link>
+            @endcanany
 
             @can('module.hr-employees')
                 <x-responsive-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
