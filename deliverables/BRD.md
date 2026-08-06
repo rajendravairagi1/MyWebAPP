@@ -11,6 +11,8 @@
 
 Ye ek **Job Work based Manufacturing ERP** hai — paint/coating factory ke liye jahan customer apna material bhejta hai processing (sanding, priming, painting, coating) ke liye, aur factory use process karke wapas dispatch karti hai invoice ke saath. System multi-role hai — Owner se lekar Security Guard tak, har role ka apna dashboard aur access hoga, jo **Owner dynamically control** kar sakta hai (checkbox-based module access).
 
+> **Design Decision — No External API:** Poora system sirf internal application logic (Laravel + MySQL) se chalega — koi WhatsApp/SMS/Email/Payment Gateway/Biometric-sync API use nahi hogi. Har calculation (salary, job time, stock, invoice) system khud karega; invoice/salary-slip/reminders PDF ya on-screen dikhenge, sharing manual rahegi (download/print/WhatsApp khud se bhejna). Isse system self-contained rahega, koi recurring third-party API cost ya dependency nahi hogi.
+
 ---
 
 ## 2. User Roles
