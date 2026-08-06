@@ -1,0 +1,213 @@
+<title>Job Work ERP — Process Flow</title>
+<style>
+  :root {
+    --ink: #1c2430; --paper: #f3efe7; --panel: #ffffff; --panel-2: #faf8f3;
+    --line: #ded7c8; --muted: #726d62;
+    --accent: #b3402f; --accent-soft: #f4dcd7;
+    --role-bd: #8a6d1f; --role-store: #1f7a6c; --role-prod: #3c5a78;
+    --role-qc: #6a4a86; --role-account: #3a4a8a; --role-security: #8a4a52;
+    --shadow: 0 1px 2px rgba(28,36,48,0.06), 0 10px 28px -14px rgba(28,36,48,0.22);
+    --font-ui: -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #eceff2; --paper: #10141a; --panel: #181d25; --panel-2: #1e2430;
+      --line: #2b3340; --muted: #97a0ab;
+      --accent: #e0796e; --accent-soft: #3a2119;
+      --role-bd: #d4b563; --role-store: #5fc2ae; --role-prod: #8fb2d1;
+      --role-qc: #b48fd1; --role-account: #93a3e8; --role-security: #d69aa1;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 28px -14px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #eceff2; --paper: #10141a; --panel: #181d25; --panel-2: #1e2430;
+    --line: #2b3340; --muted: #97a0ab;
+    --accent: #e0796e; --accent-soft: #3a2119;
+    --role-bd: #d4b563; --role-store: #5fc2ae; --role-prod: #8fb2d1;
+    --role-qc: #b48fd1; --role-account: #93a3e8; --role-security: #d69aa1;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 10px 28px -14px rgba(0,0,0,0.55);
+  }
+  :root[data-theme="light"] {
+    --ink: #1c2430; --paper: #f3efe7; --panel: #ffffff; --panel-2: #faf8f3;
+    --line: #ded7c8; --muted: #726d62;
+    --accent: #b3402f; --accent-soft: #f4dcd7;
+    --role-bd: #8a6d1f; --role-store: #1f7a6c; --role-prod: #3c5a78;
+    --role-qc: #6a4a86; --role-account: #3a4a8a; --role-security: #8a4a52;
+    --shadow: 0 1px 2px rgba(28,36,48,0.06), 0 10px 28px -14px rgba(28,36,48,0.22);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .page { background: var(--paper); color: var(--ink); font-family: var(--font-ui);
+    min-height: 100%; padding: clamp(20px,4vw,56px) clamp(16px,5vw,64px) 64px; }
+  .wrap { max-width: 1000px; margin: 0 auto; }
+  .eyebrow { font-size: 12.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--accent); background: var(--accent-soft); display: inline-block; padding: 4px 10px; border-radius: 4px; }
+  h1 { font-size: clamp(24px,3.4vw,34px); line-height: 1.1; margin: 14px 0 8px; font-weight: 800;
+    letter-spacing: -0.01em; text-wrap: balance; }
+  .sub { font-size: 15.5px; color: var(--muted); max-width: 68ch; line-height: 1.55; margin: 0 0 20px; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 14px 22px; margin-bottom: 26px; padding: 12px 16px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+
+  figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: var(--shadow); padding: 20px 18px 16px; overflow-x: auto; }
+  svg { display: block; margin: 0 auto; max-width: 100%; height: auto; min-width: 640px; }
+  figcaption { font-size: 13px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.5; }
+
+  .node-title { font-family: var(--font-ui); }
+  .n-role { font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+  .n-label { font-size: 14px; font-weight: 700; fill: var(--ink); }
+  .n-sub { font-size: 10.5px; fill: var(--muted); }
+  .flow-line { stroke: var(--ink); stroke-width: 2; fill: none; opacity: 0.55; }
+  .loop-line { stroke: var(--accent); stroke-width: 2; fill: none; }
+  .loop-label { font-size: 11px; font-weight: 700; fill: var(--accent); }
+  .note-line { stroke: var(--muted); stroke-width: 1.6; stroke-dasharray: 4 4; fill: none; }
+  .note-label { font-size: 11px; fill: var(--muted); font-style: italic; }
+  .arrow-main { fill: var(--ink); opacity: 0.55; }
+  .arrow-loop { fill: var(--accent); }
+  .box { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.4; rx: 10; }
+  .box-wide { fill: var(--panel-2); stroke: var(--line); stroke-width: 1.4; rx: 10; }
+</style>
+
+<div class="page">
+  <div class="wrap">
+    <span class="eyebrow">Process Flow — Job Receive to Payment</span>
+    <h1>Ek Job Company Me Kaise Chalti Hai</h1>
+    <p class="sub">Har box ke upar likha hai wo stage kaunsa role handle karta hai. Laal curved arrows exception paths hain — QC reject kare to production wapas jata hai, material kam pade to store se dobara issue hota hai. Dashed lines automatic reminders hain.</p>
+
+    <div class="legend">
+      <div class="legend-item"><span class="swatch" style="background:var(--role-bd)"></span>BD / Owner</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--role-store)"></span>Store</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--role-prod)"></span>Production Employees</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--role-qc)"></span>Quality (QC)</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--role-account)"></span>Account</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--role-security)"></span>Security</div>
+      <div class="legend-item"><span class="swatch" style="background:var(--accent)"></span>Exception loop</div>
+    </div>
+
+    <figure>
+      <svg viewBox="0 0 980 1420" role="img" aria-label="Job flow from customer registration through production, quality check, dispatch, invoice and payment, with a QC-reject loop back to production, a material-shortfall loop back to store issue, and dashed reminder lines at the due-date and payment-term steps.">
+        <defs>
+          <marker id="arrowMain" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="arrow-main" d="M0,0 L10,5 L0,10 z"></path>
+          </marker>
+          <marker id="arrowLoop" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path class="arrow-loop" d="M0,0 L10,5 L0,10 z"></path>
+          </marker>
+        </defs>
+
+        <!-- main flow connectors -->
+        <line class="flow-line" x1="480" y1="96"  x2="480" y2="136" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="192" x2="480" y2="232" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="288" x2="480" y2="328" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="384" x2="480" y2="424" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="514" x2="480" y2="554" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="610" x2="480" y2="650" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="706" x2="480" y2="746" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="802" x2="480" y2="842" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="898" x2="480" y2="938" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="994" x2="480" y2="1034" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="1090" x2="480" y2="1130" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="1186" x2="480" y2="1226" marker-end="url(#arrowMain)"></line>
+        <line class="flow-line" x1="480" y1="1282" x2="480" y2="1322" marker-end="url(#arrowMain)"></line>
+
+        <!-- Loop A: QC reject -> back to Production -->
+        <path class="loop-line" d="M670,582 Q752,582 752,546 Q752,470 672,469" marker-end="url(#arrowLoop)"></path>
+        <text class="loop-label" x="760" y="528" text-anchor="start">Reject →</text>
+        <text class="loop-label" x="760" y="542" text-anchor="start">Rework</text>
+
+        <!-- Loop B: Material shortfall -> back to Store Issue -->
+        <path class="loop-line" d="M670,774 Q838,774 838,565 Q838,356 672,356" marker-end="url(#arrowLoop)"></path>
+        <text class="loop-label" x="846" y="562" text-anchor="start">Shortfall →</text>
+        <text class="loop-label" x="846" y="576" text-anchor="start">Re-issue</text>
+
+        <!-- Notification: due date reminder -->
+        <line class="note-line" x1="670" y1="260" x2="738" y2="260"></line>
+        <text class="note-label" x="744" y="256" text-anchor="start">Reminder: 1 din</text>
+        <text class="note-label" x="744" y="270" text-anchor="start">pehle due-date par</text>
+
+        <!-- Notification: payment term reminder -->
+        <line class="note-line" x1="670" y1="1158" x2="738" y2="1158"></line>
+        <text class="note-label" x="744" y="1154" text-anchor="start">Reminder + follow-up</text>
+        <text class="note-label" x="744" y="1168" text-anchor="start">agar overdue ho jaye</text>
+
+        <!-- Node 1: Customer Registration -->
+        <rect class="box" x="290" y="40" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="58" text-anchor="middle" style="fill:var(--role-bd)">BD / OWNER</text>
+        <text class="n-label" x="480" y="80" text-anchor="middle">Customer Registration + Documents</text>
+
+        <!-- Node 2: Material Receive -->
+        <rect class="box" x="290" y="136" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="154" text-anchor="middle" style="fill:var(--role-store)">STORE</text>
+        <text class="n-label" x="480" y="176" text-anchor="middle">Material Receive — Vehicle, Photo, Challan</text>
+
+        <!-- Node 3: Job Entry -->
+        <rect class="box" x="290" y="232" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="250" text-anchor="middle" style="fill:var(--role-store)">STORE / PLANT HEAD</text>
+        <text class="n-label" x="480" y="272" text-anchor="middle">Job Entry — Pieces + Due Date</text>
+
+        <!-- Node 4: Material Issue -->
+        <rect class="box" x="290" y="328" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="346" text-anchor="middle" style="fill:var(--role-store)">STORE</text>
+        <text class="n-label" x="480" y="368" text-anchor="middle">Material Issue Against Job ID</text>
+
+        <!-- Node 5: Production (wide, 3 lines) -->
+        <rect class="box-wide" x="290" y="424" width="380" height="90"></rect>
+        <text class="n-role" x="480" y="442" text-anchor="middle" style="fill:var(--role-prod)">PRODUCTION EMPLOYEES</text>
+        <text class="n-label" x="480" y="464" text-anchor="middle">Production Stages</text>
+        <text class="n-sub" x="480" y="482" text-anchor="middle">Sanding → Putty → Sanding → Primer → Paint → Oven → Cool</text>
+        <text class="n-sub" x="480" y="498" text-anchor="middle">time + employee count logged per stage</text>
+
+        <!-- Node 6: QC -->
+        <rect class="box" x="290" y="554" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="572" text-anchor="middle" style="fill:var(--role-qc)">QUALITY (QC)</text>
+        <text class="n-label" x="480" y="594" text-anchor="middle">Quality Check</text>
+
+        <!-- Node 7: Packing -->
+        <rect class="box" x="290" y="650" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="668" text-anchor="middle" style="fill:var(--role-prod)">PRODUCTION EMPLOYEES</text>
+        <text class="n-label" x="480" y="690" text-anchor="middle">Wrapping + Box Packing</text>
+
+        <!-- Node 8: Material Settlement -->
+        <rect class="box" x="290" y="746" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="764" text-anchor="middle" style="fill:var(--role-store)">STORE</text>
+        <text class="n-label" x="480" y="786" text-anchor="middle">Material Settlement — Return / Used / Short</text>
+
+        <!-- Node 9: Invoice -->
+        <rect class="box" x="290" y="842" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="860" text-anchor="middle" style="fill:var(--role-account)">ACCOUNT</text>
+        <text class="n-label" x="480" y="882" text-anchor="middle">Invoice + Challan + QR Code Generate</text>
+
+        <!-- Node 10: Security Gate -->
+        <rect class="box" x="290" y="938" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="956" text-anchor="middle" style="fill:var(--role-security)">SECURITY</text>
+        <text class="n-label" x="480" y="978" text-anchor="middle">Gate Verification — 2nd Check</text>
+
+        <!-- Node 11: Dispatch -->
+        <rect class="box" x="290" y="1034" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="1052" text-anchor="middle" style="fill:var(--role-security)">SECURITY / ACCOUNT</text>
+        <text class="n-label" x="480" y="1074" text-anchor="middle">Vehicle Loaded &amp; Dispatched</text>
+
+        <!-- Node 12: Payment Term Tracking -->
+        <rect class="box" x="290" y="1130" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="1148" text-anchor="middle" style="fill:var(--role-account)">ACCOUNT</text>
+        <text class="n-label" x="480" y="1170" text-anchor="middle">Payment Term Tracking (25/45 din, etc.)</text>
+
+        <!-- Node 13: Payment Received -->
+        <rect class="box" x="290" y="1226" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="1244" text-anchor="middle" style="fill:var(--role-account)">ACCOUNT</text>
+        <text class="n-label" x="480" y="1266" text-anchor="middle">Payment Received — Balance Updated</text>
+
+        <!-- Node 14: History -->
+        <rect class="box" x="290" y="1322" width="380" height="56"></rect>
+        <text class="n-role" x="480" y="1340" text-anchor="middle" style="fill:var(--muted)">SYSTEM</text>
+        <text class="n-label" x="480" y="1362" text-anchor="middle">Moved to Customer History</text>
+      </svg>
+      <figcaption>Seedha neeche flow normal path hai; laal loops sirf tab activate hote hain jab QC reject kare ya material kam pade — baaki har job isi seedhi line se guzarta hai.</figcaption>
+    </figure>
+  </div>
+</div>
