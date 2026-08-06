@@ -15,6 +15,33 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    @can('module.crm-customers')
+                        <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                            {{ __('Customers') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
+                            {{ __('Products') }}
+                        </x-nav-link>
+                    @endcan
+
+                    @can('module.hr-employees')
+                        <x-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
+                            {{ __('Employees') }}
+                        </x-nav-link>
+                    @endcan
+
+                    @can('module.store-material')
+                        <x-nav-link :href="route('raw-materials.index')" :active="request()->routeIs('raw-materials.*')">
+                            {{ __('Raw Material') }}
+                        </x-nav-link>
+                    @endcan
+
+                    @role('Owner')
+                        <x-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.*')">
+                            {{ __('Roles') }}
+                        </x-nav-link>
+                    @endrole
                 </div>
             </div>
 
@@ -70,6 +97,33 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            @can('module.crm-customers')
+                <x-responsive-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                    {{ __('Customers') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('products.index')" :active="request()->routeIs('products.*')">
+                    {{ __('Products') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('module.hr-employees')
+                <x-responsive-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
+                    {{ __('Employees') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @can('module.store-material')
+                <x-responsive-nav-link :href="route('raw-materials.index')" :active="request()->routeIs('raw-materials.*')">
+                    {{ __('Raw Material') }}
+                </x-responsive-nav-link>
+            @endcan
+
+            @role('Owner')
+                <x-responsive-nav-link :href="route('roles.index')" :active="request()->routeIs('roles.*')">
+                    {{ __('Roles') }}
+                </x-responsive-nav-link>
+            @endrole
         </div>
 
         <!-- Responsive Settings Options -->
