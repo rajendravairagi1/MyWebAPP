@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(RolesAndModulesSeeder::class);
 
-        $owner = User::factory()->create([
+        $owner = User::create([
             'name' => 'Owner',
             'email' => 'owner@example.com',
             'password' => bcrypt('password'),
