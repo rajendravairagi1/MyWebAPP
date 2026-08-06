@@ -259,27 +259,7 @@ Stages: Sanding → Industrial Putty → Fine Sanding → Primer → Drying → 
 
 ---
 
-## 9. Kya Is Requirement Me AI/Automation Hai — Aur Kya Optional Hai
-
-Aapne is baar directly AI nahi maanga — jo bhi "automatic calculation" bola hai (job time estimate labor-hours se, late-deduction, overtime) — **wo sab formula-based logic hai, AI nahi.** System isi tarah banega — rule/formula based, predictable, verify-first.
-
-**Pehle discuss kiye gaye AI features — abhi is document me shamil NAHI hain, Phase 3 (future) ke liye reserved:**
-
-| Feature | Kya karega |
-|---|---|
-| AI Production Time Prediction | Purane data se seekh kar naye job ka time predict kare (abhi jo formula-based estimate hai, usse zyada accurate) |
-| AI Material Requirement Forecast | Kitna material aane wale mahine chahiye hoga, predict kare |
-| AI Payment Delay Prediction | Kaunsa customer late payment karega, pehle se warn kare |
-| AI Customer Risk Score | Kis customer ko credit dena risky hai |
-| AI Employee Productivity Score | Kaun consistently fast/slow hai |
-| AI Voice Assistant | "XYZ company ka pending payment dikhao" bol ke pucho |
-| AI Daily Summary | "Aaj 12 jobs complete, 3 delayed, 2 invoice overdue" — auto summary |
-
-**Recommendation:** Pehle poora formula-based system (jo upar document me hai) sahi se bana lo aur 3-6 mahine real data collect karo — AI features tabhi accurate honge jab unke paas real historical data ho. Abhi AI lagana premature hoga.
-
----
-
-## 10. Kya Extra Add Ho Sakta Hai (Suggestions)
+## 9. Kya Extra Add Ho Sakta Hai (Suggestions)
 
 Jo aapne nahi bola, lekin is scale ke ERP me useful hoga:
 
@@ -292,7 +272,7 @@ Jo aapne nahi bola, lekin is scale ke ERP me useful hoga:
 
 ---
 
-## 11. Open Questions (Design Phase Se Pehle Clarify Karna Hai)
+## 10. Open Questions (Design Phase Se Pehle Clarify Karna Hai)
 
 1. Payment terms customer-wise fixed hain ya invoice-wise alag ho sakte hain?
 2. Advance payment / partial payment allowed hai kya customer se?
