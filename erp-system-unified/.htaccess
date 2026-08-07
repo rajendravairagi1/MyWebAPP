@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Send every request into the public/ folder, which holds Laravel's own
+    # front controller + rewrite rules. Anything outside public/ (app, vendor,
+    # .env, storage, etc.) is never reachable directly by URL because of this.
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
