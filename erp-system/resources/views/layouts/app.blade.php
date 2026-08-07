@@ -27,8 +27,8 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+    <body class="font-sans antialiased bg-[var(--bg)] text-[var(--text)]">
+        <div class="min-h-screen bg-[var(--bg)] flex flex-col lg:flex-row">
             @include('layouts.sidebar')
 
             <div class="flex-1 min-w-0">
