@@ -29,7 +29,7 @@
                             @foreach ($modules as $key => $label)
                                 <label class="flex items-center gap-2 border rounded-lg px-3 py-2 {{ $role->name === 'Owner' ? 'bg-gray-50 opacity-70' : 'hover:bg-gray-50' }}">
                                     <input type="checkbox" name="modules[]" value="{{ $key }}"
-                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                        class="rounded border-gray-300 text-[var(--brand-600)] focus:ring-[var(--brand-500)]"
                                         {{ in_array($key, $granted) ? 'checked' : '' }}
                                         {{ $role->name === 'Owner' ? 'disabled' : '' }}>
                                     <span class="text-sm">{{ $label }}</span>
@@ -39,7 +39,7 @@
 
                         @if ($role->name !== 'Owner')
                             <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                                class="inline-flex items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                                 Save Access
                             </button>
                         @endif

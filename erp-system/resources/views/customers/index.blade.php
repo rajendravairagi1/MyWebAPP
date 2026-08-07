@@ -15,7 +15,7 @@
                     <div class="flex justify-between items-center mb-4">
                         <p class="text-sm text-gray-600">Total {{ $customers->total() }} customers.</p>
                         <a href="{{ route('customers.create') }}"
-                           class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                           class="inline-flex items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                             + Naya Customer
                         </a>
                     </div>
@@ -43,9 +43,9 @@
                                         <td class="px-4 py-2 text-right">₹{{ number_format($customer->opening_balance, 2) }}</td>
                                         <td class="px-4 py-2 text-gray-500">{{ $customer->products_count }}</td>
                                         <td class="px-4 py-2 text-right">
-                                            <a href="{{ route('customers.show', $customer) }}" class="text-indigo-600 hover:underline">View</a>
+                                            <a href="{{ route('customers.show', $customer) }}" class="text-[var(--brand-600)] hover:underline">View</a>
                                             &middot;
-                                            <a href="{{ route('customers.edit', $customer) }}" class="text-indigo-600 hover:underline">Edit</a>
+                                            <a href="{{ route('customers.edit', $customer) }}" class="text-[var(--brand-600)] hover:underline">Edit</a>
                                         </td>
                                     </tr>
                                 @empty

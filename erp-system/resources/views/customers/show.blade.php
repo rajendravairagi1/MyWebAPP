@@ -17,7 +17,7 @@
                             <div><span class="text-gray-500">Email:</span> {{ $customer->email ?? '—' }}</div>
                             <div><span class="text-gray-500">Opening Balance:</span> ₹{{ number_format($customer->opening_balance, 2) }}</div>
                         </div>
-                        <a href="{{ route('customers.edit', $customer) }}" class="text-sm text-indigo-600 hover:underline">Edit</a>
+                        <a href="{{ route('customers.edit', $customer) }}" class="text-sm text-[var(--brand-600)] hover:underline">Edit</a>
                     </div>
                     @if ($customer->address)
                         <p class="text-sm text-gray-500 border-t pt-3">{{ $customer->address }}</p>
@@ -29,7 +29,7 @@
                 <div class="p-6 text-gray-900">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="font-semibold text-gray-800">Products ({{ $customer->products->count() }})</h3>
-                        <a href="{{ route('products.create') }}" class="text-sm text-indigo-600 hover:underline">+ Add Product</a>
+                        <a href="{{ route('products.create') }}" class="text-sm text-[var(--brand-600)] hover:underline">+ Add Product</a>
                     </div>
                     <div class="overflow-x-auto border rounded-lg">
                         <table class="min-w-full text-sm divide-y divide-gray-200">

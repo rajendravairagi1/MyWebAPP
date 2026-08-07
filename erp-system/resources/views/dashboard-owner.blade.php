@@ -28,7 +28,7 @@
 
             <!-- Job Status Breakdown -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                @foreach (['pending' => ['Pending', 'text-gray-600', 'bg-gray-100'], 'working' => ['Working', 'text-amber-700', 'bg-amber-100'], 'ready' => ['Ready', 'text-green-700', 'bg-green-100'], 'dispatched' => ['Dispatched', 'text-indigo-700', 'bg-indigo-100']] as $key => [$label, $textClass, $bgClass])
+                @foreach (['pending' => ['Pending', 'text-gray-600', 'bg-gray-100'], 'working' => ['Working', 'text-amber-700', 'bg-amber-100'], 'ready' => ['Ready', 'text-green-700', 'bg-green-100'], 'dispatched' => ['Dispatched', 'text-[var(--brand-700)]', 'bg-[var(--brand-100)]']] as $key => [$label, $textClass, $bgClass])
                     <a href="{{ route('jobs.index', ['status' => $key]) }}" class="rounded-lg p-4 {{ $bgClass }} hover:opacity-80">
                         <p class="text-xs {{ $textClass }} uppercase tracking-wide font-semibold">{{ $label }} Jobs</p>
                         <p class="text-xl font-bold mt-1 {{ $textClass }}">{{ $jobCounts[$key] ?? 0 }}</p>
@@ -61,7 +61,7 @@
                     @empty
                         <p class="text-sm text-gray-400">Sab materials theek stock me hain.</p>
                     @endforelse
-                    <a href="{{ route('raw-materials.index') }}" class="text-xs text-indigo-600 hover:underline mt-3 inline-block">View all &rarr;</a>
+                    <a href="{{ route('raw-materials.index') }}" class="text-xs text-[var(--brand-600)] hover:underline mt-3 inline-block">View all &rarr;</a>
                 </div>
             </div>
 
@@ -97,7 +97,7 @@
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-semibold text-gray-800">Recent Jobs</h3>
-                    <a href="{{ route('jobs.index') }}" class="text-xs text-indigo-600 hover:underline">View all &rarr;</a>
+                    <a href="{{ route('jobs.index') }}" class="text-xs text-[var(--brand-600)] hover:underline">View all &rarr;</a>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
@@ -121,7 +121,7 @@
                                                 'pending' => 'bg-gray-100 text-gray-600',
                                                 'working' => 'bg-amber-100 text-amber-700',
                                                 'ready' => 'bg-green-100 text-green-700',
-                                                'dispatched' => 'bg-indigo-100 text-indigo-700',
+                                                'dispatched' => 'bg-[var(--brand-100)] text-[var(--brand-700)]',
                                             };
                                         @endphp
                                         <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $pill }}">{{ ucfirst($job->status) }}</span>

@@ -15,7 +15,7 @@
                     <div class="flex justify-between items-center mb-4">
                         <p class="text-sm text-gray-600">Total {{ $products->total() }} products.</p>
                         <a href="{{ route('products.create') }}"
-                           class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                           class="inline-flex items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                             + Naya Product
                         </a>
                     </div>
@@ -41,7 +41,7 @@
                                         <td class="px-4 py-2 text-gray-500">{{ $product->unit }}</td>
                                         <td class="px-4 py-2 text-right">₹{{ number_format($product->rate, 2) }}</td>
                                         <td class="px-4 py-2 text-right">
-                                            <a href="{{ route('products.edit', $product) }}" class="text-indigo-600 hover:underline">Edit</a>
+                                            <a href="{{ route('products.edit', $product) }}" class="text-[var(--brand-600)] hover:underline">Edit</a>
                                         </td>
                                     </tr>
                                 @empty

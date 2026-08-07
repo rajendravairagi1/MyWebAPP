@@ -60,7 +60,7 @@
                                 <div class="flex justify-between items-center mb-2">
                                     <h3 class="text-sm font-semibold text-gray-700">Products (Pieces)</h3>
                                     <button type="button" @click="rows.push({ product_id: '', quantity: 1 })"
-                                            class="text-xs text-indigo-600 hover:underline">+ Add Row</button>
+                                            class="text-xs text-[var(--brand-600)] hover:underline">+ Add Row</button>
                                 </div>
                                 @error('items') <p class="text-red-600 text-xs mb-2">{{ $message }}</p> @enderror
 
@@ -82,7 +82,7 @@
                             </div>
 
                             <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                                class="inline-flex items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                                 Job Receive Karo
                             </button>
                             <a href="{{ route('jobs.index') }}" class="ml-3 text-sm text-gray-500 hover:underline">Cancel</a>

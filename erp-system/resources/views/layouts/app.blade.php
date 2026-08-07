@@ -11,26 +11,33 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <!-- Color theme: applied before paint to avoid a flash of the default color -->
+        <script>
+            (function () {
+                var saved = localStorage.getItem('erp-theme');
+                if (saved) document.documentElement.setAttribute('data-theme', saved);
+            })();
+            window.setErpTheme = function (theme) {
+                localStorage.setItem('erp-theme', theme);
+                document.documentElement.setAttribute('data-theme', theme);
+            };
+        </script>
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+        <div class="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+            @include('layouts.sidebar')
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+            <div class="flex-1 min-w-0">
+                @include('layouts.topbar')
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+                <!-- Page Content -->
+                <main class="p-4 sm:p-6 lg:p-8">
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
     </body>
 </html>

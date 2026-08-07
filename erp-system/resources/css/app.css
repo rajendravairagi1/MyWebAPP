@@ -1,3 +1,114 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+[x-cloak] { display: none !important; }
+
+/*
+ * Brand color theme system.
+ * A theme just swaps these variables — every view uses bg-[var(--brand-600)]
+ * etc. instead of a fixed Tailwind color, so switching data-theme on <html>
+ * reskins the whole app instantly. "indigo" matches the original look and
+ * is the default so nothing changes until a user picks a color.
+ */
+:root,
+:root[data-theme="indigo"] {
+    --brand-50: #eef2ff;
+    --brand-100: #e0e7ff;
+    --brand-200: #c7d2fe;
+    --brand-400: #818cf8;
+    --brand-500: #6366f1;
+    --brand-600: #4f46e5;
+    --brand-700: #4338ca;
+    --brand-800: #3730a3;
+}
+:root[data-theme="blue"] {
+    --brand-50: #eff6ff;
+    --brand-100: #dbeafe;
+    --brand-200: #bfdbfe;
+    --brand-400: #60a5fa;
+    --brand-500: #3b82f6;
+    --brand-600: #2563eb;
+    --brand-700: #1d4ed8;
+    --brand-800: #1e40af;
+}
+:root[data-theme="violet"] {
+    --brand-50: #f5f3ff;
+    --brand-100: #ede9fe;
+    --brand-200: #ddd6fe;
+    --brand-400: #a78bfa;
+    --brand-500: #8b5cf6;
+    --brand-600: #7c3aed;
+    --brand-700: #6d28d9;
+    --brand-800: #5b21b6;
+}
+:root[data-theme="pink"] {
+    --brand-50: #fdf2f8;
+    --brand-100: #fce7f3;
+    --brand-200: #fbcfe8;
+    --brand-400: #f472b6;
+    --brand-500: #ec4899;
+    --brand-600: #db2777;
+    --brand-700: #be185d;
+    --brand-800: #9d174d;
+}
+:root[data-theme="rose"] {
+    --brand-50: #fff1f2;
+    --brand-100: #ffe4e6;
+    --brand-200: #fecdd3;
+    --brand-400: #fb7185;
+    --brand-500: #f43f5e;
+    --brand-600: #e11d48;
+    --brand-700: #be123c;
+    --brand-800: #9f1239;
+}
+:root[data-theme="red"] {
+    --brand-50: #fef2f2;
+    --brand-100: #fee2e2;
+    --brand-200: #fecaca;
+    --brand-400: #f87171;
+    --brand-500: #ef4444;
+    --brand-600: #dc2626;
+    --brand-700: #b91c1c;
+    --brand-800: #991b1b;
+}
+:root[data-theme="orange"] {
+    --brand-50: #fff7ed;
+    --brand-100: #ffedd5;
+    --brand-200: #fed7aa;
+    --brand-400: #fb923c;
+    --brand-500: #f97316;
+    --brand-600: #ea580c;
+    --brand-700: #c2410c;
+    --brand-800: #9a3412;
+}
+:root[data-theme="amber"] {
+    --brand-50: #fffbeb;
+    --brand-100: #fef3c7;
+    --brand-200: #fde68a;
+    --brand-400: #fbbf24;
+    --brand-500: #f59e0b;
+    --brand-600: #d97706;
+    --brand-700: #b45309;
+    --brand-800: #92400e;
+}
+:root[data-theme="green"] {
+    --brand-50: #f0fdf4;
+    --brand-100: #dcfce7;
+    --brand-200: #bbf7d0;
+    --brand-400: #4ade80;
+    --brand-500: #22c55e;
+    --brand-600: #16a34a;
+    --brand-700: #15803d;
+    --brand-800: #166534;
+}
+:root[data-theme="teal"] {
+    --brand-50: #f0fdfa;
+    --brand-100: #ccfbf1;
+    --brand-200: #99f6e4;
+    --brand-400: #2dd4bf;
+    --brand-500: #14b8a6;
+    --brand-600: #0d9488;
+    --brand-700: #0f766e;
+    --brand-800: #115e59;
+}

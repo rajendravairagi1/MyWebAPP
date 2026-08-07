@@ -32,7 +32,7 @@
                                     'pending' => 'bg-gray-100 text-gray-600',
                                     'working' => 'bg-amber-100 text-amber-700',
                                     'ready' => 'bg-green-100 text-green-700',
-                                    'dispatched' => 'bg-indigo-100 text-indigo-700',
+                                    'dispatched' => 'bg-[var(--brand-100)] text-[var(--brand-700)]',
                                 };
                             @endphp
                             <span class="inline-block px-2 py-0.5 rounded-full text-xs font-semibold {{ $pill }}">{{ ucfirst($job->status) }}</span><br>
@@ -124,7 +124,7 @@
                             </template>
 
                             <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                                class="inline-flex items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                                 Submit
                             </button>
                         </form>
@@ -162,7 +162,7 @@
                         </div>
                         <div class="sm:col-span-4">
                             <button type="submit"
-                                class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                                class="inline-flex items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                                 Save Entry
                             </button>
                         </div>
@@ -204,7 +204,7 @@
                         @if (! $job->invoice)
                             @can('module.invoice-accounts')
                                 <a href="{{ route('invoices.create', $job) }}"
-                                   class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                                   class="inline-flex items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                                     Generate Invoice
                                 </a>
                             @else
@@ -213,11 +213,11 @@
                         @else
                             <div class="flex items-center justify-between border rounded-lg px-4 py-3 bg-green-50 border-green-200 mb-4">
                                 <span class="text-sm">Invoice <strong>{{ $job->invoice->invoice_number }}</strong> ban chuki hai — ₹{{ number_format($job->invoice->total, 2) }}</span>
-                                <a href="{{ route('invoices.show', $job->invoice) }}" class="text-sm text-indigo-600 hover:underline">View Invoice</a>
+                                <a href="{{ route('invoices.show', $job->invoice) }}" class="text-sm text-[var(--brand-600)] hover:underline">View Invoice</a>
                             </div>
 
                             @if ($job->securityGateLog)
-                                <div class="border rounded-lg px-4 py-3 bg-indigo-50 border-indigo-200 text-sm">
+                                <div class="border rounded-lg px-4 py-3 bg-[var(--brand-50)] border-[var(--brand-200)] text-sm">
                                     <strong>Gate Verified</strong> — {{ $job->securityGateLog->verified_by }} ne
                                     {{ $job->securityGateLog->verified_at->format('d M Y, H:i') }} pe confirm kiya
                                     (Vehicle: {{ $job->securityGateLog->vehicle_number_confirmed }})
@@ -235,7 +235,7 @@
                                             <input type="text" name="vehicle_number_confirmed" value="{{ $job->invoice->vehicle_number }}" required class="w-full rounded-md border-gray-300 shadow-sm text-sm">
                                         </div>
                                         <div>
-                                            <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                                            <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                                                 Verify &amp; Dispatch
                                             </button>
                                         </div>

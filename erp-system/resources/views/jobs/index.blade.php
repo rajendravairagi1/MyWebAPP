@@ -23,7 +23,7 @@
                         </div>
                         @can('module.job-work')
                             <a href="{{ route('jobs.create') }}"
-                               class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                               class="inline-flex items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                                 + Naya Job
                             </a>
                         @endcan
@@ -58,7 +58,7 @@
                                                     'pending' => 'bg-gray-100 text-gray-600',
                                                     'working' => 'bg-amber-100 text-amber-700',
                                                     'ready' => 'bg-green-100 text-green-700',
-                                                    'dispatched' => 'bg-indigo-100 text-indigo-700',
+                                                    'dispatched' => 'bg-[var(--brand-100)] text-[var(--brand-700)]',
                                                 };
                                             @endphp
                                             <span class="px-2 py-0.5 rounded-full text-xs font-semibold {{ $pill }}">{{ ucfirst($job->status) }}</span>

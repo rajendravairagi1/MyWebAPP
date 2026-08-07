@@ -18,7 +18,7 @@
                         @include('customers._form')
 
                         <button type="submit"
-                            class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                            class="inline-flex items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                             Update Customer
                         </button>
                         <a href="{{ route('customers.index') }}" class="ml-3 text-sm text-gray-500 hover:underline">Cancel</a>
@@ -30,7 +30,7 @@
                             <ul class="text-sm space-y-1">
                                 @foreach ($customer->documents as $doc)
                                     <li>
-                                        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($doc->file_path) }}" target="_blank" class="text-indigo-600 hover:underline">{{ $doc->original_name }}</a>
+                                        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($doc->file_path) }}" target="_blank" class="text-[var(--brand-600)] hover:underline">{{ $doc->original_name }}</a>
                                     </li>
                                 @endforeach
                             </ul>
