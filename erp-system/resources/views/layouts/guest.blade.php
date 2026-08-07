@@ -11,6 +11,14 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <!-- Color theme: applied before paint to avoid a flash of the default color -->
+        <script>
+            (function () {
+                var saved = localStorage.getItem('erp-theme');
+                if (saved) document.documentElement.setAttribute('data-theme', saved);
+            })();
+        </script>
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>

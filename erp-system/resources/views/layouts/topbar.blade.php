@@ -17,8 +17,11 @@
 
         <div class="flex items-center gap-2 shrink-0">
             <!-- Color Theme Picker -->
-            <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" @click.outside="open = false"
+            <div x-data="{ open: false, active: localStorage.getItem('erp-theme') || 'indigo' }"
+                 @click.outside="open = false"
+                 @erp-theme-changed.window="active = $event.detail"
+                 class="relative">
+                <button type="button" @click="open = !open"
                         class="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h14a2 2 0 012 2v7a4 4 0 01-4 4H7z" />
@@ -35,9 +38,9 @@
                     <div class="grid grid-cols-5 gap-2">
                         @foreach ($themes as $key => $hex)
                             <button type="button"
-                                    onclick="window.setErpTheme('{{ $key }}')"
+                                    @click="window.setErpTheme('{{ $key }}'); open = false"
                                     class="h-8 w-8 rounded-full border-2 flex items-center justify-center"
-                                    :class="localStorage.getItem('erp-theme') === '{{ $key }}' || (!localStorage.getItem('erp-theme') && '{{ $key }}' === 'indigo') ? 'border-gray-800' : 'border-transparent'"
+                                    :class="active === '{{ $key }}' ? 'border-gray-800' : 'border-transparent'"
                                     style="background-color: {{ $hex }}"
                                     title="{{ ucfirst($key) }}">
                             </button>

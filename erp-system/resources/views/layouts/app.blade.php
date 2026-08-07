@@ -20,6 +20,7 @@
             window.setErpTheme = function (theme) {
                 localStorage.setItem('erp-theme', theme);
                 document.documentElement.setAttribute('data-theme', theme);
+                window.dispatchEvent(new CustomEvent('erp-theme-changed', { detail: theme }));
             };
         </script>
 
