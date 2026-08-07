@@ -25,11 +25,17 @@
                         </x-nav-link>
                     @endcan
 
-                    @canany(['module.job-work', 'module.quality'])
+                    @canany(['module.job-work', 'module.quality', 'module.security-gate', 'module.invoice-accounts'])
                         <x-nav-link :href="route('jobs.index')" :active="request()->routeIs('jobs.*')">
                             {{ __('Job Work') }}
                         </x-nav-link>
                     @endcanany
+
+                    @can('module.invoice-accounts')
+                        <x-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
+                            {{ __('Invoices') }}
+                        </x-nav-link>
+                    @endcan
 
                     @can('module.hr-employees')
                         <x-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">
@@ -113,11 +119,17 @@
                 </x-responsive-nav-link>
             @endcan
 
-            @canany(['module.job-work', 'module.quality'])
+            @canany(['module.job-work', 'module.quality', 'module.security-gate', 'module.invoice-accounts'])
                 <x-responsive-nav-link :href="route('jobs.index')" :active="request()->routeIs('jobs.*')">
                     {{ __('Job Work') }}
                 </x-responsive-nav-link>
             @endcanany
+
+            @can('module.invoice-accounts')
+                <x-responsive-nav-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
+                    {{ __('Invoices') }}
+                </x-responsive-nav-link>
+            @endcan
 
             @can('module.hr-employees')
                 <x-responsive-nav-link :href="route('employees.index')" :active="request()->routeIs('employees.*')">

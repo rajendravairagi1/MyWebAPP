@@ -195,6 +195,60 @@
                 </div>
             </div>
 
+            <!-- Dispatch: Invoice + Security Gate -->
+            @if (in_array($job->status, ['ready', 'dispatched']))
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <h3 class="font-semibold text-gray-800 mb-4">Dispatch</h3>
+
+                        @if (! $job->invoice)
+                            @can('module.invoice-accounts')
+                                <a href="{{ route('invoices.create', $job) }}"
+                                   class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                                    Generate Invoice
+                                </a>
+                            @else
+                                <p class="text-sm text-gray-500">Account role invoice banayega, tabhi dispatch aage badhega.</p>
+                            @endcan
+                        @else
+                            <div class="flex items-center justify-between border rounded-lg px-4 py-3 bg-green-50 border-green-200 mb-4">
+                                <span class="text-sm">Invoice <strong>{{ $job->invoice->invoice_number }}</strong> ban chuki hai — ₹{{ number_format($job->invoice->total, 2) }}</span>
+                                <a href="{{ route('invoices.show', $job->invoice) }}" class="text-sm text-indigo-600 hover:underline">View Invoice</a>
+                            </div>
+
+                            @if ($job->securityGateLog)
+                                <div class="border rounded-lg px-4 py-3 bg-indigo-50 border-indigo-200 text-sm">
+                                    <strong>Gate Verified</strong> — {{ $job->securityGateLog->verified_by }} ne
+                                    {{ $job->securityGateLog->verified_at->format('d M Y, H:i') }} pe confirm kiya
+                                    (Vehicle: {{ $job->securityGateLog->vehicle_number_confirmed }})
+                                </div>
+                            @else
+                                @can('module.security-gate')
+                                    <form method="POST" action="{{ route('jobs.verify-gate', $job) }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                                        @csrf
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Verified By (Guard Name)</label>
+                                            <input type="text" name="verified_by" required class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">Vehicle Number Confirm</label>
+                                            <input type="text" name="vehicle_number_confirmed" value="{{ $job->invoice->vehicle_number }}" required class="w-full rounded-md border-gray-300 shadow-sm text-sm">
+                                        </div>
+                                        <div>
+                                            <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                                                Verify &amp; Dispatch
+                                            </button>
+                                        </div>
+                                    </form>
+                                @else
+                                    <p class="text-sm text-gray-500">Security Gate se verify hone ka wait hai.</p>
+                                @endcan
+                            @endif
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             <a href="{{ route('jobs.index') }}" class="text-sm text-gray-500 hover:underline">&larr; Back to Job Work</a>
         </div>
     </div>

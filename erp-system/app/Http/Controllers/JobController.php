@@ -62,7 +62,7 @@ class JobController extends Controller
 
     public function show(Job $job)
     {
-        $job->load(['customer', 'items.product', 'stageLogs', 'materialIssues.rawMaterial']);
+        $job->load(['customer', 'items.product', 'stageLogs', 'materialIssues.rawMaterial', 'invoice', 'securityGateLog']);
 
         return view('jobs.show', [
             'job' => $job,
@@ -70,6 +70,32 @@ class JobController extends Controller
             'currentStage' => $job->currentStage(),
             'rawMaterials' => RawMaterial::orderBy('name')->get(),
         ]);
+    }
+
+    public function verifyGate(Request $request, Job $job)
+    {
+        if (! $job->invoice) {
+            return back()->with('status', 'Pehle invoice banao, tabhi gate verify ho sakta hai.');
+        }
+
+        if ($job->securityGateLog) {
+            return back()->with('status', 'Ye job pehle se hi gate se verify ho chuka hai.');
+        }
+
+        $validated = $request->validate([
+            'verified_by' => ['required', 'string', 'max:100'],
+            'vehicle_number_confirmed' => ['required', 'string', 'max:50'],
+            'remarks' => ['nullable', 'string'],
+        ]);
+
+        $job->securityGateLog()->create([
+            ...$validated,
+            'verified_at' => now(),
+        ]);
+
+        $job->update(['status' => 'dispatched']);
+
+        return back()->with('status', 'Gate verify ho gaya — job dispatched.');
     }
 
     public function advanceStage(Request $request, Job $job)

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 #[Fillable([
     'customer_id', 'challan_number', 'vehicle_number', 'photo_path',
@@ -60,6 +61,16 @@ class Job extends Model
     public function materialIssues(): HasMany
     {
         return $this->hasMany(MaterialIssue::class, 'job_order_id')->latest('issued_at');
+    }
+
+    public function invoice(): HasOne
+    {
+        return $this->hasOne(Invoice::class, 'job_order_id');
+    }
+
+    public function securityGateLog(): HasOne
+    {
+        return $this->hasOne(SecurityGateLog::class, 'job_order_id');
     }
 
     public function completedStageCount(): int

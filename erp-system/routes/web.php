@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -47,10 +48,28 @@ Route::middleware('auth')->group(function () {
         Route::post('/jobs', [JobController::class, 'store'])->name('jobs.store');
     });
 
-    Route::middleware('permission:module.job-work|module.quality|module.store-material')->group(function () {
+    Route::middleware('permission:module.job-work|module.quality|module.store-material|module.invoice-accounts|module.security-gate')->group(function () {
         Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
+    });
+
+    Route::middleware('permission:module.job-work|module.quality')->group(function () {
         Route::post('/jobs/{job}/advance-stage', [JobController::class, 'advanceStage'])->name('jobs.advance-stage');
+    });
+
+    Route::middleware('permission:module.store-material')->group(function () {
         Route::post('/jobs/{job}/issue-material', [JobController::class, 'issueMaterial'])->name('jobs.issue-material');
+    });
+
+    Route::middleware('permission:module.security-gate')->group(function () {
+        Route::post('/jobs/{job}/verify-gate', [JobController::class, 'verifyGate'])->name('jobs.verify-gate');
+    });
+
+    Route::middleware('permission:module.invoice-accounts')->group(function () {
+        Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/jobs/{job}/invoice/create', [InvoiceController::class, 'create'])->name('invoices.create');
+        Route::post('/jobs/{job}/invoice', [InvoiceController::class, 'store'])->name('invoices.store');
+        Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::post('/invoices/{invoice}/payments', [InvoiceController::class, 'addPayment'])->name('invoices.payments.store');
     });
 });
 
