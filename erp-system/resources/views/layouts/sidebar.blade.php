@@ -103,6 +103,61 @@
                             Raw Material
                         </a>
                     @endcan
+
+                    @can('module.purchase')
+                        @php $active = request()->routeIs('purchases.*') || request()->routeIs('suppliers.*'); @endphp
+                        <a href="{{ route('purchases.index') }}"
+                           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ $active ? 'text-white bg-[image:var(--brand-grad)] shadow' : 'text-[var(--sidebar-text)] hover:bg-white/5' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l-1 10H6L5 11z" />
+                            </svg>
+                            Purchase
+                        </a>
+                    @endcan
+
+                    @can('module.attendance')
+                        @php $active = request()->routeIs('attendance.*'); @endphp
+                        <a href="{{ route('attendance.index') }}"
+                           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ $active ? 'text-white bg-[image:var(--brand-grad)] shadow' : 'text-[var(--sidebar-text)] hover:bg-white/5' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Attendance
+                        </a>
+                    @endcan
+
+                    @can('module.payroll')
+                        @php $active = request()->routeIs('payroll.*'); @endphp
+                        <a href="{{ route('payroll.index') }}"
+                           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ $active ? 'text-white bg-[image:var(--brand-grad)] shadow' : 'text-[var(--sidebar-text)] hover:bg-white/5' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 10v2m9-8a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Payroll
+                        </a>
+                    @endcan
+
+                    @can('module.reports')
+                        @php $active = request()->routeIs('reports.*'); @endphp
+                        <a href="{{ route('reports.index') }}"
+                           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ $active ? 'text-white bg-[image:var(--brand-grad)] shadow' : 'text-[var(--sidebar-text)] hover:bg-white/5' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19V6l7 7-7 7zM3 5h4M3 12h2M3 19h4" />
+                            </svg>
+                            Reports
+                        </a>
+                    @endcan
+
+                    @can('module.bd-crm')
+                        @php $active = request()->routeIs('leads.*'); @endphp
+                        <a href="{{ route('leads.index') }}"
+                           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium {{ $active ? 'text-white bg-[image:var(--brand-grad)] shadow' : 'text-[var(--sidebar-text)] hover:bg-white/5' }}">
+                            <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                            Leads (BD)
+                        </a>
+                    @endcan
                 </div>
             </div>
 

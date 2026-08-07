@@ -1,14 +1,20 @@
 <?php
 
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JobController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\PayrollController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\RawMaterialController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RoleManagementController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -71,6 +77,37 @@ Route::middleware('auth')->group(function () {
         Route::post('/jobs/{job}/invoice', [InvoiceController::class, 'store'])->name('invoices.store');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
         Route::post('/invoices/{invoice}/payments', [InvoiceController::class, 'addPayment'])->name('invoices.payments.store');
+    });
+
+    Route::middleware('permission:module.purchase')->group(function () {
+        Route::resource('suppliers', SupplierController::class)->except(['show']);
+        Route::get('/purchases', [PurchaseController::class, 'index'])->name('purchases.index');
+        Route::get('/purchases/create', [PurchaseController::class, 'create'])->name('purchases.create');
+        Route::post('/purchases', [PurchaseController::class, 'store'])->name('purchases.store');
+        Route::get('/purchases/{purchase}', [PurchaseController::class, 'show'])->name('purchases.show');
+        Route::post('/purchases/{purchase}/payments', [PurchaseController::class, 'addPayment'])->name('purchases.payments.store');
+    });
+
+    Route::middleware('permission:module.attendance')->group(function () {
+        Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store');
+    });
+
+    Route::middleware('permission:module.payroll')->group(function () {
+        Route::get('/payroll', [PayrollController::class, 'index'])->name('payroll.index');
+        Route::post('/payroll/generate', [PayrollController::class, 'generate'])->name('payroll.generate');
+        Route::get('/payroll/{salarySlip}', [PayrollController::class, 'show'])->name('payroll.show');
+        Route::put('/payroll/{salarySlip}', [PayrollController::class, 'update'])->name('payroll.update');
+        Route::post('/payroll/{salarySlip}/mark-paid', [PayrollController::class, 'markPaid'])->name('payroll.mark-paid');
+    });
+
+    Route::middleware('permission:module.reports')->group(function () {
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    });
+
+    Route::middleware('permission:module.bd-crm')->group(function () {
+        Route::resource('leads', LeadController::class)->except(['destroy']);
+        Route::post('/leads/{lead}/meetings', [LeadController::class, 'storeMeeting'])->name('leads.meetings.store');
     });
 });
 
