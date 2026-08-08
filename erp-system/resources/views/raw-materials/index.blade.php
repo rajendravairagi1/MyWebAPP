@@ -1,19 +1,19 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Raw Material Inventory') }}</h2>
+        <h2 class="font-semibold text-xl text-[var(--text)] leading-tight">{{ __('Raw Material Inventory') }}</h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
+            <div class="bg-[var(--card)] overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-[var(--text)]">
 
                     @if (session('status'))
                         <div class="mb-4 px-4 py-2 rounded bg-green-50 text-green-700 text-sm">{{ session('status') }}</div>
                     @endif
 
                     <div class="flex justify-between items-center mb-4">
-                        <p class="text-sm text-gray-600">Total {{ $materials->count() }} materials.</p>
+                        <p class="text-sm text-[var(--muted)]">Total {{ $materials->count() }} materials.</p>
                         <a href="{{ route('raw-materials.create') }}"
                            class="inline-flex items-center px-4 py-2 bg-[var(--brand-600)] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[var(--brand-700)]">
                             + Naya Material
@@ -21,21 +21,21 @@
                     </div>
 
                     <div class="overflow-x-auto border rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-gray-50">
+                        <table class="min-w-full divide-y divide-[var(--border)] text-sm">
+                            <thead class="bg-[var(--bg)]">
                                 <tr>
-                                    <th class="px-4 py-2 text-left font-semibold text-gray-600">Name</th>
-                                    <th class="px-4 py-2 text-left font-semibold text-gray-600">Category</th>
-                                    <th class="px-4 py-2 text-right font-semibold text-gray-600">Current Stock</th>
-                                    <th class="px-4 py-2 text-left font-semibold text-gray-600">Status</th>
+                                    <th class="px-4 py-2 text-left font-semibold text-[var(--muted)]">Name</th>
+                                    <th class="px-4 py-2 text-left font-semibold text-[var(--muted)]">Category</th>
+                                    <th class="px-4 py-2 text-right font-semibold text-[var(--muted)]">Current Stock</th>
+                                    <th class="px-4 py-2 text-left font-semibold text-[var(--muted)]">Status</th>
                                     <th class="px-4 py-2"></th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody class="divide-y divide-[var(--border)]">
                                 @forelse ($materials as $material)
                                     <tr>
                                         <td class="px-4 py-2 font-medium">{{ $material->name }}</td>
-                                        <td class="px-4 py-2 text-gray-500">{{ $material->category }}</td>
+                                        <td class="px-4 py-2 text-[var(--muted)]">{{ $material->category }}</td>
                                         <td class="px-4 py-2 text-right">{{ number_format($material->current_stock, 2) }} {{ $material->unit }}</td>
                                         <td class="px-4 py-2">
                                             @if ($material->isLowStock())
@@ -49,7 +49,7 @@
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr><td colspan="5" class="px-4 py-6 text-center text-gray-400">Koi material nahi hai abhi.</td></tr>
+                                    <tr><td colspan="5" class="px-4 py-6 text-center text-[var(--muted)]">Koi material nahi hai abhi.</td></tr>
                                 @endforelse
                             </tbody>
                         </table>
