@@ -99,6 +99,19 @@ return [
 
     'key' => env('APP_KEY'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Web Installer Token
+    |--------------------------------------------------------------------------
+    |
+    | Guards /install on hosts with no SSH access. Only requests carrying
+    | ?token=<this value> can reach the installer. See App\Http\Controllers\
+    | InstallController and .env.example for setup notes.
+    |
+    */
+
+    'install_token' => env('INSTALL_TOKEN'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
