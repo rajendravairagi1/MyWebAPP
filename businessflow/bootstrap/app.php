@@ -13,8 +13,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // IdentifyTenant must run before SubstituteBindings — otherwise a
+        // route param like {customer} resolves against the database before
+        // the tenant global scope is active, and implicit route-model
+        // binding would silently ignore tenant isolation. Laravel's default
+        // 'web' group puts SubstituteBindings early, so it's removed and
+        // re-appended after our middleware to force the correct order.
+        $middleware->removeFromGroup('web', \Illuminate\Routing\Middleware\SubstituteBindings::class);
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\IdentifyTenant::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

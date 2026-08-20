@@ -1,0 +1,31 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Edit Customer') }}</h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            <div class="bg-white shadow-sm rounded-lg p-6">
+                <form method="POST" action="{{ route('customers.update', $customer) }}" class="space-y-6">
+                    @csrf
+                    @method('PUT')
+                    @include('customers._form')
+
+                    <div class="flex justify-end gap-3">
+                        <a href="{{ route('customers.show', $customer) }}" class="px-4 py-2 text-sm text-gray-600">{{ __('Cancel') }}</a>
+                        <x-primary-button>{{ __('Save Changes') }}</x-primary-button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="bg-white shadow-sm rounded-lg p-6 flex items-center justify-between">
+                <div class="text-sm text-gray-600">{{ __('Deleting a customer cannot be undone.') }}</div>
+                <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('{{ __('Delete this customer?') }}')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-sm text-red-600 hover:underline">{{ __('Delete customer') }}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
