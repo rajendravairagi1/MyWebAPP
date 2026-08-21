@@ -99,12 +99,20 @@
                                         <td class="px-5 py-2 text-right text-gray-300 dark:text-slate-600">—</td>
                                     @endif
                                     <td class="px-5 py-2"><x-status-badge :status="$unit->status" /></td>
-                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400">
+                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400 min-w-[10rem]">
                                         @if ($unit->customer)
-                                            <a href="{{ route('customers.show', $unit->customer) }}" class="text-accent-600 hover:underline">{{ $unit->customer->name }}</a>
-                                        @else
-                                            —
+                                            <a href="{{ route('customers.show', $unit->customer) }}" class="text-accent-600 hover:underline block mb-1">{{ $unit->customer->name }}</a>
                                         @endif
+                                        <form method="POST" action="{{ route('project-units.assign') }}">
+                                            @csrf
+                                            <input type="hidden" name="project_unit_id" value="{{ $unit->id }}">
+                                            <select name="customer_id" onchange="this.form.submit()" class="block w-full text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                                <option value="">{{ $unit->customer ? __('— Unassign —') : __('— Assign to —') }}</option>
+                                                @foreach ($customers as $customer)
+                                                    <option value="{{ $customer->id }}" @selected($unit->customer_id === $customer->id)>{{ $customer->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </form>
                                     </td>
                                     <td class="px-5 py-2 text-right">
                                         <form method="POST" action="{{ route('project-units.destroy', [$project, $unit]) }}" onsubmit="return confirm('{{ __('Remove this unit?') }}')">

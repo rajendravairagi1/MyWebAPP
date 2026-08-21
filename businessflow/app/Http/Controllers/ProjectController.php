@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,7 +40,9 @@ class ProjectController extends Controller
 
         $costsByCategory = $project->costs->groupBy('category')->map(fn ($group) => $group->sum('amount'));
 
-        return view('projects.show', compact('project', 'costsByCategory'));
+        $customers = Customer::orderBy('name')->get();
+
+        return view('projects.show', compact('project', 'costsByCategory', 'customers'));
     }
 
     public function edit(Project $project): View

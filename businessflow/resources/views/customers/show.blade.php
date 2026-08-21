@@ -40,6 +40,21 @@
                 @endif
             </div>
 
+            {{-- Assign a property --}}
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Assign a Property') }}</div>
+                <form method="POST" action="{{ route('project-units.assign') }}" class="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    @csrf
+                    <input type="hidden" name="customer_id" value="{{ $customer->id }}">
+                    <div class="sm:col-span-2">
+                        <x-project-unit-select :projects="$projects" />
+                    </div>
+                    <div>
+                        <x-primary-button class="w-full justify-center">{{ __('Assign to '.$customer->name) }}</x-primary-button>
+                    </div>
+                </form>
+            </div>
+
             @if ($customer->units->isNotEmpty())
                 @php
                     $totalPaid = $customer->units->sum(fn ($u) => $u->totalPaid());

@@ -46,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/projects/{project}/units', [ProjectUnitController::class, 'store'])->name('project-units.store');
     Route::put('/projects/{project}/units/{unit}', [ProjectUnitController::class, 'update'])->name('project-units.update');
     Route::delete('/projects/{project}/units/{unit}', [ProjectUnitController::class, 'destroy'])->name('project-units.destroy');
+    Route::post('/project-units/assign', [ProjectUnitController::class, 'assign'])->name('project-units.assign');
 
     Route::get('/followups', [FollowupController::class, 'index'])->name('followups.index');
     Route::get('/followups/create', [FollowupController::class, 'create'])->name('followups.create');

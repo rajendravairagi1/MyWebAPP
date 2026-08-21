@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\Customer;
+use App\Models\Project;
 use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
@@ -54,7 +55,9 @@ class CustomerController extends Controller
             'documents' => fn ($q) => $q->latest(),
         ]);
 
-        return view('customers.show', compact('customer'));
+        $projects = Project::with(['units' => fn ($q) => $q->orderBy('unit_number')])->orderBy('name')->get();
+
+        return view('customers.show', compact('customer', 'projects'));
     }
 
     public function statement(Customer $customer)

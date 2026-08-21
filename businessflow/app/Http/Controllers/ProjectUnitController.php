@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\Project;
 use App\Models\ProjectUnit;
 use Illuminate\Http\RedirectResponse;
@@ -48,5 +49,33 @@ class ProjectUnitController extends Controller
         $unit->delete();
 
         return back()->with('status', 'Unit removed.');
+    }
+
+    public function assign(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'project_unit_id' => ['required', 'integer'],
+            'customer_id' => ['nullable', 'integer'],
+        ]);
+
+        $unit = ProjectUnit::findOrFail($data['project_unit_id']);
+
+        if (empty($data['customer_id'])) {
+            $unit->update([
+                'customer_id' => null,
+                'status' => $unit->status === 'sold' ? $unit->status : 'available',
+            ]);
+
+            return back()->with('status', 'Property unassigned.');
+        }
+
+        $customer = Customer::findOrFail($data['customer_id']);
+
+        $unit->update([
+            'customer_id' => $customer->id,
+            'status' => $unit->status === 'available' ? 'booked' : $unit->status,
+        ]);
+
+        return back()->with('status', 'Property assigned to customer.');
     }
 }
