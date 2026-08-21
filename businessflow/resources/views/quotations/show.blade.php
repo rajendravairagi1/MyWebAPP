@@ -25,10 +25,10 @@
                 @if ($quotation->invoices->isEmpty())
                     <form method="POST" action="{{ route('quotations.convert', $quotation) }}">
                         @csrf
-                        <button class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900">{{ __('Convert to Invoice') }}</button>
+                        <button class="px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('Convert to Invoice') }}</button>
                     </form>
                 @else
-                    <a href="{{ route('invoices.show', $quotation->invoices->first()) }}" class="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900">
+                    <a href="{{ route('invoices.show', $quotation->invoices->first()) }}" class="px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">
                         {{ __('View Invoice') }} {{ $quotation->invoices->first()->number }}
                     </a>
                 @endif
@@ -37,12 +37,12 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
                 <div>
                     <div class="text-gray-500 dark:text-gray-400">{{ __('Customer') }}</div>
-                    <a href="{{ route('customers.show', $quotation->customer) }}" class="text-indigo-600 hover:underline">{{ $quotation->customer->name }}</a>
+                    <a href="{{ route('customers.show', $quotation->customer) }}" class="text-accent-600 hover:underline">{{ $quotation->customer->name }}</a>
                 </div>
                 @if ($quotation->project)
                     <div>
                         <div class="text-gray-500 dark:text-gray-400">{{ __('Project') }}</div>
-                        <a href="{{ route('projects.show', $quotation->project) }}" class="text-indigo-600 hover:underline">{{ $quotation->project->name }}</a>
+                        <a href="{{ route('projects.show', $quotation->project) }}" class="text-accent-600 hover:underline">{{ $quotation->project->name }}</a>
                         @if ($quotation->projectUnit)
                             <span class="text-gray-500 dark:text-gray-400">· {{ $quotation->projectUnit->unit_number }}</span>
                         @endif

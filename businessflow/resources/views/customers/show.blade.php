@@ -3,8 +3,8 @@
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ $customer->name }}</h2>
             <div class="flex items-center gap-4">
-                <a href="{{ route('customers.statement', $customer) }}" class="text-sm text-indigo-600 hover:underline">{{ __('Download Statement') }}</a>
-                <a href="{{ route('customers.edit', $customer) }}" class="text-sm text-indigo-600 hover:underline">{{ __('Edit') }}</a>
+                <a href="{{ route('customers.statement', $customer) }}" class="text-sm text-accent-600 hover:underline">{{ __('Download Statement') }}</a>
+                <a href="{{ route('customers.edit', $customer) }}" class="text-sm text-accent-600 hover:underline">{{ __('Edit') }}</a>
             </div>
         </div>
     </x-slot>
@@ -62,7 +62,7 @@
                             @foreach ($customer->units as $unit)
                                 <tr>
                                     <td class="px-5 py-2">
-                                        <a href="{{ route('projects.show', $unit->project) }}" class="text-indigo-600 hover:underline">{{ $unit->project->name }}</a>
+                                        <a href="{{ route('projects.show', $unit->project) }}" class="text-accent-600 hover:underline">{{ $unit->project->name }}</a>
                                     </td>
                                     <td class="px-5 py-2 text-gray-900 dark:text-gray-100 font-medium">{{ $unit->unit_number }}</td>
                                     <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ number_format($unit->price, 0) }}</td>
@@ -88,7 +88,7 @@
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                     <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
                         <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Quotations') }}</span>
-                        <a href="{{ route('quotations.create') }}" class="text-xs text-indigo-600 hover:underline">{{ __('+ New') }}</a>
+                        <a href="{{ route('quotations.create') }}" class="text-xs text-accent-600 hover:underline">{{ __('+ New') }}</a>
                     </div>
                     @if ($customer->quotations->isEmpty())
                         <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('None yet.') }}</div>
@@ -96,7 +96,7 @@
                         <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
                             @foreach ($customer->quotations as $quotation)
                                 <li class="px-5 py-3 flex items-center justify-between">
-                                    <a href="{{ route('quotations.show', $quotation) }}" class="text-indigo-600 hover:underline">{{ $quotation->number }}</a>
+                                    <a href="{{ route('quotations.show', $quotation) }}" class="text-accent-600 hover:underline">{{ $quotation->number }}</a>
                                     <div class="flex items-center gap-3">
                                         <span class="text-gray-600 dark:text-gray-400">{{ number_format($quotation->total, 2) }}</span>
                                         <x-status-badge :status="$quotation->status" />
@@ -110,7 +110,7 @@
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                     <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
                         <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Invoices') }}</span>
-                        <a href="{{ route('invoices.create') }}" class="text-xs text-indigo-600 hover:underline">{{ __('+ New') }}</a>
+                        <a href="{{ route('invoices.create') }}" class="text-xs text-accent-600 hover:underline">{{ __('+ New') }}</a>
                     </div>
                     @if ($customer->invoices->isEmpty())
                         <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('None yet.') }}</div>
@@ -118,7 +118,7 @@
                         <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
                             @foreach ($customer->invoices as $invoice)
                                 <li class="px-5 py-3 flex items-center justify-between">
-                                    <a href="{{ route('invoices.show', $invoice) }}" class="text-indigo-600 hover:underline">{{ $invoice->number }}</a>
+                                    <a href="{{ route('invoices.show', $invoice) }}" class="text-accent-600 hover:underline">{{ $invoice->number }}</a>
                                     <div class="flex items-center gap-3">
                                         <span class="text-gray-600 dark:text-gray-400">{{ number_format($invoice->total, 2) }}</span>
                                         <x-status-badge :status="$invoice->status" />

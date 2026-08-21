@@ -24,7 +24,7 @@
                     <div>
                         <x-input-label for="business_type" :value="__('Business type')" />
                         <select id="business_type" name="business_type" required
-                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                            class="mt-1 block w-full border-gray-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
                             <option value="">{{ __('Select one') }}</option>
                             @foreach ($businessTypes as $value => $label)
                                 <option value="{{ $value }}" @selected(old('business_type') === $value)>{{ $label }}</option>
@@ -44,7 +44,7 @@
                         <div>
                             <x-input-label for="currency" :value="__('Currency')" />
                             <select id="currency" name="currency" required
-                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                class="mt-1 block w-full border-gray-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
                                 @foreach ($currencies as $value => $label)
                                     <option value="{{ $value }}" @selected(old('currency') === $value)>{{ $label }}</option>
                                 @endforeach
@@ -55,7 +55,7 @@
                         <div>
                             <x-input-label for="timezone" :value="__('Timezone')" />
                             <select id="timezone" name="timezone" required
-                                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                class="mt-1 block w-full border-gray-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
                                 @foreach (\DateTimeZone::listIdentifiers() as $tz)
                                     <option value="{{ $tz }}" @selected(old('timezone') === $tz)>{{ $tz }}</option>
                                 @endforeach

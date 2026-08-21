@@ -25,12 +25,12 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 grid grid-cols-1 sm:grid-cols-4 gap-4 text-sm">
                 <div>
                     <div class="text-gray-500 dark:text-gray-400">{{ __('Customer') }}</div>
-                    <a href="{{ route('customers.show', $invoice->customer) }}" class="text-indigo-600 hover:underline">{{ $invoice->customer->name }}</a>
+                    <a href="{{ route('customers.show', $invoice->customer) }}" class="text-accent-600 hover:underline">{{ $invoice->customer->name }}</a>
                 </div>
                 @if ($invoice->project)
                     <div>
                         <div class="text-gray-500 dark:text-gray-400">{{ __('Project') }}</div>
-                        <a href="{{ route('projects.show', $invoice->project) }}" class="text-indigo-600 hover:underline">{{ $invoice->project->name }}</a>
+                        <a href="{{ route('projects.show', $invoice->project) }}" class="text-accent-600 hover:underline">{{ $invoice->project->name }}</a>
                         @if ($invoice->projectUnit)
                             <span class="text-gray-500 dark:text-gray-400">· {{ $invoice->projectUnit->unit_number }}</span>
                         @endif

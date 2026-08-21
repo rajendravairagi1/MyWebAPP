@@ -30,12 +30,12 @@
 
 <div>
     <x-input-label for="address" :value="__('Address')" />
-    <textarea id="address" name="address" rows="2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('address', $customer?->address) }}</textarea>
+    <textarea id="address" name="address" rows="2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('address', $customer?->address) }}</textarea>
     <x-input-error :messages="$errors->get('address')" class="mt-2" />
 </div>
 
 <div>
     <x-input-label for="notes" :value="__('Notes')" />
-    <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('notes', $customer?->notes) }}</textarea>
+    <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('notes', $customer?->notes) }}</textarea>
     <x-input-error :messages="$errors->get('notes')" class="mt-2" />
 </div>

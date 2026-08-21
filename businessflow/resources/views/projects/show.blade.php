@@ -13,7 +13,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <x-status-badge :status="$project->status" />
-                <a href="{{ route('projects.edit', $project) }}" class="text-sm text-indigo-600 hover:underline">{{ __('Edit') }}</a>
+                <a href="{{ route('projects.edit', $project) }}" class="text-sm text-accent-600 hover:underline">{{ __('Edit') }}</a>
             </div>
         </div>
     </x-slot>
@@ -101,7 +101,7 @@
                                     <td class="px-5 py-2"><x-status-badge :status="$unit->status" /></td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">
                                         @if ($unit->customer)
-                                            <a href="{{ route('customers.show', $unit->customer) }}" class="text-indigo-600 hover:underline">{{ $unit->customer->name }}</a>
+                                            <a href="{{ route('customers.show', $unit->customer) }}" class="text-accent-600 hover:underline">{{ $unit->customer->name }}</a>
                                         @else
                                             —
                                         @endif
@@ -224,7 +224,7 @@
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                     <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
                         <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Quotations') }}</span>
-                        <a href="{{ route('quotations.create') }}" class="text-xs text-indigo-600 hover:underline">{{ __('+ New') }}</a>
+                        <a href="{{ route('quotations.create') }}" class="text-xs text-accent-600 hover:underline">{{ __('+ New') }}</a>
                     </div>
                     @if ($project->quotations->isEmpty())
                         <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('None yet.') }}</div>
@@ -232,7 +232,7 @@
                         <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
                             @foreach ($project->quotations as $quotation)
                                 <li class="px-5 py-3 flex items-center justify-between">
-                                    <a href="{{ route('quotations.show', $quotation) }}" class="text-indigo-600 hover:underline">{{ $quotation->number }}</a>
+                                    <a href="{{ route('quotations.show', $quotation) }}" class="text-accent-600 hover:underline">{{ $quotation->number }}</a>
                                     <div class="flex items-center gap-3">
                                         <span class="text-gray-600 dark:text-gray-400">{{ number_format($quotation->total, 0) }}</span>
                                         <x-status-badge :status="$quotation->status" />
@@ -246,7 +246,7 @@
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                     <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
                         <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Invoices') }}</span>
-                        <a href="{{ route('invoices.create') }}" class="text-xs text-indigo-600 hover:underline">{{ __('+ New') }}</a>
+                        <a href="{{ route('invoices.create') }}" class="text-xs text-accent-600 hover:underline">{{ __('+ New') }}</a>
                     </div>
                     @if ($project->invoices->isEmpty())
                         <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('None yet.') }}</div>
@@ -254,7 +254,7 @@
                         <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
                             @foreach ($project->invoices as $invoice)
                                 <li class="px-5 py-3 flex items-center justify-between">
-                                    <a href="{{ route('invoices.show', $invoice) }}" class="text-indigo-600 hover:underline">{{ $invoice->number }}</a>
+                                    <a href="{{ route('invoices.show', $invoice) }}" class="text-accent-600 hover:underline">{{ $invoice->number }}</a>
                                     <div class="flex items-center gap-3">
                                         <span class="text-gray-600 dark:text-gray-400">{{ number_format($invoice->total, 0) }}</span>
                                         <x-status-badge :status="$invoice->status" />

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Invoices') }}</h2>
-            <a href="{{ route('invoices.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900">{{ __('+ New Invoice') }}</a>
+            <a href="{{ route('invoices.create') }}" class="inline-flex items-center px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('+ New Invoice') }}</a>
         </div>
     </x-slot>
 
@@ -40,7 +40,7 @@
                             @foreach ($invoices as $invoice)
                                 <tr>
                                     <td class="px-5 py-3">
-                                        <a href="{{ route('invoices.show', $invoice) }}" class="text-indigo-600 hover:underline font-medium">{{ $invoice->number }}</a>
+                                        <a href="{{ route('invoices.show', $invoice) }}" class="text-accent-600 hover:underline font-medium">{{ $invoice->number }}</a>
                                     </td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $invoice->customer->name }}</td>
                                     <td class="px-5 py-3 text-right text-gray-600 dark:text-gray-400">{{ number_format($invoice->total, 2) }}</td>

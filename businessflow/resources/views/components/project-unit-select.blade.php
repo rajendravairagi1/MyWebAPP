@@ -6,7 +6,7 @@
     }" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
         <x-input-label for="project_id" :value="__('Project (optional)')" />
-        <select id="project_id" name="project_id" x-model="projectId" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <select id="project_id" name="project_id" x-model="projectId" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             <option value="">{{ __('No project — general item') }}</option>
             @foreach ($projects as $project)
                 <option value="{{ $project->id }}">{{ $project->name }}</option>
@@ -16,7 +16,7 @@
     </div>
     <div x-show="projectId">
         <x-input-label for="project_unit_id" :value="__('Unit (optional)')" />
-        <select id="project_unit_id" name="project_unit_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <select id="project_unit_id" name="project_unit_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             <option value="">{{ __('No specific unit') }}</option>
             <template x-for="unit in (units[projectId] || [])" :key="unit.id">
                 <option :value="unit.id" x-text="unit.label + (unit.available ? '' : ' (not available)')"></option>

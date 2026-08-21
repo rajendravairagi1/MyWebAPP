@@ -2,7 +2,7 @@
 
 @php
 $classes = ($active ?? false)
-    ? 'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white'
+    ? 'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium bg-accent-600 text-white'
     : 'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition';
 @endphp
 

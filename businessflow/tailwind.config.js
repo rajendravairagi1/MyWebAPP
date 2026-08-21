@@ -15,6 +15,18 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                // Resolves to CSS variables set by [data-accent="..."] in
+                // app.css, so the theme color picker can restyle every
+                // accent-* utility at runtime without a rebuild.
+                accent: {
+                    50: 'rgb(var(--accent-50) / <alpha-value>)',
+                    100: 'rgb(var(--accent-100) / <alpha-value>)',
+                    500: 'rgb(var(--accent-500) / <alpha-value>)',
+                    600: 'rgb(var(--accent-600) / <alpha-value>)',
+                    700: 'rgb(var(--accent-700) / <alpha-value>)',
+                },
+            },
         },
     },
 

@@ -7,12 +7,15 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        {{-- Set theme before first paint to avoid a light/dark flash --}}
+        {{-- Set theme + accent color before first paint to avoid a flash --}}
         <script>
             (function () {
                 var stored = localStorage.getItem('theme');
                 var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
                 if (dark) document.documentElement.classList.add('dark');
+
+                var accent = localStorage.getItem('accent');
+                if (accent) document.documentElement.setAttribute('data-accent', accent);
             })();
         </script>
 
@@ -25,8 +28,24 @@
         @stack('scripts')
     </head>
     <body class="font-sans antialiased bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100">
-        <div x-data="{ mobileOpen: false, dark: document.documentElement.classList.contains('dark') }"
-             x-init="$watch('dark', value => { document.documentElement.classList.toggle('dark', value); localStorage.setItem('theme', value ? 'dark' : 'light'); window.dispatchEvent(new CustomEvent('theme-changed', { detail: { dark: value } })); })"
+        <div x-data="{
+                mobileOpen: false,
+                dark: document.documentElement.classList.contains('dark'),
+                accent: document.documentElement.getAttribute('data-accent') || 'indigo',
+                accents: [
+                    { key: 'indigo', label: '{{ __('Indigo') }}', swatch: '#6366f1' },
+                    { key: 'blue', label: '{{ __('Blue') }}', swatch: '#3b82f6' },
+                    { key: 'emerald', label: '{{ __('Emerald') }}', swatch: '#10b981' },
+                    { key: 'rose', label: '{{ __('Rose') }}', swatch: '#f43f5e' },
+                    { key: 'amber', label: '{{ __('Amber') }}', swatch: '#f59e0b' },
+                    { key: 'violet', label: '{{ __('Violet') }}', swatch: '#8b5cf6' },
+                    { key: 'teal', label: '{{ __('Teal') }}', swatch: '#14b8a6' },
+                ],
+             }"
+             x-init="
+                $watch('dark', value => { document.documentElement.classList.toggle('dark', value); localStorage.setItem('theme', value ? 'dark' : 'light'); window.dispatchEvent(new CustomEvent('theme-changed', { detail: { dark: value } })); });
+                $watch('accent', value => { document.documentElement.setAttribute('data-accent', value); localStorage.setItem('accent', value); });
+             "
              class="flex h-screen overflow-hidden">
 
             {{-- Mobile overlay --}}
@@ -38,7 +57,7 @@
                 :class="mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                 class="fixed lg:static inset-y-0 left-0 z-40 w-64 shrink-0 bg-slate-900 text-slate-200 flex flex-col transition-transform duration-200 ease-in-out">
                 <div class="h-16 flex items-center gap-2 px-5 border-b border-slate-800">
-                    <x-application-logo class="h-7 w-7 fill-current text-indigo-400" />
+                    <x-application-logo class="h-7 w-7 fill-current text-accent-500" />
                     <span class="font-semibold text-white tracking-tight">{{ config('app.name', 'BusinessFlow') }}</span>
                 </div>
 
@@ -94,6 +113,28 @@
                 </nav>
 
                 <div class="border-t border-slate-800 p-3 space-y-1">
+                    <x-dropdown align="left" width="56">
+                        <x-slot name="trigger">
+                            <button type="button"
+                                class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition">
+                                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h10a4 4 0 004-4V9a2 2 0 00-.586-1.414l-4-4A2 2 0 0015 3h-1M7 15h.01" /></svg>
+                                <span>{{ __('Theme color') }}</span>
+                                <span class="ml-auto h-4 w-4 rounded-full border border-white/20" :style="{ backgroundColor: accents.find(a => a.key === accent)?.swatch }"></span>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            <div class="grid grid-cols-4 gap-2 p-3">
+                                <template x-for="option in accents" :key="option.key">
+                                    <button type="button" @click="accent = option.key" :title="option.label"
+                                        class="h-8 w-8 rounded-full flex items-center justify-center border-2 transition"
+                                        :class="accent === option.key ? 'border-gray-800 dark:border-gray-100' : 'border-transparent'">
+                                        <span class="h-6 w-6 rounded-full" :style="{ backgroundColor: option.swatch }"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </x-slot>
+                    </x-dropdown>
+
                     <button @click="dark = !dark" type="button"
                         class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition">
                         <svg x-show="!dark" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
@@ -104,7 +145,7 @@
                     <x-dropdown align="right" width="56">
                         <x-slot name="trigger">
                             <button type="button" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition">
-                                <span class="h-7 w-7 rounded-full bg-indigo-500 text-white text-xs font-semibold flex items-center justify-center shrink-0">
+                                <span class="h-7 w-7 rounded-full bg-accent-500 text-white text-xs font-semibold flex items-center justify-center shrink-0">
                                     {{ collect(explode(' ', Auth::user()->name))->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('') }}
                                 </span>
                                 <span class="truncate">{{ Auth::user()->name }}</span>

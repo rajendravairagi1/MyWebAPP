@@ -54,7 +54,7 @@
         </table>
     </div>
 
-    <button type="button" @click="addRow()" class="mt-3 text-sm text-indigo-600 hover:underline">{{ __('+ Add line') }}</button>
+    <button type="button" @click="addRow()" class="mt-3 text-sm text-accent-600 hover:underline">{{ __('+ Add line') }}</button>
 
     <div class="mt-4 flex justify-end">
         <table class="text-sm w-64">

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Customers') }}</h2>
-            <a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900">{{ __('+ Add Customer') }}</a>
+            <a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('+ Add Customer') }}</a>
         </div>
     </x-slot>
 
@@ -14,7 +14,7 @@
 
             <form method="GET" class="max-w-sm">
                 <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Search customers...') }}"
-                    class="w-full border-gray-300 rounded-md shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    class="w-full border-gray-300 rounded-md shadow-sm text-sm focus:border-accent-500 focus:ring-accent-500">
             </form>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
@@ -34,7 +34,7 @@
                             @foreach ($customers as $customer)
                                 <tr>
                                     <td class="px-5 py-3">
-                                        <a href="{{ route('customers.show', $customer) }}" class="text-indigo-600 hover:underline font-medium">{{ $customer->name }}</a>
+                                        <a href="{{ route('customers.show', $customer) }}" class="text-accent-600 hover:underline font-medium">{{ $customer->name }}</a>
                                     </td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $customer->company }}</td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $customer->phone }}</td>

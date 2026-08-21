@@ -18,7 +18,7 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                 <div class="flex items-center justify-between mb-4">
                     <div class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ __('Portfolio — all projects') }}</div>
-                    <a href="{{ route('projects.index') }}" class="text-xs text-indigo-600 hover:underline">{{ __('View projects →') }}</a>
+                    <a href="{{ route('projects.index') }}" class="text-xs text-accent-600 hover:underline">{{ __('View projects →') }}</a>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
                     <div>
@@ -68,7 +68,7 @@
             </div>
 
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('projects.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900">{{ __('+ Add Project') }}</a>
+                <a href="{{ route('projects.create') }}" class="inline-flex items-center px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('+ Add Project') }}</a>
                 <a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Add Customer') }}</a>
                 <a href="{{ route('quotations.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Create Quotation') }}</a>
                 <a href="{{ route('invoices.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Create Invoice') }}</a>
@@ -79,13 +79,13 @@
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                     <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
                         <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Follow-ups due') }}</span>
-                        <a href="{{ route('followups.index') }}" class="text-xs text-indigo-600 hover:underline">{{ __('View all →') }}</a>
+                        <a href="{{ route('followups.index') }}" class="text-xs text-accent-600 hover:underline">{{ __('View all →') }}</a>
                     </div>
                     <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
                         @foreach ($dueFollowups as $followup)
                             <li class="px-5 py-3 flex items-center justify-between">
                                 <div>
-                                    <a href="{{ route('customers.show', $followup->customer) }}" class="text-indigo-600 hover:underline">{{ $followup->customer->name }}</a>
+                                    <a href="{{ route('customers.show', $followup->customer) }}" class="text-accent-600 hover:underline">{{ $followup->customer->name }}</a>
                                     <span class="text-gray-500 dark:text-gray-400">— {{ $followup->note }}</span>
                                 </div>
                                 @if ($url = $followup->whatsappUrl())
@@ -107,7 +107,7 @@
                             @foreach ($recentInvoices as $invoice)
                                 <tr>
                                     <td class="px-5 py-3">
-                                        <a href="{{ route('invoices.show', $invoice) }}" class="text-indigo-600 hover:underline">{{ $invoice->number }}</a>
+                                        <a href="{{ route('invoices.show', $invoice) }}" class="text-accent-600 hover:underline">{{ $invoice->number }}</a>
                                     </td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $invoice->customer->name }}</td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ number_format($invoice->total, 2) }}</td>

@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Products & Services') }}</h2>
-            <a href="{{ route('products.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900">{{ __('+ Add Product') }}</a>
+            <a href="{{ route('products.create') }}" class="inline-flex items-center px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('+ Add Product') }}</a>
         </div>
     </x-slot>
 
@@ -42,7 +42,7 @@
                                         @endif
                                     </td>
                                     <td class="px-5 py-3 text-right">
-                                        <a href="{{ route('products.edit', $product) }}" class="text-indigo-600 hover:underline">{{ __('Edit') }}</a>
+                                        <a href="{{ route('products.edit', $product) }}" class="text-accent-600 hover:underline">{{ __('Edit') }}</a>
                                     </td>
                                 </tr>
                             @endforeach

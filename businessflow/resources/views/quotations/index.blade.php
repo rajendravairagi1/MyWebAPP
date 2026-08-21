@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Quotations') }}</h2>
-            <a href="{{ route('quotations.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900">{{ __('+ New Quotation') }}</a>
+            <a href="{{ route('quotations.create') }}" class="inline-flex items-center px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('+ New Quotation') }}</a>
         </div>
     </x-slot>
 
@@ -30,7 +30,7 @@
                             @foreach ($quotations as $quotation)
                                 <tr>
                                     <td class="px-5 py-3">
-                                        <a href="{{ route('quotations.show', $quotation) }}" class="text-indigo-600 hover:underline font-medium">{{ $quotation->number }}</a>
+                                        <a href="{{ route('quotations.show', $quotation) }}" class="text-accent-600 hover:underline font-medium">{{ $quotation->number }}</a>
                                     </td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $quotation->customer->name }}</td>
                                     <td class="px-5 py-3 text-right text-gray-600 dark:text-gray-400">{{ number_format($quotation->total, 2) }}</td>

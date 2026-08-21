@@ -18,7 +18,7 @@
         @endif
         <form method="POST" action="{{ route('followups.complete', $followup) }}">
             @csrf
-            <button class="text-xs text-indigo-600 hover:underline">{{ __('Mark done') }}</button>
+            <button class="text-xs text-accent-600 hover:underline">{{ __('Mark done') }}</button>
         </form>
         <form method="POST" action="{{ route('followups.destroy', $followup) }}" onsubmit="return confirm('{{ __('Remove this follow-up?') }}')">
             @csrf
