@@ -15,6 +15,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\ResetDataController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -32,6 +33,9 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/reset-data', [ResetDataController::class, 'index'])->name('reset-data.index');
+    Route::post('/reset-data', [ResetDataController::class, 'store'])->name('reset-data.store');
 
     Route::resource('customers', CustomerController::class);
     Route::get('/customers/{customer}/statement', [CustomerController::class, 'statement'])->name('customers.statement');
