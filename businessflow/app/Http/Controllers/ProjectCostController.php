@@ -13,12 +13,18 @@ class ProjectCostController extends Controller
     {
         $data = $request->validate([
             'category' => ['required', 'in:land,construction,material,labor,approval,marketing,other'],
+            'category_other' => ['nullable', 'string', 'max:100'],
             'description' => ['required', 'string', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'spent_on' => ['required', 'date'],
             'vendor' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        if ($data['category'] === 'other' && filled($data['category_other'] ?? null)) {
+            $data['category'] = $data['category_other'];
+        }
+        unset($data['category_other']);
 
         $project->costs()->create($data);
 

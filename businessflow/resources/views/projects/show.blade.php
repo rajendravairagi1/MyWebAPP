@@ -68,7 +68,13 @@
 
             {{-- Units --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
-                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Units') }} ({{ $project->units->count() }})</div>
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-4">
+                    <div>
+                        <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Units / Properties') }} ({{ $project->units->count() }})</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Flats, plots or houses in this project that you plan to sell. "Price" here is what you will charge the customer.') }}</div>
+                    </div>
+                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-unit')" class="shrink-0 inline-flex items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('+ Add Unit') }}</button>
+                </div>
                 @if ($project->units->isNotEmpty())
                     <table class="min-w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
@@ -127,41 +133,57 @@
                     </table>
                 @endif
 
-                <form method="POST" action="{{ route('project-units.store', $project) }}" class="p-5 border-t border-gray-100 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-6 gap-3 items-end">
+            </div>
+
+            <x-modal name="add-unit" :show="$errors->has('unit_number') || $errors->has('price')">
+                <form method="POST" action="{{ route('project-units.store', $project) }}" class="p-6 space-y-4">
                     @csrf
-                    <div>
-                        <x-input-label for="unit_number" :value="__('Unit no.')" class="text-xs" />
-                        <x-text-input id="unit_number" name="unit_number" type="text" class="mt-1 block w-full text-sm" required />
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add a Unit / Property') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('This is a flat, plot or house you will sell — not a payment. "Selling Price" is the amount you will charge whoever buys it.') }}</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label for="unit_number" :value="__('Unit no.')" />
+                            <x-text-input id="unit_number" name="unit_number" type="text" placeholder="A-101" class="mt-1 block w-full" required />
+                        </div>
+                        <div>
+                            <x-input-label for="type" :value="__('Type (optional)')" />
+                            <x-text-input id="type" name="type" type="text" placeholder="2BHK" class="mt-1 block w-full" />
+                        </div>
+                        <div>
+                            <x-input-label for="area_sqft" :value="__('Area in sqft (optional)')" />
+                            <x-text-input id="area_sqft" name="area_sqft" type="number" step="0.01" class="mt-1 block w-full" />
+                        </div>
+                        <div>
+                            <x-input-label for="price" :value="__('Selling Price (what customer pays)')" />
+                            <x-text-input id="price" name="price" type="number" step="0.01" min="0" class="mt-1 block w-full" required />
+                        </div>
+                        <div class="sm:col-span-2">
+                            <x-input-label for="status" :value="__('Status')" />
+                            <select id="status" name="status" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <option value="available">{{ __('Available — not sold yet') }}</option>
+                                <option value="booked">{{ __('Booked — customer assigned') }}</option>
+                                <option value="sold">{{ __('Sold — fully paid') }}</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <x-input-label for="type" :value="__('Type')" class="text-xs" />
-                        <x-text-input id="type" name="type" type="text" placeholder="2BHK" class="mt-1 block w-full text-sm" />
-                    </div>
-                    <div>
-                        <x-input-label for="area_sqft" :value="__('Area (sqft)')" class="text-xs" />
-                        <x-text-input id="area_sqft" name="area_sqft" type="number" step="0.01" class="mt-1 block w-full text-sm" />
-                    </div>
-                    <div>
-                        <x-input-label for="price" :value="__('Price')" class="text-xs" />
-                        <x-text-input id="price" name="price" type="number" step="0.01" min="0" class="mt-1 block w-full text-sm" required />
-                    </div>
-                    <div>
-                        <x-input-label for="status" :value="__('Status')" class="text-xs" />
-                        <select id="status" name="status" class="mt-1 block w-full text-sm border-gray-300 rounded-md">
-                            <option value="available">{{ __('Available') }}</option>
-                            <option value="booked">{{ __('Booked') }}</option>
-                            <option value="sold">{{ __('Sold') }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <x-primary-button class="w-full justify-center">{{ __('+ Add Unit') }}</x-primary-button>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
+                        <x-primary-button>{{ __('+ Add Unit') }}</x-primary-button>
                     </div>
                 </form>
-            </div>
+            </x-modal>
 
             {{-- Costs --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
-                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Cost entries') }} ({{ $project->costs->count() }})</div>
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-4">
+                    <div>
+                        <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Payments (Kharcha)') }} ({{ $project->costs->count() }})</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Money you have spent on this project — land, material, labor, etc.') }}</div>
+                    </div>
+                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-cost')" class="shrink-0 inline-flex items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('+ Add Payment') }}</button>
+                </div>
                 @if ($project->costs->isNotEmpty())
                     <table class="min-w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
@@ -195,37 +217,65 @@
                     </table>
                 @endif
 
-                <form method="POST" action="{{ route('project-costs.store', $project) }}" class="p-5 border-t border-gray-100 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-6 gap-3 items-end">
+            </div>
+
+            <x-modal name="add-cost" :show="$errors->has('category') || $errors->has('description') || $errors->has('amount') || $errors->has('spent_on')">
+                <form method="POST" action="{{ route('project-costs.store', $project) }}" class="p-6 space-y-4" x-data="{ category: 'land' }">
                     @csrf
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add a Payment') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Record money you paid out for this project.') }}</p>
+
                     <div>
-                        <x-input-label for="category" :value="__('Category')" class="text-xs" />
-                        <select id="category" name="category" class="mt-1 block w-full text-sm border-gray-300 rounded-md">
-                            @foreach (['land' => 'Land', 'construction' => 'Construction', 'material' => 'Material', 'labor' => 'Labor', 'approval' => 'Approvals', 'marketing' => 'Marketing', 'other' => 'Other'] as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
-                            @endforeach
+                        <x-input-label for="category" :value="__('What was it for?')" />
+                        <select id="category" name="category" x-model="category" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            <option value="land">{{ __('Land') }}</option>
+                            <option value="construction">{{ __('Construction') }}</option>
+                            <option value="material">{{ __('Material') }}</option>
+                            <option value="labor">{{ __('Labor') }}</option>
+                            <option value="approval">{{ __('Government / Approvals') }}</option>
+                            <option value="marketing">{{ __('Marketing') }}</option>
+                            <option value="other">{{ __('Other — type my own') }}</option>
                         </select>
                     </div>
-                    <div class="sm:col-span-2">
-                        <x-input-label for="description" :value="__('Description')" class="text-xs" />
-                        <x-text-input id="description" name="description" type="text" class="mt-1 block w-full text-sm" required />
+
+                    <div x-show="category === 'other'" x-cloak>
+                        <x-input-label for="category_other" :value="__('Custom category name')" />
+                        <x-text-input id="category_other" name="category_other" type="text" placeholder="{{ __('e.g. Electricity Bill') }}" class="mt-1 block w-full" />
                     </div>
+
                     <div>
-                        <x-input-label for="amount" :value="__('Amount')" class="text-xs" />
-                        <x-text-input id="amount" name="amount" type="number" step="0.01" min="0.01" class="mt-1 block w-full text-sm" required />
+                        <x-input-label for="description" :value="__('Description')" />
+                        <x-text-input id="description" name="description" type="text" placeholder="{{ __('e.g. Cement 20 bags') }}" class="mt-1 block w-full" required />
                     </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label for="amount" :value="__('Amount')" />
+                            <x-text-input id="amount" name="amount" type="number" step="0.01" min="0.01" class="mt-1 block w-full" required />
+                        </div>
+                        <div>
+                            <x-input-label for="spent_on" :value="__('Date')" />
+                            <x-text-input id="spent_on" name="spent_on" type="date" value="{{ now()->toDateString() }}" class="mt-1 block w-full" required />
+                        </div>
+                    </div>
+
                     <div>
-                        <x-input-label for="spent_on" :value="__('Date')" class="text-xs" />
-                        <x-text-input id="spent_on" name="spent_on" type="date" value="{{ now()->toDateString() }}" class="mt-1 block w-full text-sm" required />
+                        <x-input-label for="vendor" :value="__('Paid to / Vendor (optional)')" />
+                        <x-text-input id="vendor" name="vendor" type="text" placeholder="{{ __('e.g. Ram Lal Cement Store, Contractor name') }}" class="mt-1 block w-full" />
+                        <p class="mt-1 text-xs text-gray-400">{{ __('Who you gave this money to. Leave blank if not needed.') }}</p>
                     </div>
+
                     <div>
-                        <x-input-label for="vendor" :value="__('Vendor (optional)')" class="text-xs" />
-                        <x-text-input id="vendor" name="vendor" type="text" class="mt-1 block w-full text-sm" />
+                        <x-input-label for="notes" :value="__('Notes (optional)')" />
+                        <textarea id="notes" name="notes" rows="2" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500"></textarea>
                     </div>
-                    <div class="sm:col-span-6">
-                        <x-primary-button>{{ __('+ Add Cost Entry') }}</x-primary-button>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
+                        <x-primary-button>{{ __('+ Add Payment') }}</x-primary-button>
                     </div>
                 </form>
-            </div>
+            </x-modal>
 
             {{-- Quotations & Invoices --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
