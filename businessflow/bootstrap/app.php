@@ -5,7 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 
-return Application::configure(basePath: dirname(__DIR__))
+$builder = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -29,4 +29,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
-    })->create();
+    });
+
+$app = $builder->create();
+
+// Some shared hosts won't let you point the domain's document root at
+// public/, so the contents of public/ get moved up to sit alongside
+// this app's other folders (vendor, app, bootstrap) instead. When
+// that's happened there's no public/ directory left — point Laravel's
+// public path at the base path instead, so asset helpers (the Vite
+// manifest, asset()) resolve to where the files actually ended up.
+if (! is_dir($app->basePath('public'))) {
+    $app->usePublicPath($app->basePath());
+}
+
+return $app;
