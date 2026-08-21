@@ -129,6 +129,100 @@
                     @endif
                 </div>
             </div>
+
+            {{-- Follow-ups --}}
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Follow-ups') }}</div>
+
+                @if ($customer->followups->isNotEmpty())
+                    <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
+                        @foreach ($customer->followups as $followup)
+                            <li class="px-5 py-3 flex items-center justify-between gap-4 {{ $followup->status === 'done' ? 'opacity-50' : '' }}">
+                                <div class="min-w-0">
+                                    <div class="text-gray-900 dark:text-gray-100 truncate">{{ $followup->note }}</div>
+                                    <div class="text-xs {{ $followup->status === 'pending' && $followup->due_at->isPast() ? 'text-red-500' : 'text-gray-400' }}">
+                                        {{ $followup->due_at->format('d M Y, h:i A') }}
+                                        @if ($followup->project) · {{ $followup->project->name }} @endif
+                                        @if ($followup->status === 'done') · {{ __('Done') }} @endif
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    @if ($followup->status === 'pending')
+                                        @if ($url = $followup->whatsappUrl())
+                                            <a href="{{ $url }}" target="_blank" rel="noopener" class="inline-flex items-center px-2.5 py-1 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700">{{ __('WhatsApp') }}</a>
+                                        @endif
+                                        <form method="POST" action="{{ route('followups.complete', $followup) }}">
+                                            @csrf
+                                            <button class="text-xs text-accent-600 hover:underline">{{ __('Mark done') }}</button>
+                                        </form>
+                                    @endif
+                                    <form method="POST" action="{{ route('followups.destroy', $followup) }}" onsubmit="return confirm('{{ __('Remove this follow-up?') }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-xs text-red-600 hover:underline">{{ __('Remove') }}</button>
+                                    </form>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                <form method="POST" action="{{ route('followups.store') }}" class="p-5 border-t border-gray-100 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                    @csrf
+                    <input type="hidden" name="customer_id" value="{{ $customer->id }}">
+                    <div class="sm:col-span-2">
+                        <x-input-label for="note" :value="__('Note (e.g. promised payment, site visit)')" class="text-xs" />
+                        <x-text-input id="note" name="note" type="text" class="mt-1 block w-full text-sm" required placeholder="{{ __('e.g. Said will pay ₹50,000 by 25th') }}" />
+                    </div>
+                    <div>
+                        <x-input-label for="due_at" :value="__('Due')" class="text-xs" />
+                        <input id="due_at" name="due_at" type="datetime-local" value="{{ now()->addDay()->format('Y-m-d\TH:i') }}" required
+                            class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    </div>
+                    <div>
+                        <x-primary-button class="w-full justify-center">{{ __('+ Add') }}</x-primary-button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Documents --}}
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Documents') }}</div>
+
+                @if ($customer->documents->isNotEmpty())
+                    <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
+                        @foreach ($customer->documents as $document)
+                            <li class="px-5 py-3 flex items-center justify-between gap-4">
+                                <a href="{{ route('customer-documents.download', [$customer, $document]) }}" class="flex items-center gap-2 min-w-0 text-accent-600 hover:underline">
+                                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                    <span class="truncate">{{ $document->name }}</span>
+                                </a>
+                                <div class="flex items-center gap-3 shrink-0 text-xs text-gray-400">
+                                    <span>{{ $document->humanSize() }}</span>
+                                    <span>{{ $document->created_at->format('d M Y') }}</span>
+                                    <form method="POST" action="{{ route('customer-documents.destroy', [$customer, $document]) }}" onsubmit="return confirm('{{ __('Delete this document?') }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-red-600 hover:underline">{{ __('Delete') }}</button>
+                                    </form>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No documents uploaded yet.') }}</div>
+                @endif
+
+                <form method="POST" action="{{ route('customer-documents.store', $customer) }}" enctype="multipart/form-data" class="p-5 border-t border-gray-100 dark:border-slate-700 flex flex-wrap items-end gap-3">
+                    @csrf
+                    <div class="flex-1 min-w-[200px]">
+                        <x-input-label for="file" :value="__('Upload file (ID proof, agreement, receipt...)')" class="text-xs" />
+                        <input id="file" name="file" type="file" required
+                            class="mt-1 block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
+                    </div>
+                    <x-primary-button>{{ __('Upload') }}</x-primary-button>
+                </form>
+            </div>
         </div>
     </div>
 </x-app-layout>

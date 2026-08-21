@@ -43,7 +43,7 @@ class FollowupController extends Controller
 
         Followup::create($data + ['owner_id' => auth()->id()]);
 
-        return redirect()->route('followups.index')->with('status', 'Follow-up scheduled.');
+        return redirect()->route('customers.show', $data['customer_id'])->with('status', 'Follow-up scheduled.');
     }
 
     public function complete(Followup $followup): RedirectResponse
