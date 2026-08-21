@@ -27,6 +27,15 @@
                     <div class="text-gray-500">{{ __('Customer') }}</div>
                     <a href="{{ route('customers.show', $invoice->customer) }}" class="text-indigo-600 hover:underline">{{ $invoice->customer->name }}</a>
                 </div>
+                @if ($invoice->project)
+                    <div>
+                        <div class="text-gray-500">{{ __('Project') }}</div>
+                        <a href="{{ route('projects.show', $invoice->project) }}" class="text-indigo-600 hover:underline">{{ $invoice->project->name }}</a>
+                        @if ($invoice->projectUnit)
+                            <span class="text-gray-500">· {{ $invoice->projectUnit->unit_number }}</span>
+                        @endif
+                    </div>
+                @endif
                 <div>
                     <div class="text-gray-500">{{ __('Due date') }}</div>
                     <div class="text-gray-900">{{ $invoice->due_date?->format('d M Y') ?? '—' }}</div>

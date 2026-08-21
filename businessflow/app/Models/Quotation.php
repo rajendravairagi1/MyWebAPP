@@ -16,6 +16,8 @@ class Quotation extends Model
     protected $fillable = [
         'business_id',
         'customer_id',
+        'project_id',
+        'project_unit_id',
         'number',
         'status',
         'valid_until',
@@ -41,6 +43,16 @@ class Quotation extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function projectUnit(): BelongsTo
+    {
+        return $this->belongsTo(ProjectUnit::class);
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(QuotationItem::class);
@@ -58,6 +70,8 @@ class Quotation extends Model
         $invoice = Invoice::create([
             'business_id' => $this->business_id,
             'customer_id' => $this->customer_id,
+            'project_id' => $this->project_id,
+            'project_unit_id' => $this->project_unit_id,
             'quotation_id' => $this->id,
             'number' => Invoice::nextNumber($this->business_id),
             'status' => 'draft',

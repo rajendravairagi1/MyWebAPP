@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\Project;
+use App\Models\ProjectUnit;
 use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
@@ -29,6 +31,7 @@ class InvoiceController extends Controller
         return view('invoices.create', [
             'customers' => Customer::orderBy('name')->get(),
             'products' => Product::orderBy('name')->get(),
+            'projects' => Project::with('units')->orderBy('name')->get(),
         ]);
     }
 
@@ -36,6 +39,8 @@ class InvoiceController extends Controller
     {
         $data = $request->validate([
             'customer_id' => ['required', 'exists:customers,id'],
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'project_unit_id' => ['nullable', 'exists:project_units,id'],
             'due_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'items' => ['required', 'array', 'min:1'],
@@ -49,12 +54,20 @@ class InvoiceController extends Controller
 
         $invoice = Invoice::create([
             'customer_id' => $data['customer_id'],
+            'project_id' => $data['project_id'] ?? null,
+            'project_unit_id' => $data['project_unit_id'] ?? null,
             'number' => Invoice::nextNumber(Tenant::id()),
             'status' => 'draft',
             'due_date' => $data['due_date'] ?? null,
             'notes' => $data['notes'] ?? null,
             'created_by' => auth()->id(),
         ]);
+
+        if (! empty($data['project_unit_id'])) {
+            ProjectUnit::where('id', $data['project_unit_id'])
+                ->where('status', 'available')
+                ->update(['status' => 'booked', 'customer_id' => $data['customer_id']]);
+        }
 
         foreach ($data['items'] as $item) {
             $invoice->items()->create([
@@ -74,7 +87,7 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice): View
     {
-        $invoice->load(['customer', 'items.product', 'payments']);
+        $invoice->load(['customer', 'items.product', 'payments', 'project', 'projectUnit']);
 
         return view('invoices.show', compact('invoice'));
     }

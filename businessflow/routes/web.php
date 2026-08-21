@@ -2,12 +2,16 @@
 
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FollowupController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectCostController;
+use App\Http\Controllers\ProjectUnitController;
 use App\Http\Controllers\QuotationController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +32,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('customers', CustomerController::class);
     Route::resource('products', ProductController::class)->except(['show']);
+
+    Route::resource('projects', ProjectController::class)->except(['destroy']);
+    Route::post('/projects/{project}/costs', [ProjectCostController::class, 'store'])->name('project-costs.store');
+    Route::delete('/projects/{project}/costs/{cost}', [ProjectCostController::class, 'destroy'])->name('project-costs.destroy');
+    Route::post('/projects/{project}/units', [ProjectUnitController::class, 'store'])->name('project-units.store');
+    Route::put('/projects/{project}/units/{unit}', [ProjectUnitController::class, 'update'])->name('project-units.update');
+    Route::delete('/projects/{project}/units/{unit}', [ProjectUnitController::class, 'destroy'])->name('project-units.destroy');
+
+    Route::get('/followups', [FollowupController::class, 'index'])->name('followups.index');
+    Route::get('/followups/create', [FollowupController::class, 'create'])->name('followups.create');
+    Route::post('/followups', [FollowupController::class, 'store'])->name('followups.store');
+    Route::post('/followups/{followup}/complete', [FollowupController::class, 'complete'])->name('followups.complete');
+    Route::delete('/followups/{followup}', [FollowupController::class, 'destroy'])->name('followups.destroy');
 
     Route::get('/quotations', [QuotationController::class, 'index'])->name('quotations.index');
     Route::get('/quotations/create', [QuotationController::class, 'create'])->name('quotations.create');

@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Followup;
 use App\Models\Invoice;
+use App\Models\Project;
+use App\Models\ProjectCost;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -17,6 +20,17 @@ class DashboardController extends Controller
             ->whereYear('created_at', now()->year)
             ->sum('total');
 
+        $projects = Project::withCount('units')->get();
+        $portfolioCost = ProjectCost::sum('amount');
+        $portfolioRevenue = Invoice::whereNotNull('project_id')->sum('amount_paid');
+
+        $dueFollowups = Followup::with('customer')
+            ->where('status', 'pending')
+            ->where('due_at', '<=', now()->addDay())
+            ->orderBy('due_at')
+            ->limit(5)
+            ->get();
+
         return view('dashboard', [
             'customerCount' => Customer::count(),
             'unpaidCount' => $unpaidInvoices->count(),
@@ -24,6 +38,12 @@ class DashboardController extends Controller
             'overdueCount' => $overdueInvoices->count(),
             'salesThisMonth' => $salesThisMonth,
             'recentInvoices' => Invoice::with('customer')->latest()->limit(5)->get(),
+            'projectCount' => $projects->count(),
+            'ongoingProjectCount' => $projects->where('status', 'ongoing')->count(),
+            'portfolioCost' => $portfolioCost,
+            'portfolioRevenue' => $portfolioRevenue,
+            'portfolioProfit' => $portfolioRevenue - $portfolioCost,
+            'dueFollowups' => $dueFollowups,
         ]);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Project;
+use App\Models\ProjectUnit;
 use App\Models\Quotation;
 use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -25,6 +27,7 @@ class QuotationController extends Controller
         return view('quotations.create', [
             'customers' => Customer::orderBy('name')->get(),
             'products' => Product::orderBy('name')->get(),
+            'projects' => Project::with(['units' => fn ($q) => $q->where('status', 'available')])->orderBy('name')->get(),
         ]);
     }
 
@@ -32,6 +35,8 @@ class QuotationController extends Controller
     {
         $data = $request->validate([
             'customer_id' => ['required', 'exists:customers,id'],
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'project_unit_id' => ['nullable', 'exists:project_units,id'],
             'valid_until' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'terms' => ['nullable', 'string', 'max:2000'],
@@ -46,6 +51,8 @@ class QuotationController extends Controller
 
         $quotation = Quotation::create([
             'customer_id' => $data['customer_id'],
+            'project_id' => $data['project_id'] ?? null,
+            'project_unit_id' => $data['project_unit_id'] ?? null,
             'number' => Quotation::nextNumber(Tenant::id()),
             'status' => 'draft',
             'valid_until' => $data['valid_until'] ?? null,
@@ -53,6 +60,12 @@ class QuotationController extends Controller
             'terms' => $data['terms'] ?? null,
             'created_by' => auth()->id(),
         ]);
+
+        if (! empty($data['project_unit_id'])) {
+            ProjectUnit::where('id', $data['project_unit_id'])
+                ->where('status', 'available')
+                ->update(['status' => 'booked', 'customer_id' => $data['customer_id']]);
+        }
 
         foreach ($data['items'] as $item) {
             $quotation->items()->create([
@@ -72,7 +85,7 @@ class QuotationController extends Controller
 
     public function show(Quotation $quotation): View
     {
-        $quotation->load(['customer', 'items.product', 'invoices']);
+        $quotation->load(['customer', 'items.product', 'invoices', 'project', 'projectUnit']);
 
         return view('quotations.show', compact('quotation'));
     }

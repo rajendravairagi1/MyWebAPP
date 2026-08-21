@@ -16,6 +16,8 @@ class Invoice extends Model
     protected $fillable = [
         'business_id',
         'customer_id',
+        'project_id',
+        'project_unit_id',
         'quotation_id',
         'number',
         'status',
@@ -46,6 +48,16 @@ class Invoice extends Model
     public function quotation(): BelongsTo
     {
         return $this->belongsTo(Quotation::class);
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    public function projectUnit(): BelongsTo
+    {
+        return $this->belongsTo(ProjectUnit::class);
     }
 
     public function items(): HasMany
@@ -88,6 +100,10 @@ class Invoice extends Model
             'amount_paid' => $totalPaid,
             'status' => $status,
         ])->save();
+
+        if ($status === 'paid' && $this->project_unit_id) {
+            $this->projectUnit?->update(['status' => 'sold']);
+        }
 
         return $payment;
     }

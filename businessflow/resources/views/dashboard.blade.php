@@ -14,6 +14,33 @@
                 </div>
             @endif
 
+            {{-- Portfolio P&L across all projects --}}
+            <div class="bg-white shadow-sm rounded-lg p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="text-sm font-medium text-gray-800">{{ __('Portfolio — all projects') }}</div>
+                    <a href="{{ route('projects.index') }}" class="text-xs text-indigo-600 hover:underline">{{ __('View projects →') }}</a>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500">{{ __('Projects') }}</div>
+                        <div class="mt-1 text-xl font-semibold text-gray-900">{{ $projectCount }}</div>
+                        <div class="text-xs text-gray-400">{{ $ongoingProjectCount }} {{ __('ongoing') }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500">{{ __('Total cost') }}</div>
+                        <div class="mt-1 text-xl font-semibold text-gray-900">{{ number_format($portfolioCost, 0) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500">{{ __('Received') }}</div>
+                        <div class="mt-1 text-xl font-semibold text-gray-900">{{ number_format($portfolioRevenue, 0) }}</div>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <div class="text-xs uppercase tracking-wide text-gray-500">{{ __('Profit / Loss') }}</div>
+                        <div class="mt-1 text-xl font-semibold {{ $portfolioProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($portfolioProfit, 0) }}</div>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500">{{ __('Customers') }}</div>
@@ -35,11 +62,34 @@
             </div>
 
             <div class="flex flex-wrap gap-3">
-                <a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900">{{ __('+ Add Customer') }}</a>
+                <a href="{{ route('projects.create') }}" class="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-md hover:bg-gray-900">{{ __('+ Add Project') }}</a>
+                <a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">{{ __('+ Add Customer') }}</a>
                 <a href="{{ route('quotations.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">{{ __('+ Create Quotation') }}</a>
                 <a href="{{ route('invoices.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">{{ __('+ Create Invoice') }}</a>
-                <a href="{{ route('products.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">{{ __('+ Add Product') }}</a>
+                <a href="{{ route('followups.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">{{ __('+ Schedule Follow-up') }}</a>
             </div>
+
+            @if ($dueFollowups->isNotEmpty())
+                <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+                        <span class="font-medium text-gray-800">{{ __('Follow-ups due') }}</span>
+                        <a href="{{ route('followups.index') }}" class="text-xs text-indigo-600 hover:underline">{{ __('View all →') }}</a>
+                    </div>
+                    <ul class="divide-y divide-gray-100 text-sm">
+                        @foreach ($dueFollowups as $followup)
+                            <li class="px-5 py-3 flex items-center justify-between">
+                                <div>
+                                    <a href="{{ route('customers.show', $followup->customer) }}" class="text-indigo-600 hover:underline">{{ $followup->customer->name }}</a>
+                                    <span class="text-gray-500">— {{ $followup->note }}</span>
+                                </div>
+                                @if ($url = $followup->whatsappUrl())
+                                    <a href="{{ $url }}" target="_blank" rel="noopener" class="inline-flex items-center px-3 py-1 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700">{{ __('WhatsApp') }}</a>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <div class="bg-white shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 font-medium text-gray-800">{{ __('Recent invoices') }}</div>

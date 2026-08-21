@@ -39,6 +39,15 @@
                     <div class="text-gray-500">{{ __('Customer') }}</div>
                     <a href="{{ route('customers.show', $quotation->customer) }}" class="text-indigo-600 hover:underline">{{ $quotation->customer->name }}</a>
                 </div>
+                @if ($quotation->project)
+                    <div>
+                        <div class="text-gray-500">{{ __('Project') }}</div>
+                        <a href="{{ route('projects.show', $quotation->project) }}" class="text-indigo-600 hover:underline">{{ $quotation->project->name }}</a>
+                        @if ($quotation->projectUnit)
+                            <span class="text-gray-500">· {{ $quotation->projectUnit->unit_number }}</span>
+                        @endif
+                    </div>
+                @endif
                 <div>
                     <div class="text-gray-500">{{ __('Valid until') }}</div>
                     <div class="text-gray-900">{{ $quotation->valid_until?->format('d M Y') ?? '—' }}</div>

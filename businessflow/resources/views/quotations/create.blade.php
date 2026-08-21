@@ -30,6 +30,8 @@
                         </div>
                     </div>
 
+                    <x-project-unit-select :projects="$projects" />
+
                     <x-line-items :products="$products" />
                     <x-input-error :messages="$errors->get('items')" class="mt-2" />
 

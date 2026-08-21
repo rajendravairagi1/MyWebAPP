@@ -36,4 +36,14 @@ class Customer extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function units(): HasMany
+    {
+        return $this->hasMany(ProjectUnit::class);
+    }
+
+    public function followups(): HasMany
+    {
+        return $this->hasMany(Followup::class);
+    }
 }
