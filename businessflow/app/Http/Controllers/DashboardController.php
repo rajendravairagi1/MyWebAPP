@@ -38,6 +38,7 @@ class DashboardController extends Controller
             'overdueCount' => $overdueInvoices->count(),
             'salesThisMonth' => $salesThisMonth,
             'recentInvoices' => Invoice::with('customer')->latest()->limit(5)->get(),
+            'projects' => $projects,
             'projectCount' => $projects->count(),
             'ongoingProjectCount' => $projects->where('status', 'ongoing')->count(),
             'portfolioCost' => $portfolioCost,

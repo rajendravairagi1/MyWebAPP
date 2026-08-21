@@ -1,12 +1,12 @@
 <li class="px-5 py-4 flex items-center justify-between gap-4">
     <div class="min-w-0">
         <div class="flex items-center gap-2">
-            <a href="{{ route('customers.show', $followup->customer) }}" class="font-medium text-gray-900 hover:underline">{{ $followup->customer->name }}</a>
+            <a href="{{ route('customers.show', $followup->customer) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:underline">{{ $followup->customer->name }}</a>
             @if ($followup->project)
                 <span class="text-xs text-gray-400">· {{ $followup->project->name }}</span>
             @endif
         </div>
-        <div class="text-sm text-gray-600 truncate">{{ $followup->note }}</div>
+        <div class="text-sm text-gray-600 dark:text-gray-400 truncate">{{ $followup->note }}</div>
         <div class="text-xs text-gray-400 mt-0.5">{{ $followup->due_at->format('d M Y, h:i A') }}</div>
     </div>
     <div class="flex items-center gap-3 shrink-0">

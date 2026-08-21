@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Business;
 use App\Models\Customer;
+use App\Support\Tenant;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -42,9 +45,23 @@ class CustomerController extends Controller
 
     public function show(Customer $customer): View
     {
-        $customer->load(['quotations' => fn ($q) => $q->latest()->limit(10), 'invoices' => fn ($q) => $q->latest()->limit(10)]);
+        $customer->load([
+            'quotations' => fn ($q) => $q->latest()->limit(10),
+            'invoices' => fn ($q) => $q->latest()->limit(10),
+            'units.project',
+            'units.invoices',
+        ]);
 
         return view('customers.show', compact('customer'));
+    }
+
+    public function statement(Customer $customer)
+    {
+        $customer->load(['units.project', 'invoices.payments', 'invoices.project', 'invoices.projectUnit']);
+        $business = Business::find(Tenant::id());
+
+        return Pdf::loadView('customers.statement', compact('customer', 'business'))
+            ->download('Statement - '.$customer->name.'.pdf');
     }
 
     public function edit(Customer $customer): View

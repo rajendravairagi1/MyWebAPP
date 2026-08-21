@@ -6,6 +6,7 @@ use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProjectUnit extends Model
 {
@@ -35,5 +36,25 @@ class ProjectUnit extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function totalInvoiced(): float
+    {
+        return (float) $this->invoices()->sum('total');
+    }
+
+    public function totalPaid(): float
+    {
+        return (float) $this->invoices()->sum('amount_paid');
+    }
+
+    public function balanceDue(): float
+    {
+        return max(0, $this->totalInvoiced() - $this->totalPaid());
     }
 }

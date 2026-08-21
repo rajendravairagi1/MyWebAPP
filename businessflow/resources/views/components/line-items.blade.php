@@ -3,7 +3,7 @@
 <div x-data="lineItemsForm(@js($products->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'price' => (float) $p->price, 'tax_rate' => (float) $p->tax_rate])))">
     <div class="overflow-x-auto border border-gray-200 rounded-md">
         <table class="min-w-full text-sm">
-            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
+            <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                 <tr>
                     <th class="px-3 py-2 text-left w-1/3">{{ __('Item') }}</th>
                     <th class="px-3 py-2 text-right w-20">{{ __('Qty') }}</th>
@@ -16,7 +16,7 @@
             </thead>
             <tbody>
                 <template x-for="(row, index) in rows" :key="index">
-                    <tr class="border-t border-gray-100">
+                    <tr class="border-t border-gray-100 dark:border-slate-700">
                         <td class="px-3 py-2">
                             <select :name="`items[${index}][product_id]`" x-model="row.product_id" @change="selectProduct(index)"
                                 class="block w-full text-sm border-gray-300 rounded-md mb-1">
@@ -44,7 +44,7 @@
                             <input type="number" step="0.01" min="0" max="100" :name="`items[${index}][tax_rate]`" x-model.number="row.tax_rate"
                                 class="w-full text-sm text-right border-gray-300 rounded-md">
                         </td>
-                        <td class="px-3 py-2 text-right text-gray-700" x-text="lineTotal(row).toFixed(2)"></td>
+                        <td class="px-3 py-2 text-right text-gray-700 dark:text-gray-300" x-text="lineTotal(row).toFixed(2)"></td>
                         <td class="px-3 py-2 text-right">
                             <button type="button" @click="removeRow(index)" x-show="rows.length > 1" class="text-gray-400 hover:text-red-600">&times;</button>
                         </td>
@@ -59,20 +59,20 @@
     <div class="mt-4 flex justify-end">
         <table class="text-sm w-64">
             <tr>
-                <td class="py-1 text-gray-500">{{ __('Subtotal') }}</td>
-                <td class="py-1 text-right text-gray-900" x-text="subtotal().toFixed(2)"></td>
+                <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Subtotal') }}</td>
+                <td class="py-1 text-right text-gray-900 dark:text-gray-100" x-text="subtotal().toFixed(2)"></td>
             </tr>
             <tr>
-                <td class="py-1 text-gray-500">{{ __('Discount') }}</td>
-                <td class="py-1 text-right text-gray-900" x-text="discountTotal().toFixed(2)"></td>
+                <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Discount') }}</td>
+                <td class="py-1 text-right text-gray-900 dark:text-gray-100" x-text="discountTotal().toFixed(2)"></td>
             </tr>
             <tr>
-                <td class="py-1 text-gray-500">{{ __('Tax') }}</td>
-                <td class="py-1 text-right text-gray-900" x-text="taxTotal().toFixed(2)"></td>
+                <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Tax') }}</td>
+                <td class="py-1 text-right text-gray-900 dark:text-gray-100" x-text="taxTotal().toFixed(2)"></td>
             </tr>
             <tr class="border-t border-gray-200 font-semibold">
-                <td class="py-1 text-gray-700">{{ __('Total') }}</td>
-                <td class="py-1 text-right text-gray-900" x-text="grandTotal().toFixed(2)"></td>
+                <td class="py-1 text-gray-700 dark:text-gray-300">{{ __('Total') }}</td>
+                <td class="py-1 text-right text-gray-900 dark:text-gray-100" x-text="grandTotal().toFixed(2)"></td>
             </tr>
         </table>
     </div>
