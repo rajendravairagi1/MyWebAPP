@@ -18,24 +18,39 @@
                 <template x-for="(row, index) in rows" :key="index">
                     <tr class="border-t border-gray-100 dark:border-slate-700">
                         <td class="px-3 py-2">
-                            <select :name="`items[${index}][product_id]`" x-model="row.product_id" @change="selectProduct(index)"
-                                class="block w-full text-sm border-gray-300 rounded-md mb-1">
-                                <option value="">{{ __('Custom item — type your own') }}</option>
-                                <optgroup label="{{ __('Common Real Estate Items') }}">
-                                    <template x-for="item in commonItems" :key="item.id">
-                                        <option :value="item.id" x-text="item.name"></option>
-                                    </template>
-                                </optgroup>
-                                @if ($products->isNotEmpty())
-                                    <optgroup label="{{ __('My Products') }}">
-                                        <template x-for="product in products" :key="product.id">
-                                            <option :value="product.id" x-text="product.name"></option>
-                                        </template>
-                                    </optgroup>
-                                @endif
-                            </select>
-                            <input type="text" :name="`items[${index}][description]`" x-model="row.description" required
-                                placeholder="{{ __('Item / product name — e.g. Booking Amount, GST, Registration Charges') }}" class="block w-full text-sm border-gray-300 rounded-md">
+                            <input type="hidden" :name="`items[${index}][product_id]`" :value="row.product_id">
+
+                            <template x-if="!row.customMode">
+                                <div>
+                                    <select required x-model="row.selectValue" @change="onPick(index)"
+                                        class="block w-full text-sm border-gray-300 rounded-md">
+                                        <option value="" disabled>{{ __('Choose an item…') }}</option>
+                                        <option value="custom">{{ __('Custom item — type your own') }}</option>
+                                        <optgroup label="{{ __('Common Real Estate Items') }}">
+                                            <template x-for="item in commonItems" :key="item.id">
+                                                <option :value="item.id" x-text="item.name"></option>
+                                            </template>
+                                        </optgroup>
+                                        @if ($products->isNotEmpty())
+                                            <optgroup label="{{ __('My Products') }}">
+                                                <template x-for="product in products" :key="product.id">
+                                                    <option :value="'product-' + product.id" x-text="product.name"></option>
+                                                </template>
+                                            </optgroup>
+                                        @endif
+                                    </select>
+                                    <input type="hidden" :name="`items[${index}][description]`" :value="row.description">
+                                </div>
+                            </template>
+
+                            <template x-if="row.customMode">
+                                <div>
+                                    <input type="text" :name="`items[${index}][description]`" x-model="row.description" required
+                                        placeholder="{{ __('Type item / product name') }}"
+                                        class="block w-full text-sm border-gray-300 rounded-md">
+                                    <button type="button" @click="backToList(index)" class="mt-1 text-xs text-accent-600 hover:underline">{{ __('← Choose from list instead') }}</button>
+                                </div>
+                            </template>
                         </td>
                         <td class="px-3 py-2">
                             <input type="number" step="0.01" min="0.01" :name="`items[${index}][quantity]`" x-model.number="row.quantity"
@@ -64,6 +79,7 @@
     </div>
 
     <button type="button" @click="addRow()" class="mt-3 text-sm text-accent-600 hover:underline">{{ __('+ Add line') }}</button>
+    <p x-show="addRowError" x-text="addRowError" x-cloak class="mt-1 text-xs text-red-500"></p>
 
     <div class="mt-4 flex justify-end">
         <table class="text-sm w-64">
@@ -107,29 +123,64 @@
                         { id: 're-interest', name: 'Interest / Late Payment Charges' },
                         { id: 're-final', name: 'Full & Final Payment' },
                     ],
-                    rows: [{ product_id: '', description: '', quantity: 1, unit_price: 0, discount: 0, tax_rate: 0 }],
+                    addRowError: '',
+                    newRow() {
+                        return { product_id: '', description: '', selectValue: '', customMode: false, quantity: 1, unit_price: 0, discount: 0, tax_rate: 0 };
+                    },
+                    rows: [],
+                    init() {
+                        this.rows = [this.newRow()];
+                    },
                     addRow() {
-                        this.rows.push({ product_id: '', description: '', quantity: 1, unit_price: 0, discount: 0, tax_rate: 0 });
+                        const last = this.rows[this.rows.length - 1];
+                        if (!last.description || !last.description.trim()) {
+                            this.addRowError = '{{ __('Please fill in the item above before adding another line.') }}';
+                            return;
+                        }
+                        this.addRowError = '';
+                        this.rows.push(this.newRow());
                     },
                     removeRow(index) {
                         this.rows.splice(index, 1);
                     },
-                    selectProduct(index) {
+                    onPick(index) {
                         const row = this.rows[index];
+                        const val = row.selectValue;
 
-                        const preset = this.commonItems.find(item => item.id === row.product_id);
-                        if (preset) {
-                            row.description = preset.name;
+                        if (val === 'custom') {
+                            row.customMode = true;
+                            row.description = '';
                             row.product_id = '';
+                            this.$nextTick(() => {
+                                this.$root.querySelector(`input[name="items[${index}][description]"]`)?.focus();
+                            });
                             return;
                         }
 
-                        const product = this.products.find(p => String(p.id) === String(row.product_id));
-                        if (product) {
-                            row.description = product.name;
-                            row.unit_price = product.price;
-                            row.tax_rate = product.tax_rate;
+                        if (typeof val === 'string' && val.startsWith('product-')) {
+                            const id = val.replace('product-', '');
+                            const product = this.products.find(p => String(p.id) === id);
+                            if (product) {
+                                row.product_id = product.id;
+                                row.description = product.name;
+                                row.unit_price = product.price;
+                                row.tax_rate = product.tax_rate;
+                            }
+                            return;
                         }
+
+                        const preset = this.commonItems.find(item => item.id === val);
+                        if (preset) {
+                            row.product_id = '';
+                            row.description = preset.name;
+                        }
+                    },
+                    backToList(index) {
+                        const row = this.rows[index];
+                        row.customMode = false;
+                        row.selectValue = '';
+                        row.description = '';
+                        row.product_id = '';
                     },
                     lineTotal(row) {
                         const base = (Number(row.quantity) || 0) * (Number(row.unit_price) || 0) - (Number(row.discount) || 0);
