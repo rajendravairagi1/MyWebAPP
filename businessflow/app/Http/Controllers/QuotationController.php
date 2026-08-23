@@ -63,12 +63,6 @@ class QuotationController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        if (! empty($data['project_unit_id'])) {
-            ProjectUnit::where('id', $data['project_unit_id'])
-                ->where('status', 'available')
-                ->update(['status' => 'booked', 'customer_id' => $data['customer_id']]);
-        }
-
         foreach ($data['items'] as $item) {
             $quotation->items()->create([
                 'product_id' => $item['product_id'] ?? null,
@@ -128,8 +122,6 @@ class QuotationController extends Controller
 
         $this->assertUnitAvailableFor($data['project_unit_id'] ?? null, $data['customer_id']);
 
-        $this->syncProjectUnit($quotation->project_unit_id, $data['project_unit_id'] ?? null, $quotation->customer_id, $data['customer_id']);
-
         $quotation->update([
             'customer_id' => $data['customer_id'],
             'project_id' => $data['project_id'] ?? null,
@@ -172,26 +164,6 @@ class QuotationController extends Controller
         }
     }
 
-    protected function syncProjectUnit(?int $oldUnitId, ?int $newUnitId, int $oldCustomerId, int $newCustomerId): void
-    {
-        if ($oldUnitId === $newUnitId) {
-            return;
-        }
-
-        if ($oldUnitId) {
-            ProjectUnit::where('id', $oldUnitId)
-                ->where('customer_id', $oldCustomerId)
-                ->where('status', 'booked')
-                ->update(['status' => 'available', 'customer_id' => null]);
-        }
-
-        if ($newUnitId) {
-            ProjectUnit::where('id', $newUnitId)
-                ->where('status', 'available')
-                ->update(['status' => 'booked', 'customer_id' => $newCustomerId]);
-        }
-    }
-
     public function markSent(Quotation $quotation): RedirectResponse
     {
         $quotation->update(['status' => 'sent']);
@@ -210,8 +182,11 @@ class QuotationController extends Controller
     {
         $quotation->load(['customer', 'items']);
         $business = \App\Models\Business::find(Tenant::id());
+        $verifyQr = \App\Support\DocumentQr::dataUri(
+            \Illuminate\Support\Facades\URL::signedRoute('verify.quotation', ['quotation' => $quotation->id])
+        );
 
-        return Pdf::loadView('quotations.pdf', compact('quotation', 'business'))
+        return Pdf::loadView('quotations.pdf', compact('quotation', 'business', 'verifyQr'))
             ->download($quotation->number.'.pdf');
     }
 }

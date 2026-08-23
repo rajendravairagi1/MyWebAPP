@@ -20,6 +20,9 @@
         .summary .value { font-weight: bold; font-size: 14px; }
         .balance-pos { color: #c53030; }
         .balance-zero { color: #2f855a; }
+        .qr { text-align: center; }
+        .qr img { width: 70px; height: 70px; }
+        .qr div { font-size: 8px; color: #a0aec0; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -32,6 +35,12 @@
             <td class="text-right">
                 <div class="muted">Generated: {{ now()->format('d M Y') }}</div>
             </td>
+            @if (isset($verifyQr))
+                <td class="qr" style="width: 90px;">
+                    <img src="{{ $verifyQr }}" alt="Verify QR">
+                    <div>Scan to verify</div>
+                </td>
+            @endif
         </tr>
     </table>
 

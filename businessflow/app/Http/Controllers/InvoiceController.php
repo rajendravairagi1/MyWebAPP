@@ -65,12 +65,6 @@ class InvoiceController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        if (! empty($data['project_unit_id'])) {
-            ProjectUnit::where('id', $data['project_unit_id'])
-                ->where('status', 'available')
-                ->update(['status' => 'booked', 'customer_id' => $data['customer_id']]);
-        }
-
         foreach ($data['items'] as $item) {
             $invoice->items()->create([
                 'product_id' => $item['product_id'] ?? null,
@@ -129,7 +123,7 @@ class InvoiceController extends Controller
 
         $this->assertUnitAvailableFor($data['project_unit_id'] ?? null, $data['customer_id']);
 
-        $this->syncProjectUnit($invoice->project_unit_id, $data['project_unit_id'] ?? null, $invoice->customer_id, $data['customer_id']);
+        $this->syncProjectUnit($invoice->project_unit_id, $data['project_unit_id'] ?? null, $invoice->customer_id);
 
         $invoice->update([
             'customer_id' => $data['customer_id'],
@@ -172,24 +166,21 @@ class InvoiceController extends Controller
         }
     }
 
-    protected function syncProjectUnit(?int $oldUnitId, ?int $newUnitId, int $oldCustomerId, int $newCustomerId): void
+    protected function syncProjectUnit(?int $oldUnitId, ?int $newUnitId, int $oldCustomerId): void
     {
-        if ($oldUnitId === $newUnitId) {
+        // Booking (status -> 'booked') only ever happens when the first
+        // payment is recorded (see Invoice::recordPayment), so there is
+        // nothing to book here when the unit changes — only a
+        // previously-booked unit needs releasing if it's no longer
+        // attached to this invoice.
+        if ($oldUnitId === $newUnitId || ! $oldUnitId) {
             return;
         }
 
-        if ($oldUnitId) {
-            ProjectUnit::where('id', $oldUnitId)
-                ->where('customer_id', $oldCustomerId)
-                ->where('status', 'booked')
-                ->update(['status' => 'available', 'customer_id' => null]);
-        }
-
-        if ($newUnitId) {
-            ProjectUnit::where('id', $newUnitId)
-                ->where('status', 'available')
-                ->update(['status' => 'booked', 'customer_id' => $newCustomerId]);
-        }
+        ProjectUnit::where('id', $oldUnitId)
+            ->where('customer_id', $oldCustomerId)
+            ->where('status', 'booked')
+            ->update(['status' => 'available', 'customer_id' => null]);
     }
 
     public function markSent(Invoice $invoice): RedirectResponse
@@ -203,8 +194,11 @@ class InvoiceController extends Controller
     {
         $invoice->load(['customer', 'items']);
         $business = \App\Models\Business::find(Tenant::id());
+        $verifyQr = \App\Support\DocumentQr::dataUri(
+            \Illuminate\Support\Facades\URL::signedRoute('verify.invoice', ['invoice' => $invoice->id])
+        );
 
-        return Pdf::loadView('invoices.pdf', compact('invoice', 'business'))
+        return Pdf::loadView('invoices.pdf', compact('invoice', 'business', 'verifyQr'))
             ->download($invoice->number.'.pdf');
     }
 }

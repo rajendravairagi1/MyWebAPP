@@ -64,8 +64,11 @@ class CustomerController extends Controller
     {
         $customer->load(['units.project', 'invoices.payments', 'invoices.project', 'invoices.projectUnit']);
         $business = Business::find(Tenant::id());
+        $verifyQr = \App\Support\DocumentQr::dataUri(
+            \Illuminate\Support\Facades\URL::signedRoute('verify.customer', ['customer' => $customer->id])
+        );
 
-        return Pdf::loadView('customers.statement', compact('customer', 'business'))
+        return Pdf::loadView('customers.statement', compact('customer', 'business', 'verifyQr'))
             ->download('Statement - '.$customer->name.'.pdf');
     }
 

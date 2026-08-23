@@ -17,6 +17,9 @@
         .header { width: 100%; margin-bottom: 20px; }
         .header td { border: none; padding: 0; vertical-align: top; }
         .balance { color: #c53030; font-weight: bold; }
+        .qr { text-align: center; }
+        .qr img { width: 70px; height: 70px; }
+        .qr div { font-size: 8px; color: #a0aec0; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -33,6 +36,12 @@
                     <div class="muted">Due: {{ $invoice->due_date->format('d M Y') }}</div>
                 @endif
             </td>
+            @if (isset($verifyQr))
+                <td class="qr" style="width: 90px;">
+                    <img src="{{ $verifyQr }}" alt="Verify QR">
+                    <div>Scan to verify</div>
+                </td>
+            @endif
         </tr>
     </table>
 

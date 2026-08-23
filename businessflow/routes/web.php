@@ -16,6 +16,7 @@ use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ResetDataController;
+use App\Http\Controllers\VerifyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -25,6 +26,13 @@ Route::get('/', function () {
 Route::get('/install', [InstallController::class, 'index'])->name('install.index');
 Route::post('/install', [InstallController::class, 'store'])->name('install.store');
 Route::get('/migrate', MigrateController::class)->name('migrate');
+
+// Public, signed verification pages linked from the QR code printed on
+// Quotation/Invoice/Statement PDFs — confirms a document is genuine
+// without requiring the viewer to have an account.
+Route::get('/verify/quotation/{quotation}', [VerifyController::class, 'quotation'])->name('verify.quotation')->middleware('signed');
+Route::get('/verify/invoice/{invoice}', [VerifyController::class, 'invoice'])->name('verify.invoice')->middleware('signed');
+Route::get('/verify/customer/{customer}', [VerifyController::class, 'customer'])->name('verify.customer')->middleware('signed');
 
 Route::middleware('auth')->group(function () {
     Route::get('/onboarding/business', [OnboardingController::class, 'create'])->name('onboarding.create');

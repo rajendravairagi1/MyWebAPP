@@ -77,6 +77,8 @@ class Invoice extends Model
 
     public function recordPayment(float $amount, ?string $method, string $paidAt, ?string $reference, ?string $notes): Payment
     {
+        $isFirstPayment = ! $this->payments()->exists();
+
         $payment = $this->payments()->create([
             'business_id' => $this->business_id,
             'amount' => $amount,
@@ -101,8 +103,17 @@ class Invoice extends Model
             'status' => $status,
         ])->save();
 
-        if ($status === 'paid' && $this->project_unit_id) {
-            $this->projectUnit?->update(['status' => 'sold']);
+        // A unit only becomes "booked" once actual money (the token
+        // payment) has come in — creating the invoice/quotation alone
+        // is just a proposal and shouldn't reserve the property.
+        if ($this->project_unit_id) {
+            if ($status === 'paid') {
+                $this->projectUnit?->update(['status' => 'sold']);
+            } elseif ($isFirstPayment) {
+                ProjectUnit::where('id', $this->project_unit_id)
+                    ->where('status', 'available')
+                    ->update(['status' => 'booked', 'customer_id' => $this->customer_id]);
+            }
         }
 
         return $payment;
