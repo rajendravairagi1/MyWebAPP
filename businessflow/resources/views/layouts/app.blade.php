@@ -110,6 +110,13 @@
                         </x-slot>
                         {{ __('Products') }}
                     </x-sidebar-link>
+
+                    <x-sidebar-link :href="route('ledger.index')" :active="request()->routeIs('ledger.*')">
+                        <x-slot name="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                        </x-slot>
+                        {{ __('Ledger') }}
+                    </x-sidebar-link>
                 </nav>
 
                 <div class="border-t border-slate-800 p-3 space-y-1">

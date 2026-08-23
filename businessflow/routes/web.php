@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FollowupController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\MigrateController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PaymentController;
@@ -48,6 +49,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('customers', CustomerController::class);
     Route::get('/customers/{customer}/statement', [CustomerController::class, 'statement'])->name('customers.statement');
+    Route::get('/customers/{customer}/photo', [CustomerController::class, 'photo'])->name('customers.photo');
+    Route::get('/customers/{customer}/aadhar', [CustomerController::class, 'aadhar'])->name('customers.aadhar');
     Route::post('/customers/{customer}/documents', [CustomerDocumentController::class, 'store'])->name('customer-documents.store');
     Route::get('/customers/{customer}/documents/{document}/download', [CustomerDocumentController::class, 'download'])->name('customer-documents.download');
     Route::delete('/customers/{customer}/documents/{document}', [CustomerDocumentController::class, 'destroy'])->name('customer-documents.destroy');
@@ -94,6 +97,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::delete('/invoices/{invoice}/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+
+    Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
+    Route::post('/ledger/entries', [LedgerController::class, 'storeEntry'])->name('ledger.entries.store');
+    Route::delete('/ledger/entries/{entry}', [LedgerController::class, 'destroyEntry'])->name('ledger.entries.destroy');
 });
 
 Route::middleware('auth')->group(function () {

@@ -28,8 +28,12 @@
             {{-- Identity card --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 flex flex-col lg:flex-row lg:items-start justify-between gap-6">
                 <div class="flex items-start gap-4 min-w-0">
-                    <div class="h-14 w-14 shrink-0 rounded-lg bg-accent-100 dark:bg-slate-700 text-accent-700 dark:text-accent-100 flex items-center justify-center text-2xl font-semibold">
-                        {{ strtoupper(substr($customer->name, 0, 1)) }}
+                    <div class="h-14 w-14 shrink-0 rounded-lg overflow-hidden bg-accent-100 dark:bg-slate-700 text-accent-700 dark:text-accent-100 flex items-center justify-center text-2xl font-semibold">
+                        @if ($customer->photo_path)
+                            <img src="{{ route('customers.photo', $customer) }}" alt="{{ $customer->name }}" class="h-full w-full object-cover">
+                        @else
+                            {{ strtoupper(substr($customer->name, 0, 1)) }}
+                        @endif
                     </div>
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
@@ -69,6 +73,12 @@
                                     {{ __('Source') }}: {{ $customer->source }}
                                 </span>
                             @endif
+                            @if ($customer->aadhar_path)
+                                <a href="{{ route('customers.aadhar', $customer) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-accent-600 hover:underline">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    {{ __('Aadhar on file') }}
+                                </a>
+                            @endif
                         </div>
                         @if ($customer->notes)
                             <div class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ $customer->notes }}</div>
@@ -76,21 +86,21 @@
                     </div>
                 </div>
                 <div class="flex flex-wrap gap-2 shrink-0">
-                    <a href="{{ route('customers.edit', $customer) }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
+                    <a href="{{ route('customers.edit', $customer) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
                         {{ __('Edit') }}
                     </a>
-                    <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 dark:text-accent-100 hover:bg-accent-100 dark:hover:bg-slate-600">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                    <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 dark:text-accent-100 hover:bg-accent-100 dark:hover:bg-slate-600">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                         {{ __('Statement') }}
                     </a>
-                    <a href="#documents" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M2.25 12.75L4.06 5.19A2.25 2.25 0 016.243 3.75h11.514a2.25 2.25 0 012.183 1.44l1.81 7.56" /></svg>
+                    <a href="#documents" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M2.25 12.75L4.06 5.19A2.25 2.25 0 016.243 3.75h11.514a2.25 2.25 0 012.183 1.44l1.81 7.56" /></svg>
                         {{ __('Documents') }}
                     </a>
-                    <a href="#followups" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium bg-accent-600 text-white hover:bg-accent-700">
-                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        {{ __('Follow-up') }}
+                    <a href="#followups" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        {{ __('Commitment') }}
                     </a>
                 </div>
             </div>

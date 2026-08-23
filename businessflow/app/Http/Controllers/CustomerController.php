@@ -9,7 +9,9 @@ use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CustomerController extends Controller
 {
@@ -38,6 +40,7 @@ class CustomerController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);
+        $data = $this->withUploads($request, $data);
 
         $customer = Customer::create($data);
 
@@ -80,7 +83,10 @@ class CustomerController extends Controller
 
     public function update(Request $request, Customer $customer): RedirectResponse
     {
-        $customer->update($this->validated($request));
+        $data = $this->validated($request);
+        $data = $this->withUploads($request, $data, $customer);
+
+        $customer->update($data);
 
         return redirect()->route('customers.show', $customer)->with('status', 'Customer updated.');
     }
@@ -90,6 +96,20 @@ class CustomerController extends Controller
         $customer->delete();
 
         return redirect()->route('customers.index')->with('status', 'Customer removed.');
+    }
+
+    public function photo(Customer $customer): StreamedResponse
+    {
+        abort_unless(filled($customer->photo_path), 404);
+
+        return Storage::disk('local')->response($customer->photo_path);
+    }
+
+    public function aadhar(Customer $customer): StreamedResponse
+    {
+        abort_unless(filled($customer->aadhar_path), 404);
+
+        return Storage::disk('local')->response($customer->aadhar_path, $customer->aadhar_name);
     }
 
     protected function validated(Request $request): array
@@ -102,6 +122,31 @@ class CustomerController extends Controller
             'address' => ['nullable', 'string', 'max:2000'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'source' => ['nullable', 'string', 'max:100'],
+            'photo' => ['nullable', 'image', 'max:5120'],
+            'aadhar' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ]);
+    }
+
+    protected function withUploads(Request $request, array $data, ?Customer $customer = null): array
+    {
+        if ($request->hasFile('photo')) {
+            if ($customer?->photo_path) {
+                Storage::disk('local')->delete($customer->photo_path);
+            }
+            $data['photo_path'] = $request->file('photo')->store('customer-photos', 'local');
+        }
+        unset($data['photo']);
+
+        if ($request->hasFile('aadhar')) {
+            if ($customer?->aadhar_path) {
+                Storage::disk('local')->delete($customer->aadhar_path);
+            }
+            $file = $request->file('aadhar');
+            $data['aadhar_path'] = $file->store('customer-aadhar', 'local');
+            $data['aadhar_name'] = $file->getClientOriginalName();
+        }
+        unset($data['aadhar']);
+
+        return $data;
     }
 }

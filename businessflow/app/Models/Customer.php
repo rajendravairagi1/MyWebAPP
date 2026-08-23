@@ -21,6 +21,9 @@ class Customer extends Model
         'notes',
         'source',
         'tags',
+        'photo_path',
+        'aadhar_path',
+        'aadhar_name',
     ];
 
     protected $casts = [

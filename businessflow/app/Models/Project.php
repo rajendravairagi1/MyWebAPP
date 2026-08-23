@@ -59,7 +59,9 @@ class Project extends Model
 
     public function totalRevenue(): float
     {
-        return (float) $this->invoices()->sum('amount_paid');
+        $directPaid = (float) UnitPayment::whereIn('project_unit_id', $this->units()->pluck('id'))->sum('amount');
+
+        return (float) $this->invoices()->sum('amount_paid') + $directPaid;
     }
 
     public function totalInvoiced(): float
