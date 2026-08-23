@@ -29,7 +29,7 @@
 
     <div>
         <x-input-label for="start_date" :value="__('Start date')" />
-        <x-text-input id="start_date" name="start_date" type="date" class="mt-1 block w-full" :value="old('start_date', $project?->start_date?->toDateString())" />
+        <x-text-input id="start_date" name="start_date" type="date" class="mt-1 block w-full" :value="old('start_date', $project?->start_date?->toDateString() ?? now()->toDateString())" />
         <x-input-error :messages="$errors->get('start_date')" class="mt-2" />
     </div>
 

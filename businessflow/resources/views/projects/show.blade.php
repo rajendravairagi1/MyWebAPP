@@ -193,6 +193,7 @@
                                 <th class="px-5 py-2 text-left">{{ __('Description') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Vendor') }}</th>
                                 <th class="px-5 py-2 text-right">{{ __('Amount') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Bill') }}</th>
                                 <th class="px-5 py-2"></th>
                             </tr>
                         </thead>
@@ -204,6 +205,13 @@
                                     <td class="px-5 py-2 text-gray-900 dark:text-gray-100">{{ $entry->description }}</td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $entry->vendor }}</td>
                                     <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">{{ number_format($entry->amount, 2) }}</td>
+                                    <td class="px-5 py-2">
+                                        @if ($entry->bill_path)
+                                            <a href="{{ route('project-costs.bill', [$project, $entry]) }}" target="_blank" rel="noopener" class="text-accent-600 hover:underline text-xs">{{ __('View') }}</a>
+                                        @else
+                                            <span class="text-gray-300 dark:text-slate-600 text-xs">—</span>
+                                        @endif
+                                    </td>
                                     <td class="px-5 py-2 text-right">
                                         <form method="POST" action="{{ route('project-costs.destroy', [$project, $entry]) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')">
                                             @csrf
@@ -219,8 +227,8 @@
 
             </div>
 
-            <x-modal name="add-cost" :show="$errors->has('category') || $errors->has('description') || $errors->has('amount') || $errors->has('spent_on')">
-                <form method="POST" action="{{ route('project-costs.store', $project) }}" class="p-6 space-y-4" x-data="{ category: 'land' }">
+            <x-modal name="add-cost" :show="$errors->has('category') || $errors->has('description') || $errors->has('amount') || $errors->has('spent_on') || $errors->has('bill')">
+                <form method="POST" action="{{ route('project-costs.store', $project) }}" enctype="multipart/form-data" class="p-6 space-y-4" x-data="{ category: 'land' }">
                     @csrf
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add a Payment') }}</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Record money you paid out for this project.') }}</p>
@@ -268,6 +276,14 @@
                     <div>
                         <x-input-label for="notes" :value="__('Notes (optional)')" />
                         <textarea id="notes" name="notes" rows="2" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500"></textarea>
+                    </div>
+
+                    <div>
+                        <x-input-label for="bill" :value="__('Upload Bill / Receipt (optional)')" />
+                        <input id="bill" name="bill" type="file" accept="image/*,.pdf" capture="environment"
+                            class="mt-1 block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
+                        <p class="mt-1 text-xs text-gray-400">{{ __('Photo or PDF of the bill/receipt. On mobile this can open your camera directly.') }}</p>
+                        <x-input-error :messages="$errors->get('bill')" class="mt-2" />
                     </div>
 
                     <div class="flex justify-end gap-3 pt-2">

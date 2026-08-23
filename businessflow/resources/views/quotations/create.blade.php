@@ -25,7 +25,7 @@
                         </div>
                         <div>
                             <x-input-label for="valid_until" :value="__('Valid until')" />
-                            <x-text-input id="valid_until" name="valid_until" type="date" class="mt-1 block w-full" :value="old('valid_until')" />
+                            <x-text-input id="valid_until" name="valid_until" type="date" class="mt-1 block w-full" :value="old('valid_until', now()->addDays(2)->toDateString())" />
                             <x-input-error :messages="$errors->get('valid_until')" class="mt-2" />
                         </div>
                     </div>

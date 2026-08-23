@@ -20,6 +20,8 @@ class ProjectCost extends Model
         'spent_on',
         'vendor',
         'notes',
+        'bill_path',
+        'bill_name',
     ];
 
     protected $casts = [
