@@ -98,8 +98,8 @@
                                     <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ $unit->area_sqft ?? '—' }}</td>
                                     <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ number_format($unit->price, 0) }}</td>
                                     @if ($unit->customer)
-                                        <td class="px-5 py-2 text-right text-green-600">{{ number_format($unit->totalPaid(), 0) }}</td>
-                                        <td class="px-5 py-2 text-right {{ $unit->balanceDue() > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ number_format($unit->balanceDue(), 0) }}</td>
+                                        <td class="px-5 py-2 text-right text-green-600">{{ number_format($unit->totalCollected(), 0) }}</td>
+                                        <td class="px-5 py-2 text-right {{ $unit->totalOutstanding() > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ number_format($unit->totalOutstanding(), 0) }}</td>
                                     @else
                                         <td class="px-5 py-2 text-right text-gray-300 dark:text-slate-600">—</td>
                                         <td class="px-5 py-2 text-right text-gray-300 dark:text-slate-600">—</td>

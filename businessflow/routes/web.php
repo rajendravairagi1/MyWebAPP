@@ -16,6 +16,7 @@ use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ResetDataController;
+use App\Http\Controllers\UnitPaymentController;
 use App\Http\Controllers\VerifyController;
 use Illuminate\Support\Facades\Route;
 
@@ -60,6 +61,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/projects/{project}/units/{unit}', [ProjectUnitController::class, 'update'])->name('project-units.update');
     Route::delete('/projects/{project}/units/{unit}', [ProjectUnitController::class, 'destroy'])->name('project-units.destroy');
     Route::post('/project-units/assign', [ProjectUnitController::class, 'assign'])->name('project-units.assign');
+    Route::post('/project-units/{unit}/write-off', [ProjectUnitController::class, 'writeOff'])->name('project-units.write-off');
+    Route::post('/project-units/{unit}/recover', [ProjectUnitController::class, 'recover'])->name('project-units.recover');
+    Route::post('/project-units/{unit}/payments', [UnitPaymentController::class, 'store'])->name('unit-payments.store');
+    Route::put('/project-units/{unit}/payments/{payment}', [UnitPaymentController::class, 'update'])->name('unit-payments.update');
+    Route::delete('/project-units/{unit}/payments/{payment}', [UnitPaymentController::class, 'destroy'])->name('unit-payments.destroy');
 
     Route::get('/followups', [FollowupController::class, 'index'])->name('followups.index');
     Route::get('/followups/create', [FollowupController::class, 'create'])->name('followups.create');

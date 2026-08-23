@@ -1,9 +1,11 @@
 @php
-    $totalPaid = $customer->units->sum(fn ($u) => $u->totalPaid());
-    $totalDue = $customer->units->sum(fn ($u) => $u->balanceDue());
+    $activeUnits = $customer->units->whereNull('archived_at');
+    $historyUnits = $customer->units->whereNotNull('archived_at');
+    $totalPaid = $customer->units->sum(fn ($u) => $u->totalCollected());
+    $totalDue = $customer->units->sum(fn ($u) => $u->totalOutstanding());
     $totalValue = $customer->units->sum(fn ($u) => $u->price);
     $unitCount = $customer->units->count();
-    $activeUnitCount = $customer->units->where('status', '!=', 'sold')->count();
+    $activeUnitCount = $activeUnits->count();
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -73,11 +75,23 @@
                         @endif
                     </div>
                 </div>
-                <div class="flex lg:flex-col gap-2 shrink-0">
-                    <a href="{{ route('customers.edit', $customer) }}" class="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 text-center">{{ __('Edit') }}</a>
-                    <a href="{{ route('customers.statement', $customer) }}" class="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 text-center">{{ __('Statement') }}</a>
-                    <a href="#documents" class="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 text-center">{{ __('Documents') }}</a>
-                    <a href="#followups" class="px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700 text-center">{{ __('+ Follow-up') }}</a>
+                <div class="flex flex-wrap gap-2 shrink-0">
+                    <a href="{{ route('customers.edit', $customer) }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
+                        {{ __('Edit') }}
+                    </a>
+                    <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 dark:text-accent-100 hover:bg-accent-100 dark:hover:bg-slate-600">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        {{ __('Statement') }}
+                    </a>
+                    <a href="#documents" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M2.25 12.75L4.06 5.19A2.25 2.25 0 016.243 3.75h11.514a2.25 2.25 0 012.183 1.44l1.81 7.56" /></svg>
+                        {{ __('Documents') }}
+                    </a>
+                    <a href="#followups" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-sm font-medium bg-accent-600 text-white hover:bg-accent-700">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        {{ __('Follow-up') }}
+                    </a>
                 </div>
             </div>
 
@@ -90,27 +104,30 @@
                 </div>
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Total Value') }}</div>
-                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ number_format($totalValue, 0) }}</div>
+                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($totalValue, 0) }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Collected') }}</div>
-                    <div class="mt-1 text-2xl font-semibold text-green-600">{{ number_format($totalPaid, 0) }}</div>
+                    <div class="mt-1 text-2xl font-semibold text-green-600">₹{{ number_format($totalPaid, 0) }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}</div>
-                    <div class="mt-1 text-2xl font-semibold {{ $totalDue > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ number_format($totalDue, 0) }}</div>
+                    <div class="mt-1 text-2xl font-semibold {{ $totalDue > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($totalDue, 0) }}</div>
                 </div>
             </div>
 
-            {{-- Properties --}}
+            {{-- Properties (active) --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
-                    <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Properties') }} ({{ $unitCount }})</span>
-                    <a href="{{ route('customers.statement', $customer) }}" class="text-xs text-accent-600 hover:underline">{{ __('Download full statement') }}</a>
+                    <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Properties') }} ({{ $activeUnitCount }})</span>
+                    <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 dark:text-accent-100 hover:bg-accent-100 dark:hover:bg-slate-600">
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        {{ __('Download full statement') }}
+                    </a>
                 </div>
 
-                @forelse ($customer->units as $unit)
-                    @php $progress = $unit->price > 0 ? min(100, ($unit->totalPaid() / $unit->price) * 100) : 0; @endphp
+                @forelse ($activeUnits as $unit)
+                    @php $progress = $unit->price > 0 ? min(100, ($unit->totalCollected() / $unit->price) * 100) : 0; @endphp
                     <div class="p-5 border-b border-gray-100 dark:border-slate-700 last:border-b-0">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div>
@@ -124,7 +141,7 @@
                             </div>
                             <div class="text-right">
                                 <div class="text-xs text-gray-400">{{ __('Price') }}</div>
-                                <div class="font-semibold text-gray-900 dark:text-gray-100">{{ number_format($unit->price, 0) }}</div>
+                                <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->price, 0) }}</div>
                             </div>
                         </div>
 
@@ -132,8 +149,8 @@
                             <div class="h-full bg-green-500" style="width: {{ $progress }}%"></div>
                         </div>
                         <div class="mt-1.5 flex flex-wrap gap-x-6 gap-y-1 text-xs">
-                            <span class="text-gray-500 dark:text-gray-400">{{ __('Paid') }}: <strong class="text-green-600">{{ number_format($unit->totalPaid(), 0) }}</strong></span>
-                            <span class="text-gray-500 dark:text-gray-400">{{ __('Balance') }}: <strong class="{{ $unit->balanceDue() > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ number_format($unit->balanceDue(), 0) }}</strong></span>
+                            <span class="text-gray-500 dark:text-gray-400">{{ __('Collected') }}: <strong class="text-green-600">₹{{ number_format($unit->totalCollected(), 0) }}</strong></span>
+                            <span class="text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}: <strong class="{{ $unit->totalOutstanding() > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($unit->totalOutstanding(), 0) }}</strong></span>
                         </div>
 
                         @if ($unit->invoices->isNotEmpty())
@@ -142,6 +159,52 @@
                                     <a href="{{ route('invoices.show', $unitInvoice) }}" class="text-accent-600 hover:underline">{{ $unitInvoice->number }}</a>
                                 @endforeach
                             </div>
+                        @endif
+
+                        {{-- Record a payment --}}
+                        <form method="POST" action="{{ route('unit-payments.store', $unit) }}" class="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2 items-end bg-gray-50 dark:bg-slate-900/40 p-3 rounded-md">
+                            @csrf
+                            <div>
+                                <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Amount') }}</label>
+                                <input type="number" step="0.01" min="0.01" name="amount" required placeholder="₹" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                            </div>
+                            <div>
+                                <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Date') }}</label>
+                                <input type="date" name="paid_at" value="{{ now()->format('Y-m-d') }}" required class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                            </div>
+                            <div>
+                                <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Method') }}</label>
+                                <select name="method" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                    <option value="cash">{{ __('Cash') }}</option>
+                                    <option value="upi">{{ __('UPI') }}</option>
+                                    <option value="bank_transfer">{{ __('Bank transfer') }}</option>
+                                    <option value="cheque">{{ __('Cheque') }}</option>
+                                    <option value="card">{{ __('Card') }}</option>
+                                    <option value="other">{{ __('Other') }}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Reference') }}</label>
+                                <input type="text" name="reference" placeholder="{{ __('optional') }}" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                            </div>
+                            <div class="col-span-2 sm:col-span-1">
+                                <button class="w-full inline-flex justify-center items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('+ Record Payment') }}</button>
+                            </div>
+                        </form>
+
+                        <x-unit-payment-ledger :unit="$unit" :editable="true" />
+
+                        @if ($unit->totalOutstanding() > 0)
+                            <details class="mt-3">
+                                <summary class="cursor-pointer text-xs text-red-600 hover:underline select-none list-none">{{ __('Write off remaining balance') }}</summary>
+                                <form method="POST" action="{{ route('project-units.write-off', $unit) }}" class="mt-2 flex flex-wrap items-end gap-2" onsubmit="return confirm('{{ __('Write off the remaining outstanding balance for this property? This moves it to History.') }}')">
+                                    @csrf
+                                    <div class="flex-1 min-w-[200px]">
+                                        <input type="text" name="note" placeholder="{{ __('Reason (optional)') }}" class="block w-full text-xs rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                    </div>
+                                    <button class="px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-md hover:bg-red-500">{{ __('Confirm Write-off') }} (₹{{ number_format($unit->totalOutstanding(), 0) }})</button>
+                                </form>
+                            </details>
                         @endif
                     </div>
                 @empty
@@ -161,6 +224,51 @@
                     </form>
                 </div>
             </div>
+
+            {{-- History: fully paid off or written off --}}
+            @if ($historyUnits->isNotEmpty())
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">
+                        {{ __('History') }} ({{ $historyUnits->count() }})
+                    </div>
+                    @foreach ($historyUnits as $unit)
+                        <div class="p-5 border-b border-gray-100 dark:border-slate-700 last:border-b-0">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <a href="{{ route('projects.show', $unit->project) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:text-accent-600">{{ $unit->project->name }}</a>
+                                        <span class="text-gray-400">·</span>
+                                        <span class="text-gray-700 dark:text-gray-300">{{ $unit->unit_number }}</span>
+                                        @if ($unit->write_off_at)
+                                            <span class="text-xs px-2 py-0.5 rounded font-medium bg-red-100 text-red-700">{{ __('Written off') }}</span>
+                                        @else
+                                            <span class="text-xs px-2 py-0.5 rounded font-medium bg-green-100 text-green-700">{{ __('Paid off') }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-xs text-gray-400 mt-0.5">
+                                        {{ __('Closed on') }} {{ $unit->archived_at->format('d M Y') }}
+                                        @if ($unit->write_off_at)
+                                            · {{ __('Written off') }}: ₹{{ number_format($unit->write_off_amount, 0) }}@if ($unit->write_off_note) — {{ $unit->write_off_note }}@endif
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="text-xs text-gray-400">{{ __('Collected') }}</div>
+                                        <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->totalCollected(), 0) }} / ₹{{ number_format($unit->price, 0) }}</div>
+                                    </div>
+                                    <form method="POST" action="{{ route('project-units.recover', $unit) }}" onsubmit="return confirm('{{ __('Move this property back to active?') }}')">
+                                        @csrf
+                                        <button class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Recover') }}</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <x-unit-payment-ledger :unit="$unit" :editable="false" />
+                        </div>
+                    @endforeach
+                </div>
+            @endif
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
@@ -208,9 +316,9 @@
                 </div>
             </div>
 
-            {{-- Follow-ups --}}
+            {{-- Follow-ups (also serves as the payment-commitment log — "customer said will pay X by date Y") --}}
             <div id="followups" class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden scroll-mt-6">
-                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Follow-ups & reminders') }}</div>
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Follow-ups & commitments') }}</div>
 
                 @if ($customer->followups->isNotEmpty())
                     <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">

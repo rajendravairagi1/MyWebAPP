@@ -52,14 +52,14 @@
     </div>
 
     @php
-        $totalInvoiced = $customer->invoices->sum('total');
-        $totalPaid = $customer->invoices->sum('amount_paid');
-        $totalDue = max(0, $totalInvoiced - $totalPaid);
+        $totalValue = $customer->units->sum(fn ($u) => $u->price);
+        $totalPaid = $customer->units->sum(fn ($u) => $u->totalCollected());
+        $totalDue = $customer->units->sum(fn ($u) => $u->totalOutstanding());
     @endphp
 
     <table class="summary">
         <tr>
-            <td><div class="label">Total invoiced</div><div class="value">{{ number_format($totalInvoiced, 2) }}</div></td>
+            <td><div class="label">Sale value</div><div class="value">{{ number_format($totalValue, 2) }}</div></td>
             <td><div class="label">Total received</div><div class="value">{{ number_format($totalPaid, 2) }}</div></td>
             <td><div class="label">Balance due</div><div class="value {{ $totalDue > 0 ? 'balance-pos' : 'balance-zero' }}">{{ number_format($totalDue, 2) }}</div></td>
         </tr>
@@ -84,9 +84,11 @@
                         <td>{{ $unit->project->name }}</td>
                         <td>{{ $unit->unit_number }}</td>
                         <td class="text-right">{{ number_format($unit->price, 2) }}</td>
-                        <td class="text-right">{{ number_format($unit->totalPaid(), 2) }}</td>
-                        <td class="text-right">{{ number_format($unit->balanceDue(), 2) }}</td>
-                        <td>{{ ucfirst($unit->status) }}</td>
+                        <td class="text-right">{{ number_format($unit->totalCollected(), 2) }}</td>
+                        <td class="text-right">{{ number_format($unit->totalOutstanding(), 2) }}</td>
+                        <td>
+                            {{ $unit->write_off_at ? 'Written off' : ucfirst($unit->status) }}
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
@@ -126,18 +128,34 @@
         <thead>
             <tr>
                 <th>Date</th>
-                <th>Invoice</th>
+                <th>Against</th>
                 <th>Method</th>
                 <th>Reference</th>
                 <th class="text-right">Amount</th>
             </tr>
         </thead>
         <tbody>
-            @php $payments = $customer->invoices->flatMap->payments->sortByDesc('paid_at'); @endphp
-            @forelse ($payments as $payment)
+            @php
+                $invoicePayments = $customer->invoices->flatMap(fn ($inv) => $inv->payments->map(fn ($p) => (object) [
+                    'paid_at' => $p->paid_at,
+                    'against' => $inv->number,
+                    'method' => $p->method,
+                    'reference' => $p->reference,
+                    'amount' => $p->amount,
+                ]));
+                $unitPayments = $customer->units->flatMap(fn ($u) => $u->payments->map(fn ($p) => (object) [
+                    'paid_at' => $p->paid_at,
+                    'against' => $u->unit_number,
+                    'method' => $p->method,
+                    'reference' => $p->reference,
+                    'amount' => $p->amount,
+                ]));
+                $allPayments = $invoicePayments->concat($unitPayments)->sortByDesc('paid_at');
+            @endphp
+            @forelse ($allPayments as $payment)
                 <tr>
                     <td>{{ $payment->paid_at->format('d M Y') }}</td>
-                    <td>{{ $payment->invoice->number }}</td>
+                    <td>{{ $payment->against }}</td>
                     <td>{{ $payment->method ? ucfirst(str_replace('_', ' ', $payment->method)) : '—' }}</td>
                     <td>{{ $payment->reference ?? '—' }}</td>
                     <td class="text-right">{{ number_format($payment->amount, 2) }}</td>
@@ -147,5 +165,30 @@
             @endforelse
         </tbody>
     </table>
+
+    @php $writtenOff = $customer->units->filter(fn ($u) => $u->write_off_at); @endphp
+    @if ($writtenOff->isNotEmpty())
+        <h2>Written Off</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Unit</th>
+                    <th>Date</th>
+                    <th class="text-right">Amount</th>
+                    <th>Reason</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($writtenOff as $unit)
+                    <tr>
+                        <td>{{ $unit->unit_number }}</td>
+                        <td>{{ $unit->write_off_at->format('d M Y') }}</td>
+                        <td class="text-right">{{ number_format($unit->write_off_amount, 2) }}</td>
+                        <td>{{ $unit->write_off_note ?? '—' }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 </body>
 </html>

@@ -43,18 +43,17 @@ class VerifyController extends Controller
 
     public function customer(Customer $customer): View
     {
-        $customer->load('invoices');
+        $customer->load('units.payments');
         $business = \App\Models\Business::find($customer->business_id);
 
-        $totalInvoiced = $customer->invoices->sum('total');
-        $totalPaid = $customer->invoices->sum('amount_paid');
+        $totalDue = $customer->units->sum(fn ($unit) => $unit->totalOutstanding());
 
         return view('verify.show', [
             'business' => $business,
             'docType' => 'Statement',
             'docNumber' => 'Customer #'.$customer->id,
             'customerName' => $customer->name,
-            'amount' => max(0, $totalInvoiced - $totalPaid),
+            'amount' => $totalDue,
             'amountLabel' => 'Balance due (as of now)',
             'date' => now(),
             'status' => null,

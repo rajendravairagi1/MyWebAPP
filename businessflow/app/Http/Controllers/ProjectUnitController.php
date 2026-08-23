@@ -78,4 +78,24 @@ class ProjectUnitController extends Controller
 
         return back()->with('status', 'Property assigned to customer.');
     }
+
+    public function writeOff(Request $request, ProjectUnit $unit): RedirectResponse
+    {
+        $data = $request->validate([
+            'note' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        abort_if($unit->totalOutstanding() <= 0, 422, 'Nothing outstanding to write off.');
+
+        $unit->writeOff($data['note'] ?? null);
+
+        return back()->with('status', 'Remaining balance written off and moved to history.');
+    }
+
+    public function recover(ProjectUnit $unit): RedirectResponse
+    {
+        $unit->recover();
+
+        return back()->with('status', 'Property moved back to active.');
+    }
 }

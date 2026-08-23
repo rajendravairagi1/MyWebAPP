@@ -51,6 +51,7 @@ class CustomerController extends Controller
             'invoices' => fn ($q) => $q->latest()->limit(10),
             'units.project',
             'units.invoices',
+            'units.payments',
             'followups' => fn ($q) => $q->orderByRaw("status = 'done'")->orderBy('due_at'),
             'documents' => fn ($q) => $q->latest(),
         ]);
@@ -62,7 +63,7 @@ class CustomerController extends Controller
 
     public function statement(Customer $customer)
     {
-        $customer->load(['units.project', 'invoices.payments', 'invoices.project', 'invoices.projectUnit']);
+        $customer->load(['units.project', 'units.payments', 'invoices.payments', 'invoices.project', 'invoices.projectUnit']);
         $business = Business::find(Tenant::id());
         $verifyQr = \App\Support\DocumentQr::dataUri(
             \Illuminate\Support\Facades\URL::signedRoute('verify.customer', ['customer' => $customer->id])
