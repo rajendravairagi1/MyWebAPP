@@ -52,6 +52,8 @@ class InvoiceController extends Controller
             'items.*.tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ]);
 
+        $this->assertUnitAvailableFor($data['project_unit_id'] ?? null, $data['customer_id']);
+
         $invoice = Invoice::create([
             'customer_id' => $data['customer_id'],
             'project_id' => $data['project_id'] ?? null,
@@ -125,6 +127,8 @@ class InvoiceController extends Controller
             'items.*.tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ]);
 
+        $this->assertUnitAvailableFor($data['project_unit_id'] ?? null, $data['customer_id']);
+
         $this->syncProjectUnit($invoice->project_unit_id, $data['project_unit_id'] ?? null, $invoice->customer_id, $data['customer_id']);
 
         $invoice->update([
@@ -151,6 +155,21 @@ class InvoiceController extends Controller
         $invoice->recalculateTotals();
 
         return redirect()->route('invoices.show', $invoice)->with('status', 'Invoice updated.');
+    }
+
+    protected function assertUnitAvailableFor(?int $unitId, int $customerId): void
+    {
+        if (! $unitId) {
+            return;
+        }
+
+        $unit = ProjectUnit::find($unitId);
+
+        if ($unit && $unit->status !== 'available' && (int) $unit->customer_id !== $customerId) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'project_unit_id' => 'This unit is already assigned to another customer.',
+            ]);
+        }
     }
 
     protected function syncProjectUnit(?int $oldUnitId, ?int $newUnitId, int $oldCustomerId, int $newCustomerId): void

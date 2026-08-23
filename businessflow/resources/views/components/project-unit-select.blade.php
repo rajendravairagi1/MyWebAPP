@@ -3,7 +3,7 @@
 <div x-data="{
         projectId: '{{ old('project_id', $selectedProjectId) }}',
         unitId: '{{ old('project_unit_id', $selectedUnitId) }}',
-        units: @js($projects->mapWithKeys(fn ($p) => [$p->id => $p->units->map(fn ($u) => ['id' => $u->id, 'label' => $u->unit_number.($u->type ? ' · '.$u->type : '').' · '.number_format($u->price, 0), 'available' => $u->status === 'available'])])),
+        units: @js($projects->mapWithKeys(fn ($p) => [$p->id => $p->units->map(fn ($u) => ['id' => $u->id, 'label' => $u->unit_number.($u->type ? ' · '.$u->type : '').' · '.number_format($u->price, 0), 'available' => $u->status === 'available' || $u->id === $selectedUnitId])])),
     }" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
         <x-input-label for="project_id" :value="__('Project (optional)')" />
