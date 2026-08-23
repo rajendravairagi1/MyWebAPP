@@ -15,6 +15,10 @@
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('quotations.pdf', $quotation) }}" class="px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download PDF') }}</a>
 
+                @if ($quotation->invoices->isEmpty())
+                    <a href="{{ route('quotations.edit', $quotation) }}" class="px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Edit') }}</a>
+                @endif
+
                 @if ($quotation->status === 'draft')
                     <form method="POST" action="{{ route('quotations.mark-sent', $quotation) }}">
                         @csrf

@@ -1,6 +1,9 @@
-@props(['products'])
+@props(['products', 'items' => null])
 
-<div x-data="lineItemsForm(@js($products->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'price' => (float) $p->price, 'tax_rate' => (float) $p->tax_rate])))">
+<div x-data="lineItemsForm(
+        @js($products->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'price' => (float) $p->price, 'tax_rate' => (float) $p->tax_rate])),
+        @js($items ? $items->map(fn ($i) => ['product_id' => $i->product_id, 'description' => $i->description, 'quantity' => (float) $i->quantity, 'unit_price' => (float) $i->unit_price, 'discount' => (float) $i->discount, 'tax_rate' => (float) $i->tax_rate])->all() : [])
+    )">
     <div class="overflow-x-auto border border-gray-200 rounded-md">
         <table class="min-w-full text-sm">
             <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
@@ -106,7 +109,7 @@
 @once
     @push('scripts')
         <script>
-            function lineItemsForm(products) {
+            function lineItemsForm(products, initialItems) {
                 return {
                     products,
                     commonItems: [
@@ -129,7 +132,39 @@
                     },
                     rows: [],
                     init() {
-                        this.rows = [this.newRow()];
+                        if (initialItems && initialItems.length) {
+                            this.rows = initialItems.map(item => item.product_id ? {
+                                product_id: item.product_id,
+                                description: item.description,
+                                selectValue: 'product-' + item.product_id,
+                                customMode: false,
+                                quantity: item.quantity,
+                                unit_price: item.unit_price,
+                                discount: item.discount,
+                                tax_rate: item.tax_rate,
+                            } : {
+                                product_id: '',
+                                description: item.description,
+                                selectValue: '',
+                                customMode: true,
+                                quantity: item.quantity,
+                                unit_price: item.unit_price,
+                                discount: item.discount,
+                                tax_rate: item.tax_rate,
+                            });
+                        } else {
+                            this.rows = [this.newRow()];
+                        }
+
+                        this.$nextTick(() => this.$nextTick(() => {
+                            const trs = this.$root.querySelector('table').querySelectorAll('tbody tr');
+                            this.rows.forEach((row, index) => {
+                                if (!row.customMode && row.selectValue && trs[index]) {
+                                    const el = trs[index].querySelector('select');
+                                    if (el) el.value = row.selectValue;
+                                }
+                            });
+                        }));
                     },
                     addRow() {
                         const last = this.rows[this.rows.length - 1];

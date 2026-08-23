@@ -14,6 +14,9 @@
 
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('invoices.pdf', $invoice) }}" class="px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download PDF') }}</a>
+                @if ($invoice->payments->isEmpty())
+                    <a href="{{ route('invoices.edit', $invoice) }}" class="px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Edit') }}</a>
+                @endif
                 @if ($invoice->status === 'draft')
                     <form method="POST" action="{{ route('invoices.mark-sent', $invoice) }}">
                         @csrf

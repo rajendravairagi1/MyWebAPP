@@ -63,6 +63,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/quotations/create', [QuotationController::class, 'create'])->name('quotations.create');
     Route::post('/quotations', [QuotationController::class, 'store'])->name('quotations.store');
     Route::get('/quotations/{quotation}', [QuotationController::class, 'show'])->name('quotations.show');
+    Route::get('/quotations/{quotation}/edit', [QuotationController::class, 'edit'])->name('quotations.edit');
+    Route::put('/quotations/{quotation}', [QuotationController::class, 'update'])->name('quotations.update');
     Route::post('/quotations/{quotation}/mark-sent', [QuotationController::class, 'markSent'])->name('quotations.mark-sent');
     Route::post('/quotations/{quotation}/convert', [QuotationController::class, 'convert'])->name('quotations.convert');
     Route::get('/quotations/{quotation}/pdf', [QuotationController::class, 'pdf'])->name('quotations.pdf');
@@ -71,6 +73,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
+    Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     Route::post('/invoices/{invoice}/mark-sent', [InvoiceController::class, 'markSent'])->name('invoices.mark-sent');
     Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
 

@@ -90,6 +90,89 @@ class QuotationController extends Controller
         return view('quotations.show', compact('quotation'));
     }
 
+    public function edit(Quotation $quotation): View
+    {
+        abort_if($quotation->invoices()->exists(), 403, 'This quotation has already been converted to an invoice and can no longer be edited.');
+
+        $quotation->load('items');
+
+        return view('quotations.edit', [
+            'quotation' => $quotation,
+            'customers' => Customer::orderBy('name')->get(),
+            'products' => Product::orderBy('name')->get(),
+            'projects' => Project::with('units')->orderBy('name')->get(),
+        ]);
+    }
+
+    public function update(Request $request, Quotation $quotation): RedirectResponse
+    {
+        abort_if($quotation->invoices()->exists(), 403, 'This quotation has already been converted to an invoice and can no longer be edited.');
+
+        $data = $request->validate([
+            'customer_id' => ['required', 'exists:customers,id'],
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'project_unit_id' => ['nullable', 'exists:project_units,id'],
+            'valid_until' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+            'terms' => ['nullable', 'string', 'max:2000'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['nullable', 'exists:products,id'],
+            'items.*.description' => ['required', 'string', 'max:255'],
+            'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
+            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'items.*.discount' => ['nullable', 'numeric', 'min:0'],
+            'items.*.tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        $this->syncProjectUnit($quotation->project_unit_id, $data['project_unit_id'] ?? null, $quotation->customer_id, $data['customer_id']);
+
+        $quotation->update([
+            'customer_id' => $data['customer_id'],
+            'project_id' => $data['project_id'] ?? null,
+            'project_unit_id' => $data['project_unit_id'] ?? null,
+            'valid_until' => $data['valid_until'] ?? null,
+            'notes' => $data['notes'] ?? null,
+            'terms' => $data['terms'] ?? null,
+        ]);
+
+        $quotation->items()->delete();
+
+        foreach ($data['items'] as $item) {
+            $quotation->items()->create([
+                'product_id' => $item['product_id'] ?? null,
+                'description' => $item['description'],
+                'quantity' => $item['quantity'],
+                'unit_price' => $item['unit_price'],
+                'discount' => $item['discount'] ?? 0,
+                'tax_rate' => $item['tax_rate'] ?? 0,
+            ]);
+        }
+
+        $quotation->recalculateTotals();
+
+        return redirect()->route('quotations.show', $quotation)->with('status', 'Quotation updated.');
+    }
+
+    protected function syncProjectUnit(?int $oldUnitId, ?int $newUnitId, int $oldCustomerId, int $newCustomerId): void
+    {
+        if ($oldUnitId === $newUnitId) {
+            return;
+        }
+
+        if ($oldUnitId) {
+            ProjectUnit::where('id', $oldUnitId)
+                ->where('customer_id', $oldCustomerId)
+                ->where('status', 'booked')
+                ->update(['status' => 'available', 'customer_id' => null]);
+        }
+
+        if ($newUnitId) {
+            ProjectUnit::where('id', $newUnitId)
+                ->where('status', 'available')
+                ->update(['status' => 'booked', 'customer_id' => $newCustomerId]);
+        }
+    }
+
     public function markSent(Quotation $quotation): RedirectResponse
     {
         $quotation->update(['status' => 'sent']);

@@ -92,6 +92,87 @@ class InvoiceController extends Controller
         return view('invoices.show', compact('invoice'));
     }
 
+    public function edit(Invoice $invoice): View
+    {
+        abort_if($invoice->payments()->exists(), 403, 'This invoice already has payments recorded and can no longer be edited.');
+
+        $invoice->load('items');
+
+        return view('invoices.edit', [
+            'invoice' => $invoice,
+            'customers' => Customer::orderBy('name')->get(),
+            'products' => Product::orderBy('name')->get(),
+            'projects' => Project::with('units')->orderBy('name')->get(),
+        ]);
+    }
+
+    public function update(Request $request, Invoice $invoice): RedirectResponse
+    {
+        abort_if($invoice->payments()->exists(), 403, 'This invoice already has payments recorded and can no longer be edited.');
+
+        $data = $request->validate([
+            'customer_id' => ['required', 'exists:customers,id'],
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'project_unit_id' => ['nullable', 'exists:project_units,id'],
+            'due_date' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['nullable', 'exists:products,id'],
+            'items.*.description' => ['required', 'string', 'max:255'],
+            'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
+            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'items.*.discount' => ['nullable', 'numeric', 'min:0'],
+            'items.*.tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+        ]);
+
+        $this->syncProjectUnit($invoice->project_unit_id, $data['project_unit_id'] ?? null, $invoice->customer_id, $data['customer_id']);
+
+        $invoice->update([
+            'customer_id' => $data['customer_id'],
+            'project_id' => $data['project_id'] ?? null,
+            'project_unit_id' => $data['project_unit_id'] ?? null,
+            'due_date' => $data['due_date'] ?? null,
+            'notes' => $data['notes'] ?? null,
+        ]);
+
+        $invoice->items()->delete();
+
+        foreach ($data['items'] as $item) {
+            $invoice->items()->create([
+                'product_id' => $item['product_id'] ?? null,
+                'description' => $item['description'],
+                'quantity' => $item['quantity'],
+                'unit_price' => $item['unit_price'],
+                'discount' => $item['discount'] ?? 0,
+                'tax_rate' => $item['tax_rate'] ?? 0,
+            ]);
+        }
+
+        $invoice->recalculateTotals();
+
+        return redirect()->route('invoices.show', $invoice)->with('status', 'Invoice updated.');
+    }
+
+    protected function syncProjectUnit(?int $oldUnitId, ?int $newUnitId, int $oldCustomerId, int $newCustomerId): void
+    {
+        if ($oldUnitId === $newUnitId) {
+            return;
+        }
+
+        if ($oldUnitId) {
+            ProjectUnit::where('id', $oldUnitId)
+                ->where('customer_id', $oldCustomerId)
+                ->where('status', 'booked')
+                ->update(['status' => 'available', 'customer_id' => null]);
+        }
+
+        if ($newUnitId) {
+            ProjectUnit::where('id', $newUnitId)
+                ->where('status', 'available')
+                ->update(['status' => 'booked', 'customer_id' => $newCustomerId]);
+        }
+    }
+
     public function markSent(Invoice $invoice): RedirectResponse
     {
         $invoice->update(['status' => $invoice->amount_paid > 0 ? $invoice->status : 'sent']);
