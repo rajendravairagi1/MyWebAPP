@@ -188,13 +188,4 @@ class InvoiceController extends Controller
         return Pdf::loadView('invoices.pdf', compact('invoice', 'business'))
             ->download($invoice->number.'.pdf');
     }
-
-    public function publicPdf(Invoice $invoice)
-    {
-        $invoice->load(['customer', 'items']);
-        $business = \App\Models\Business::find($invoice->business_id);
-
-        return Pdf::loadView('invoices.pdf', compact('invoice', 'business'))
-            ->stream($invoice->number.'.pdf');
-    }
 }

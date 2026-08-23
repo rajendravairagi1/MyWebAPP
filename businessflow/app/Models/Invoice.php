@@ -4,16 +4,14 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToTenant;
 use App\Models\Concerns\HasLineItemTotals;
-use App\Models\Concerns\HasWhatsAppLink;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\URL;
 
 class Invoice extends Model
 {
-    use BelongsToTenant, HasFactory, HasLineItemTotals, HasWhatsAppLink;
+    use BelongsToTenant, HasFactory, HasLineItemTotals;
 
     protected $fillable = [
         'business_id',
@@ -116,14 +114,5 @@ class Invoice extends Model
         $count = static::withoutGlobalScope('tenant')->where('business_id', $businessId)->count();
 
         return sprintf('%s-%05d', $business->invoice_prefix ?: 'INV', $count + 1);
-    }
-
-    public function whatsappShareUrl(): ?string
-    {
-        $pdfUrl = URL::signedRoute('invoices.public-pdf', ['invoice' => $this->id]);
-
-        $message = "Hi {$this->customer?->name}, here is your invoice {$this->number} from us: {$pdfUrl}. Total: {$this->total}, balance due: {$this->balanceDue()}.";
-
-        return $this->whatsappUrl($message);
     }
 }

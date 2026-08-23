@@ -4,16 +4,14 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToTenant;
 use App\Models\Concerns\HasLineItemTotals;
-use App\Models\Concerns\HasWhatsAppLink;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\URL;
 
 class Quotation extends Model
 {
-    use BelongsToTenant, HasFactory, HasLineItemTotals, HasWhatsAppLink;
+    use BelongsToTenant, HasFactory, HasLineItemTotals;
 
     protected $fillable = [
         'business_id',
@@ -104,14 +102,5 @@ class Quotation extends Model
         $count = static::withoutGlobalScope('tenant')->where('business_id', $businessId)->count();
 
         return sprintf('QT-%05d', $count + 1);
-    }
-
-    public function whatsappShareUrl(): ?string
-    {
-        $pdfUrl = URL::signedRoute('quotations.public-pdf', ['quotation' => $this->id]);
-
-        $message = "Hi {$this->customer?->name}, here is your quotation {$this->number} from us: {$pdfUrl}";
-
-        return $this->whatsappUrl($message);
     }
 }
