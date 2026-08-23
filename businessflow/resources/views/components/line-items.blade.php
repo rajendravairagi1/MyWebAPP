@@ -20,13 +20,22 @@
                         <td class="px-3 py-2">
                             <select :name="`items[${index}][product_id]`" x-model="row.product_id" @change="selectProduct(index)"
                                 class="block w-full text-sm border-gray-300 rounded-md mb-1">
-                                <option value="">{{ __('Custom item') }}</option>
-                                <template x-for="product in products" :key="product.id">
-                                    <option :value="product.id" x-text="product.name"></option>
-                                </template>
+                                <option value="">{{ __('Custom item — type your own') }}</option>
+                                <optgroup label="{{ __('Common Real Estate Items') }}">
+                                    <template x-for="item in commonItems" :key="item.id">
+                                        <option :value="item.id" x-text="item.name"></option>
+                                    </template>
+                                </optgroup>
+                                @if ($products->isNotEmpty())
+                                    <optgroup label="{{ __('My Products') }}">
+                                        <template x-for="product in products" :key="product.id">
+                                            <option :value="product.id" x-text="product.name"></option>
+                                        </template>
+                                    </optgroup>
+                                @endif
                             </select>
                             <input type="text" :name="`items[${index}][description]`" x-model="row.description" required
-                                placeholder="{{ __('Description') }}" class="block w-full text-sm border-gray-300 rounded-md">
+                                placeholder="{{ __('Item / product name — e.g. Booking Amount, GST, Registration Charges') }}" class="block w-full text-sm border-gray-300 rounded-md">
                         </td>
                         <td class="px-3 py-2">
                             <input type="number" step="0.01" min="0.01" :name="`items[${index}][quantity]`" x-model.number="row.quantity"
@@ -84,6 +93,20 @@
             function lineItemsForm(products) {
                 return {
                     products,
+                    commonItems: [
+                        { id: 're-booking', name: 'Booking Amount / Token Money' },
+                        { id: 're-down-payment', name: 'Down Payment' },
+                        { id: 're-construction-installment', name: 'Construction Installment' },
+                        { id: 're-registration', name: 'Registration Charges' },
+                        { id: 're-stamp-duty', name: 'Stamp Duty' },
+                        { id: 're-gst', name: 'GST' },
+                        { id: 're-maintenance', name: 'Maintenance Charges' },
+                        { id: 're-parking', name: 'Parking Charges' },
+                        { id: 're-legal', name: 'Legal / Documentation Charges' },
+                        { id: 're-society', name: 'Society / Club Membership Fee' },
+                        { id: 're-interest', name: 'Interest / Late Payment Charges' },
+                        { id: 're-final', name: 'Full & Final Payment' },
+                    ],
                     rows: [{ product_id: '', description: '', quantity: 1, unit_price: 0, discount: 0, tax_rate: 0 }],
                     addRow() {
                         this.rows.push({ product_id: '', description: '', quantity: 1, unit_price: 0, discount: 0, tax_rate: 0 });
@@ -93,6 +116,14 @@
                     },
                     selectProduct(index) {
                         const row = this.rows[index];
+
+                        const preset = this.commonItems.find(item => item.id === row.product_id);
+                        if (preset) {
+                            row.description = preset.name;
+                            row.product_id = '';
+                            return;
+                        }
+
                         const product = this.products.find(p => String(p.id) === String(row.product_id));
                         if (product) {
                             row.description = product.name;
