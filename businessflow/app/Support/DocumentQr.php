@@ -15,11 +15,20 @@ use Endroid\QrCode\Writer\PngWriter;
  */
 class DocumentQr
 {
-    public static function dataUri(string $url, int $size = 130): string
+    /**
+     * Returns null (instead of throwing) if QR rendering isn't possible
+     * on this server — e.g. the GD extension is missing — so a PDF still
+     * downloads without its verification QR rather than failing outright.
+     */
+    public static function dataUri(string $url, int $size = 130): ?string
     {
-        $qrCode = new QrCode($url, size: $size, margin: 4);
-        $writer = new PngWriter();
+        try {
+            $qrCode = new QrCode($url, size: $size, margin: 4);
+            $writer = new PngWriter();
 
-        return $writer->write($qrCode)->getDataUri();
+            return $writer->write($qrCode)->getDataUri();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }
