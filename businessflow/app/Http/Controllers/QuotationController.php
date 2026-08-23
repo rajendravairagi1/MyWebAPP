@@ -195,4 +195,13 @@ class QuotationController extends Controller
         return Pdf::loadView('quotations.pdf', compact('quotation', 'business'))
             ->download($quotation->number.'.pdf');
     }
+
+    public function publicPdf(Quotation $quotation)
+    {
+        $quotation->load(['customer', 'items']);
+        $business = \App\Models\Business::find($quotation->business_id);
+
+        return Pdf::loadView('quotations.pdf', compact('quotation', 'business'))
+            ->stream($quotation->number.'.pdf');
+    }
 }

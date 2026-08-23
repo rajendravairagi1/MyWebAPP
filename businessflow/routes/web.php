@@ -26,6 +26,16 @@ Route::get('/install', [InstallController::class, 'index'])->name('install.index
 Route::post('/install', [InstallController::class, 'store'])->name('install.store');
 Route::get('/migrate', MigrateController::class)->name('migrate');
 
+// Public, signed PDF links so a customer (who has no login) can open a
+// quotation/invoice PDF from a WhatsApp message. The signature itself
+// authorizes access to that one document — no session/tenant needed.
+Route::get('/quotations/{quotation}/public-pdf', [QuotationController::class, 'publicPdf'])
+    ->name('quotations.public-pdf')
+    ->middleware('signed');
+Route::get('/invoices/{invoice}/public-pdf', [InvoiceController::class, 'publicPdf'])
+    ->name('invoices.public-pdf')
+    ->middleware('signed');
+
 Route::middleware('auth')->group(function () {
     Route::get('/onboarding/business', [OnboardingController::class, 'create'])->name('onboarding.create');
     Route::post('/onboarding/business', [OnboardingController::class, 'store'])->name('onboarding.store');

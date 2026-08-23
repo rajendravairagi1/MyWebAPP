@@ -49,7 +49,7 @@
             <tr>
                 <th>Description</th>
                 <th class="text-right">Qty</th>
-                <th class="text-right">Unit price</th>
+                <th class="text-right">Price</th>
                 <th class="text-right">Line total</th>
             </tr>
         </thead>

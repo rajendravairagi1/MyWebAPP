@@ -10,7 +10,7 @@
                 <tr>
                     <th class="px-3 py-2 text-left w-1/3">{{ __('Item') }}</th>
                     <th class="px-3 py-2 text-right w-20">{{ __('Qty') }}</th>
-                    <th class="px-3 py-2 text-right w-28">{{ __('Unit price') }}</th>
+                    <th class="px-3 py-2 text-right w-28">{{ __('Price') }}</th>
                     <th class="px-3 py-2 text-right w-24">{{ __('Discount') }}</th>
                     <th class="px-3 py-2 text-right w-20">{{ __('Tax %') }}</th>
                     <th class="px-3 py-2 text-right w-28">{{ __('Line total') }}</th>
