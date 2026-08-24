@@ -117,6 +117,13 @@
                         </x-slot>
                         {{ __('Ledger') }}
                     </x-sidebar-link>
+
+                    <x-sidebar-link :href="route('completed-projects.index')" :active="request()->routeIs('completed-projects.*')">
+                        <x-slot name="icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </x-slot>
+                        {{ __('Completed Projects') }}
+                    </x-sidebar-link>
                 </nav>
 
                 <div class="border-t border-slate-800 p-3 space-y-1">
@@ -185,8 +192,8 @@
                         <x-slot name="trigger">
                             <button type="button" class="relative text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                                @if ($dueFollowupsCount > 0)
-                                    <span class="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-red-600 text-white text-[10px] leading-4 text-center font-semibold">{{ $dueFollowupsCount }}</span>
+                                @if (($dueFollowupsCount + $dueCommitmentsCount) > 0)
+                                    <span class="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-red-600 text-white text-[10px] leading-4 text-center font-semibold">{{ $dueFollowupsCount + $dueCommitmentsCount }}</span>
                                 @endif
                             </button>
                         </x-slot>
@@ -204,6 +211,19 @@
                                 <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ __('Nothing due right now.') }}</div>
                             @endforelse
                             <a href="{{ route('followups.index') }}" class="block px-4 py-2 text-xs text-center text-accent-600 border-t border-gray-100 dark:border-slate-700 hover:underline">{{ __('View all follow-ups') }}</a>
+
+                            <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-t border-b border-gray-100 dark:border-slate-700">
+                                {{ __('Possession commitments overdue') }}
+                            </div>
+                            @forelse ($dueCommitmentsForBell as $commitmentUnit)
+                                <a href="{{ route('customers.show', $commitmentUnit->customer) }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700">
+                                    <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ $commitmentUnit->customer?->name }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $commitmentUnit->project->name }} · {{ $commitmentUnit->unit_number }}</div>
+                                    <div class="text-xs text-red-500">{{ __('Promised') }} {{ $commitmentUnit->commitment_date->diffForHumans() }}</div>
+                                </a>
+                            @empty
+                                <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ __('Nothing overdue right now.') }}</div>
+                            @endforelse
                         </x-slot>
                     </x-dropdown>
                 </header>

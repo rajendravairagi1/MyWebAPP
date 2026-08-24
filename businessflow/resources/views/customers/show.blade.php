@@ -102,6 +102,12 @@
                         <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                         {{ __('Follow-up') }}
                     </button>
+                    @if ($historyUnits->isNotEmpty())
+                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'history')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            {{ __('History') }}
+                        </button>
+                    @endif
                 </div>
             </div>
 
@@ -141,13 +147,24 @@
                     <div class="p-5 border-b border-gray-100 dark:border-slate-700 last:border-b-0">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <a href="{{ route('projects.show', $unit->project) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:text-accent-600">{{ $unit->project->name }}</a>
                                     <span class="text-gray-400">·</span>
                                     <span class="text-gray-700 dark:text-gray-300">{{ $unit->unit_number }}</span>
+                                    <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400">#{{ $unit->id }}</span>
                                     <x-status-badge :status="$unit->status" />
                                 </div>
                                 <div class="text-xs text-gray-400 mt-0.5">{{ $unit->type }}{{ $unit->area_sqft ? ' · '.$unit->area_sqft.' sqft' : '' }}</div>
+                                <div class="mt-1.5 flex items-center gap-1.5">
+                                    @if ($unit->commitment_date)
+                                        @php $cs = $unit->commitmentStatus(); @endphp
+                                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'commitment-{{ $unit->id }}')" class="text-xs px-2 py-0.5 rounded font-medium hover:opacity-80 {{ $cs === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' }}">
+                                            {{ __('Committed by') }} {{ $unit->commitment_date->format('d M Y') }}{{ $cs === 'overdue' ? ' · '.__('Overdue') : '' }}
+                                        </button>
+                                    @else
+                                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'commitment-{{ $unit->id }}')" class="text-xs text-accent-600 hover:underline">{{ __('+ Set commitment date') }}</button>
+                                    @endif
+                                </div>
                             </div>
                             <div class="text-right">
                                 <div class="text-xs text-gray-400">{{ __('Price') }}</div>
@@ -254,16 +271,42 @@
                             </div>
                         </form>
                     </x-modal>
+
+                    <x-modal name="commitment-{{ $unit->id }}" max-width="md">
+                        <form method="POST" action="{{ route('project-units.commitment', $unit) }}" class="p-6 space-y-4">
+                            @csrf
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Possession Commitment') }}</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $unit->project->name }} · {{ $unit->unit_number }} — {{ __('the date you promised to hand this property over. We\'ll remind you if it\'s overdue.') }}</p>
+
+                            <div>
+                                <x-input-label for="commitment_date-{{ $unit->id }}" :value="__('Commitment date')" />
+                                <input id="commitment_date-{{ $unit->id }}" type="date" name="commitment_date" value="{{ $unit->commitment_date?->format('Y-m-d') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            </div>
+                            <div>
+                                <x-input-label for="commitment_note-{{ $unit->id }}" :value="__('Note (optional)')" />
+                                <x-text-input id="commitment_note-{{ $unit->id }}" name="commitment_note" type="text" class="mt-1 block w-full" value="{{ $unit->commitment_note }}" placeholder="{{ __('e.g. Handover with full finishing') }}" />
+                            </div>
+
+                            <div class="flex justify-end gap-3">
+                                <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
+                                <x-primary-button>{{ __('Save') }}</x-primary-button>
+                            </div>
+                        </form>
+                    </x-modal>
                 @empty
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No properties assigned yet.') }}</div>
                 @endforelse
 
                 <div class="p-5 border-t border-gray-100 dark:border-slate-700">
-                    <form method="POST" action="{{ route('project-units.assign') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <form method="POST" action="{{ route('project-units.assign') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
                         @csrf
                         <input type="hidden" name="customer_id" value="{{ $customer->id }}">
                         <div class="sm:col-span-2">
                             <x-project-unit-select :projects="$projects" />
+                        </div>
+                        <div>
+                            <x-input-label for="assign_commitment_date" :value="__('Commitment date (optional)')" />
+                            <input id="assign_commitment_date" type="date" name="commitment_date" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                         </div>
                         <div>
                             <x-primary-button class="w-full justify-center">{{ __('+ Assign Property') }}</x-primary-button>
@@ -272,49 +315,55 @@
                 </div>
             </div>
 
-            {{-- History: fully paid off or written off --}}
+            {{-- History: fully paid off or written off. Opens from the header's "History" button so it doesn't clutter the active view. --}}
             @if ($historyUnits->isNotEmpty())
-                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
-                    <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">
+                <x-modal name="history" max-width="2xl">
+                    <div class="px-6 py-4 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">
                         {{ __('History') }} ({{ $historyUnits->count() }})
                     </div>
-                    @foreach ($historyUnits as $unit)
-                        <div class="p-5 border-b border-gray-100 dark:border-slate-700 last:border-b-0">
-                            <div class="flex flex-wrap items-start justify-between gap-3">
-                                <div>
-                                    <div class="flex items-center gap-2">
-                                        <a href="{{ route('projects.show', $unit->project) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:text-accent-600">{{ $unit->project->name }}</a>
-                                        <span class="text-gray-400">·</span>
-                                        <span class="text-gray-700 dark:text-gray-300">{{ $unit->unit_number }}</span>
-                                        @if ($unit->write_off_at)
-                                            <span class="text-xs px-2 py-0.5 rounded font-medium bg-red-100 text-red-700">{{ __('Written off') }}</span>
-                                        @else
-                                            <span class="text-xs px-2 py-0.5 rounded font-medium bg-green-100 text-green-700">{{ __('Paid off') }}</span>
-                                        @endif
+                    <div class="max-h-[70vh] overflow-y-auto">
+                        @foreach ($historyUnits as $unit)
+                            <div class="p-5 border-b border-gray-100 dark:border-slate-700 last:border-b-0">
+                                <div class="flex flex-wrap items-start justify-between gap-3">
+                                    <div>
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <a href="{{ route('projects.show', $unit->project) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:text-accent-600">{{ $unit->project->name }}</a>
+                                            <span class="text-gray-400">·</span>
+                                            <span class="text-gray-700 dark:text-gray-300">{{ $unit->unit_number }}</span>
+                                            <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400">#{{ $unit->id }}</span>
+                                            @if ($unit->write_off_at)
+                                                <span class="text-xs px-2 py-0.5 rounded font-medium bg-red-100 text-red-700">{{ __('Written off') }}</span>
+                                            @else
+                                                <span class="text-xs px-2 py-0.5 rounded font-medium bg-green-100 text-green-700">{{ __('Paid off') }}</span>
+                                            @endif
+                                        </div>
+                                        <div class="text-xs text-gray-400 mt-0.5">
+                                            {{ __('Closed on') }} {{ $unit->archived_at->format('d M Y') }}
+                                            @if ($unit->write_off_at)
+                                                · {{ __('Written off') }}: ₹{{ number_format($unit->write_off_amount, 0) }}@if ($unit->write_off_note) — {{ $unit->write_off_note }}@endif
+                                            @endif
+                                        </div>
                                     </div>
-                                    <div class="text-xs text-gray-400 mt-0.5">
-                                        {{ __('Closed on') }} {{ $unit->archived_at->format('d M Y') }}
-                                        @if ($unit->write_off_at)
-                                            · {{ __('Written off') }}: ₹{{ number_format($unit->write_off_amount, 0) }}@if ($unit->write_off_note) — {{ $unit->write_off_note }}@endif
-                                        @endif
+                                    <div class="flex items-center gap-3">
+                                        <div class="text-right">
+                                            <div class="text-xs text-gray-400">{{ __('Collected') }}</div>
+                                            <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->totalCollected(), 0) }} / ₹{{ number_format($unit->price, 0) }}</div>
+                                        </div>
+                                        <form method="POST" action="{{ route('project-units.recover', $unit) }}" onsubmit="return confirm('{{ __('Move this property back to active?') }}')">
+                                            @csrf
+                                            <button class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Recover') }}</button>
+                                        </form>
                                     </div>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="text-right">
-                                        <div class="text-xs text-gray-400">{{ __('Collected') }}</div>
-                                        <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->totalCollected(), 0) }} / ₹{{ number_format($unit->price, 0) }}</div>
-                                    </div>
-                                    <form method="POST" action="{{ route('project-units.recover', $unit) }}" onsubmit="return confirm('{{ __('Move this property back to active?') }}')">
-                                        @csrf
-                                        <button class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Recover') }}</button>
-                                    </form>
-                                </div>
-                            </div>
 
-                            <x-unit-payment-ledger :unit="$unit" :editable="false" />
-                        </div>
-                    @endforeach
-                </div>
+                                <x-unit-payment-ledger :unit="$unit" :editable="false" />
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="px-6 py-4 border-t border-gray-100 dark:border-slate-700 text-right">
+                        <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Close') }}</button>
+                    </div>
+                </x-modal>
             @endif
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

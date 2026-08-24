@@ -21,6 +21,8 @@ class ProjectUnit extends Model
         'price',
         'status',
         'customer_id',
+        'commitment_date',
+        'commitment_note',
         'archived_at',
         'write_off_amount',
         'write_off_note',
@@ -31,6 +33,7 @@ class ProjectUnit extends Model
         'area_sqft' => 'decimal:2',
         'price' => 'decimal:2',
         'write_off_amount' => 'decimal:2',
+        'commitment_date' => 'date',
         'archived_at' => 'datetime',
         'write_off_at' => 'datetime',
     ];
@@ -148,5 +151,23 @@ class ProjectUnit extends Model
         ])->save();
 
         $this->syncPaymentState();
+    }
+
+    /**
+     * Whether we delivered on the possession/handover date we promised —
+     * 'met' or 'late' once the property is closed out, 'overdue' or
+     * 'upcoming' while it's still open, or null if no date was set.
+     */
+    public function commitmentStatus(): ?string
+    {
+        if (! $this->commitment_date) {
+            return null;
+        }
+
+        if ($this->isArchived()) {
+            return $this->archived_at->toDateString() <= $this->commitment_date->toDateString() ? 'met' : 'late';
+        }
+
+        return $this->commitment_date->isPast() ? 'overdue' : 'upcoming';
     }
 }

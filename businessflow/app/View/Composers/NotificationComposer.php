@@ -3,21 +3,28 @@
 namespace App\View\Composers;
 
 use App\Models\Followup;
+use App\Models\ProjectUnit;
 use App\Support\Tenant;
 use Illuminate\View\View;
 
 /**
  * Feeds the notification bell in layouts.app, which every authenticated
- * page renders — due/overdue follow-ups the current business owner
- * should know about. Kept deliberately cheap since it runs on every
- * request; Tenant::check() short-circuits it before login/onboarding.
+ * page renders — due/overdue follow-ups and overdue possession
+ * commitments the current business owner should know about. Kept
+ * deliberately cheap since it runs on every request; Tenant::check()
+ * short-circuits it before login/onboarding.
  */
 class NotificationComposer
 {
     public function compose(View $view): void
     {
         if (! Tenant::check()) {
-            $view->with(['dueFollowupsForBell' => collect(), 'dueFollowupsCount' => 0]);
+            $view->with([
+                'dueFollowupsForBell' => collect(),
+                'dueFollowupsCount' => 0,
+                'dueCommitmentsForBell' => collect(),
+                'dueCommitmentsCount' => 0,
+            ]);
 
             return;
         }
@@ -29,9 +36,19 @@ class NotificationComposer
             ->limit(8)
             ->get();
 
+        $overdueCommitments = ProjectUnit::with(['project', 'customer'])
+            ->whereNull('archived_at')
+            ->whereNotNull('commitment_date')
+            ->where('commitment_date', '<=', now()->toDateString())
+            ->orderBy('commitment_date')
+            ->limit(8)
+            ->get();
+
         $view->with([
             'dueFollowupsForBell' => $due,
             'dueFollowupsCount' => Followup::where('status', 'pending')->where('due_at', '<=', now())->count(),
+            'dueCommitmentsForBell' => $overdueCommitments,
+            'dueCommitmentsCount' => ProjectUnit::whereNull('archived_at')->whereNotNull('commitment_date')->where('commitment_date', '<=', now()->toDateString())->count(),
         ]);
     }
 }

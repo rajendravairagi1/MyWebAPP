@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CompletedProjectsController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerDocumentController;
 use App\Http\Controllers\DashboardController;
@@ -66,6 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/project-units/assign', [ProjectUnitController::class, 'assign'])->name('project-units.assign');
     Route::post('/project-units/{unit}/write-off', [ProjectUnitController::class, 'writeOff'])->name('project-units.write-off');
     Route::post('/project-units/{unit}/recover', [ProjectUnitController::class, 'recover'])->name('project-units.recover');
+    Route::post('/project-units/{unit}/commitment', [ProjectUnitController::class, 'updateCommitment'])->name('project-units.commitment');
     Route::post('/project-units/{unit}/payments', [UnitPaymentController::class, 'store'])->name('unit-payments.store');
     Route::put('/project-units/{unit}/payments/{payment}', [UnitPaymentController::class, 'update'])->name('unit-payments.update');
     Route::delete('/project-units/{unit}/payments/{payment}', [UnitPaymentController::class, 'destroy'])->name('unit-payments.destroy');
@@ -101,6 +103,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
     Route::post('/ledger/entries', [LedgerController::class, 'storeEntry'])->name('ledger.entries.store');
     Route::delete('/ledger/entries/{entry}', [LedgerController::class, 'destroyEntry'])->name('ledger.entries.destroy');
+
+    Route::get('/completed-projects', [CompletedProjectsController::class, 'index'])->name('completed-projects.index');
 });
 
 Route::middleware('auth')->group(function () {

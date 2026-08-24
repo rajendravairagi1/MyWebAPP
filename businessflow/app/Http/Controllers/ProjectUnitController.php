@@ -56,6 +56,7 @@ class ProjectUnitController extends Controller
         $data = $request->validate([
             'project_unit_id' => ['required', 'integer'],
             'customer_id' => ['nullable', 'integer'],
+            'commitment_date' => ['nullable', 'date'],
         ]);
 
         $unit = ProjectUnit::findOrFail($data['project_unit_id']);
@@ -74,9 +75,22 @@ class ProjectUnitController extends Controller
         $unit->update([
             'customer_id' => $customer->id,
             'status' => $unit->status === 'available' ? 'booked' : $unit->status,
+            'commitment_date' => $data['commitment_date'] ?? $unit->commitment_date,
         ]);
 
         return back()->with('status', 'Property assigned to customer.');
+    }
+
+    public function updateCommitment(Request $request, ProjectUnit $unit): RedirectResponse
+    {
+        $data = $request->validate([
+            'commitment_date' => ['nullable', 'date'],
+            'commitment_note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $unit->update($data);
+
+        return back()->with('status', 'Commitment date updated.');
     }
 
     public function writeOff(Request $request, ProjectUnit $unit): RedirectResponse
