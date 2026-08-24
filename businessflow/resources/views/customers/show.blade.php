@@ -1,11 +1,15 @@
 @php
     $activeUnits = $customer->units->whereNull('archived_at');
     $historyUnits = $customer->units->whereNotNull('archived_at');
-    $totalPaid = $customer->units->sum(fn ($u) => $u->totalCollected());
-    $totalDue = $customer->units->sum(fn ($u) => $u->totalOutstanding());
-    $totalValue = $customer->units->sum(fn ($u) => $u->price);
+    // Only currently-active properties count toward these — once a
+    // property is fully closed (paid off / written off) there's nothing
+    // left to collect on it, so it shouldn't inflate the live totals.
+    $totalPaid = $activeUnits->sum(fn ($u) => $u->totalCollected());
+    $totalDue = $activeUnits->sum(fn ($u) => $u->totalOutstanding());
+    $totalValue = $activeUnits->sum(fn ($u) => $u->price);
     $unitCount = $customer->units->count();
     $activeUnitCount = $activeUnits->count();
+    $primaryUnit = $unitCount === 1 ? $customer->units->first() : null;
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -85,29 +89,37 @@
                         @endif
                     </div>
                 </div>
-                <div class="flex flex-wrap gap-2 shrink-0">
-                    <a href="{{ route('customers.edit', $customer) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
-                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
-                        {{ __('Edit') }}
-                    </a>
-                    <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 dark:text-accent-100 hover:bg-accent-100 dark:hover:bg-slate-600">
-                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
-                        {{ __('Statement') }}
-                    </a>
-                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'upload-document')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
-                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M2.25 12.75L4.06 5.19A2.25 2.25 0 016.243 3.75h11.514a2.25 2.25 0 012.183 1.44l1.81 7.56" /></svg>
-                        {{ __('Documents') }}
-                    </button>
-                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-followup')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
-                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        {{ __('Follow-up') }}
-                    </button>
-                    @if ($historyUnits->isNotEmpty())
-                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'history')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
-                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            {{ __('History') }}
+                <div class="flex flex-col gap-2 shrink-0">
+                    <div class="grid grid-cols-3 gap-2">
+                        <a href="{{ route('customers.edit', $customer) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
+                            {{ __('Edit') }}
+                        </a>
+                        <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 dark:text-accent-100 hover:bg-accent-100 dark:hover:bg-slate-600">
+                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                            {{ __('Statement') }}
+                        </a>
+                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'upload-document')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M2.25 12.75L4.06 5.19A2.25 2.25 0 016.243 3.75h11.514a2.25 2.25 0 012.183 1.44l1.81 7.56" /></svg>
+                            {{ __('Documents') }}
                         </button>
-                    @endif
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-followup')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
+                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            {{ __('Follow-up') }}
+                        </button>
+                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'commitments')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            {{ __('Commitment') }}
+                        </button>
+                        @if ($historyUnits->isNotEmpty())
+                            <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'history')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                                <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                {{ __('History') }}
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </div>
 
@@ -115,8 +127,13 @@
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Properties') }}</div>
-                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $unitCount }}</div>
-                    <div class="text-xs text-gray-400 mt-0.5">{{ $activeUnitCount }} {{ __('active') }}</div>
+                    @if ($primaryUnit)
+                        <div class="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{{ $primaryUnit->project->name }} · {{ $primaryUnit->unit_number }}</div>
+                        <div class="text-xs text-gray-400 mt-0.5">#{{ $primaryUnit->id }} · {{ $primaryUnit->isArchived() ? __('closed') : __('active') }}</div>
+                    @else
+                        <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $unitCount }}</div>
+                        <div class="text-xs text-gray-400 mt-0.5">{{ $activeUnitCount }} {{ __('active') }}</div>
+                    @endif
                 </div>
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Total Value') }}</div>
@@ -155,16 +172,6 @@
                                     <x-status-badge :status="$unit->status" />
                                 </div>
                                 <div class="text-xs text-gray-400 mt-0.5">{{ $unit->type }}{{ $unit->area_sqft ? ' · '.$unit->area_sqft.' sqft' : '' }}</div>
-                                <div class="mt-1.5 flex items-center gap-1.5">
-                                    @if ($unit->commitment_date)
-                                        @php $cs = $unit->commitmentStatus(); @endphp
-                                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'commitment-{{ $unit->id }}')" class="text-xs px-2 py-0.5 rounded font-medium hover:opacity-80 {{ $cs === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' }}">
-                                            {{ __('Committed by') }} {{ $unit->commitment_date->format('d M Y') }}{{ $cs === 'overdue' ? ' · '.__('Overdue') : '' }}
-                                        </button>
-                                    @else
-                                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'commitment-{{ $unit->id }}')" class="text-xs text-accent-600 hover:underline">{{ __('+ Set commitment date') }}</button>
-                                    @endif
-                                </div>
                             </div>
                             <div class="text-right">
                                 <div class="text-xs text-gray-400">{{ __('Price') }}</div>
@@ -271,28 +278,6 @@
                             </div>
                         </form>
                     </x-modal>
-
-                    <x-modal name="commitment-{{ $unit->id }}" max-width="md">
-                        <form method="POST" action="{{ route('project-units.commitment', $unit) }}" class="p-6 space-y-4">
-                            @csrf
-                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Possession Commitment') }}</h2>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $unit->project->name }} · {{ $unit->unit_number }} — {{ __('the date you promised to hand this property over. We\'ll remind you if it\'s overdue.') }}</p>
-
-                            <div>
-                                <x-input-label for="commitment_date-{{ $unit->id }}" :value="__('Commitment date')" />
-                                <input id="commitment_date-{{ $unit->id }}" type="date" name="commitment_date" value="{{ $unit->commitment_date?->format('Y-m-d') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                            </div>
-                            <div>
-                                <x-input-label for="commitment_note-{{ $unit->id }}" :value="__('Note (optional)')" />
-                                <x-text-input id="commitment_note-{{ $unit->id }}" name="commitment_note" type="text" class="mt-1 block w-full" value="{{ $unit->commitment_note }}" placeholder="{{ __('e.g. Handover with full finishing') }}" />
-                            </div>
-
-                            <div class="flex justify-end gap-3">
-                                <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
-                                <x-primary-button>{{ __('Save') }}</x-primary-button>
-                            </div>
-                        </form>
-                    </x-modal>
                 @empty
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No properties assigned yet.') }}</div>
                 @endforelse
@@ -314,6 +299,47 @@
                     </form>
                 </div>
             </div>
+
+            <x-modal name="commitments" max-width="lg">
+                <div class="p-6 space-y-4">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Possession Commitments') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('The handover date promised for each active property. We\'ll remind you here and in the notification bell if one goes overdue.') }}</p>
+
+                    @forelse ($activeUnits as $unit)
+                        @php $cs = $unit->commitmentStatus(); @endphp
+                        <form method="POST" action="{{ route('project-units.commitment', $unit) }}" class="border border-gray-200 dark:border-slate-700 rounded-lg p-4 space-y-3">
+                            @csrf
+                            <div class="flex items-center justify-between gap-2 flex-wrap">
+                                <div class="font-medium text-gray-900 dark:text-gray-100">{{ $unit->project->name }} · {{ $unit->unit_number }} <span class="text-xs text-gray-400">#{{ $unit->id }}</span></div>
+                                @if ($cs === 'overdue')
+                                    <span class="text-xs px-2 py-0.5 rounded font-medium bg-red-100 text-red-700">{{ __('Overdue') }}</span>
+                                @elseif ($cs === 'upcoming')
+                                    <span class="text-xs px-2 py-0.5 rounded font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">{{ __('Upcoming') }}</span>
+                                @endif
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <x-input-label for="commitment_date-{{ $unit->id }}" :value="__('Commitment date')" class="text-xs" />
+                                    <input id="commitment_date-{{ $unit->id }}" type="date" name="commitment_date" value="{{ $unit->commitment_date?->format('Y-m-d') }}" class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                </div>
+                                <div>
+                                    <x-input-label for="commitment_note-{{ $unit->id }}" :value="__('Note (optional)')" class="text-xs" />
+                                    <input id="commitment_note-{{ $unit->id }}" type="text" name="commitment_note" value="{{ $unit->commitment_note }}" placeholder="{{ __('e.g. Handover with full finishing') }}" class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <button class="px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('Save') }}</button>
+                            </div>
+                        </form>
+                    @empty
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ __('No active properties to set a commitment on.') }}</div>
+                    @endforelse
+
+                    <div class="flex justify-end pt-2">
+                        <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Close') }}</button>
+                    </div>
+                </div>
+            </x-modal>
 
             {{-- History: fully paid off or written off. Opens from the header's "History" button so it doesn't clutter the active view. --}}
             @if ($historyUnits->isNotEmpty())
