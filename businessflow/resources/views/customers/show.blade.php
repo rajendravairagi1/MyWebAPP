@@ -171,39 +171,71 @@
                             </div>
                         @endif
 
-                        {{-- Record a payment --}}
-                        <form method="POST" action="{{ route('unit-payments.store', $unit) }}" class="mt-4 space-y-2 bg-gray-50 dark:bg-slate-900/40 p-3 rounded-md">
+                        <div class="mt-4">
+                            <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'record-payment-{{ $unit->id }}')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg bg-accent-600 text-white text-sm font-semibold hover:bg-accent-700">
+                                <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                                {{ __('Record Payment') }}
+                            </button>
+                        </div>
+
+                        <x-unit-payment-ledger :unit="$unit" :editable="true" />
+
+                        @if ($unit->totalOutstanding() > 0)
+                            <details class="mt-3 group">
+                                <summary class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 bg-white dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden">
+                                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    {{ __('Write off remaining balance') }}
+                                </summary>
+                                <form method="POST" action="{{ route('project-units.write-off', $unit) }}" class="mt-2 flex flex-wrap items-end gap-2 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900 rounded-lg p-3" onsubmit="return confirm('{{ __('Write off the remaining outstanding balance for this property? This moves it to History.') }}')">
+                                    @csrf
+                                    <div class="flex-1 min-w-[200px]">
+                                        <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Reason (optional)') }}</label>
+                                        <input type="text" name="note" placeholder="{{ __('e.g. Customer unable to pay, settled verbally') }}" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-red-500 focus:ring-red-500">
+                                    </div>
+                                    <button class="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-500 whitespace-nowrap">{{ __('Confirm Write-off') }} (₹{{ number_format($unit->totalOutstanding(), 0) }})</button>
+                                </form>
+                            </details>
+                        @endif
+                    </div>
+
+                    <x-modal name="record-payment-{{ $unit->id }}" max-width="md">
+                        <form method="POST" action="{{ route('unit-payments.store', $unit) }}" class="p-6 space-y-4">
                             @csrf
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Record Payment') }}</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $unit->project->name }} · {{ $unit->unit_number }}</p>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Payment for') }}</label>
-                                    <select name="purpose" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                    <x-input-label for="purpose-{{ $unit->id }}" :value="__('Payment for')" />
+                                    <select id="purpose-{{ $unit->id }}" name="purpose" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                         @foreach (\App\Models\UnitPayment::PURPOSES as $val => $label)
                                             <option value="{{ $val }}" @selected($val === 'installment')>{{ $label }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('If Other, specify') }}</label>
-                                    <input type="text" name="purpose_other" placeholder="{{ __('e.g. Parking charges') }}" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
-                                </div>
-                                <div class="col-span-2 sm:col-span-1">
-                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Description') }}</label>
-                                    <input type="text" name="description" placeholder="{{ __('optional note') }}" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                    <x-input-label for="purpose_other-{{ $unit->id }}" :value="__('If Other, specify')" />
+                                    <x-text-input id="purpose_other-{{ $unit->id }}" name="purpose_other" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Parking charges') }}" />
                                 </div>
                             </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 items-end">
+
+                            <div>
+                                <x-input-label for="description-{{ $unit->id }}" :value="__('Description (optional)')" />
+                                <x-text-input id="description-{{ $unit->id }}" name="description" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. 2nd installment as per agreement') }}" />
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
-                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Amount') }}</label>
-                                    <input type="number" step="0.01" min="0.01" name="amount" required placeholder="₹" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                    <x-input-label for="amount-{{ $unit->id }}" :value="__('Amount')" />
+                                    <input id="amount-{{ $unit->id }}" type="number" step="0.01" min="0.01" name="amount" required placeholder="₹" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 </div>
                                 <div>
-                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Date') }}</label>
-                                    <input type="date" name="paid_at" value="{{ now()->format('Y-m-d') }}" required class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                    <x-input-label for="paid_at-{{ $unit->id }}" :value="__('Date')" />
+                                    <input id="paid_at-{{ $unit->id }}" type="date" name="paid_at" value="{{ now()->format('Y-m-d') }}" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 </div>
                                 <div>
-                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Method') }}</label>
-                                    <select name="method" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                    <x-input-label for="method-{{ $unit->id }}" :value="__('Method')" />
+                                    <select id="method-{{ $unit->id }}" name="method" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                         <option value="cash">{{ __('Cash') }}</option>
                                         <option value="upi">{{ __('UPI') }}</option>
                                         <option value="bank_transfer">{{ __('Bank transfer') }}</option>
@@ -213,30 +245,17 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Reference') }}</label>
-                                    <input type="text" name="reference" placeholder="{{ __('optional') }}" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
-                                </div>
-                                <div class="col-span-2 sm:col-span-1">
-                                    <button class="w-full inline-flex justify-center items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('+ Record Payment') }}</button>
+                                    <x-input-label for="reference-{{ $unit->id }}" :value="__('Reference (optional)')" />
+                                    <x-text-input id="reference-{{ $unit->id }}" name="reference" type="text" class="mt-1 block w-full" />
                                 </div>
                             </div>
+
+                            <div class="flex justify-end gap-3">
+                                <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
+                                <x-primary-button>{{ __('+ Record Payment') }}</x-primary-button>
+                            </div>
                         </form>
-
-                        <x-unit-payment-ledger :unit="$unit" :editable="true" />
-
-                        @if ($unit->totalOutstanding() > 0)
-                            <details class="mt-3">
-                                <summary class="cursor-pointer text-xs text-red-600 hover:underline select-none list-none">{{ __('Write off remaining balance') }}</summary>
-                                <form method="POST" action="{{ route('project-units.write-off', $unit) }}" class="mt-2 flex flex-wrap items-end gap-2" onsubmit="return confirm('{{ __('Write off the remaining outstanding balance for this property? This moves it to History.') }}')">
-                                    @csrf
-                                    <div class="flex-1 min-w-[200px]">
-                                        <input type="text" name="note" placeholder="{{ __('Reason (optional)') }}" class="block w-full text-xs rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
-                                    </div>
-                                    <button class="px-3 py-1.5 bg-red-600 text-white text-xs font-semibold rounded-md hover:bg-red-500">{{ __('Confirm Write-off') }} (₹{{ number_format($unit->totalOutstanding(), 0) }})</button>
-                                </form>
-                            </details>
-                        @endif
-                    </div>
+                    </x-modal>
                 @empty
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No properties assigned yet.') }}</div>
                 @endforelse
