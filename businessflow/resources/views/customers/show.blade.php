@@ -94,14 +94,14 @@
                         <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                         {{ __('Statement') }}
                     </a>
-                    <a href="#documents" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'upload-document')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
                         <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M2.25 12.75L4.06 5.19A2.25 2.25 0 016.243 3.75h11.514a2.25 2.25 0 012.183 1.44l1.81 7.56" /></svg>
                         {{ __('Documents') }}
-                    </a>
-                    <a href="#followups" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
+                    </button>
+                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-commitment')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
                         <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                         {{ __('Commitment') }}
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -199,24 +199,22 @@
                     </div>
 
                     <x-modal name="record-payment-{{ $unit->id }}" max-width="md">
-                        <form method="POST" action="{{ route('unit-payments.store', $unit) }}" class="p-6 space-y-4">
+                        <form method="POST" action="{{ route('unit-payments.store', $unit) }}" x-data="{ purpose: 'installment' }" class="p-6 space-y-4">
                             @csrf
                             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Record Payment') }}</h2>
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $unit->project->name }} · {{ $unit->unit_number }}</p>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <x-input-label for="purpose-{{ $unit->id }}" :value="__('Payment for')" />
-                                    <select id="purpose-{{ $unit->id }}" name="purpose" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                        @foreach (\App\Models\UnitPayment::PURPOSES as $val => $label)
-                                            <option value="{{ $val }}" @selected($val === 'installment')>{{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div>
-                                    <x-input-label for="purpose_other-{{ $unit->id }}" :value="__('If Other, specify')" />
-                                    <x-text-input id="purpose_other-{{ $unit->id }}" name="purpose_other" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Parking charges') }}" />
-                                </div>
+                            <div>
+                                <x-input-label for="purpose-{{ $unit->id }}" :value="__('Payment for')" />
+                                <select id="purpose-{{ $unit->id }}" name="purpose" x-model="purpose" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                    @foreach (\App\Models\UnitPayment::PURPOSES as $val => $label)
+                                        <option value="{{ $val }}" @selected($val === 'installment')>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div x-show="purpose === 'other'" x-cloak>
+                                <x-input-label for="purpose_other-{{ $unit->id }}" :value="__('If Other, specify')" />
+                                <x-text-input id="purpose_other-{{ $unit->id }}" name="purpose_other" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Parking charges') }}" />
                             </div>
 
                             <div>
@@ -365,11 +363,11 @@
                 </div>
             </div>
 
-            {{-- Follow-ups (also serves as the payment-commitment log — "customer said will pay X by date Y") --}}
+            {{-- Follow-ups / commitments — "customer said will pay X by date Y". Adding one happens via the header's "Commitment" button (popup); this section only shows when there's something to list. --}}
+            @if ($customer->followups->isNotEmpty())
             <div id="followups" class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden scroll-mt-6">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Follow-ups & commitments') }}</div>
 
-                @if ($customer->followups->isNotEmpty())
                     <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
                         @foreach ($customer->followups as $followup)
                             <li class="px-5 py-3 flex items-center justify-between gap-4 {{ $followup->status === 'done' ? 'opacity-50' : '' }}">
@@ -405,31 +403,35 @@
                             </li>
                         @endforeach
                     </ul>
-                @endif
+            </div>
+            @endif
 
-                <form method="POST" action="{{ route('followups.store') }}" class="p-5 border-t border-gray-100 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+            <x-modal name="add-commitment" :show="$errors->has('note') || $errors->has('due_at')">
+                <form method="POST" action="{{ route('followups.store') }}" class="p-6 space-y-4">
                     @csrf
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add Commitment / Follow-up') }}</h2>
                     <input type="hidden" name="customer_id" value="{{ $customer->id }}">
-                    <div class="sm:col-span-2">
-                        <x-input-label for="note" :value="__('Note (e.g. promised payment, site visit)')" class="text-xs" />
-                        <x-text-input id="note" name="note" type="text" class="mt-1 block w-full text-sm" required placeholder="{{ __('e.g. Said will pay ₹50,000 by 25th') }}" />
+                    <div>
+                        <x-input-label for="note" :value="__('Note (e.g. promised payment, site visit)')" />
+                        <x-text-input id="note" name="note" type="text" class="mt-1 block w-full" required placeholder="{{ __('e.g. Said will pay ₹50,000 by 25th') }}" />
                     </div>
                     <div>
-                        <x-input-label for="due_at" :value="__('Due')" class="text-xs" />
+                        <x-input-label for="due_at" :value="__('Due')" />
                         <input id="due_at" name="due_at" type="datetime-local" value="{{ now()->addDay()->format('Y-m-d\TH:i') }}" required
-                            class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     </div>
-                    <div>
-                        <x-primary-button class="w-full justify-center">{{ __('+ Add') }}</x-primary-button>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
+                        <x-primary-button>{{ __('+ Add') }}</x-primary-button>
                     </div>
                 </form>
-            </div>
+            </x-modal>
 
             {{-- Documents --}}
+            @if ($customer->documents->isNotEmpty())
             <div id="documents" class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden scroll-mt-6">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Documents') }}</div>
 
-                @if ($customer->documents->isNotEmpty())
                     <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
                         @foreach ($customer->documents as $document)
                             <li class="px-5 py-3 flex items-center justify-between gap-4">
@@ -449,20 +451,25 @@
                             </li>
                         @endforeach
                     </ul>
-                @else
-                    <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No documents uploaded yet.') }}</div>
-                @endif
+            </div>
+            @endif
 
-                <form method="POST" action="{{ route('customer-documents.store', $customer) }}" enctype="multipart/form-data" class="p-5 border-t border-gray-100 dark:border-slate-700 flex flex-wrap items-end gap-3">
+            <x-modal name="upload-document" :show="$errors->has('file')">
+                <form method="POST" action="{{ route('customer-documents.store', $customer) }}" enctype="multipart/form-data" class="p-6 space-y-4">
                     @csrf
-                    <div class="flex-1 min-w-[200px]">
-                        <x-input-label for="file" :value="__('Upload file (ID proof, agreement, receipt...)')" class="text-xs" />
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Document') }}</h2>
+                    <div>
+                        <x-input-label for="file" :value="__('File (ID proof, agreement, receipt...)')" />
                         <input id="file" name="file" type="file" required
                             class="mt-1 block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
+                        <x-input-error :messages="$errors->get('file')" class="mt-2" />
                     </div>
-                    <x-primary-button>{{ __('Upload') }}</x-primary-button>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
+                        <x-primary-button>{{ __('Upload') }}</x-primary-button>
+                    </div>
                 </form>
-            </div>
+            </x-modal>
         </div>
     </div>
 </x-app-layout>

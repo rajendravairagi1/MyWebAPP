@@ -11,12 +11,12 @@
 @endphp
 
 @if ($unit->payments->isNotEmpty())
-    <div class="mt-3 space-y-3.5">
+    <div class="mt-3 space-y-4">
         <div class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('Payment history') }} ({{ $unit->payments->count() }})</div>
 
         @foreach ($unit->payments as $payment)
             @php $style = $purposeStyles[$payment->purpose] ?? $defaultStyle; @endphp
-            <div class="rounded-lg border border-gray-200 dark:border-slate-700 {{ $style['border'] }} border-l-4 bg-white dark:bg-slate-800 shadow-sm p-3.5">
+            <div class="rounded-lg border border-gray-200 dark:border-slate-600 {{ $style['border'] }} border-l-4 bg-gray-50 dark:bg-slate-900/60 shadow-sm p-3.5">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
@@ -37,15 +37,18 @@
                             <div class="mt-1.5 flex items-center justify-end gap-1.5 text-xs">
                                 <details class="relative">
                                     <summary class="cursor-pointer px-2 py-1 rounded border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 list-none [&::-webkit-details-marker]:hidden">{{ __('Edit') }}</summary>
-                                    <form method="POST" action="{{ route('unit-payments.update', [$unit, $payment]) }}" class="absolute right-0 z-10 mt-2 grid grid-cols-2 gap-1.5 text-left w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-3 rounded-md">
+                                    @php $paymentPurposeIsCustom = ! array_key_exists($payment->purpose, \App\Models\UnitPayment::PURPOSES); @endphp
+                                    <form method="POST" action="{{ route('unit-payments.update', [$unit, $payment]) }}" x-data="{ purpose: '{{ $paymentPurposeIsCustom ? 'other' : $payment->purpose }}' }" class="absolute right-0 z-10 mt-2 grid grid-cols-2 gap-1.5 text-left w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-3 rounded-md">
                                         @csrf
                                         @method('PUT')
-                                        <select name="purpose" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                        <select name="purpose" x-model="purpose" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
                                             @foreach (\App\Models\UnitPayment::PURPOSES as $val => $label)
-                                                <option value="{{ $val }}" @selected($payment->purpose === $val)>{{ $label }}</option>
+                                                <option value="{{ $val }}" @selected($paymentPurposeIsCustom ? $val === 'other' : $payment->purpose === $val)>{{ $label }}</option>
                                             @endforeach
                                         </select>
-                                        <input type="text" name="purpose_other" value="{{ !array_key_exists($payment->purpose, \App\Models\UnitPayment::PURPOSES) ? $payment->purpose : '' }}" placeholder="{{ __('If Other, specify') }}" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                        <div x-show="purpose === 'other'" x-cloak class="col-span-2">
+                                            <input type="text" name="purpose_other" value="{{ $paymentPurposeIsCustom ? $payment->purpose : '' }}" placeholder="{{ __('If Other, specify') }}" class="w-full text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                        </div>
                                         <textarea name="description" rows="2" placeholder="{{ __('Description') }}" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">{{ $payment->description }}</textarea>
                                         <input type="number" step="0.01" min="0.01" name="amount" value="{{ $payment->amount }}" required class="col-span-1 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
                                         <input type="date" name="paid_at" value="{{ $payment->paid_at->format('Y-m-d') }}" required class="col-span-1 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">

@@ -3,7 +3,10 @@
 <div x-data="{
         projectId: '{{ old('project_id', $selectedProjectId) }}',
         unitId: '{{ old('project_unit_id', $selectedUnitId) }}',
-        units: @js($projects->mapWithKeys(fn ($p) => [$p->id => $p->units->map(fn ($u) => ['id' => $u->id, 'label' => $u->unit_number.($u->type ? ' · '.$u->type : '').' · '.number_format($u->price, 0), 'available' => $u->status === 'available' || $u->id === $selectedUnitId])])),
+        units: @js($projects->mapWithKeys(fn ($p) => [$p->id => $p->units
+            ->filter(fn ($u) => $u->status === 'available' || $u->id === $selectedUnitId)
+            ->map(fn ($u) => ['id' => $u->id, 'label' => $u->unit_number.($u->type ? ' · '.$u->type : '').' · '.number_format($u->price, 0)])
+            ->values()])),
     }" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <div>
         <x-input-label for="project_id" :value="__('Project (optional)')" />
@@ -20,7 +23,7 @@
         <select id="project_unit_id" name="project_unit_id" x-model="unitId" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             <option value="">{{ __('No specific unit') }}</option>
             <template x-for="unit in (units[projectId] || [])" :key="unit.id">
-                <option :value="unit.id" x-text="unit.label + (unit.available ? '' : ' (not available)')"></option>
+                <option :value="unit.id" x-text="unit.label"></option>
             </template>
         </select>
         <x-input-error :messages="$errors->get('project_unit_id')" class="mt-2" />
