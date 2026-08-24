@@ -21,6 +21,7 @@ class ProjectUnitController extends Controller
         ]);
 
         $project->units()->create($data);
+        $project->syncCompletionStatus();
 
         return back()->with('status', 'Unit added.');
     }
@@ -38,6 +39,7 @@ class ProjectUnitController extends Controller
         ]);
 
         $unit->update($data);
+        $project->syncCompletionStatus();
 
         return back()->with('status', 'Unit updated.');
     }
@@ -47,6 +49,7 @@ class ProjectUnitController extends Controller
         abort_unless($unit->project_id === $project->id, 404);
 
         $unit->delete();
+        $project->syncCompletionStatus();
 
         return back()->with('status', 'Unit removed.');
     }
@@ -66,6 +69,7 @@ class ProjectUnitController extends Controller
                 'customer_id' => null,
                 'status' => $unit->status === 'sold' ? $unit->status : 'available',
             ]);
+            $unit->project?->syncCompletionStatus();
 
             return back()->with('status', 'Property unassigned.');
         }
@@ -77,6 +81,7 @@ class ProjectUnitController extends Controller
             'status' => $unit->status === 'available' ? 'booked' : $unit->status,
             'commitment_date' => $data['commitment_date'] ?? $unit->commitment_date,
         ]);
+        $unit->project?->syncCompletionStatus();
 
         return back()->with('status', 'Property assigned to customer.');
     }

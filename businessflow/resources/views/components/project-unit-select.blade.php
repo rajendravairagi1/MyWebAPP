@@ -1,5 +1,12 @@
 @props(['projects', 'selectedProjectId' => null, 'selectedUnitId' => null])
 
+@php
+    // A project with nothing left to sell shouldn't appear here at all —
+    // keep it only if it still has an available unit, or it's the project
+    // already tied to this record (so editing doesn't lose that context).
+    $visibleProjects = $projects->filter(fn ($p) => $p->id == $selectedProjectId || $p->units->contains(fn ($u) => $u->status === 'available'));
+@endphp
+
 <div x-data="{
         projectId: '{{ old('project_id', $selectedProjectId) }}',
         unitId: '{{ old('project_unit_id', $selectedUnitId) }}',
@@ -12,7 +19,7 @@
         <x-input-label for="project_id" :value="__('Project (optional)')" />
         <select id="project_id" name="project_id" x-model="projectId" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             <option value="">{{ __('No project — general item') }}</option>
-            @foreach ($projects as $project)
+            @foreach ($visibleProjects as $project)
                 <option value="{{ $project->id }}">{{ $project->name }}</option>
             @endforeach
         </select>

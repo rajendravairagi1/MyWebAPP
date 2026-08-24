@@ -78,4 +78,26 @@ class Project extends Model
     {
         return $this->units()->where('status', 'sold')->count();
     }
+
+    /**
+     * Auto-flips status to "completed" once every unit is closed out (sold
+     * & paid off, or written off) — nothing left open or for sale — and
+     * back to "ongoing" the moment a unit is open again, e.g. a new one is
+     * added or one is recovered from history. A project with no units at
+     * all, or with a unit still being paid off, is left alone.
+     */
+    public function syncCompletionStatus(): void
+    {
+        if (! $this->units()->exists()) {
+            return;
+        }
+
+        $hasOpenUnits = $this->units()->whereNull('archived_at')->exists();
+
+        if (! $hasOpenUnits && $this->status !== 'completed') {
+            $this->update(['status' => 'completed']);
+        } elseif ($hasOpenUnits && $this->status === 'completed') {
+            $this->update(['status' => 'ongoing']);
+        }
+    }
 }

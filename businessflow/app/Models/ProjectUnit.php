@@ -122,6 +122,8 @@ class ProjectUnit extends Model
                 'archived_at' => $this->archived_at ?? now(),
             ])->save();
 
+            $this->project?->syncCompletionStatus();
+
             return;
         }
 
@@ -129,6 +131,8 @@ class ProjectUnit extends Model
             'status' => $collected > 0 ? 'booked' : ($this->status === 'sold' ? 'available' : $this->status),
             'archived_at' => null,
         ])->save();
+
+        $this->project?->syncCompletionStatus();
     }
 
     public function writeOff(?string $note): void
@@ -139,6 +143,8 @@ class ProjectUnit extends Model
             'write_off_at' => now(),
             'archived_at' => now(),
         ])->save();
+
+        $this->project?->syncCompletionStatus();
     }
 
     public function recover(): void
