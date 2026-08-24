@@ -47,12 +47,22 @@ class UnitPaymentController extends Controller
 
     protected function validated(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.01'],
+            'purpose' => ['required', 'in:token,installment,registry,maintenance,other'],
+            'purpose_other' => ['nullable', 'string', 'max:100'],
+            'description' => ['nullable', 'string', 'max:1000'],
             'method' => ['nullable', 'string', 'max:50'],
             'paid_at' => ['required', 'date'],
             'reference' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        if ($data['purpose'] === 'other' && filled($data['purpose_other'] ?? null)) {
+            $data['purpose'] = $data['purpose_other'];
+        }
+        unset($data['purpose_other']);
+
+        return $data;
     }
 }

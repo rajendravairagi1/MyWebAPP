@@ -16,12 +16,27 @@ class UnitPayment extends Model
         'project_unit_id',
         'customer_id',
         'amount',
+        'purpose',
+        'description',
         'method',
         'paid_at',
         'reference',
         'notes',
         'recorded_by',
     ];
+
+    public const PURPOSES = [
+        'token' => 'Token / Booking Amount',
+        'installment' => 'Installment',
+        'registry' => 'Registry / Stamp Duty',
+        'maintenance' => 'Maintenance',
+        'other' => 'Other',
+    ];
+
+    public function purposeLabel(): string
+    {
+        return self::PURPOSES[$this->purpose] ?? ($this->purpose ?: 'Payment');
+    }
 
     protected $casts = [
         'amount' => 'decimal:2',

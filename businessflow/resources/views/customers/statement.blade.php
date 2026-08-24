@@ -129,6 +129,7 @@
             <tr>
                 <th>Date</th>
                 <th>Against</th>
+                <th>For</th>
                 <th>Method</th>
                 <th>Reference</th>
                 <th class="text-right">Amount</th>
@@ -139,6 +140,7 @@
                 $invoicePayments = $customer->invoices->flatMap(fn ($inv) => $inv->payments->map(fn ($p) => (object) [
                     'paid_at' => $p->paid_at,
                     'against' => $inv->number,
+                    'for' => 'Invoice',
                     'method' => $p->method,
                     'reference' => $p->reference,
                     'amount' => $p->amount,
@@ -146,6 +148,7 @@
                 $unitPayments = $customer->units->flatMap(fn ($u) => $u->payments->map(fn ($p) => (object) [
                     'paid_at' => $p->paid_at,
                     'against' => $u->unit_number,
+                    'for' => $p->purposeLabel().($p->description ? ' — '.$p->description : ''),
                     'method' => $p->method,
                     'reference' => $p->reference,
                     'amount' => $p->amount,
@@ -156,12 +159,13 @@
                 <tr>
                     <td>{{ $payment->paid_at->format('d M Y') }}</td>
                     <td>{{ $payment->against }}</td>
+                    <td>{{ $payment->for }}</td>
                     <td>{{ $payment->method ? ucfirst(str_replace('_', ' ', $payment->method)) : '—' }}</td>
                     <td>{{ $payment->reference ?? '—' }}</td>
                     <td class="text-right">{{ number_format($payment->amount, 2) }}</td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="muted">No payments recorded yet.</td></tr>
+                <tr><td colspan="6" class="muted">No payments recorded yet.</td></tr>
             @endforelse
         </tbody>
     </table>

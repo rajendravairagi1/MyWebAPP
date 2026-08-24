@@ -172,33 +172,53 @@
                         @endif
 
                         {{-- Record a payment --}}
-                        <form method="POST" action="{{ route('unit-payments.store', $unit) }}" class="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2 items-end bg-gray-50 dark:bg-slate-900/40 p-3 rounded-md">
+                        <form method="POST" action="{{ route('unit-payments.store', $unit) }}" class="mt-4 space-y-2 bg-gray-50 dark:bg-slate-900/40 p-3 rounded-md">
                             @csrf
-                            <div>
-                                <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Amount') }}</label>
-                                <input type="number" step="0.01" min="0.01" name="amount" required placeholder="₹" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                <div>
+                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Payment for') }}</label>
+                                    <select name="purpose" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                        @foreach (\App\Models\UnitPayment::PURPOSES as $val => $label)
+                                            <option value="{{ $val }}" @selected($val === 'installment')>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('If Other, specify') }}</label>
+                                    <input type="text" name="purpose_other" placeholder="{{ __('e.g. Parking charges') }}" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                </div>
+                                <div class="col-span-2 sm:col-span-1">
+                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Description') }}</label>
+                                    <input type="text" name="description" placeholder="{{ __('optional note') }}" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                </div>
                             </div>
-                            <div>
-                                <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Date') }}</label>
-                                <input type="date" name="paid_at" value="{{ now()->format('Y-m-d') }}" required class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
-                            </div>
-                            <div>
-                                <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Method') }}</label>
-                                <select name="method" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
-                                    <option value="cash">{{ __('Cash') }}</option>
-                                    <option value="upi">{{ __('UPI') }}</option>
-                                    <option value="bank_transfer">{{ __('Bank transfer') }}</option>
-                                    <option value="cheque">{{ __('Cheque') }}</option>
-                                    <option value="card">{{ __('Card') }}</option>
-                                    <option value="other">{{ __('Other') }}</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Reference') }}</label>
-                                <input type="text" name="reference" placeholder="{{ __('optional') }}" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
-                            </div>
-                            <div class="col-span-2 sm:col-span-1">
-                                <button class="w-full inline-flex justify-center items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('+ Record Payment') }}</button>
+                            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 items-end">
+                                <div>
+                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Amount') }}</label>
+                                    <input type="number" step="0.01" min="0.01" name="amount" required placeholder="₹" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                </div>
+                                <div>
+                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Date') }}</label>
+                                    <input type="date" name="paid_at" value="{{ now()->format('Y-m-d') }}" required class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                </div>
+                                <div>
+                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Method') }}</label>
+                                    <select name="method" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                        <option value="cash">{{ __('Cash') }}</option>
+                                        <option value="upi">{{ __('UPI') }}</option>
+                                        <option value="bank_transfer">{{ __('Bank transfer') }}</option>
+                                        <option value="cheque">{{ __('Cheque') }}</option>
+                                        <option value="card">{{ __('Card') }}</option>
+                                        <option value="other">{{ __('Other') }}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Reference') }}</label>
+                                    <input type="text" name="reference" placeholder="{{ __('optional') }}" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                </div>
+                                <div class="col-span-2 sm:col-span-1">
+                                    <button class="w-full inline-flex justify-center items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('+ Record Payment') }}</button>
+                                </div>
                             </div>
                         </form>
 
