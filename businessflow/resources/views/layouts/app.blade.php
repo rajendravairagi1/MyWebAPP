@@ -125,57 +125,6 @@
                         {{ __('Completed Projects') }}
                     </x-sidebar-link>
                 </nav>
-
-                <div class="border-t border-slate-800 p-3 space-y-1">
-                    <x-dropdown align="left" width="56">
-                        <x-slot name="trigger">
-                            <button type="button"
-                                class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition">
-                                <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h10a4 4 0 004-4V9a2 2 0 00-.586-1.414l-4-4A2 2 0 0015 3h-1M7 15h.01" /></svg>
-                                <span>{{ __('Theme color') }}</span>
-                                <span class="ml-auto h-4 w-4 rounded-full border border-white/20" :style="{ backgroundColor: accents.find(a => a.key === accent)?.swatch }"></span>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <div class="grid grid-cols-4 gap-2 p-3">
-                                <template x-for="option in accents" :key="option.key">
-                                    <button type="button" @click="accent = option.key" :title="option.label"
-                                        class="h-8 w-8 rounded-full flex items-center justify-center border-2 transition"
-                                        :class="accent === option.key ? 'border-gray-800 dark:border-gray-100' : 'border-transparent'">
-                                        <span class="h-6 w-6 rounded-full" :style="{ backgroundColor: option.swatch }"></span>
-                                    </button>
-                                </template>
-                            </div>
-                        </x-slot>
-                    </x-dropdown>
-
-                    <button @click="dark = !dark" type="button"
-                        class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition">
-                        <svg x-show="!dark" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
-                        <svg x-show="dark" x-cloak class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
-                        <span x-text="dark ? '{{ __('Light mode') }}' : '{{ __('Dark mode') }}'"></span>
-                    </button>
-
-                    <x-dropdown align="right" width="56">
-                        <x-slot name="trigger">
-                            <button type="button" class="w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition">
-                                <span class="h-7 w-7 rounded-full bg-accent-500 text-white text-xs font-semibold flex items-center justify-center shrink-0">
-                                    {{ collect(explode(' ', Auth::user()->name))->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('') }}
-                                </span>
-                                <span class="truncate">{{ Auth::user()->name }}</span>
-                            </button>
-                        </x-slot>
-                        <x-slot name="content">
-                            <x-dropdown-link :href="route('profile.edit')">{{ __('Profile') }}</x-dropdown-link>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
-                                    {{ __('Log Out') }}
-                                </x-dropdown-link>
-                            </form>
-                        </x-slot>
-                    </x-dropdown>
-                </div>
             </aside>
 
             {{-- Main column --}}
@@ -224,6 +173,53 @@
                             @empty
                                 <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ __('Nothing overdue right now.') }}</div>
                             @endforelse
+                        </x-slot>
+                    </x-dropdown>
+
+                    <x-dropdown align="right" width="56">
+                        <x-slot name="trigger">
+                            <button type="button" class="flex items-center gap-2 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
+                                <span class="h-8 w-8 rounded-full bg-accent-500 text-white text-xs font-semibold flex items-center justify-center shrink-0">
+                                    {{ collect(explode(' ', Auth::user()->name))->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('') }}
+                                </span>
+                                <span class="hidden sm:block text-sm text-gray-700 dark:text-gray-200 truncate max-w-[10rem]">{{ Auth::user()->name }}</span>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('profile.edit')">{{ __('Profile Settings') }}</x-dropdown-link>
+
+                            <div class="border-t border-gray-100 dark:border-slate-700 my-1"></div>
+
+                            <div class="px-4 py-2">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm text-gray-700 dark:text-gray-200">{{ __('Theme color') }}</span>
+                                </div>
+                                <div class="grid grid-cols-4 gap-2">
+                                    <template x-for="option in accents" :key="option.key">
+                                        <button type="button" @click="accent = option.key" :title="option.label"
+                                            class="h-7 w-7 rounded-full flex items-center justify-center border-2 transition"
+                                            :class="accent === option.key ? 'border-gray-800 dark:border-gray-100' : 'border-transparent'">
+                                            <span class="h-5 w-5 rounded-full" :style="{ backgroundColor: option.swatch }"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <button @click="dark = !dark" type="button"
+                                class="w-full flex items-center gap-3 px-4 py-2 text-start text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition">
+                                <svg x-show="!dark" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                <svg x-show="dark" x-cloak class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                                <span x-text="dark ? '{{ __('Light mode') }}' : '{{ __('Dark mode') }}'"></span>
+                            </button>
+
+                            <div class="border-t border-gray-100 dark:border-slate-700 my-1"></div>
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
                         </x-slot>
                     </x-dropdown>
                 </header>
