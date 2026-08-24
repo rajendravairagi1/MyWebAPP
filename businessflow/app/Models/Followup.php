@@ -16,6 +16,7 @@ class Followup extends Model
         'customer_id',
         'project_id',
         'note',
+        'category',
         'due_at',
         'status',
         'owner_id',
@@ -24,6 +25,20 @@ class Followup extends Model
     protected $casts = [
         'due_at' => 'datetime',
     ];
+
+    public const CATEGORIES = [
+        'general' => 'General Discussion',
+        'installment' => 'Installment Reminder',
+        'registry' => 'Registry',
+        'site_visit' => 'Site Visit',
+        'documentation' => 'Documentation / Papers',
+        'other' => 'Other',
+    ];
+
+    public function categoryLabel(): string
+    {
+        return self::CATEGORIES[$this->category] ?? ($this->category ?: 'General Discussion');
+    }
 
     public function customer(): BelongsTo
     {

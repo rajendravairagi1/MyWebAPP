@@ -16,8 +16,8 @@
 
         @foreach ($unit->payments as $payment)
             @php $style = $purposeStyles[$payment->purpose] ?? $defaultStyle; @endphp
-            <div class="rounded-lg border border-gray-200 dark:border-slate-600 {{ $style['border'] }} border-l-4 bg-gray-50 dark:bg-slate-900/60 shadow-sm p-3.5">
-                <div class="flex items-start justify-between gap-3">
+            <div class="rounded-lg border border-gray-200 dark:border-slate-600 {{ $style['border'] }} border-l-4 bg-gray-50 dark:bg-slate-900/60 shadow-sm p-4">
+                <div class="flex items-start justify-between gap-4">
                     <div class="min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="text-xs px-2 py-0.5 rounded font-semibold {{ $style['badge'] }}">{{ $payment->purposeLabel() }}</span>
@@ -31,7 +31,7 @@
                             @if ($payment->reference) · {{ __('Ref') }}: {{ $payment->reference }} @endif
                         </div>
                     </div>
-                    <div class="text-right shrink-0">
+                    <div class="text-right shrink-0 pr-1">
                         <div class="text-lg font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">₹{{ number_format($payment->amount, 0) }}</div>
                         @if ($editable)
                             <div class="mt-1.5 flex items-center justify-end gap-1.5 text-xs">

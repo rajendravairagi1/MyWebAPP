@@ -98,9 +98,9 @@
                         <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M2.25 12.75L4.06 5.19A2.25 2.25 0 016.243 3.75h11.514a2.25 2.25 0 012.183 1.44l1.81 7.56" /></svg>
                         {{ __('Documents') }}
                     </button>
-                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-commitment')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
+                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-followup')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
                         <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        {{ __('Commitment') }}
+                        {{ __('Follow-up') }}
                     </button>
                 </div>
             </div>
@@ -363,16 +363,17 @@
                 </div>
             </div>
 
-            {{-- Follow-ups / commitments — "customer said will pay X by date Y". Adding one happens via the header's "Commitment" button (popup); this section only shows when there's something to list. --}}
+            {{-- Follow-ups — reminders to us, e.g. "customer said will pay X by date Y". Not the same thing as a completion/possession commitment (that's a separate, still-being-designed feature). Adding one happens via the header's "Follow-up" button (popup); this section only shows when there's something to list. --}}
             @if ($customer->followups->isNotEmpty())
             <div id="followups" class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden scroll-mt-6">
-                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Follow-ups & commitments') }}</div>
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Follow-ups') }}</div>
 
                     <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
                         @foreach ($customer->followups as $followup)
                             <li class="px-5 py-3 flex items-center justify-between gap-4 {{ $followup->status === 'done' ? 'opacity-50' : '' }}">
                                 <div class="min-w-0">
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="text-xs px-2 py-0.5 rounded font-medium bg-accent-100 dark:bg-slate-700 text-accent-700 dark:text-accent-100">{{ $followup->categoryLabel() }}</span>
                                         <x-status-badge :status="$followup->status" />
                                         @if ($followup->status === 'pending' && $followup->due_at->isPast())
                                             <span class="text-xs px-2 py-0.5 rounded font-medium bg-red-100 text-red-700">{{ __('Overdue') }}</span>
@@ -406,13 +407,27 @@
             </div>
             @endif
 
-            <x-modal name="add-commitment" :show="$errors->has('note') || $errors->has('due_at')">
-                <form method="POST" action="{{ route('followups.store') }}" class="p-6 space-y-4">
+            <x-modal name="add-followup" :show="$errors->has('note') || $errors->has('due_at')">
+                <form method="POST" action="{{ route('followups.store') }}" x-data="{ category: 'general' }" class="p-6 space-y-4">
                     @csrf
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add Commitment / Follow-up') }}</h2>
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add Follow-up') }}</h2>
                     <input type="hidden" name="customer_id" value="{{ $customer->id }}">
+
                     <div>
-                        <x-input-label for="note" :value="__('Note (e.g. promised payment, site visit)')" />
+                        <x-input-label for="category" :value="__('This follow-up is about')" />
+                        <select id="category" name="category" x-model="category" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            @foreach (\App\Models\Followup::CATEGORIES as $val => $label)
+                                <option value="{{ $val }}" @selected($val === 'general')>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div x-show="category === 'other'" x-cloak>
+                        <x-input-label for="category_other" :value="__('If Other, specify')" />
+                        <x-text-input id="category_other" name="category_other" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Loan / bank paperwork') }}" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="note" :value="__('Note')" />
                         <x-text-input id="note" name="note" type="text" class="mt-1 block w-full" required placeholder="{{ __('e.g. Said will pay ₹50,000 by 25th') }}" />
                     </div>
                     <div>

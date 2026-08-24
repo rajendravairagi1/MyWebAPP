@@ -38,8 +38,16 @@ class FollowupController extends Controller
             'customer_id' => ['required', 'exists:customers,id'],
             'project_id' => ['nullable', 'exists:projects,id'],
             'note' => ['required', 'string', 'max:1000'],
+            'category' => ['nullable', 'in:general,installment,registry,site_visit,documentation,other'],
+            'category_other' => ['nullable', 'string', 'max:100'],
             'due_at' => ['required', 'date'],
         ]);
+
+        $data['category'] = $data['category'] ?? 'general';
+        if ($data['category'] === 'other' && filled($data['category_other'] ?? null)) {
+            $data['category'] = $data['category_other'];
+        }
+        unset($data['category_other']);
 
         Followup::create($data + ['owner_id' => auth()->id()]);
 

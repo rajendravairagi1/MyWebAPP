@@ -6,8 +6,22 @@
     <div class="py-12">
         <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6">
-                <form method="POST" action="{{ route('followups.store') }}" class="space-y-6">
+                <form method="POST" action="{{ route('followups.store') }}" x-data="{ category: '{{ old('category', 'general') }}' }" class="space-y-6">
                     @csrf
+
+                    <div>
+                        <x-input-label for="category" :value="__('This follow-up is about')" />
+                        <select id="category" name="category" x-model="category" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            @foreach (\App\Models\Followup::CATEGORIES as $val => $label)
+                                <option value="{{ $val }}" @selected(old('category', 'general') === $val)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <x-input-error :messages="$errors->get('category')" class="mt-2" />
+                    </div>
+                    <div x-show="category === 'other'" x-cloak>
+                        <x-input-label for="category_other" :value="__('If Other, specify')" />
+                        <x-text-input id="category_other" name="category_other" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Loan / bank paperwork') }}" />
+                    </div>
 
                     <div>
                         <x-input-label for="customer_id" :value="__('Customer')" />
