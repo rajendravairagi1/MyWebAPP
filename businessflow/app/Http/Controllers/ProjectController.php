@@ -33,7 +33,10 @@ class ProjectController extends Controller
     {
         $project->load([
             'costs' => fn ($q) => $q->latest('spent_on'),
-            'units' => fn ($q) => $q->orderBy('unit_number'),
+            // A unit that's fully paid off or written off is done — it
+            // no longer needs managing here, and it's already visible via
+            // the customer's History or the Completed Projects page.
+            'units' => fn ($q) => $q->whereNull('archived_at')->orderBy('unit_number'),
             'quotations' => fn ($q) => $q->latest(),
             'invoices' => fn ($q) => $q->latest(),
         ]);
