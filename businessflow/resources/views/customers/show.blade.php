@@ -282,7 +282,7 @@
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No properties assigned yet.') }}</div>
                 @endforelse
 
-                <div class="p-5 border-t border-gray-100 dark:border-slate-700">
+                <div class="p-5 border-t border-gray-100 dark:border-slate-700" x-data="{ customerId: {{ $customer->id }} }">
                     <form method="POST" action="{{ route('project-units.assign') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
                         @csrf
                         <input type="hidden" name="customer_id" value="{{ $customer->id }}">

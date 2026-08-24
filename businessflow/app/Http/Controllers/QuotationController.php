@@ -27,7 +27,7 @@ class QuotationController extends Controller
         return view('quotations.create', [
             'customers' => Customer::orderBy('name')->get(),
             'products' => Product::orderBy('name')->get(),
-            'projects' => Project::with(['units' => fn ($q) => $q->where('status', 'available')])->orderBy('name')->get(),
+            'projects' => Project::with('units')->orderBy('name')->get(),
         ]);
     }
 
