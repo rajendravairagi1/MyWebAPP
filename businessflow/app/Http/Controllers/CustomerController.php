@@ -37,12 +37,16 @@ class CustomerController extends Controller
         return view('customers.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $data = $this->validated($request);
         $data = $this->withUploads($request, $data);
 
         $customer = Customer::create($data);
+
+        if ($request->wantsJson()) {
+            return response()->json(['id' => $customer->id, 'name' => $customer->name]);
+        }
 
         return redirect()->route('customers.show', $customer)->with('status', 'Customer added.');
     }

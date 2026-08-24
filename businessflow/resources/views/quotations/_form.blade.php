@@ -1,19 +1,20 @@
 @php $quotation = $quotation ?? null; @endphp
 
-<div x-data="{ customerId: '{{ old('customer_id', $quotation?->customer_id) }}' }" class="space-y-6">
+<div x-data="{
+        customerId: '{{ old('customer_id', $quotation?->customer_id) }}',
+        customers: @js($customers->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->values()),
+    }" class="space-y-6">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="sm:col-span-2">
             <x-input-label for="customer_id" :value="__('Customer')" />
             <select id="customer_id" name="customer_id" x-model="customerId" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                 <option value="">{{ __('Select a customer') }}</option>
-                @foreach ($customers as $customer)
-                    <option value="{{ $customer->id }}">{{ $customer->name }}</option>
-                @endforeach
+                <template x-for="customer in customers" :key="customer.id">
+                    <option :value="customer.id" x-text="customer.name"></option>
+                </template>
             </select>
             <x-input-error :messages="$errors->get('customer_id')" class="mt-2" />
-            @if ($customers->isEmpty())
-                <p class="mt-1 text-xs text-amber-600">{{ __('No customers yet — ') }}<a href="{{ route('customers.create') }}" class="underline">{{ __('add one first') }}</a>.</p>
-            @endif
+            <x-quick-add-customer />
         </div>
         <div>
             <x-input-label for="valid_until" :value="__('Valid until')" />
