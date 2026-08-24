@@ -1,19 +1,17 @@
 @props(['products', 'items' => null])
 
 <div x-data="lineItemsForm(
-        @js($products->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'price' => (float) $p->price, 'tax_rate' => (float) $p->tax_rate])),
-        @js($items ? $items->map(fn ($i) => ['product_id' => $i->product_id, 'description' => $i->description, 'quantity' => (float) $i->quantity, 'unit_price' => (float) $i->unit_price, 'discount' => (float) $i->discount, 'tax_rate' => (float) $i->tax_rate])->all() : [])
+        @js($products->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'price' => (float) $p->price])),
+        @js($items ? $items->map(fn ($i) => ['product_id' => $i->product_id, 'description' => $i->description, 'unit_price' => (float) $i->unit_price])->all() : []),
+        {{ $items ? (float) $items->sum('discount') : 0 }},
+        {{ $items && $items->isNotEmpty() ? (float) $items->first()->tax_rate : 0 }}
     )">
     <div class="overflow-x-auto border border-gray-200 rounded-md">
         <table class="min-w-full text-sm">
             <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                 <tr>
-                    <th class="px-3 py-2 text-left w-1/3">{{ __('Item') }}</th>
-                    <th class="px-3 py-2 text-right w-20">{{ __('Qty') }}</th>
-                    <th class="px-3 py-2 text-right w-28">{{ __('Price') }}</th>
-                    <th class="px-3 py-2 text-right w-24">{{ __('Discount') }}</th>
-                    <th class="px-3 py-2 text-right w-20">{{ __('Tax %') }}</th>
-                    <th class="px-3 py-2 text-right w-28">{{ __('Line total') }}</th>
+                    <th class="px-3 py-2 text-left">{{ __('Item') }}</th>
+                    <th class="px-3 py-2 text-right w-40">{{ __('Price') }}</th>
                     <th class="px-3 py-2 w-10"></th>
                 </tr>
             </thead>
@@ -22,6 +20,9 @@
                     <tr class="border-t border-gray-100 dark:border-slate-700">
                         <td class="px-3 py-2">
                             <input type="hidden" :name="`items[${index}][product_id]`" :value="row.product_id">
+                            <input type="hidden" :name="`items[${index}][quantity]`" value="1">
+                            <input type="hidden" :name="`items[${index}][discount]`" :value="rowDiscount(index)">
+                            <input type="hidden" :name="`items[${index}][tax_rate]`" :value="overallTaxRate || 0">
 
                             <template x-if="!row.customMode">
                                 <div>
@@ -56,22 +57,9 @@
                             </template>
                         </td>
                         <td class="px-3 py-2">
-                            <input type="number" step="0.01" min="0.01" :name="`items[${index}][quantity]`" x-model.number="row.quantity"
-                                class="w-full text-sm text-right border-gray-300 rounded-md">
-                        </td>
-                        <td class="px-3 py-2">
                             <input type="number" step="0.01" min="0" :name="`items[${index}][unit_price]`" x-model.number="row.unit_price"
                                 class="w-full text-sm text-right border-gray-300 rounded-md">
                         </td>
-                        <td class="px-3 py-2">
-                            <input type="number" step="0.01" min="0" :name="`items[${index}][discount]`" x-model.number="row.discount"
-                                class="w-full text-sm text-right border-gray-300 rounded-md">
-                        </td>
-                        <td class="px-3 py-2">
-                            <input type="number" step="0.01" min="0" max="100" :name="`items[${index}][tax_rate]`" x-model.number="row.tax_rate"
-                                class="w-full text-sm text-right border-gray-300 rounded-md">
-                        </td>
-                        <td class="px-3 py-2 text-right text-gray-700 dark:text-gray-300" x-text="lineTotal(row).toFixed(2)"></td>
                         <td class="px-3 py-2 text-right">
                             <button type="button" @click="removeRow(index)" x-show="rows.length > 1" class="text-gray-400 hover:text-red-600">&times;</button>
                         </td>
@@ -91,12 +79,18 @@
                 <td class="py-1 text-right text-gray-900 dark:text-gray-100" x-text="subtotal().toFixed(2)"></td>
             </tr>
             <tr>
-                <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Discount') }}</td>
-                <td class="py-1 text-right text-gray-900 dark:text-gray-100" x-text="discountTotal().toFixed(2)"></td>
+                <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Discount') }} <span class="text-gray-400">(₹)</span></td>
+                <td class="py-1 text-right">
+                    <input type="number" step="0.01" min="0" x-model.number="overallDiscount" placeholder="0"
+                        class="w-full text-sm text-right border-gray-300 rounded-md">
+                </td>
             </tr>
             <tr>
-                <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Tax') }}</td>
-                <td class="py-1 text-right text-gray-900 dark:text-gray-100" x-text="taxTotal().toFixed(2)"></td>
+                <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Tax') }} <span class="text-gray-400">(%)</span></td>
+                <td class="py-1 text-right">
+                    <input type="number" step="0.01" min="0" max="100" x-model.number="overallTaxRate" placeholder="0"
+                        class="w-full text-sm text-right border-gray-300 rounded-md">
+                </td>
             </tr>
             <tr class="border-t border-gray-200 font-semibold">
                 <td class="py-1 text-gray-700 dark:text-gray-300">{{ __('Total') }}</td>
@@ -109,7 +103,7 @@
 @once
     @push('scripts')
         <script>
-            function lineItemsForm(products, initialItems) {
+            function lineItemsForm(products, initialItems, initialDiscount, initialTaxRate) {
                 return {
                     products,
                     commonItems: [
@@ -127,8 +121,10 @@
                         { id: 're-final', name: 'Full & Final Payment' },
                     ],
                     addRowError: '',
+                    overallDiscount: initialDiscount || 0,
+                    overallTaxRate: initialTaxRate || 0,
                     newRow() {
-                        return { product_id: '', description: '', selectValue: '', customMode: false, quantity: 1, unit_price: 0, discount: 0, tax_rate: 0 };
+                        return { product_id: '', description: '', selectValue: '', customMode: false, unit_price: 0 };
                     },
                     rows: [],
                     init() {
@@ -138,19 +134,13 @@
                                 description: item.description,
                                 selectValue: 'product-' + item.product_id,
                                 customMode: false,
-                                quantity: item.quantity,
                                 unit_price: item.unit_price,
-                                discount: item.discount,
-                                tax_rate: item.tax_rate,
                             } : {
                                 product_id: '',
                                 description: item.description,
                                 selectValue: '',
                                 customMode: true,
-                                quantity: item.quantity,
                                 unit_price: item.unit_price,
-                                discount: item.discount,
-                                tax_rate: item.tax_rate,
                             });
                         } else {
                             this.rows = [this.newRow()];
@@ -199,7 +189,6 @@
                                 row.product_id = product.id;
                                 row.description = product.name;
                                 row.unit_price = product.price;
-                                row.tax_rate = product.tax_rate;
                             }
                             return;
                         }
@@ -217,21 +206,24 @@
                         row.description = '';
                         row.product_id = '';
                     },
-                    lineTotal(row) {
-                        const base = (Number(row.quantity) || 0) * (Number(row.unit_price) || 0) - (Number(row.discount) || 0);
-                        return base + base * ((Number(row.tax_rate) || 0) / 100);
+                    // The one overall discount is carried on the first row only, so
+                    // the sum across rows (what the server recalculates totals from)
+                    // still equals exactly what the user typed once.
+                    rowDiscount(index) {
+                        return index === 0 ? (Number(this.overallDiscount) || 0) : 0;
+                    },
+                    rowBase(index) {
+                        const row = this.rows[index];
+                        return (Number(row.unit_price) || 0) - this.rowDiscount(index);
                     },
                     subtotal() {
-                        return this.rows.reduce((sum, row) => sum + (Number(row.quantity) || 0) * (Number(row.unit_price) || 0), 0);
+                        return this.rows.reduce((sum, row) => sum + (Number(row.unit_price) || 0), 0);
                     },
                     discountTotal() {
-                        return this.rows.reduce((sum, row) => sum + (Number(row.discount) || 0), 0);
+                        return Number(this.overallDiscount) || 0;
                     },
                     taxTotal() {
-                        return this.rows.reduce((sum, row) => {
-                            const base = (Number(row.quantity) || 0) * (Number(row.unit_price) || 0) - (Number(row.discount) || 0);
-                            return sum + base * ((Number(row.tax_rate) || 0) / 100);
-                        }, 0);
+                        return this.rows.reduce((sum, row, index) => sum + this.rowBase(index) * ((Number(this.overallTaxRate) || 0) / 100), 0);
                     },
                     grandTotal() {
                         return this.subtotal() - this.discountTotal() + this.taxTotal();
