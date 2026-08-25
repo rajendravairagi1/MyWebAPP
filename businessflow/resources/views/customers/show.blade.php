@@ -405,7 +405,7 @@
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                     <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
                         <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Quotations') }}</span>
-                        <a href="{{ route('quotations.create') }}" class="text-xs text-accent-600 hover:underline">{{ __('+ New') }}</a>
+                        <a href="{{ route('quotations.create', ['customer_id' => $customer->id]) }}" class="text-xs text-accent-600 hover:underline">{{ __('+ New') }}</a>
                     </div>
                     @if ($customer->quotations->isEmpty())
                         <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('None yet.') }}</div>
@@ -427,7 +427,7 @@
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                     <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
                         <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Invoices') }}</span>
-                        <a href="{{ route('invoices.create') }}" class="text-xs text-accent-600 hover:underline">{{ __('+ New') }}</a>
+                        <a href="{{ route('invoices.create', ['customer_id' => $customer->id]) }}" class="text-xs text-accent-600 hover:underline">{{ __('+ New') }}</a>
                     </div>
                     @if ($customer->invoices->isEmpty())
                         <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('None yet.') }}</div>

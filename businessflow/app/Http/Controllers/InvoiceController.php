@@ -34,6 +34,7 @@ class InvoiceController extends Controller
             'projects' => Project::with('units')->orderBy('name')->get(),
             'prefillProjectId' => $request->integer('project_id') ?: null,
             'prefillUnitId' => $request->integer('unit_id') ?: null,
+            'prefillCustomerId' => $request->integer('customer_id') ?: null,
         ]);
     }
 
@@ -194,7 +195,7 @@ class InvoiceController extends Controller
 
     public function pdf(Invoice $invoice)
     {
-        $invoice->load(['customer', 'items']);
+        $invoice->load(['customer', 'items', 'projectUnit']);
         $business = \App\Models\Business::find(Tenant::id());
         $verifyQr = \App\Support\DocumentQr::dataUri(
             \Illuminate\Support\Facades\URL::signedRoute('verify.invoice', ['invoice' => $invoice->id])

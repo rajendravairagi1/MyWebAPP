@@ -30,6 +30,7 @@ class QuotationController extends Controller
             'projects' => Project::with('units')->orderBy('name')->get(),
             'prefillProjectId' => $request->integer('project_id') ?: null,
             'prefillUnitId' => $request->integer('unit_id') ?: null,
+            'prefillCustomerId' => $request->integer('customer_id') ?: null,
         ]);
     }
 

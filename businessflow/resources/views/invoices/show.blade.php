@@ -87,6 +87,17 @@
                         <tr class="text-green-700"><td class="py-1">{{ __('Paid') }}</td><td class="py-1 text-right">{{ number_format($invoice->amount_paid, 2) }}</td></tr>
                     </table>
                 </div>
+
+                @if ($invoice->projectUnit)
+                    <div class="px-5 py-4 border-t border-gray-100 dark:border-slate-700 flex justify-end">
+                        <table class="text-sm w-64">
+                            <tr><td colspan="2" class="pb-1 text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ $invoice->projectUnit->unit_number }} {{ __('— property balance') }}</td></tr>
+                            <tr><td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Property price') }}</td><td class="py-1 text-right">{{ number_format($invoice->projectUnit->price, 2) }}</td></tr>
+                            <tr><td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Total received so far') }}</td><td class="py-1 text-right">{{ number_format($invoice->projectUnit->totalCollected(), 2) }}</td></tr>
+                            <tr class="border-t border-gray-200 dark:border-slate-700 font-semibold"><td class="py-1">{{ __('Property balance remaining') }}</td><td class="py-1 text-right {{ $invoice->projectUnit->totalOutstanding() > 0 ? 'text-red-600' : 'text-green-600' }}">{{ number_format($invoice->projectUnit->totalOutstanding(), 2) }}</td></tr>
+                        </table>
+                    </div>
+                @endif
             </div>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">

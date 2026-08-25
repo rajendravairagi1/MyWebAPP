@@ -2,10 +2,11 @@
     $invoice = $invoice ?? null;
     $prefillProjectId = $prefillProjectId ?? null;
     $prefillUnitId = $prefillUnitId ?? null;
+    $prefillCustomerId = $prefillCustomerId ?? null;
 @endphp
 
 <div x-data="{
-        customerId: '{{ old('customer_id', $invoice?->customer_id) }}',
+        customerId: '{{ old('customer_id', $invoice?->customer_id ?? $prefillCustomerId) }}',
         customers: @js($customers->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->values()),
     }" class="space-y-6">
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
