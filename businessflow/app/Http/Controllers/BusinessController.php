@@ -28,7 +28,6 @@ class BusinessController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:1000'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'business_type' => ['required', 'string', 'in:'.implode(',', array_keys(config('business.types')))],
             'invoice_prefix' => ['nullable', 'string', 'max:20'],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);

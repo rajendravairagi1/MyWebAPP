@@ -61,17 +61,6 @@
                         </div>
                     </div>
 
-                    <div>
-                        <x-input-label for="business_type" :value="__('Business Type')" />
-                        <select id="business_type" name="business_type" required
-                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                            @foreach (config('business.types') as $key => $label)
-                                <option value="{{ $key }}" @selected(old('business_type', $business->business_type) === $key)>{{ $label }}</option>
-                            @endforeach
-                        </select>
-                        <x-input-error :messages="$errors->get('business_type')" class="mt-2" />
-                    </div>
-
                     <div class="flex justify-end">
                         <x-primary-button>{{ __('Save') }}</x-primary-button>
                     </div>
