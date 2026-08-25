@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerDocumentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FollowupController;
 use App\Http\Controllers\InstallController;
+use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\MaterialEntryController;
@@ -39,6 +40,7 @@ Route::get('/migrate', MigrateController::class)->name('migrate');
 Route::get('/verify/quotation/{quotation}', [VerifyController::class, 'quotation'])->name('verify.quotation')->middleware('signed');
 Route::get('/verify/invoice/{invoice}', [VerifyController::class, 'invoice'])->name('verify.invoice')->middleware('signed');
 Route::get('/verify/customer/{customer}', [VerifyController::class, 'customer'])->name('verify.customer')->middleware('signed');
+Route::get('/verify/investor/{investor}', [VerifyController::class, 'investor'])->name('verify.investor')->middleware('signed');
 
 Route::middleware('auth')->group(function () {
     Route::get('/onboarding/business', [OnboardingController::class, 'create'])->name('onboarding.create');
@@ -59,6 +61,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/customers/{customer}/documents/{document}/download', [CustomerDocumentController::class, 'download'])->name('customer-documents.download');
     Route::delete('/customers/{customer}/documents/{document}', [CustomerDocumentController::class, 'destroy'])->name('customer-documents.destroy');
     Route::resource('products', ProductController::class)->except(['show']);
+
+    Route::get('/investors', [InvestorController::class, 'index'])->name('investors.index');
+    Route::post('/investors', [InvestorController::class, 'store'])->name('investors.store');
+    Route::get('/investors/{investor}', [InvestorController::class, 'show'])->name('investors.show');
+    Route::put('/investors/{investor}', [InvestorController::class, 'update'])->name('investors.update');
+    Route::get('/investors/{investor}/statement', [InvestorController::class, 'statement'])->name('investors.statement');
+    Route::post('/investors/{investor}/transactions', [InvestorController::class, 'storeTransaction'])->name('investor-transactions.store');
+    Route::delete('/investors/{investor}/transactions/{transaction}', [InvestorController::class, 'destroyTransaction'])->name('investor-transactions.destroy');
+
     Route::get('/available-properties', [AvailablePropertiesController::class, 'index'])->name('available-properties.index');
     Route::post('/available-properties', [AvailablePropertiesController::class, 'store'])->name('available-properties.store');
 

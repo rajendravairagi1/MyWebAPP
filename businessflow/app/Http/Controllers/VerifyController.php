@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Investor;
 use App\Models\Quotation;
 use Illuminate\View\View;
 
@@ -55,6 +56,23 @@ class VerifyController extends Controller
             'customerName' => $customer->name,
             'amount' => $totalDue,
             'amountLabel' => 'Balance due (as of now)',
+            'date' => now(),
+            'status' => null,
+        ]);
+    }
+
+    public function investor(Investor $investor): View
+    {
+        $business = \App\Models\Business::find($investor->business_id);
+
+        return view('verify.show', [
+            'business' => $business,
+            'docType' => 'Statement',
+            'docNumber' => 'Investor #'.$investor->id,
+            'partyLabel' => 'Investor',
+            'customerName' => $investor->name,
+            'amount' => $investor->balance(),
+            'amountLabel' => 'Balance (as of now)',
             'date' => now(),
             'status' => null,
         ]);

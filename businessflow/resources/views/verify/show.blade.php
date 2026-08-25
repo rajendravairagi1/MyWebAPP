@@ -33,7 +33,7 @@
         <div class="body">
             <div class="row"><span class="k">Document</span><span class="v">{{ $docType }}</span></div>
             <div class="row"><span class="k">Number</span><span class="v">{{ $docNumber }}</span></div>
-            <div class="row"><span class="k">Customer</span><span class="v">{{ $customerName }}</span></div>
+            <div class="row"><span class="k">{{ $partyLabel ?? 'Customer' }}</span><span class="v">{{ $customerName }}</span></div>
             <div class="row"><span class="k">{{ $amountLabel ?? 'Amount' }}</span><span class="v">{{ number_format($amount, 2) }}</span></div>
             <div class="row"><span class="k">Date</span><span class="v">{{ $date->format('d M Y') }}</span></div>
             @if ($status)
