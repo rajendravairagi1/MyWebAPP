@@ -58,6 +58,31 @@ class ProjectUnit extends Model
         return $this->hasMany(UnitPayment::class)->latest('paid_at')->latest('id');
     }
 
+    public function materialEntries(): HasMany
+    {
+        return $this->hasMany(MaterialEntry::class)->latest('entered_on')->latest('id');
+    }
+
+    /**
+     * Current stock per material at this unit — in minus out — for
+     * whoever (a supervisor, usually) has been logging it. A unit
+     * nobody has logged material for just has an empty list; nothing
+     * else on the unit depends on this.
+     *
+     * @return \Illuminate\Support\Collection<int, array{material_name: string, unit_label: ?string, balance: float}>
+     */
+    public function materialStock(): \Illuminate\Support\Collection
+    {
+        return $this->materialEntries
+            ->groupBy('material_name')
+            ->map(fn ($entries) => [
+                'material_name' => $entries->first()->material_name,
+                'unit_label' => $entries->first()->unit_label,
+                'balance' => $entries->sum(fn ($e) => $e->signedQuantity()),
+            ])
+            ->values();
+    }
+
     public function totalInvoiced(): float
     {
         return (float) $this->invoices()->sum('total');

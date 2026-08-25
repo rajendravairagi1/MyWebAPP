@@ -133,8 +133,9 @@
                                             </select>
                                         </form>
                                     </td>
-                                    <td class="px-5 py-2 text-right">
-                                        <form method="POST" action="{{ route('project-units.destroy', [$project, $unit]) }}" onsubmit="return confirm('{{ __('Remove this unit?') }}')">
+                                    <td class="px-5 py-2 text-right whitespace-nowrap">
+                                        <button type="button" x-data="" @click="$dispatch('open-modal', 'material-{{ $unit->id }}')" class="text-xs text-accent-600 hover:underline mr-3">{{ __('Material') }}</button>
+                                        <form method="POST" action="{{ route('project-units.destroy', [$project, $unit]) }}" onsubmit="return confirm('{{ __('Remove this unit?') }}')" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button class="text-xs text-red-600 hover:underline">{{ __('Remove') }}</button>
@@ -187,6 +188,81 @@
                     </div>
                 </form>
             </x-modal>
+
+            @foreach ($project->units as $unit)
+                <x-modal name="material-{{ $unit->id }}" max-width="lg">
+                    <div class="p-6 space-y-4" x-data="{ direction: 'in' }">
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Material Stock') }} — {{ $unit->unit_number }}</h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Optional — only useful if a supervisor is logging material at this site. Nothing else depends on this.') }}</p>
+
+                        @if ($unit->materialStock()->isNotEmpty())
+                            <div class="flex flex-wrap gap-2">
+                                @foreach ($unit->materialStock() as $stock)
+                                    <div class="px-3 py-2 bg-gray-50 dark:bg-slate-700/50 rounded-md text-sm">
+                                        <span class="text-gray-600 dark:text-gray-400">{{ $stock['material_name'] }}:</span>
+                                        <span class="font-medium text-gray-900 dark:text-gray-100">{{ rtrim(rtrim(number_format($stock['balance'], 2), '0'), '.') }} {{ $stock['unit_label'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        <form method="POST" action="{{ route('material-entries.store', $unit) }}" class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-gray-100 dark:border-slate-700 pt-4">
+                            @csrf
+                            <div class="sm:col-span-2">
+                                <x-input-label :value="__('Material name')" />
+                                <x-text-input name="material_name" type="text" placeholder="{{ __('e.g. Cement, Bricks, Tiles') }}" class="mt-1 block w-full" required />
+                            </div>
+                            <div>
+                                <x-input-label :value="__('Quantity')" />
+                                <x-text-input name="quantity" type="number" step="0.01" min="0.01" class="mt-1 block w-full" required />
+                            </div>
+                            <div>
+                                <x-input-label :value="__('Unit (optional)')" />
+                                <x-text-input name="unit_label" type="text" placeholder="{{ __('bags, pcs, kg') }}" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label :value="__('Type')" />
+                                <select name="direction" x-model="direction" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                    <option value="in">{{ __('Received') }}</option>
+                                    <option value="out">{{ __('Used') }}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <x-input-label :value="__('Date')" />
+                                <x-text-input name="entered_on" type="date" value="{{ now()->toDateString() }}" class="mt-1 block w-full" required />
+                            </div>
+                            <div class="sm:col-span-2">
+                                <x-input-label :value="__('Note (optional)')" />
+                                <x-text-input name="note" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div class="sm:col-span-2 flex justify-end gap-3 pt-2">
+                                <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Close') }}</x-secondary-button>
+                                <x-primary-button>{{ __('+ Add Entry') }}</x-primary-button>
+                            </div>
+                        </form>
+
+                        @if ($unit->materialEntries->isNotEmpty())
+                            <div class="border-t border-gray-100 dark:border-slate-700 pt-3 max-h-56 overflow-y-auto space-y-1.5">
+                                @foreach ($unit->materialEntries as $entry)
+                                    <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 gap-2">
+                                        <span>
+                                            {{ $entry->entered_on->format('d M') }} —
+                                            {{ $entry->material_name }}
+                                            <span class="{{ $entry->direction === 'in' ? 'text-green-600' : 'text-red-600' }}">{{ $entry->direction === 'in' ? '+' : '-' }}{{ rtrim(rtrim(number_format($entry->quantity, 2), '0'), '.') }} {{ $entry->unit_label }}</span>
+                                            @if ($entry->note) — {{ $entry->note }} @endif
+                                        </span>
+                                        <form method="POST" action="{{ route('material-entries.destroy', [$unit, $entry]) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="text-red-500 hover:underline shrink-0">{{ __('Remove') }}</button>
+                                        </form>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </x-modal>
+            @endforeach
 
             {{-- Costs --}}
             <div x-data="{
