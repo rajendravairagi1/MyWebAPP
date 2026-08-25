@@ -33,8 +33,11 @@
                     </div>
                     <div class="text-right shrink-0 pr-1">
                         <div class="text-lg font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">₹{{ number_format($payment->amount, 0) }}</div>
-                        @if ($editable)
-                            <div class="mt-1.5 flex items-center justify-end gap-1.5 text-xs">
+                        <div class="mt-1.5 flex items-center justify-end gap-1.5 text-xs">
+                            @if ($payment->invoice)
+                                <a href="{{ route('invoices.show', $payment->invoice) }}" class="px-2 py-1 rounded border border-accent-200 dark:border-accent-800 text-accent-600 dark:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/20">{{ $payment->invoice->number }}</a>
+                            @endif
+                            @if ($editable)
                                 <details class="relative">
                                     <summary class="cursor-pointer px-2 py-1 rounded border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 list-none [&::-webkit-details-marker]:hidden">{{ __('Edit') }}</summary>
                                     @php $paymentPurposeIsCustom = ! array_key_exists($payment->purpose, \App\Models\UnitPayment::PURPOSES); @endphp
@@ -66,8 +69,8 @@
                                     @method('DELETE')
                                     <button class="px-2 py-1 rounded border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">{{ __('Delete') }}</button>
                                 </form>
-                            </div>
-                        @endif
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

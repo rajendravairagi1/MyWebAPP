@@ -58,7 +58,7 @@ class CustomerController extends Controller
             'invoices' => fn ($q) => $q->latest()->limit(10),
             'units.project',
             'units.invoices',
-            'units.payments',
+            'units.payments.invoice',
             'followups' => fn ($q) => $q->orderByRaw("status = 'done'")->orderBy('due_at'),
             'documents' => fn ($q) => $q->latest(),
         ]);

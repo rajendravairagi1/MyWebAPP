@@ -19,6 +19,7 @@ class Invoice extends Model
         'project_id',
         'project_unit_id',
         'quotation_id',
+        'unit_payment_id',
         'number',
         'status',
         'due_date',
@@ -48,6 +49,11 @@ class Invoice extends Model
     public function quotation(): BelongsTo
     {
         return $this->belongsTo(Quotation::class);
+    }
+
+    public function unitPayment(): BelongsTo
+    {
+        return $this->belongsTo(UnitPayment::class);
     }
 
     public function project(): BelongsTo

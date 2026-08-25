@@ -282,23 +282,32 @@
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No properties assigned yet.') }}</div>
                 @endforelse
 
-                <div class="p-5 border-t border-gray-100 dark:border-slate-700" x-data="{ customerId: {{ $customer->id }} }">
-                    <form method="POST" action="{{ route('project-units.assign') }}" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                <div class="p-5 border-t border-gray-100 dark:border-slate-700">
+                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'assign-property')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        {{ __('Assign Property') }}
+                    </button>
+                </div>
+            </div>
+
+            <x-modal name="assign-property" max-width="lg">
+                <div class="p-6" x-data="{ customerId: {{ $customer->id }} }">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('Assign a Property') }}</h2>
+                    <form method="POST" action="{{ route('project-units.assign') }}" class="space-y-4">
                         @csrf
                         <input type="hidden" name="customer_id" value="{{ $customer->id }}">
-                        <div class="sm:col-span-2">
-                            <x-project-unit-select :projects="$projects" />
-                        </div>
+                        <x-project-unit-select :projects="$projects" />
                         <div>
                             <x-input-label for="assign_commitment_date" :value="__('Commitment date (optional)')" />
                             <input id="assign_commitment_date" type="date" name="commitment_date" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                         </div>
-                        <div>
-                            <x-primary-button class="w-full justify-center">{{ __('+ Assign Property') }}</x-primary-button>
+                        <div class="flex justify-end gap-3 pt-2">
+                            <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
+                            <x-primary-button>{{ __('+ Assign Property') }}</x-primary-button>
                         </div>
                     </form>
                 </div>
-            </div>
+            </x-modal>
 
             <x-modal name="commitments" max-width="lg">
                 <div class="p-6 space-y-4">

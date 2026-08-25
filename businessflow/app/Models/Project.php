@@ -61,12 +61,14 @@ class Project extends Model
     {
         $directPaid = (float) UnitPayment::whereIn('project_unit_id', $this->units()->pluck('id'))->sum('amount');
 
-        return (float) $this->invoices()->sum('amount_paid') + $directPaid;
+        // Excludes the auto-generated receipt invoices created per direct
+        // payment — that money is already counted in $directPaid above.
+        return (float) $this->invoices()->whereNull('unit_payment_id')->sum('amount_paid') + $directPaid;
     }
 
     public function totalInvoiced(): float
     {
-        return (float) $this->invoices()->sum('total');
+        return (float) $this->invoices()->whereNull('unit_payment_id')->sum('total');
     }
 
     public function profit(): float

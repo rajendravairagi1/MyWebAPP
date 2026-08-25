@@ -52,4 +52,13 @@ class UnitPayment extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+
+    /**
+     * The receipt invoice auto-generated when this payment was recorded.
+     * See UnitPaymentController::store().
+     */
+    public function invoice(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Invoice::class);
+    }
 }
