@@ -13,10 +13,18 @@ class ProjectController extends Controller
 {
     public function index(): View
     {
-        // Fully completed projects (every unit sold & paid off, or written
-        // off) are done — they clutter this active list, and stay reachable
-        // via the Completed Projects page or a direct link.
-        $projects = Project::withCount('units')->where('status', '!=', 'completed')->latest()->get();
+        // A project with every unit sold & paid off (or written off) is
+        // done — it clutters this active list, and stays reachable via the
+        // Completed Projects page or a direct link. Checked off the units
+        // themselves (not the project's own status flag), since that flag
+        // can go stale on older data.
+        $projects = Project::withCount('units')
+            ->where(function ($query) {
+                $query->doesntHave('units')
+                    ->orWhereHas('units', fn ($q) => $q->whereNull('archived_at'));
+            })
+            ->latest()
+            ->get();
 
         return view('projects.index', compact('projects'));
     }
