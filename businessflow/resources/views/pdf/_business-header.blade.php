@@ -1,9 +1,9 @@
 {{--
     Shared business identity block for every PDF header (Invoice, Quotation,
     Customer Statement, Investor Statement) — logo beside the name with a
-    divider between them, address + phone on one line underneath. Kept as
-    one partial so a design change here (like this one) doesn't have to be
-    repeated by hand across every PDF template.
+    divider between them, contact line right under the name, doc label
+    (Invoice/Quotation/...) below that. Kept as one partial so a design
+    change here doesn't have to be repeated by hand across every template.
 
     All styles are inline rather than in each template's <style> block —
     dompdf's CSS cascade is unreliable enough that inline is the safe
@@ -26,10 +26,10 @@
     <h1 style="margin: 0; font-size: 20px;">{{ $business?->name ?? config('app.name') }}</h1>
 @endif
 
-<div class="muted">{{ $docLabel }}</div>
-
-@if ($business?->address || $business?->phone)
-    <div class="muted" style="font-size: 10px; margin-top: 4px;">
-        {{ collect([$business->address, $business->phone])->filter()->implode(' · ') }}
+@if ($business && collect([$business->phone, $business->address, $business->email, $business->website])->filter()->isNotEmpty())
+    <div class="muted" style="font-size: 10px; margin-top: 3px;">
+        {{ collect([$business->phone, $business->address, $business->email, $business->website])->filter()->implode(' · ') }}
     </div>
 @endif
+
+<div style="font-size: 15px; font-weight: 600; color: #4a5568; margin-top: 6px;">{{ $docLabel }}</div>

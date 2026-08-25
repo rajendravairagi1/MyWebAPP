@@ -88,5 +88,7 @@
             @endforelse
         </tbody>
     </table>
+
+    @include('pdf._footer-note')
 </body>
 </html>

@@ -97,5 +97,7 @@
     @if ($invoice->notes)
         <p><strong>Notes:</strong> {{ $invoice->notes }}</p>
     @endif
+
+    @include('pdf._footer-note')
 </body>
 </html>

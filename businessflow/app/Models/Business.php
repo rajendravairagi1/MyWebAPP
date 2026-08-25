@@ -14,6 +14,8 @@ class Business extends Model
         'name',
         'address',
         'phone',
+        'email',
+        'website',
         'business_type',
         'country',
         'currency',

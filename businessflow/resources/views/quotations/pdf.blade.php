@@ -86,5 +86,7 @@
     @if ($quotation->terms)
         <p><strong>Terms:</strong> {{ $quotation->terms }}</p>
     @endif
+
+    @include('pdf._footer-note')
 </body>
 </html>

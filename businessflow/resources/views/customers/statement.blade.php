@@ -193,5 +193,7 @@
             </tbody>
         </table>
     @endif
+
+    @include('pdf._footer-note')
 </body>
 </html>
