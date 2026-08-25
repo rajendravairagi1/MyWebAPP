@@ -1,7 +1,13 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Invoice') }} {{ $invoice->number }}</h2>
+        <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3 min-w-0">
+                <button type="button" onclick="history.back()" class="shrink-0 inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-100">
+                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+                    {{ __('Back') }}
+                </button>
+                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight truncate">{{ __('Invoice') }} {{ $invoice->number }}</h2>
+            </div>
             <x-status-badge :status="$invoice->status" class="text-sm" />
         </div>
     </x-slot>
