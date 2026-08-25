@@ -87,16 +87,20 @@ class ProjectUnit extends Model
      * Formal invoiced amount for this unit. Excludes the auto-generated
      * receipt invoices created per direct payment (see
      * UnitPaymentController::store()) — those just document money already
-     * counted in directPaid(), so including them here would double it.
+     * counted in directPaid(), so including them here would double it —
+     * and excludes any invoice explicitly marked as not counting toward
+     * the property price (e.g. a separate charge for extra work the
+     * customer asked for, unrelated to what they're paying for the unit
+     * itself).
      */
     public function totalInvoiced(): float
     {
-        return (float) $this->invoices()->whereNull('unit_payment_id')->sum('total');
+        return (float) $this->invoices()->whereNull('unit_payment_id')->where('counts_toward_property_price', true)->sum('total');
     }
 
     public function totalPaid(): float
     {
-        return (float) $this->invoices()->whereNull('unit_payment_id')->sum('amount_paid');
+        return (float) $this->invoices()->whereNull('unit_payment_id')->where('counts_toward_property_price', true)->sum('amount_paid');
     }
 
     public function balanceDue(): float

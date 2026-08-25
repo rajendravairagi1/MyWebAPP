@@ -84,13 +84,15 @@
         <tr><td class="balance">Balance due</td><td class="text-right balance">{{ $invoice->balanceDue() }}</td></tr>
     </table>
 
-    @if ($invoice->projectUnit)
+    @if ($invoice->projectUnit && $invoice->counts_toward_property_price)
         <table class="totals" style="margin-top: 4px;">
             <tr><td class="muted" colspan="2" style="padding-top: 10px; font-size: 10px; text-transform: uppercase;">{{ $invoice->projectUnit->unit_number }} — property balance</td></tr>
             <tr><td>Property price</td><td class="text-right">{{ number_format($invoice->projectUnit->price, 2) }}</td></tr>
             <tr><td>Total received so far</td><td class="text-right">{{ number_format($invoice->projectUnit->totalCollected(), 2) }}</td></tr>
             <tr class="grand"><td>Property balance remaining</td><td class="text-right">{{ number_format($invoice->projectUnit->totalOutstanding(), 2) }}</td></tr>
         </table>
+    @elseif ($invoice->projectUnit)
+        <p class="muted" style="margin-top: 10px; font-size: 10px;">This is a separate charge for {{ $invoice->projectUnit->unit_number }} — not counted toward the property price.</p>
     @endif
 
     @if ($invoice->notes)

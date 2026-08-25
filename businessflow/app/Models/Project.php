@@ -62,13 +62,15 @@ class Project extends Model
         $directPaid = (float) UnitPayment::whereIn('project_unit_id', $this->units()->pluck('id'))->sum('amount');
 
         // Excludes the auto-generated receipt invoices created per direct
-        // payment — that money is already counted in $directPaid above.
-        return (float) $this->invoices()->whereNull('unit_payment_id')->sum('amount_paid') + $directPaid;
+        // payment (that money is already counted in $directPaid above) and
+        // any invoice explicitly marked as not counting toward the
+        // property price (e.g. a separate charge for unrelated work).
+        return (float) $this->invoices()->whereNull('unit_payment_id')->where('counts_toward_property_price', true)->sum('amount_paid') + $directPaid;
     }
 
     public function totalInvoiced(): float
     {
-        return (float) $this->invoices()->whereNull('unit_payment_id')->sum('total');
+        return (float) $this->invoices()->whereNull('unit_payment_id')->where('counts_toward_property_price', true)->sum('total');
     }
 
     public function profit(): float

@@ -29,6 +29,16 @@
     </div>
 
     <x-project-unit-select :projects="$projects" :selected-project-id="$invoice?->project_id ?? $prefillProjectId" :selected-unit-id="$invoice?->project_unit_id ?? $prefillUnitId" />
+
+    <div class="flex items-start gap-2">
+        <input type="hidden" name="counts_toward_property_price" value="0">
+        <input type="checkbox" id="counts_toward_property_price" name="counts_toward_property_price" value="1"
+            @checked(old('counts_toward_property_price', $invoice?->counts_toward_property_price ?? true))
+            class="mt-1 rounded border-gray-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500">
+        <label for="counts_toward_property_price" class="text-sm text-gray-600 dark:text-gray-400">
+            {{ __('Counts toward the property price (if a unit is selected above) — leave checked for a payment installment, uncheck for a separate charge like extra work the customer asked for. Unchecked invoices still show in this customer/property\'s records but won\'t reduce the outstanding balance.') }}
+        </label>
+    </div>
 </div>
 
 <x-line-items :products="$products" :items="$invoice?->items" />

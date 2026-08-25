@@ -72,6 +72,7 @@ class UnitPaymentController extends Controller
             'project_id' => $unit->project_id,
             'project_unit_id' => $unit->id,
             'unit_payment_id' => $payment->id,
+            'counts_toward_property_price' => true,
             'number' => Invoice::nextNumber(Tenant::id()),
             'created_by' => auth()->id(),
         ]);

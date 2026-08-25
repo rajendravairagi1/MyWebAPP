@@ -20,6 +20,7 @@ class Invoice extends Model
         'project_unit_id',
         'quotation_id',
         'unit_payment_id',
+        'counts_toward_property_price',
         'number',
         'status',
         'due_date',
@@ -39,6 +40,7 @@ class Invoice extends Model
         'tax_total' => 'decimal:2',
         'total' => 'decimal:2',
         'amount_paid' => 'decimal:2',
+        'counts_toward_property_price' => 'boolean',
     ];
 
     public function customer(): BelongsTo
