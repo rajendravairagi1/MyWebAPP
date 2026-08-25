@@ -7,12 +7,17 @@
         {{ $items && $items->isNotEmpty() ? (float) $items->first()->tax_rate : 0 }}
     )">
     <div class="overflow-x-auto border border-gray-200 rounded-md">
-        <table class="min-w-full text-sm">
+        <table class="min-w-full text-sm" style="table-layout: fixed;">
+            <colgroup>
+                <col>
+                <col style="width: 10rem;">
+                <col style="width: 2.5rem;">
+            </colgroup>
             <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                 <tr>
                     <th class="px-3 py-2 text-left">{{ __('Item') }}</th>
-                    <th class="px-3 py-2 text-right w-40">{{ __('Price') }}</th>
-                    <th class="px-3 py-2 w-10"></th>
+                    <th class="px-3 py-2 text-right">{{ __('Price') }}</th>
+                    <th class="px-3 py-2"></th>
                 </tr>
             </thead>
             <tbody>
