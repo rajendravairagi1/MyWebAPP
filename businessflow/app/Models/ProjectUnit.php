@@ -63,6 +63,31 @@ class ProjectUnit extends Model
         return $this->hasMany(MaterialEntry::class)->latest('entered_on')->latest('id');
     }
 
+    public function media(): HasMany
+    {
+        return $this->hasMany(UnitMedia::class)->latest();
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->media()->where('type', 'photo');
+    }
+
+    public function videos(): HasMany
+    {
+        return $this->media()->where('type', 'video');
+    }
+
+    public function layouts(): HasMany
+    {
+        return $this->media()->where('type', 'layout');
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->media()->where('type', 'document');
+    }
+
     /**
      * Current stock per material at this unit — in minus out — for
      * whoever (a supervisor, usually) has been logging it. A unit

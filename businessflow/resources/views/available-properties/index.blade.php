@@ -23,11 +23,12 @@
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div>
                                 <div class="flex items-center gap-2 flex-wrap">
-                                    <a href="{{ route('projects.show', $unit->project) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:text-accent-600">{{ $unit->project->name }}</a>
-                                    <span class="text-gray-400">·</span>
-                                    <span class="text-gray-700 dark:text-gray-300">{{ $unit->unit_number }}</span>
+                                    <a href="{{ route('project-units.show', $unit) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:text-accent-600">{{ $unit->project->name }} · {{ $unit->unit_number }}</a>
                                     @if ($unit->type)
                                         <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400">{{ $unit->type }}</span>
+                                    @endif
+                                    @if ($unit->photos->count() || $unit->videos->count())
+                                        <span class="text-xs text-gray-400">{{ __('· :count media', ['count' => $unit->photos->count() + $unit->videos->count()]) }}</span>
                                     @endif
                                 </div>
                                 <div class="text-xs text-gray-400 mt-0.5">
@@ -45,6 +46,7 @@
                                     <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->price, 0) }}</div>
                                 </div>
                                 <div class="flex flex-col gap-1 text-xs">
+                                    <a href="{{ route('project-units.show', $unit) }}" class="text-accent-600 hover:underline">{{ __('View Details →') }}</a>
                                     <a href="{{ route('quotations.create', ['project_id' => $unit->project_id, 'unit_id' => $unit->id]) }}" class="text-accent-600 hover:underline">{{ __('+ Quotation') }}</a>
                                     <a href="{{ route('invoices.create', ['project_id' => $unit->project_id, 'unit_id' => $unit->id]) }}" class="text-accent-600 hover:underline">{{ __('+ Invoice') }}</a>
                                 </div>

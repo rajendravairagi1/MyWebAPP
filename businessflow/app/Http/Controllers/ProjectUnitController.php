@@ -7,9 +7,17 @@ use App\Models\Project;
 use App\Models\ProjectUnit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class ProjectUnitController extends Controller
 {
+    public function show(ProjectUnit $unit): View
+    {
+        $unit->load(['project', 'customer', 'photos', 'videos', 'layouts', 'documents']);
+
+        return view('project-units.show', compact('unit'));
+    }
+
     public function store(Request $request, Project $project): RedirectResponse
     {
         $data = $request->validate([

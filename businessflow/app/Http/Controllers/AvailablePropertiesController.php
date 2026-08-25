@@ -9,7 +9,7 @@ class AvailablePropertiesController extends Controller
 {
     public function index(): View
     {
-        $units = ProjectUnit::with('project')
+        $units = ProjectUnit::with(['project', 'photos', 'videos'])
             ->where('status', 'available')
             ->whereNull('archived_at')
             ->get()
