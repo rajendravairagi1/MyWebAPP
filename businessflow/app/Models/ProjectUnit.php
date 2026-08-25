@@ -172,6 +172,16 @@ class ProjectUnit extends Model
         $this->project?->syncCompletionStatus();
     }
 
+    /**
+     * Manually moves this unit back to active/open, still assigned to
+     * whichever customer it was closed out with — e.g. a payment was
+     * entered wrong and the builder needs it open again to fix it.
+     * Deliberately does NOT call syncPaymentState(): a fully-paid unit
+     * would just get immediately re-closed by that, right back to where
+     * it started, since the money that's already logged still adds up
+     * to the full price. Normal auto-close resumes on the next payment
+     * add/edit/remove, once the figures are actually corrected.
+     */
     public function recover(): void
     {
         $this->forceFill([
@@ -179,9 +189,10 @@ class ProjectUnit extends Model
             'write_off_note' => null,
             'write_off_at' => null,
             'archived_at' => null,
+            'status' => $this->customer_id ? 'booked' : 'available',
         ])->save();
 
-        $this->syncPaymentState();
+        $this->project?->syncCompletionStatus();
     }
 
     /**
