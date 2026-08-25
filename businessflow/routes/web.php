@@ -66,8 +66,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/investors', [InvestorController::class, 'store'])->name('investors.store');
     Route::get('/investors/{investor}', [InvestorController::class, 'show'])->name('investors.show');
     Route::put('/investors/{investor}', [InvestorController::class, 'update'])->name('investors.update');
+    Route::delete('/investors/{investor}', [InvestorController::class, 'destroy'])->name('investors.destroy');
     Route::get('/investors/{investor}/statement', [InvestorController::class, 'statement'])->name('investors.statement');
     Route::post('/investors/{investor}/transactions', [InvestorController::class, 'storeTransaction'])->name('investor-transactions.store');
+    Route::put('/investors/{investor}/transactions/{transaction}', [InvestorController::class, 'updateTransaction'])->name('investor-transactions.update');
     Route::delete('/investors/{investor}/transactions/{transaction}', [InvestorController::class, 'destroyTransaction'])->name('investor-transactions.destroy');
 
     Route::get('/available-properties', [AvailablePropertiesController::class, 'index'])->name('available-properties.index');

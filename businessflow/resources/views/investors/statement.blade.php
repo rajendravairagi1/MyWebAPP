@@ -19,7 +19,8 @@
         .summary .label { color: #718096; }
         .summary .value { font-weight: bold; font-size: 14px; }
         .type-investment { color: #2f855a; }
-        .type-payout { color: #b7791f; }
+        .type-profit_credited { color: #b7791f; }
+        .type-payment_paid { color: #b83280; }
         .qr { text-align: center; }
         .qr img { width: 70px; height: 70px; }
         .qr div { font-size: 8px; color: #a0aec0; margin-top: 2px; }
@@ -52,8 +53,9 @@
 
     <table class="summary">
         <tr>
-            <td><div class="label">Total invested</div><div class="value">{{ number_format($investor->totalInvested(), 2) }}</div></td>
-            <td><div class="label">Total paid out</div><div class="value">{{ number_format($investor->totalPaidOut(), 2) }}</div></td>
+            <td><div class="label">Total investment</div><div class="value">{{ number_format($investor->totalInvested(), 2) }}</div></td>
+            <td><div class="label">Total profit credited</div><div class="value">{{ number_format($investor->totalProfitCredited(), 2) }}</div></td>
+            <td><div class="label">Total paid</div><div class="value">{{ number_format($investor->totalPaidOut(), 2) }}</div></td>
             <td><div class="label">Balance</div><div class="value">{{ number_format($investor->balance(), 2) }}</div></td>
         </tr>
     </table>
@@ -75,7 +77,7 @@
             @forelse ($investor->transactions as $transaction)
                 <tr>
                     <td>{{ $transaction->transaction_date->format('d M Y') }}</td>
-                    <td class="{{ $transaction->type === 'investment' ? 'type-investment' : 'type-payout' }}">{{ $transaction->typeLabel() }}</td>
+                    <td class="type-{{ $transaction->type }}">{{ $transaction->typeLabel() }}</td>
                     <td>{{ $transaction->project?->name ?? '—' }}</td>
                     <td>{{ $transaction->method ? ucfirst(str_replace('_', ' ', $transaction->method)) : '—' }}</td>
                     <td>{{ $transaction->reference ?? '—' }}</td>

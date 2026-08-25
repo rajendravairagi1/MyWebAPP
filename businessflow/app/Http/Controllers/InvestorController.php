@@ -52,6 +52,13 @@ class InvestorController extends Controller
         return back()->with('status', 'Investor updated.');
     }
 
+    public function destroy(Investor $investor): RedirectResponse
+    {
+        $investor->delete();
+
+        return redirect()->route('investors.index')->with('status', 'Investor deleted.');
+    }
+
     protected function validated(Request $request): array
     {
         return $request->validate([
@@ -64,8 +71,26 @@ class InvestorController extends Controller
 
     public function storeTransaction(Request $request, Investor $investor): RedirectResponse
     {
+        $data = $this->validatedTransaction($request);
+
+        $investor->transactions()->create($data + ['recorded_by' => auth()->id()]);
+
+        return back()->with('status', (new InvestorTransaction($data))->typeLabel().' recorded.');
+    }
+
+    public function updateTransaction(Request $request, Investor $investor, InvestorTransaction $transaction): RedirectResponse
+    {
+        abort_unless($transaction->investor_id === $investor->id, 404);
+
+        $transaction->update($this->validatedTransaction($request));
+
+        return back()->with('status', 'Transaction updated.');
+    }
+
+    protected function validatedTransaction(Request $request): array
+    {
         $data = $request->validate([
-            'type' => ['required', 'in:investment,payout'],
+            'type' => ['required', 'in:investment,profit_credited,payment_paid'],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'transaction_date' => ['required', 'date'],
             'project_id' => ['nullable', 'integer'],
@@ -78,9 +103,7 @@ class InvestorController extends Controller
             Project::findOrFail($data['project_id']);
         }
 
-        $investor->transactions()->create($data + ['recorded_by' => auth()->id()]);
-
-        return back()->with('status', ($data['type'] === 'investment' ? 'Investment' : 'Payout').' recorded.');
+        return $data;
     }
 
     public function destroyTransaction(Investor $investor, InvestorTransaction $transaction): RedirectResponse

@@ -46,7 +46,12 @@ class InvestorTransaction extends Model
 
     public function typeLabel(): string
     {
-        return $this->type === 'investment' ? 'Investment' : 'Profit / Payout';
+        return match ($this->type) {
+            'investment' => 'Investment',
+            'profit_credited' => 'Profit Credited',
+            'payment_paid' => 'Payment Paid',
+            default => ucfirst(str_replace('_', ' ', $this->type)),
+        };
     }
 
     public function detailsSummary(): string
