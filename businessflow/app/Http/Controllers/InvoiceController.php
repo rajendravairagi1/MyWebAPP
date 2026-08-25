@@ -26,12 +26,14 @@ class InvoiceController extends Controller
         return view('invoices.index', compact('invoices'));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         return view('invoices.create', [
             'customers' => Customer::orderBy('name')->get(),
             'products' => Product::orderBy('name')->get(),
             'projects' => Project::with('units')->orderBy('name')->get(),
+            'prefillProjectId' => $request->integer('project_id') ?: null,
+            'prefillUnitId' => $request->integer('unit_id') ?: null,
         ]);
     }
 

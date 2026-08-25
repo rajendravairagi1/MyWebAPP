@@ -1,4 +1,8 @@
-@php $invoice = $invoice ?? null; @endphp
+@php
+    $invoice = $invoice ?? null;
+    $prefillProjectId = $prefillProjectId ?? null;
+    $prefillUnitId = $prefillUnitId ?? null;
+@endphp
 
 <div x-data="{
         customerId: '{{ old('customer_id', $invoice?->customer_id) }}',
@@ -23,7 +27,7 @@
         </div>
     </div>
 
-    <x-project-unit-select :projects="$projects" :selected-project-id="$invoice?->project_id" :selected-unit-id="$invoice?->project_unit_id" />
+    <x-project-unit-select :projects="$projects" :selected-project-id="$invoice?->project_id ?? $prefillProjectId" :selected-unit-id="$invoice?->project_unit_id ?? $prefillUnitId" />
 </div>
 
 <x-line-items :products="$products" :items="$invoice?->items" />

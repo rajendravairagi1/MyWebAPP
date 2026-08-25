@@ -1,4 +1,8 @@
-@php $quotation = $quotation ?? null; @endphp
+@php
+    $quotation = $quotation ?? null;
+    $prefillProjectId = $prefillProjectId ?? null;
+    $prefillUnitId = $prefillUnitId ?? null;
+@endphp
 
 <div x-data="{
         customerId: '{{ old('customer_id', $quotation?->customer_id) }}',
@@ -23,7 +27,7 @@
         </div>
     </div>
 
-    <x-project-unit-select :projects="$projects" :selected-project-id="$quotation?->project_id" :selected-unit-id="$quotation?->project_unit_id" />
+    <x-project-unit-select :projects="$projects" :selected-project-id="$quotation?->project_id ?? $prefillProjectId" :selected-unit-id="$quotation?->project_unit_id ?? $prefillUnitId" />
 </div>
 
 <x-line-items :products="$products" :items="$quotation?->items" />

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AvailablePropertiesController;
 use App\Http\Controllers\CompletedProjectsController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerDocumentController;
@@ -56,6 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/customers/{customer}/documents/{document}/download', [CustomerDocumentController::class, 'download'])->name('customer-documents.download');
     Route::delete('/customers/{customer}/documents/{document}', [CustomerDocumentController::class, 'destroy'])->name('customer-documents.destroy');
     Route::resource('products', ProductController::class)->except(['show']);
+    Route::get('/available-properties', [AvailablePropertiesController::class, 'index'])->name('available-properties.index');
 
     Route::resource('projects', ProjectController::class);
     Route::post('/projects/{project}/costs', [ProjectCostController::class, 'store'])->name('project-costs.store');

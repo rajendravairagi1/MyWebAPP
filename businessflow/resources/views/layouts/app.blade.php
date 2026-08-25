@@ -104,11 +104,11 @@
                         {{ __('Follow-ups') }}
                     </x-sidebar-link>
 
-                    <x-sidebar-link :href="route('products.index')" :active="request()->routeIs('products.*')">
+                    <x-sidebar-link :href="route('available-properties.index')" :active="request()->routeIs('available-properties.*')">
                         <x-slot name="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                         </x-slot>
-                        {{ __('Products') }}
+                        {{ __('Available Properties') }}
                     </x-sidebar-link>
 
                     <x-sidebar-link :href="route('ledger.index')" :active="request()->routeIs('ledger.*')">
