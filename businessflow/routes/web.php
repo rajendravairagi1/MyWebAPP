@@ -57,7 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/customers/{customer}/documents/{document}', [CustomerDocumentController::class, 'destroy'])->name('customer-documents.destroy');
     Route::resource('products', ProductController::class)->except(['show']);
 
-    Route::resource('projects', ProjectController::class)->except(['destroy']);
+    Route::resource('projects', ProjectController::class);
     Route::post('/projects/{project}/costs', [ProjectCostController::class, 'store'])->name('project-costs.store');
     Route::put('/projects/{project}/costs/{cost}', [ProjectCostController::class, 'update'])->name('project-costs.update');
     Route::delete('/projects/{project}/costs/{cost}', [ProjectCostController::class, 'destroy'])->name('project-costs.destroy');

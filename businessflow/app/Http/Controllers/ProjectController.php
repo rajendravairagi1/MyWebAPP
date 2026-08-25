@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProjectController extends Controller
@@ -58,6 +59,19 @@ class ProjectController extends Controller
         $project->update($this->validated($request));
 
         return redirect()->route('projects.show', $project)->with('status', 'Project updated.');
+    }
+
+    public function destroy(Project $project): RedirectResponse
+    {
+        foreach ($project->costs as $cost) {
+            if ($cost->bill_path) {
+                Storage::disk('local')->delete($cost->bill_path);
+            }
+        }
+
+        $project->delete();
+
+        return redirect()->route('projects.index')->with('status', 'Project deleted.');
     }
 
     protected function validated(Request $request): array

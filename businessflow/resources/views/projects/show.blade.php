@@ -3,6 +3,14 @@
     $revenue = $project->totalRevenue();
     $invoiced = $project->totalInvoiced();
     $profit = $revenue - $cost;
+
+    $unitsCount = $project->units->count();
+    $costsCount = $project->costs->count();
+    $deleteConfirmMsg = "Delete \"{$project->name}\"? This permanently removes its {$unitsCount} unit(s) and {$costsCount} payment (kharcha) entries";
+    if ($revenue > 0) {
+        $deleteConfirmMsg .= ", including ".number_format($revenue, 0)." already recorded as received";
+    }
+    $deleteConfirmMsg .= ". Any quotations/invoices linked to it are kept but unlinked. This cannot be undone.";
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -14,6 +22,11 @@
             <div class="flex items-center gap-3">
                 <x-status-badge :status="$project->status" />
                 <a href="{{ route('projects.edit', $project) }}" class="text-sm text-accent-600 hover:underline">{{ __('Edit') }}</a>
+                <form method="POST" action="{{ route('projects.destroy', $project) }}" onsubmit="return confirm(@js($deleteConfirmMsg))">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-sm text-red-600 hover:underline">{{ __('Delete Project') }}</button>
+                </form>
             </div>
         </div>
     </x-slot>
