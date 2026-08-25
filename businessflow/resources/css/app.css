@@ -7,6 +7,23 @@
 }
 
 /*
+ * Browsers default table cells to vertical-align: middle, which misaligns
+ * a row the moment one cell wraps to two lines (e.g. a "type your own"
+ * input plus a link below it) while its neighbors stay one line — the
+ * shorter cells float to the middle instead of lining up with the top of
+ * the taller one. Top-aligning every cell keeps every row's content
+ * flush across the board, on every table, without having to remember an
+ * align-top class per cell. Use align-middle explicitly on a cell that
+ * genuinely wants centering.
+ */
+@layer base {
+    td,
+    th {
+        vertical-align: top;
+    }
+}
+
+/*
  * Accent theme colors. The `accent` Tailwind color family (see
  * tailwind.config.js) resolves to these variables, so switching
  * data-accent on <html> re-colors every accent-* utility at once,
