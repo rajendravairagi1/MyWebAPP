@@ -176,6 +176,19 @@
             </x-modal>
 
             {{-- Costs --}}
+            <div x-data="{
+                    fixedCategories: ['land', 'construction', 'material', 'labor', 'approval', 'marketing'],
+                    editingCost: { id: null, categorySelect: 'land', categoryOther: '', description: '', amount: '', spent_on: '', vendor: '', notes: '', bill_name: null },
+                    openEdit(cost) {
+                        const isFixed = this.fixedCategories.includes(cost.category);
+                        this.editingCost = {
+                            ...cost,
+                            categorySelect: isFixed ? cost.category : 'other',
+                            categoryOther: isFixed ? '' : cost.category,
+                        };
+                        $dispatch('open-modal', 'edit-cost');
+                    },
+                 }">
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-4">
                     <div>
@@ -212,8 +225,18 @@
                                             <span class="text-gray-300 dark:text-slate-600 text-xs">—</span>
                                         @endif
                                     </td>
-                                    <td class="px-5 py-2 text-right">
-                                        <form method="POST" action="{{ route('project-costs.destroy', [$project, $entry]) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')">
+                                    <td class="px-5 py-2 text-right whitespace-nowrap">
+                                        <button type="button" @click="openEdit(@js([
+                                            'id' => $entry->id,
+                                            'category' => $entry->category,
+                                            'description' => $entry->description,
+                                            'amount' => (float) $entry->amount,
+                                            'spent_on' => $entry->spent_on->format('Y-m-d'),
+                                            'vendor' => $entry->vendor,
+                                            'notes' => $entry->notes,
+                                            'bill_name' => $entry->bill_name,
+                                        ]))" class="text-xs text-accent-600 hover:underline mr-3">{{ __('Edit') }}</button>
+                                        <form method="POST" action="{{ route('project-costs.destroy', [$project, $entry]) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button class="text-xs text-red-600 hover:underline">{{ __('Remove') }}</button>
@@ -292,6 +315,73 @@
                     </div>
                 </form>
             </x-modal>
+
+            <x-modal name="edit-cost">
+                <form method="POST" :action="'{{ route('project-costs.update', [$project, '__ID__']) }}'.replace('__ID__', editingCost.id)" enctype="multipart/form-data" class="p-6 space-y-4">
+                    @csrf
+                    @method('PUT')
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Payment') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Update this expense entry.') }}</p>
+
+                    <div>
+                        <x-input-label for="edit_category" :value="__('What was it for?')" />
+                        <select id="edit_category" name="category" x-model="editingCost.categorySelect" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            <option value="land">{{ __('Land') }}</option>
+                            <option value="construction">{{ __('Construction') }}</option>
+                            <option value="material">{{ __('Material') }}</option>
+                            <option value="labor">{{ __('Labor') }}</option>
+                            <option value="approval">{{ __('Government / Approvals') }}</option>
+                            <option value="marketing">{{ __('Marketing') }}</option>
+                            <option value="other">{{ __('Other — type my own') }}</option>
+                        </select>
+                    </div>
+
+                    <div x-show="editingCost.categorySelect === 'other'" x-cloak>
+                        <x-input-label for="edit_category_other" :value="__('Custom category name')" />
+                        <input id="edit_category_other" name="category_other" type="text" x-model="editingCost.categoryOther" placeholder="{{ __('e.g. Electricity Bill') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    </div>
+
+                    <div>
+                        <x-input-label for="edit_description" :value="__('Description')" />
+                        <input id="edit_description" name="description" type="text" x-model="editingCost.description" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label for="edit_amount" :value="__('Amount')" />
+                            <input id="edit_amount" name="amount" type="number" step="0.01" min="0.01" x-model="editingCost.amount" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        </div>
+                        <div>
+                            <x-input-label for="edit_spent_on" :value="__('Date')" />
+                            <input id="edit_spent_on" name="spent_on" type="date" x-model="editingCost.spent_on" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <x-input-label for="edit_vendor" :value="__('Paid to / Vendor (optional)')" />
+                        <input id="edit_vendor" name="vendor" type="text" x-model="editingCost.vendor" placeholder="{{ __('e.g. Ram Lal Cement Store, Contractor name') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    </div>
+
+                    <div>
+                        <x-input-label for="edit_notes" :value="__('Notes (optional)')" />
+                        <textarea id="edit_notes" name="notes" rows="2" x-model="editingCost.notes" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500"></textarea>
+                    </div>
+
+                    <div>
+                        <x-input-label for="edit_bill" :value="__('Bill / Receipt')" />
+                        <p x-show="editingCost.bill_name" class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ __('Current file:') }} <span x-text="editingCost.bill_name"></span></p>
+                        <input id="edit_bill" name="bill" type="file" accept="image/*,.pdf" capture="environment"
+                            class="mt-1 block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
+                        <p class="mt-1 text-xs text-gray-400">{{ __('Leave blank to keep the existing bill. Upload a new file to replace it.') }}</p>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
+                        <x-primary-button>{{ __('Save Changes') }}</x-primary-button>
+                    </div>
+                </form>
+            </x-modal>
+            </div>
 
             {{-- Quotations & Invoices --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
