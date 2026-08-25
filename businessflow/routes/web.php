@@ -60,6 +60,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/customers/{customer}/documents/{document}', [CustomerDocumentController::class, 'destroy'])->name('customer-documents.destroy');
     Route::resource('products', ProductController::class)->except(['show']);
     Route::get('/available-properties', [AvailablePropertiesController::class, 'index'])->name('available-properties.index');
+    Route::post('/available-properties', [AvailablePropertiesController::class, 'store'])->name('available-properties.store');
 
     Route::resource('projects', ProjectController::class);
     Route::post('/projects/{project}/costs', [ProjectCostController::class, 'store'])->name('project-costs.store');
