@@ -46,17 +46,22 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="flex items-center gap-4">
-                                <div class="text-right">
-                                    <div class="text-xs text-gray-400">{{ __('Price') }}</div>
-                                    <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->price, 0) }}</div>
-                                </div>
-                                <div class="flex flex-col gap-1 text-xs">
-                                    <a href="{{ route('project-units.show', $unit) }}" class="text-accent-600 hover:underline">{{ __('View Details →') }}</a>
-                                    <a href="{{ route('quotations.create', ['project_id' => $unit->project_id, 'unit_id' => $unit->id]) }}" class="text-accent-600 hover:underline">{{ __('+ Quotation') }}</a>
-                                    <a href="{{ route('invoices.create', ['project_id' => $unit->project_id, 'unit_id' => $unit->id]) }}" class="text-accent-600 hover:underline">{{ __('+ Invoice') }}</a>
-                                </div>
+                            <div class="text-right">
+                                <div class="text-xs text-gray-400">{{ __('Price') }}</div>
+                                <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->price, 0) }}</div>
                             </div>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <a href="{{ route('project-units.show', $unit) }}" class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
+                                {{ __('View Details') }}
+                            </a>
+                            <a href="{{ route('quotations.create', ['project_id' => $unit->project_id, 'unit_id' => $unit->id]) }}" class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                                {{ __('+ Quotation') }}
+                            </a>
+                            <a href="{{ route('invoices.create', ['project_id' => $unit->project_id, 'unit_id' => $unit->id]) }}" class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                                {{ __('+ Invoice') }}
+                            </a>
                         </div>
                     </div>
                 @empty
