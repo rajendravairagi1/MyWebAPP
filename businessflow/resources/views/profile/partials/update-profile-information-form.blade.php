@@ -13,9 +13,26 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6" x-data="{ avatar: '{{ old('avatar', $user->avatar) }}' }">
         @csrf
         @method('patch')
+
+        <div>
+            <x-input-label :value="__('Avatar')" />
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-2">{{ __('Shown next to your name until you add a real profile photo.') }}</p>
+            <div class="flex gap-3">
+                @foreach (['' => __('Default'), 'male' => __('Male'), 'female' => __('Female'), 'cartoon' => __('Cartoon')] as $value => $label)
+                    <label class="flex flex-col items-center gap-1.5 cursor-pointer">
+                        <input type="radio" name="avatar" value="{{ $value }}" x-model="avatar" class="sr-only">
+                        <span class="h-14 w-14 rounded-full ring-2 ring-offset-2 dark:ring-offset-slate-800 transition"
+                            :class="avatar === '{{ $value }}' ? 'ring-accent-500' : 'ring-transparent'">
+                            <x-avatar-graphic :style="$value ?: null" :initials="collect(explode(' ', $user->name))->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('')" class="h-full w-full" />
+                        </span>
+                        <span class="text-xs text-gray-600 dark:text-gray-400">{{ $label }}</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
 
         <div>
             <x-input-label for="name" :value="__('Name')" />

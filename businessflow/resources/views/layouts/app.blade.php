@@ -179,16 +179,12 @@
                     <x-dropdown align="right" width="w-72">
                         <x-slot name="trigger">
                             <button type="button" class="flex items-center gap-2 text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
-                                <span class="h-9 w-9 rounded-full bg-accent-500 text-white text-sm font-semibold flex items-center justify-center shrink-0">
-                                    {{ collect(explode(' ', Auth::user()->name))->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('') }}
-                                </span>
+                                <x-avatar-graphic :style="Auth::user()->avatar" :initials="collect(explode(' ', Auth::user()->name))->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('')" class="h-9 w-9" />
                             </button>
                         </x-slot>
                         <x-slot name="content">
                             <div class="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-slate-700">
-                                <span class="h-10 w-10 rounded-full bg-accent-500 text-white text-sm font-semibold flex items-center justify-center shrink-0">
-                                    {{ collect(explode(' ', Auth::user()->name))->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('') }}
-                                </span>
+                                <x-avatar-graphic :style="Auth::user()->avatar" :initials="collect(explode(' ', Auth::user()->name))->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('')" class="h-10 w-10" />
                                 <div class="min-w-0">
                                     <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{{ Auth::user()->name }}</p>
                                     <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ Auth::user()->email }}</p>

@@ -13,7 +13,10 @@ class ProjectController extends Controller
 {
     public function index(): View
     {
-        $projects = Project::withCount('units')->latest()->get();
+        // Fully completed projects (every unit sold & paid off, or written
+        // off) are done — they clutter this active list, and stay reachable
+        // via the Completed Projects page or a direct link.
+        $projects = Project::withCount('units')->where('status', '!=', 'completed')->latest()->get();
 
         return view('projects.index', compact('projects'));
     }
