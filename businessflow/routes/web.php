@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AvailablePropertiesController;
+use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\CompletedProjectsController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerDocumentController;
@@ -137,6 +138,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/business', [BusinessController::class, 'edit'])->name('business.edit');
+    Route::put('/business', [BusinessController::class, 'update'])->name('business.update');
+    Route::get('/business/logo', [BusinessController::class, 'logo'])->name('business.logo');
 });
 
 require __DIR__.'/auth.php';

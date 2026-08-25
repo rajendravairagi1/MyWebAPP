@@ -25,8 +25,13 @@
     <table class="header">
         <tr>
             <td>
+                @if ($business?->logoDataUri())
+                    <img src="{{ $business->logoDataUri() }}" alt="{{ $business->name }}" style="max-height: 48px; max-width: 180px; margin-bottom: 4px;">
+                @endif
                 <h1>{{ $business?->name ?? config('app.name') }}</h1>
                 <div class="muted">Quotation</div>
+                @if ($business?->address)<div class="muted" style="font-size: 10px; margin-top: 4px;">{{ $business->address }}</div>@endif
+                @if ($business?->phone)<div class="muted" style="font-size: 10px;">{{ $business->phone }}</div>@endif
             </td>
             <td class="text-right">
                 <div><strong>{{ $quotation->number }}</strong></div>
