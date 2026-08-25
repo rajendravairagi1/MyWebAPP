@@ -63,6 +63,7 @@
                         </td>
                         <td class="px-3 py-2">
                             <input type="text" inputmode="decimal" :name="`items[${index}][unit_price]`" x-model.number="row.unit_price"
+                                @focus="$event.target.select()" placeholder="0"
                                 class="w-full text-sm text-right border-gray-300 rounded-md">
                         </td>
                         <td class="px-3 py-2 text-right">
@@ -86,14 +87,14 @@
             <tr>
                 <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Discount') }} <span class="text-gray-400">(₹)</span></td>
                 <td class="py-1 text-right">
-                    <input type="text" inputmode="decimal" x-model.number="overallDiscount" placeholder="0"
+                    <input type="text" inputmode="decimal" x-model.number="overallDiscount" @focus="$event.target.select()" placeholder="0"
                         class="w-full text-sm text-right border-gray-300 rounded-md">
                 </td>
             </tr>
             <tr>
                 <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Tax') }} <span class="text-gray-400">(%)</span></td>
                 <td class="py-1 text-right">
-                    <input type="text" inputmode="decimal" x-model.number="overallTaxRate" placeholder="0"
+                    <input type="text" inputmode="decimal" x-model.number="overallTaxRate" @focus="$event.target.select()" placeholder="0"
                         class="w-full text-sm text-right border-gray-300 rounded-md">
                 </td>
             </tr>
@@ -126,10 +127,10 @@
                         { id: 're-final', name: 'Full & Final Payment' },
                     ],
                     addRowError: '',
-                    overallDiscount: initialDiscount || 0,
-                    overallTaxRate: initialTaxRate || 0,
+                    overallDiscount: initialDiscount || '',
+                    overallTaxRate: initialTaxRate || '',
                     newRow() {
-                        return { product_id: '', description: '', selectValue: '', customMode: false, unit_price: 0 };
+                        return { product_id: '', description: '', selectValue: '', customMode: false, unit_price: '' };
                     },
                     rows: [],
                     init() {
