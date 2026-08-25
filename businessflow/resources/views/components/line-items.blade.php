@@ -10,7 +10,7 @@
         <table class="min-w-full text-sm" style="table-layout: fixed;">
             <colgroup>
                 <col>
-                <col style="width: 10rem;">
+                <col style="width: 12rem;">
                 <col style="width: 2.5rem;">
             </colgroup>
             <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
@@ -62,7 +62,7 @@
                             </template>
                         </td>
                         <td class="px-3 py-2">
-                            <input type="number" step="0.01" min="0" :name="`items[${index}][unit_price]`" x-model.number="row.unit_price"
+                            <input type="text" inputmode="decimal" :name="`items[${index}][unit_price]`" x-model.number="row.unit_price"
                                 class="w-full text-sm text-right border-gray-300 rounded-md">
                         </td>
                         <td class="px-3 py-2 text-right">
@@ -86,14 +86,14 @@
             <tr>
                 <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Discount') }} <span class="text-gray-400">(₹)</span></td>
                 <td class="py-1 text-right">
-                    <input type="number" step="0.01" min="0" x-model.number="overallDiscount" placeholder="0"
+                    <input type="text" inputmode="decimal" x-model.number="overallDiscount" placeholder="0"
                         class="w-full text-sm text-right border-gray-300 rounded-md">
                 </td>
             </tr>
             <tr>
                 <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Tax') }} <span class="text-gray-400">(%)</span></td>
                 <td class="py-1 text-right">
-                    <input type="number" step="0.01" min="0" max="100" x-model.number="overallTaxRate" placeholder="0"
+                    <input type="text" inputmode="decimal" x-model.number="overallTaxRate" placeholder="0"
                         class="w-full text-sm text-right border-gray-300 rounded-md">
                 </td>
             </tr>
