@@ -3,7 +3,7 @@
 @php
     $purposeStyles = [
         'token' => ['border' => 'border-l-blue-500', 'badge' => 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'],
-        'installment' => ['border' => 'border-l-accent-500', 'badge' => 'bg-accent-100 dark:bg-slate-700 text-accent-700 dark:text-accent-100'],
+        'installment' => ['border' => 'border-l-accent-500', 'badge' => 'bg-accent-100 dark:bg-slate-700 text-accent-700'],
         'registry' => ['border' => 'border-l-amber-500', 'badge' => 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300'],
         'maintenance' => ['border' => 'border-l-teal-500', 'badge' => 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300'],
     ];

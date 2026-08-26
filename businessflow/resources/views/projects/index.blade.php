@@ -25,7 +25,7 @@
             {{-- Header card --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <div class="h-14 w-14 shrink-0 rounded-lg bg-accent-100 dark:bg-slate-700 text-accent-700 dark:text-accent-100 flex items-center justify-center">
+                    <div class="h-14 w-14 shrink-0 rounded-lg bg-accent-100 dark:bg-slate-700 text-accent-700 flex items-center justify-center">
                         <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9h.01M9 12h.01M9 15h.01M9 18h.01" /></svg>
                     </div>
                     <div>

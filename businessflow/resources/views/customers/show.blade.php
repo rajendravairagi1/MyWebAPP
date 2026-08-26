@@ -42,7 +42,7 @@
             {{-- Identity card --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 flex flex-col lg:flex-row lg:items-start justify-between gap-6">
                 <div class="flex items-start gap-4 min-w-0">
-                    <div class="h-14 w-14 shrink-0 rounded-lg overflow-hidden bg-accent-100 dark:bg-slate-700 text-accent-700 dark:text-accent-100 flex items-center justify-center text-2xl font-semibold">
+                    <div class="h-14 w-14 shrink-0 rounded-lg overflow-hidden bg-accent-100 dark:bg-slate-700 text-accent-700 flex items-center justify-center text-2xl font-semibold">
                         @if ($customer->photo_path)
                             <img src="{{ route('customers.photo', $customer) }}" alt="{{ $customer->name }}" class="h-full w-full object-cover">
                         @else
@@ -106,7 +106,7 @@
                             {{ __('Edit') }}
                         </a>
                         @if ($canFinancials)
-                        <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 dark:text-accent-100 hover:bg-accent-100 dark:hover:bg-slate-600">
+                        <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 hover:bg-accent-100 dark:hover:bg-slate-600">
                             <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                             {{ __('Statement') }}
                         </a>
@@ -168,7 +168,7 @@
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
                     <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Properties') }} ({{ $activeUnitCount }})</span>
                     @if ($canFinancials)
-                    <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 dark:text-accent-100 hover:bg-accent-100 dark:hover:bg-slate-600">
+                    <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 hover:bg-accent-100 dark:hover:bg-slate-600">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                         {{ __('Download full statement') }}
                     </a>
@@ -485,7 +485,7 @@
                             <li class="px-5 py-3 flex items-center justify-between gap-4 {{ $followup->status === 'done' ? 'opacity-50' : '' }}">
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="text-xs px-2 py-0.5 rounded font-medium bg-accent-100 dark:bg-slate-700 text-accent-700 dark:text-accent-100">{{ $followup->categoryLabel() }}</span>
+                                        <span class="text-xs px-2 py-0.5 rounded font-medium bg-accent-100 dark:bg-slate-700 text-accent-700">{{ $followup->categoryLabel() }}</span>
                                         <x-status-badge :status="$followup->status" />
                                         @if ($followup->status === 'pending' && $followup->due_at->isPast())
                                             <span class="text-xs px-2 py-0.5 rounded font-medium bg-red-100 text-red-700">{{ __('Overdue') }}</span>

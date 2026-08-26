@@ -1,7 +1,7 @@
 <li class="px-5 py-4 flex items-center justify-between gap-4">
     <div class="min-w-0">
         <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-xs px-2 py-0.5 rounded font-medium bg-accent-100 dark:bg-slate-700 text-accent-700 dark:text-accent-100">{{ $followup->categoryLabel() }}</span>
+            <span class="text-xs px-2 py-0.5 rounded font-medium bg-accent-100 dark:bg-slate-700 text-accent-700">{{ $followup->categoryLabel() }}</span>
             <a href="{{ route('customers.show', $followup->customer) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:underline">{{ $followup->customer->name }}</a>
             @if ($followup->project)
                 <span class="text-xs text-gray-400">· {{ $followup->project->name }}</span>
