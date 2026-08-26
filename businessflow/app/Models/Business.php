@@ -68,17 +68,30 @@ class Business extends Model
      * temporary Tenant switch rather than just bypassing this model's
      * own scope, to keep those nested queries scoped correctly too.
      */
+    /**
+     * 'profit' here uses the same cash-basis formula as the Ledger
+     * (collected + manual income − costs − manual expense) — money
+     * actually received, not booked sale value — so a Company/Branch
+     * dashboard rolling these up never disagrees with what a builder
+     * sees on their own Ledger.
+     */
     public function statsSummary(): array
     {
         return \App\Support\Tenant::runAs($this->id, function () {
             $units = \App\Models\ProjectUnit::whereNull('archived_at')->get();
+            $collected = (float) $units->sum(fn ($u) => $u->totalCollected());
+            $manualIncome = (float) \App\Models\LedgerEntry::where('type', 'income')->sum('amount');
+            $manualExpense = (float) \App\Models\LedgerEntry::where('type', 'expense')->sum('amount');
+            $cost = (float) \App\Models\ProjectCost::sum('amount') + $manualExpense;
 
             return [
                 'projects' => \App\Models\Project::count(),
                 'customers' => \App\Models\Customer::count(),
                 'value' => (float) $units->sum('price'),
-                'collected' => (float) $units->sum(fn ($u) => $u->totalCollected()),
+                'collected' => $collected,
                 'outstanding' => (float) $units->sum(fn ($u) => $u->totalOutstanding()),
+                'cost' => $cost,
+                'profit' => $collected + $manualIncome - $cost,
             ];
         });
     }

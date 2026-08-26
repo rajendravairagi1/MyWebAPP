@@ -43,6 +43,40 @@
                 @endif
             </div>
 
+            {{-- Branch-wide P&L across every builder --}}
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                <div class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-4">{{ __('Branch-wide — all builders') }}</div>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Projects') }}</div>
+                        <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $branchTotals['projects'] }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Collected') }}</div>
+                        <div class="mt-1 text-xl font-semibold text-green-600">₹{{ number_format($branchTotals['collected'], 0) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}</div>
+                        <div class="mt-1 text-xl font-semibold {{ $branchTotals['outstanding'] > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($branchTotals['outstanding'], 0) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Cost') }}</div>
+                        <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($branchTotals['cost'], 0) }}</div>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Profit / Loss') }}</div>
+                        <div class="mt-1 text-xl font-semibold {{ $branchTotals['profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($branchTotals['profit'], 0) }}</div>
+                    </div>
+                </div>
+
+                @if ($branch->businesses->isNotEmpty())
+                    <div class="mt-6 pt-5 border-t border-gray-100 dark:border-slate-700">
+                        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ __('Profit / loss by builder') }}</div>
+                        <x-profit-chart :labels="$branch->businesses->pluck('name')" :values="$branch->businesses->map(fn ($b) => round($businessStats[$b->id]['profit'], 2))" />
+                    </div>
+                @endif
+            </div>
+
             @if ($branch->businesses->isEmpty())
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-8 text-center text-sm text-gray-500 dark:text-gray-400">
                     {{ __('No builders in this branch yet.') }}
@@ -57,6 +91,7 @@
                                 <th class="px-5 py-3 text-right">{{ __('Customers') }}</th>
                                 <th class="px-5 py-3 text-right">{{ __('Collected') }}</th>
                                 <th class="px-5 py-3 text-right">{{ __('Outstanding') }}</th>
+                                <th class="px-5 py-3 text-right">{{ __('Profit') }}</th>
                                 <th class="px-5 py-3"></th>
                             </tr>
                         </thead>
@@ -69,6 +104,7 @@
                                     <td class="px-5 py-3 text-right text-gray-600 dark:text-gray-400">{{ $stats['customers'] }}</td>
                                     <td class="px-5 py-3 text-right text-green-600">₹{{ number_format($stats['collected'], 0) }}</td>
                                     <td class="px-5 py-3 text-right {{ $stats['outstanding'] > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($stats['outstanding'], 0) }}</td>
+                                    <td class="px-5 py-3 text-right font-medium {{ $stats['profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($stats['profit'], 0) }}</td>
                                     <td class="px-5 py-3 text-right">
                                         <form method="POST" action="{{ route('businesses.switch', $business) }}">
                                             @csrf

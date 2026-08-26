@@ -25,6 +25,40 @@
                 {{ __('Each branch can have its own manager and any number of builders — each builder runs fully independently, with its own projects, customers and team.') }}
             </p>
 
+            {{-- Company-wide P&L across every branch --}}
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                <div class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-4">{{ __('Company-wide — all branches') }}</div>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Projects') }}</div>
+                        <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $companyTotals['projects'] }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Collected') }}</div>
+                        <div class="mt-1 text-xl font-semibold text-green-600">₹{{ number_format($companyTotals['collected'], 0) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}</div>
+                        <div class="mt-1 text-xl font-semibold {{ $companyTotals['outstanding'] > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($companyTotals['outstanding'], 0) }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Cost') }}</div>
+                        <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($companyTotals['cost'], 0) }}</div>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Profit / Loss') }}</div>
+                        <div class="mt-1 text-xl font-semibold {{ $companyTotals['profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($companyTotals['profit'], 0) }}</div>
+                    </div>
+                </div>
+
+                @if ($branches->isNotEmpty())
+                    <div class="mt-6 pt-5 border-t border-gray-100 dark:border-slate-700">
+                        <div class="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">{{ __('Profit / loss by branch') }}</div>
+                        <x-profit-chart :labels="$branches->pluck('name')" :values="$branches->map(fn ($b) => round($branchStats[$b->id]['profit'], 2))" />
+                    </div>
+                @endif
+            </div>
+
             @if ($branches->isEmpty())
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-8 text-center text-sm text-gray-500 dark:text-gray-400">
                     {{ __('No branches yet — add your first one to start adding builders under it.') }}
@@ -43,7 +77,7 @@
                                 </div>
                                 <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 shrink-0">{{ $branch->businesses->count() }} {{ __('builders') }}</span>
                             </div>
-                            <div class="mt-4 grid grid-cols-3 gap-2 text-xs">
+                            <div class="mt-4 grid grid-cols-4 gap-2 text-xs">
                                 <div>
                                     <div class="text-gray-400">{{ __('Projects') }}</div>
                                     <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $stats['projects'] }}</div>
@@ -55,6 +89,10 @@
                                 <div>
                                     <div class="text-gray-400">{{ __('Outstanding') }}</div>
                                     <div class="font-semibold {{ $stats['outstanding'] > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($stats['outstanding'], 0) }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-gray-400">{{ __('Profit') }}</div>
+                                    <div class="font-semibold {{ $stats['profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($stats['profit'], 0) }}</div>
                                 </div>
                             </div>
                         </a>

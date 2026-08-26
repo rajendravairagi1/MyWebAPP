@@ -48,7 +48,7 @@ class CompanyController extends Controller
         $branches = $company->branches()->with(['manager', 'businesses'])->orderBy('created_at')->get();
 
         $branchStats = $branches->mapWithKeys(function ($branch) {
-            $totals = ['projects' => 0, 'customers' => 0, 'value' => 0, 'collected' => 0, 'outstanding' => 0];
+            $totals = ['projects' => 0, 'customers' => 0, 'value' => 0, 'collected' => 0, 'outstanding' => 0, 'cost' => 0, 'profit' => 0];
 
             foreach ($branch->businesses as $business) {
                 foreach ($business->statsSummary() as $key => $value) {
@@ -59,6 +59,13 @@ class CompanyController extends Controller
             return [$branch->id => $totals];
         });
 
-        return view('company.show', compact('company', 'branches', 'branchStats'));
+        $companyTotals = ['projects' => 0, 'customers' => 0, 'value' => 0, 'collected' => 0, 'outstanding' => 0, 'cost' => 0, 'profit' => 0];
+        foreach ($branchStats as $totals) {
+            foreach ($totals as $key => $value) {
+                $companyTotals[$key] += $value;
+            }
+        }
+
+        return view('company.show', compact('company', 'branches', 'branchStats', 'companyTotals'));
     }
 }

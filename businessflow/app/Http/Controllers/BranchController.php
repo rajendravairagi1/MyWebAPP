@@ -41,7 +41,14 @@ class BranchController extends Controller
         $businessStats = $branch->businesses->mapWithKeys(fn ($business) => [$business->id => $business->statsSummary()]);
         $isCompanyOwner = $request->user()->ownedCompany?->id === $branch->company_id;
 
-        return view('branches.show', compact('branch', 'businessStats', 'isCompanyOwner'));
+        $branchTotals = ['projects' => 0, 'customers' => 0, 'value' => 0, 'collected' => 0, 'outstanding' => 0, 'cost' => 0, 'profit' => 0];
+        foreach ($businessStats as $stats) {
+            foreach ($stats as $key => $value) {
+                $branchTotals[$key] += $value;
+            }
+        }
+
+        return view('branches.show', compact('branch', 'businessStats', 'isCompanyOwner', 'branchTotals'));
     }
 
     public function update(Request $request, Branch $branch): RedirectResponse
