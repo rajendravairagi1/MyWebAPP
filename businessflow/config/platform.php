@@ -6,5 +6,5 @@
 return [
     'admin_email' => env('PLATFORM_ADMIN_EMAIL', 'rajendravairagi1@gmail.com'),
 
-    'demo_email' => env('PLATFORM_DEMO_EMAIL', 'demo@businessflow.local'),
+    'demo_email' => env('PLATFORM_DEMO_EMAIL', 'demo@gmail.com'),
 ];
