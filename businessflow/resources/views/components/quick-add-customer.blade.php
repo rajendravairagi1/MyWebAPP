@@ -57,11 +57,11 @@
             <div class="space-y-3">
                 <div>
                     <x-input-label :value="__('Name')" />
-                    <input type="text" x-model="name" @keydown.enter.prevent="submit()" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500" autofocus>
+                    <input type="text" x-model="name" @keydown.enter.prevent="submit()" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500" autofocus>
                 </div>
                 <div>
                     <x-input-label :value="__('Phone (optional)')" />
-                    <input type="text" x-model="phone" @keydown.enter.prevent="submit()" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    <input type="text" x-model="phone" @keydown.enter.prevent="submit()" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                 </div>
                 <p x-show="error" x-text="error" class="text-xs text-red-600"></p>
             </div>

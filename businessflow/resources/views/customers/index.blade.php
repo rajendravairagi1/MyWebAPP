@@ -14,7 +14,7 @@
 
             <form method="GET" class="max-w-sm">
                 <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Search customers...') }}"
-                    class="w-full border-gray-300 rounded-md shadow-sm text-sm focus:border-accent-500 focus:ring-accent-500">
+                    class="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm text-sm focus:border-accent-500 focus:ring-accent-500">
             </form>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">

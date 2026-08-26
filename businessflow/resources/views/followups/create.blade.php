@@ -11,7 +11,7 @@
 
                     <div>
                         <x-input-label for="category" :value="__('This follow-up is about')" />
-                        <select id="category" name="category" x-model="category" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <select id="category" name="category" x-model="category" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                             @foreach (\App\Models\Followup::CATEGORIES as $val => $label)
                                 <option value="{{ $val }}" @selected(old('category', 'general') === $val)>{{ $label }}</option>
                             @endforeach
@@ -25,7 +25,7 @@
 
                     <div>
                         <x-input-label for="customer_id" :value="__('Customer')" />
-                        <select id="customer_id" name="customer_id" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <select id="customer_id" name="customer_id" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                             <option value="">{{ __('Select a customer') }}</option>
                             @foreach ($customers as $customer)
                                 <option value="{{ $customer->id }}" @selected(old('customer_id') == $customer->id)>{{ $customer->name }} @if($customer->phone) ({{ $customer->phone }}) @endif</option>
@@ -39,7 +39,7 @@
 
                     <div>
                         <x-input-label for="project_id" :value="__('Project (optional)')" />
-                        <select id="project_id" name="project_id" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <select id="project_id" name="project_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                             <option value="">{{ __('None') }}</option>
                             @foreach ($projects as $project)
                                 <option value="{{ $project->id }}" @selected(old('project_id') == $project->id)>{{ $project->name }}</option>
@@ -51,7 +51,7 @@
                     <div>
                         <x-input-label for="note" :value="__('Reminder note')" />
                         <textarea id="note" name="note" rows="3" required placeholder="{{ __('e.g. Follow up on site visit, ask about payment plan') }}"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('note') }}</textarea>
+                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('note') }}</textarea>
                         <x-input-error :messages="$errors->get('note')" class="mt-2" />
                         <p class="mt-1 text-xs text-gray-400">{{ __('This text is also used as the WhatsApp message when you click the WhatsApp button.') }}</p>
                     </div>
@@ -59,7 +59,7 @@
                     <div>
                         <x-input-label for="due_at" :value="__('Due')" />
                         <input id="due_at" name="due_at" type="datetime-local" value="{{ old('due_at', now()->addDay()->format('Y-m-d\TH:i')) }}" required
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                         <x-input-error :messages="$errors->get('due_at')" class="mt-2" />
                     </div>
 

@@ -69,10 +69,10 @@
 
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('projects.create') }}" class="inline-flex items-center px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('+ Add Project') }}</a>
-                <a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Add Customer') }}</a>
-                <a href="{{ route('quotations.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Create Quotation') }}</a>
-                <a href="{{ route('invoices.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Create Invoice') }}</a>
-                <a href="{{ route('followups.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Schedule Follow-up') }}</a>
+                <a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Add Customer') }}</a>
+                <a href="{{ route('quotations.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Create Quotation') }}</a>
+                <a href="{{ route('invoices.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Create Invoice') }}</a>
+                <a href="{{ route('followups.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Schedule Follow-up') }}</a>
             </div>
 
             @if ($dueFollowups->isNotEmpty())

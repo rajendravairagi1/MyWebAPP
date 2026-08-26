@@ -8,7 +8,7 @@
     </div>
     <div>
         <x-input-label for="type" :value="__('Type')" />
-        <select id="type" name="type" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+        <select id="type" name="type" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             <option value="product" @selected(old('type', $product?->type) === 'product')>{{ __('Product') }}</option>
             <option value="service" @selected(old('type', $product?->type) === 'service')>{{ __('Service') }}</option>
         </select>

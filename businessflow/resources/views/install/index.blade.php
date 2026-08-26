@@ -30,38 +30,38 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700" for="app_url">App URL</label>
                 <input id="app_url" name="app_url" type="url" required value="{{ old('app_url', $appUrl) }}"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             </div>
 
             <div class="grid grid-cols-3 gap-3">
                 <div class="col-span-2">
                     <label class="block text-sm font-medium text-gray-700" for="db_host">Database host</label>
                     <input id="db_host" name="db_host" type="text" required value="{{ old('db_host', 'localhost') }}"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700" for="db_port">Port</label>
                     <input id="db_port" name="db_port" type="text" required value="{{ old('db_port', '3306') }}"
-                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                 </div>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700" for="db_database">Database name</label>
                 <input id="db_database" name="db_database" type="text" required value="{{ old('db_database') }}"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700" for="db_username">Database username</label>
                 <input id="db_username" name="db_username" type="text" required value="{{ old('db_username') }}"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-700" for="db_password">Database password</label>
                 <input id="db_password" name="db_password" type="password" value="{{ old('db_password') }}"
-                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             </div>
 
             <button type="submit"

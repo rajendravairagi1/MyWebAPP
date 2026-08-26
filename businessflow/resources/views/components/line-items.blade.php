@@ -6,7 +6,7 @@
         {{ $items ? (float) $items->sum('discount') : 0 }},
         {{ $items && $items->isNotEmpty() ? (float) $items->first()->tax_rate : 0 }}
     )">
-    <div class="overflow-x-auto border border-gray-200 rounded-md">
+    <div class="overflow-x-auto border border-gray-200 dark:border-slate-700 rounded-md">
         <table class="min-w-full text-sm" style="table-layout: fixed;">
             <colgroup>
                 <col>
@@ -32,7 +32,7 @@
                             <template x-if="!row.customMode">
                                 <div>
                                     <select required x-model="row.selectValue" @change="onPick(index)"
-                                        class="block w-full text-sm border-gray-300 rounded-md">
+                                        class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md">
                                         <option value="" disabled>{{ __('Choose an item…') }}</option>
                                         <option value="custom">{{ __('Custom item — type your own') }}</option>
                                         <optgroup label="{{ __('Common Real Estate Items') }}">
@@ -56,7 +56,7 @@
                                 <div>
                                     <input type="text" :name="`items[${index}][description]`" x-model="row.description" required
                                         placeholder="{{ __('Type item / product name') }}"
-                                        class="block w-full text-sm border-gray-300 rounded-md">
+                                        class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md">
                                     <button type="button" @click="backToList(index)" class="mt-1 text-xs text-accent-600 hover:underline">{{ __('← Choose from list instead') }}</button>
                                 </div>
                             </template>
@@ -64,7 +64,7 @@
                         <td class="px-3 py-2">
                             <input type="text" inputmode="decimal" :name="`items[${index}][unit_price]`" x-model.number="row.unit_price"
                                 @focus="$event.target.select()" placeholder="0"
-                                class="w-full text-sm text-right border-gray-300 rounded-md">
+                                class="w-full text-sm text-right border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md">
                         </td>
                         <td class="px-3 py-2 text-right">
                             <button type="button" @click="removeRow(index)" x-show="rows.length > 1" class="text-gray-400 hover:text-red-600">&times;</button>
@@ -88,17 +88,17 @@
                 <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Discount') }} <span class="text-gray-400">(₹)</span></td>
                 <td class="py-1 text-right">
                     <input type="text" inputmode="decimal" x-model.number="overallDiscount" @focus="$event.target.select()" placeholder="0"
-                        class="w-full text-sm text-right border-gray-300 rounded-md">
+                        class="w-full text-sm text-right border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md">
                 </td>
             </tr>
             <tr>
                 <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Tax') }} <span class="text-gray-400">(%)</span></td>
                 <td class="py-1 text-right">
                     <input type="text" inputmode="decimal" x-model.number="overallTaxRate" @focus="$event.target.select()" placeholder="0"
-                        class="w-full text-sm text-right border-gray-300 rounded-md">
+                        class="w-full text-sm text-right border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md">
                 </td>
             </tr>
-            <tr class="border-t border-gray-200 font-semibold">
+            <tr class="border-t border-gray-200 dark:border-slate-700 font-semibold">
                 <td class="py-1 text-gray-700 dark:text-gray-300">{{ __('Total') }}</td>
                 <td class="py-1 text-right text-gray-900 dark:text-gray-100" x-text="grandTotal().toFixed(2)"></td>
             </tr>

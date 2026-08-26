@@ -1,14 +1,14 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">
             {{ __('Set up your business') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <p class="text-sm text-gray-600 mb-6">
+            <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                     {{ __('A couple of details and your BusinessFlow dashboard will be ready.') }}
                 </p>
 
@@ -24,7 +24,7 @@
                     <div>
                         <x-input-label for="business_type" :value="__('Business type')" />
                         <select id="business_type" name="business_type" required
-                            class="mt-1 block w-full border-gray-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
+                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
                             <option value="">{{ __('Select one') }}</option>
                             @foreach ($businessTypes as $value => $label)
                                 <option value="{{ $value }}" @selected(old('business_type') === $value)>{{ $label }}</option>
@@ -44,7 +44,7 @@
                         <div>
                             <x-input-label for="currency" :value="__('Currency')" />
                             <select id="currency" name="currency" required
-                                class="mt-1 block w-full border-gray-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
+                                class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
                                 @foreach ($currencies as $value => $label)
                                     <option value="{{ $value }}" @selected(old('currency') === $value)>{{ $label }}</option>
                                 @endforeach
@@ -55,7 +55,7 @@
                         <div>
                             <x-input-label for="timezone" :value="__('Timezone')" />
                             <select id="timezone" name="timezone" required
-                                class="mt-1 block w-full border-gray-300 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
+                                class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
                                 @foreach (\DateTimeZone::listIdentifiers() as $tz)
                                     <option value="{{ $tz }}" @selected(old('timezone') === $tz)>{{ $tz }}</option>
                                 @endforeach

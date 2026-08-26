@@ -12,7 +12,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="sm:col-span-2">
             <x-input-label for="customer_id" :value="__('Customer')" />
-            <select id="customer_id" name="customer_id" x-model="customerId" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+            <select id="customer_id" name="customer_id" x-model="customerId" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                 <option value="">{{ __('Select a customer') }}</option>
                 <template x-for="customer in customers" :key="customer.id">
                     <option :value="customer.id" x-text="customer.name"></option>
@@ -46,5 +46,5 @@
 
 <div>
     <x-input-label for="notes" :value="__('Notes')" />
-    <textarea id="notes" name="notes" rows="2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('notes', $invoice?->notes) }}</textarea>
+    <textarea id="notes" name="notes" rows="2" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('notes', $invoice?->notes) }}</textarea>
 </div>

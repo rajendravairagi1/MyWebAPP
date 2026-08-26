@@ -9,7 +9,7 @@
 
     <div>
         <x-input-label for="type" :value="__('Type')" />
-        <select id="type" name="type" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+        <select id="type" name="type" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             @foreach (['residential' => 'Residential', 'commercial' => 'Commercial', 'plot' => 'Plots', 'mixed' => 'Mixed-use'] as $value => $label)
                 <option value="{{ $value }}" @selected(old('type', $project?->type) === $value)>{{ $label }}</option>
             @endforeach
@@ -19,7 +19,7 @@
 
     <div>
         <x-input-label for="status" :value="__('Status')" />
-        <select id="status" name="status" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+        <select id="status" name="status" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             @foreach (['planning' => 'Planning', 'ongoing' => 'Ongoing', 'completed' => 'Completed', 'on_hold' => 'On hold'] as $value => $label)
                 <option value="{{ $value }}" @selected(old('status', $project?->status ?? 'planning') === $value)>{{ $label }}</option>
             @endforeach
@@ -42,12 +42,12 @@
 
 <div>
     <x-input-label for="location" :value="__('Location / address')" />
-    <textarea id="location" name="location" rows="2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('location', $project?->location) }}</textarea>
+    <textarea id="location" name="location" rows="2" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('location', $project?->location) }}</textarea>
     <x-input-error :messages="$errors->get('location')" class="mt-2" />
 </div>
 
 <div>
     <x-input-label for="notes" :value="__('Notes')" />
-    <textarea id="notes" name="notes" rows="2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('notes', $project?->notes) }}</textarea>
+    <textarea id="notes" name="notes" rows="2" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('notes', $project?->notes) }}</textarea>
     <x-input-error :messages="$errors->get('notes')" class="mt-2" />
 </div>
