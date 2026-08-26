@@ -43,14 +43,15 @@ $app = $builder->create();
 
 // Some shared hosts won't let you point the domain's document root at
 // public/, so the contents of public/ get moved up to sit alongside
-// this app's other folders (vendor, app, bootstrap) instead. Checking
-// for the Vite manifest directly (rather than just whether public/
-// still exists as a directory) means this also works if an emptied-out
-// public/ folder was left behind rather than deleted. When the built
-// assets are found one level up instead of the usual place, point
-// Laravel's public path at the base path so asset helpers (the Vite
-// manifest, asset()) resolve to where the files actually ended up.
-if (! is_file($app->basePath('public/build/manifest.json')) && is_file($app->basePath('build/manifest.json'))) {
+// this app's other folders (vendor, app, bootstrap) instead. A plain
+// Vite project never outputs a build/ directory at the project root —
+// only inside public/ — so finding one at the base path is an
+// unambiguous signal of this flattened layout. It's checked first and
+// wins even if a stale public/build/ happens to still exist too (e.g.
+// left over from before the deploy switched to this flattened form):
+// otherwise every future deploy's fresh assets would keep silently
+// losing to that old, orphaned copy no one remembers to update.
+if (is_file($app->basePath('build/manifest.json'))) {
     $app->usePublicPath($app->basePath());
 }
 
