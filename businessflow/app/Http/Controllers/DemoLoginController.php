@@ -17,6 +17,14 @@ class DemoLoginController extends Controller
 {
     public function __invoke(): RedirectResponse
     {
+        // If someone is already logged in (e.g. you, testing "See Demo"
+        // while signed in as the platform admin), don't silently swap
+        // their session over to the demo account out from under them —
+        // just take them to their own dashboard.
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+
         $demoUser = User::where('email', config('platform.demo_email'))->first();
 
         abort_unless($demoUser, 404, 'Demo account not set up yet.');
