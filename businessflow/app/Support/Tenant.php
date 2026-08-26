@@ -16,11 +16,14 @@ class Tenant
 
     protected static ?array $permissions = null;
 
-    public static function set(?int $id, ?string $role = null, ?array $permissions = null): void
+    protected static ?string $plan = null;
+
+    public static function set(?int $id, ?string $role = null, ?array $permissions = null, ?string $plan = null): void
     {
         static::$id = $id;
         static::$role = $role;
         static::$permissions = $permissions;
+        static::$plan = $plan;
     }
 
     public static function id(): ?int
@@ -38,6 +41,7 @@ class Tenant
         static::$id = null;
         static::$role = null;
         static::$permissions = null;
+        static::$plan = null;
     }
 
     public static function role(): ?string
@@ -61,13 +65,14 @@ class Tenant
         $previousId = static::$id;
         $previousRole = static::$role;
         $previousPermissions = static::$permissions;
+        $previousPlan = static::$plan;
 
-        static::set($businessId, 'owner', null);
+        static::set($businessId, 'owner', null, 'company');
 
         try {
             return $callback();
         } finally {
-            static::set($previousId, $previousRole, $previousPermissions);
+            static::set($previousId, $previousRole, $previousPermissions, $previousPlan);
         }
     }
 
@@ -109,5 +114,19 @@ class Tenant
         }
 
         return in_array($module, static::$permissions['financials'] ?? [], true);
+    }
+
+    /**
+     * Whether the active business's subscription tier includes $tier
+     * (solo < team < company) — gates the Team feature and the Company/
+     * Branch hierarchy. Set from Business::effectivePlan() by
+     * IdentifyTenant, so a business inside a branch is always 'company'
+     * tier regardless of its own plan column.
+     */
+    public static function planAllows(string $tier): bool
+    {
+        $levels = ['solo' => 0, 'team' => 1, 'company' => 2];
+
+        return ($levels[static::$plan ?? 'solo'] ?? 0) >= ($levels[$tier] ?? 0);
     }
 }

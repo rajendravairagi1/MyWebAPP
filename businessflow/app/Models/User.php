@@ -47,6 +47,17 @@ class User extends Authenticatable
     }
 
     /**
+     * Whether this user is entitled to create a Company — i.e. the
+     * platform admin has upgraded one of their owned businesses to the
+     * 'company' plan tier. Gates /company/create; self-serve Company
+     * creation isn't otherwise reachable without this.
+     */
+    public function hasCompanyPlan(): bool
+    {
+        return $this->businesses()->wherePivot('role', 'owner')->where('plan', 'company')->exists();
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

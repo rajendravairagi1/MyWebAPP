@@ -31,6 +31,8 @@ class NotificationComposer
             'activeBusinessBranch' => Tenant::check()
                 ? Branch::with('company')->find(Business::find(Tenant::id())?->branch_id)
                 : null,
+            'canCreateCompany' => $user && ! $user->ownedCompany && $user->hasCompanyPlan(),
+            'isPlatformAdmin' => $user && $user->email === config('platform.admin_email'),
         ]);
 
         if (! Tenant::check()) {

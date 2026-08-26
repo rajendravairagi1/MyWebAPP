@@ -46,16 +46,28 @@ class IdentifyTenant
             // business memberships yet (e.g. a branch with no builders
             // added so far) — let them through to set that up instead of
             // forcing single-business onboarding.
-            $exemptRoutes = ['onboarding.*', 'logout', 'company.*', 'branches.*', 'builders.*', 'businesses.switch'];
+            $exemptRoutes = ['onboarding.*', 'logout', 'company.*', 'branches.*', 'builders.*', 'businesses.switch', 'admin.*'];
 
             if ($request->routeIs($exemptRoutes)) {
                 return $next($request);
             }
 
+            // Post-login lands everyone on /dashboard by default — a
+            // Company Owner or Branch Manager with no business of their
+            // own yet needs to land on their Company/Branch dashboard
+            // instead of being bounced into solo-business onboarding.
+            if ($user->ownedCompany) {
+                return redirect()->route('company.show');
+            }
+
+            if ($branch = $user->managedBranches()->first()) {
+                return redirect()->route('branches.show', $branch);
+            }
+
             return redirect()->route('onboarding.create');
         }
 
-        Tenant::set($businessId, $membership->pivot->role, $membership->pivot->permissions);
+        Tenant::set($businessId, $membership->pivot->role, $membership->pivot->permissions, $membership->effectivePlan());
 
         return $next($request);
     }

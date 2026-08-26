@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AvailablePropertiesController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BuilderController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\CompletedProjectsController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerDocumentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DemoLoginController;
 use App\Http\Controllers\FollowupController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\InvestorController;
@@ -34,6 +36,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/demo', DemoLoginController::class)->name('demo.login');
+
+Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('index');
+    Route::get('/create', [AdminController::class, 'create'])->name('create');
+    Route::post('/', [AdminController::class, 'store'])->name('store');
+    Route::put('/businesses/{business}/plan', [AdminController::class, 'updatePlan'])->name('businesses.plan');
+    Route::post('/demo/reset', [AdminController::class, 'resetDemo'])->name('demo.reset');
 });
 
 Route::get('/install', [InstallController::class, 'index'])->name('install.index');
@@ -80,7 +92,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'owner'])->group(function () {
     Route::get('/reset-data', [ResetDataController::class, 'index'])->name('reset-data.index');
     Route::post('/reset-data', [ResetDataController::class, 'store'])->name('reset-data.store');
+});
 
+Route::middleware(['auth', 'verified', 'owner', 'plan:team'])->group(function () {
     Route::get('/team', [TeamController::class, 'index'])->name('team.index');
     Route::post('/team', [TeamController::class, 'store'])->name('team.store');
     Route::put('/team/{member}', [TeamController::class, 'update'])->name('team.update');

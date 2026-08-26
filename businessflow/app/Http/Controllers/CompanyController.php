@@ -15,12 +15,15 @@ class CompanyController extends Controller
             return redirect()->route('company.show');
         }
 
+        abort_unless($request->user()->hasCompanyPlan(), 403, "Your account isn't on the Company plan yet — contact us to upgrade.");
+
         return view('company.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
         abort_if($request->user()->ownedCompany, 422, 'You already have a company.');
+        abort_unless($request->user()->hasCompanyPlan(), 403, "Your account isn't on the Company plan yet — contact us to upgrade.");
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],

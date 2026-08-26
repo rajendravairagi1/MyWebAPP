@@ -13,6 +13,8 @@ class Business extends Model
 
     protected $fillable = [
         'branch_id',
+        'plan',
+        'is_demo',
         'name',
         'address',
         'phone',
@@ -31,7 +33,19 @@ class Business extends Model
     protected $casts = [
         'tax_config' => 'array',
         'enabled_modules' => 'array',
+        'is_demo' => 'boolean',
     ];
+
+    /**
+     * This business's effective plan tier for App\Support\Tenant::planAllows().
+     * A business inside a branch is always at least 'company' tier — that's
+     * what being part of a Company/Branch means — regardless of its own
+     * 'plan' column (which only matters for a standalone business).
+     */
+    public function effectivePlan(): string
+    {
+        return $this->branch_id ? 'company' : $this->plan;
+    }
 
     public function users(): BelongsToMany
     {

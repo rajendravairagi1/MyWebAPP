@@ -28,6 +28,8 @@ $builder = Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'module' => \App\Http\Middleware\RequireModule::class,
             'owner' => \App\Http\Middleware\EnsureOwner::class,
+            'plan' => \App\Http\Middleware\RequirePlan::class,
+            'platform-admin' => \App\Http\Middleware\EnsurePlatformAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
