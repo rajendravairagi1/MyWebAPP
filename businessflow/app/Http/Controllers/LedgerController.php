@@ -28,7 +28,10 @@ class LedgerController extends Controller
         $totalCollected = (float) $soldUnits->sum(fn ($u) => $u->totalCollected());
         $totalOutstanding = (float) $soldUnits->sum(fn ($u) => $u->totalOutstanding());
         $totalPurchases = (float) ProjectCost::sum('amount') + $manualExpense;
-        $netProfit = $totalSaleValue + $manualIncome - $totalPurchases;
+        // Profit is on money actually in hand, not the full booked sale
+        // value — an unpaid/outstanding sale isn't profit until it's
+        // collected, and a written-off balance never will be.
+        $netProfit = $totalCollected + $manualIncome - $totalPurchases;
 
         $projects = Project::withCount('units')->orderBy('name')->get()->map(function (Project $project) use ($soldUnits) {
             $units = $soldUnits->where('project_id', $project->id);
@@ -40,7 +43,7 @@ class LedgerController extends Controller
                 'collected' => $units->sum(fn ($u) => $u->totalCollected()),
                 'outstanding' => $units->sum(fn ($u) => $u->totalOutstanding()),
                 'purchases' => $project->totalCost(),
-                'profit' => $units->sum('price') - $project->totalCost(),
+                'profit' => $units->sum(fn ($u) => $u->totalCollected()) - $project->totalCost(),
             ];
         })->filter(fn ($row) => $row->unitCount > 0 || $row->purchases > 0)->values();
 
