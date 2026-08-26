@@ -95,28 +95,32 @@ class CustomerController extends Controller
         return redirect()->route('customers.show', $customer)->with('status', 'Customer updated.');
     }
 
+    /**
+     * Soft-deletes only — their sale/payment history stays intact in the
+     * Ledger and on quotations/invoices for audit purposes (see
+     * LedgerController), and they can be restored from the Deleted
+     * Customers list if removed by mistake.
+     */
     public function destroy(Customer $customer): RedirectResponse
     {
-        // Quotations/invoices restrict-on-delete at the DB level (they're
-        // financial records that shouldn't silently vanish) — check first
-        // so this fails with a clear message instead of a raw SQL error.
-        $blockers = [];
-        if ($customer->quotations()->exists()) {
-            $blockers[] = 'quotations';
-        }
-        if ($customer->invoices()->exists()) {
-            $blockers[] = 'invoices';
-        }
-
-        if ($blockers) {
-            return back()->withErrors([
-                'delete' => 'Can\'t delete this customer — they still have '.implode(' and ', $blockers).'. Remove those first.',
-            ]);
-        }
-
         $customer->delete();
 
-        return redirect()->route('customers.index')->with('status', 'Customer removed.');
+        return redirect()->route('customers.index')->with('status', 'Customer removed. Their sale history stays visible in the Ledger — restore them anytime from "Deleted customers" below the list.');
+    }
+
+    public function trashed(): View
+    {
+        $customers = Customer::onlyTrashed()->latest('deleted_at')->paginate(20);
+
+        return view('customers.trashed', compact('customers'));
+    }
+
+    public function restore(int $id): RedirectResponse
+    {
+        $customer = Customer::onlyTrashed()->findOrFail($id);
+        $customer->restore();
+
+        return redirect()->route('customers.show', $customer)->with('status', 'Customer restored.');
     }
 
     public function photo(Customer $customer): StreamedResponse

@@ -102,7 +102,9 @@ Route::middleware(['auth', 'verified', 'owner', 'plan:team'])->group(function ()
 });
 
 Route::middleware(['auth', 'verified', 'module:customers'])->group(function () {
-    Route::resource('customers', CustomerController::class);
+    Route::get('/customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
+    Route::post('/customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
+    Route::resource('customers', CustomerController::class)->withTrashed(['show']);
     Route::get('/customers/{customer}/statement', [CustomerController::class, 'statement'])->name('customers.statement');
     Route::get('/customers/{customer}/photo', [CustomerController::class, 'photo'])->name('customers.photo');
     Route::get('/customers/{customer}/aadhar', [CustomerController::class, 'aadhar'])->name('customers.aadhar');

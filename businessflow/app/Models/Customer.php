@@ -6,10 +6,11 @@ use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
 {
-    use BelongsToTenant, HasFactory;
+    use BelongsToTenant, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'business_id',

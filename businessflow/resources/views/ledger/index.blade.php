@@ -102,6 +102,9 @@
                                     <td class="px-5 py-2">
                                         @if ($row->customer)
                                             <a href="{{ route('customers.show', $row->customer) }}" class="text-accent-600 hover:underline">{{ $row->customer->name }}</a>
+                                            @if ($row->customer->trashed())
+                                                <span class="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-400">{{ __('deleted') }}</span>
+                                            @endif
                                         @else
                                             —
                                         @endif
@@ -157,7 +160,7 @@
                                         <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $entry->category ?? '—' }}</td>
                                         <td class="px-5 py-2 text-gray-900 dark:text-gray-100">{{ $entry->description }}</td>
                                         <td class="px-5 py-2 text-gray-500 dark:text-gray-400">
-                                            @if ($entry->customer)<a href="{{ route('customers.show', $entry->customer) }}" class="text-accent-600 hover:underline">{{ $entry->customer->name }}</a>@endif
+                                            @if ($entry->customer)<a href="{{ route('customers.show', $entry->customer) }}" class="text-accent-600 hover:underline">{{ $entry->customer->name }}</a>@if ($entry->customer->trashed()) <span class="text-xs text-gray-400">({{ __('deleted') }})</span>@endif @endif
                                             @if ($entry->project)<a href="{{ route('projects.show', $entry->project) }}" class="text-accent-600 hover:underline">{{ $entry->project->name }}</a>@endif
                                             @if (!$entry->customer && !$entry->project) — @endif
                                         </td>

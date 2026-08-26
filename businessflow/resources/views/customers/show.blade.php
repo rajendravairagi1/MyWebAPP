@@ -29,6 +29,15 @@
                     </ul>
                 </div>
             @endif
+            @if ($customer->trashed())
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-sm rounded-md p-3 flex items-center justify-between gap-3">
+                    <span>{{ __('This customer has been deleted — kept here for record/history only.') }}</span>
+                    <form method="POST" action="{{ route('customers.restore', $customer->id) }}">
+                        @csrf
+                        <button class="text-xs font-semibold px-3 py-1.5 rounded-md border border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900/40 whitespace-nowrap">{{ __('Restore') }}</button>
+                    </form>
+                </div>
+            @endif
 
             {{-- Identity card --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 flex flex-col lg:flex-row lg:items-start justify-between gap-6">

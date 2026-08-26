@@ -47,6 +47,10 @@
             </div>
 
             {{ $customers->links() }}
+
+            <div class="text-center">
+                <a href="{{ route('customers.trashed') }}" class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:underline">{{ __('Deleted customers') }}</a>
+            </div>
         </div>
     </div>
 </x-app-layout>

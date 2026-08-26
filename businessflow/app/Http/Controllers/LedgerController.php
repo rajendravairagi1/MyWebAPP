@@ -16,8 +16,11 @@ class LedgerController extends Controller
     public function index(): View
     {
         // Only booked/sold units represent a committed sale — an
-        // "available" unit isn't revenue yet.
-        $soldUnits = ProjectUnit::with(['project', 'customer'])
+        // "available" unit isn't revenue yet. ->withTrashed() on the
+        // customer relation keeps a deleted customer's name/history
+        // showing here rather than silently disappearing — the sale
+        // still happened.
+        $soldUnits = ProjectUnit::with(['project', 'customer' => fn ($q) => $q->withTrashed()])
             ->whereIn('status', ['booked', 'sold'])
             ->get();
 
@@ -52,7 +55,7 @@ class LedgerController extends Controller
             'unit' => $unit,
         ]);
 
-        $entries = LedgerEntry::with(['customer', 'project'])->orderByDesc('entry_date')->orderByDesc('id')->limit(100)->get();
+        $entries = LedgerEntry::with(['customer' => fn ($q) => $q->withTrashed(), 'project'])->orderByDesc('entry_date')->orderByDesc('id')->limit(100)->get();
 
         $customers = Customer::orderBy('name')->get();
         $allProjects = Project::orderBy('name')->get();
