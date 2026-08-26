@@ -97,6 +97,23 @@ class CustomerController extends Controller
 
     public function destroy(Customer $customer): RedirectResponse
     {
+        // Quotations/invoices restrict-on-delete at the DB level (they're
+        // financial records that shouldn't silently vanish) — check first
+        // so this fails with a clear message instead of a raw SQL error.
+        $blockers = [];
+        if ($customer->quotations()->exists()) {
+            $blockers[] = 'quotations';
+        }
+        if ($customer->invoices()->exists()) {
+            $blockers[] = 'invoices';
+        }
+
+        if ($blockers) {
+            return back()->withErrors([
+                'delete' => 'Can\'t delete this customer — they still have '.implode(' and ', $blockers).'. Remove those first.',
+            ]);
+        }
+
         $customer->delete();
 
         return redirect()->route('customers.index')->with('status', 'Customer removed.');

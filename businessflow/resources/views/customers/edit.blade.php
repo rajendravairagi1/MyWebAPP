@@ -5,6 +5,9 @@
 
     <div class="py-12">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            @if ($errors->has('delete'))
+                <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-md p-3">{{ $errors->first('delete') }}</div>
+            @endif
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6">
                 <form method="POST" action="{{ route('customers.update', $customer) }}" enctype="multipart/form-data" class="space-y-6">
                     @csrf
