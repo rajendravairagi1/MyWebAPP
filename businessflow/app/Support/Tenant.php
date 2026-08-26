@@ -45,13 +45,41 @@ class Tenant
         return static::$role;
     }
 
+    public static function permissions(): ?array
+    {
+        return static::$permissions;
+    }
+
     /**
-     * Owners (and company owners, once that tier exists) always have
-     * full access — module permissions only ever narrow a supervisor.
+     * Runs $callback with the tenant temporarily switched to $businessId
+     * (full "owner" access, no permission restrictions), then restores
+     * whatever was active before — used by Branch/Company dashboards to
+     * compute another business's stats without permanently switching.
+     */
+    public static function runAs(int $businessId, callable $callback): mixed
+    {
+        $previousId = static::$id;
+        $previousRole = static::$role;
+        $previousPermissions = static::$permissions;
+
+        static::set($businessId, 'owner', null);
+
+        try {
+            return $callback();
+        } finally {
+            static::set($previousId, $previousRole, $previousPermissions);
+        }
+    }
+
+    /**
+     * Owners, plus Company Owners and Branch Managers looking in from
+     * above (see App\Models\Company / Branch), always have full access
+     * within a business — module permissions only ever narrow a
+     * regular supervisor.
      */
     public static function isOwner(): bool
     {
-        return in_array(static::$role, ['owner', 'company_owner'], true);
+        return in_array(static::$role, ['owner', 'company_owner', 'branch_manager'], true);
     }
 
     public static function can(string $module): bool

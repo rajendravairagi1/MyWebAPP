@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Business extends Model
@@ -11,6 +12,7 @@ class Business extends Model
     use HasFactory;
 
     protected $fillable = [
+        'branch_id',
         'name',
         'address',
         'phone',
@@ -37,6 +39,34 @@ class Business extends Model
             ->using(BusinessUser::class)
             ->withPivot(['role', 'permissions', 'status'])
             ->withTimestamps();
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    /**
+     * Combined counts/totals for this business, used by the Branch/Company
+     * dashboards to show a builder's numbers without switching into it.
+     * totalCollected()/totalOutstanding() pull from invoices/payments,
+     * which are themselves tenant-scoped — so this runs under a
+     * temporary Tenant switch rather than just bypassing this model's
+     * own scope, to keep those nested queries scoped correctly too.
+     */
+    public function statsSummary(): array
+    {
+        return \App\Support\Tenant::runAs($this->id, function () {
+            $units = \App\Models\ProjectUnit::whereNull('archived_at')->get();
+
+            return [
+                'projects' => \App\Models\Project::count(),
+                'customers' => \App\Models\Customer::count(),
+                'value' => (float) $units->sum('price'),
+                'collected' => (float) $units->sum(fn ($u) => $u->totalCollected()),
+                'outstanding' => (float) $units->sum(fn ($u) => $u->totalOutstanding()),
+            ];
+        });
     }
 
     /**

@@ -62,15 +62,20 @@
                                 <td class="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{{ $member->name }}</td>
                                 <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $member->email }}</td>
                                 <td class="px-5 py-3">
+                                    @php $isProtected = in_array($member->pivot->role, ['owner', 'company_owner', 'branch_manager'], true); @endphp
                                     <span @class([
                                         'text-xs px-2 py-0.5 rounded font-medium',
-                                        'bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400' => $member->pivot->role === 'owner',
-                                        'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400' => $member->pivot->role !== 'owner',
-                                    ])>{{ ucfirst($member->pivot->role) }}</span>
+                                        'bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400' => $isProtected,
+                                        'bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400' => ! $isProtected,
+                                    ])>{{ match ($member->pivot->role) {
+                                        'company_owner' => __('Company Owner'),
+                                        'branch_manager' => __('Branch Manager'),
+                                        default => ucfirst($member->pivot->role),
+                                    } }}</span>
                                 </td>
                                 <td class="px-5 py-3 text-gray-600 dark:text-gray-400">
-                                    @if ($member->pivot->role === 'owner')
-                                        <span class="text-gray-400">{{ __('All (owner)') }}</span>
+                                    @if ($isProtected)
+                                        <span class="text-gray-400">{{ __('All') }}</span>
                                     @else
                                         @php
                                             $modules = $member->pivot->permissions['modules'] ?? [];
@@ -90,7 +95,7 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
-                                    @if ($member->pivot->role !== 'owner')
+                                    @if (! $isProtected)
                                         <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-member-{{ $member->id }}')" class="text-accent-600 hover:underline text-xs">{{ __('Edit') }}</button>
                                         <form method="POST" action="{{ route('team.destroy', $member) }}" onsubmit="return confirm('{{ __('Remove this team member?') }}')" class="inline">
                                             @csrf
@@ -170,7 +175,7 @@
     </x-modal>
 
     @foreach ($members as $member)
-        @if ($member->pivot->role !== 'owner')
+        @if (! in_array($member->pivot->role, ['owner', 'company_owner', 'branch_manager'], true))
             @php
                 $memberModules = $member->pivot->permissions['modules'] ?? [];
                 $memberFinancials = $member->pivot->permissions['financials'] ?? [];

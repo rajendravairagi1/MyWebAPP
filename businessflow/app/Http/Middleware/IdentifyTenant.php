@@ -42,7 +42,13 @@ class IdentifyTenant
         }
 
         if (! $businessId) {
-            if ($request->routeIs('onboarding.*') || $request->routeIs('logout')) {
+            // A Company Owner/Branch Manager may legitimately have zero
+            // business memberships yet (e.g. a branch with no builders
+            // added so far) — let them through to set that up instead of
+            // forcing single-business onboarding.
+            $exemptRoutes = ['onboarding.*', 'logout', 'company.*', 'branches.*', 'builders.*', 'businesses.switch'];
+
+            if ($request->routeIs($exemptRoutes)) {
                 return $next($request);
             }
 

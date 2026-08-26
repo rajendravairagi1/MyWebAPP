@@ -2,9 +2,12 @@
 
 namespace App\View\Composers;
 
+use App\Models\Branch;
+use App\Models\Business;
 use App\Models\Followup;
 use App\Models\ProjectUnit;
 use App\Support\Tenant;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 /**
@@ -18,6 +21,18 @@ class NotificationComposer
 {
     public function compose(View $view): void
     {
+        $user = Auth::user();
+
+        $view->with([
+            // Account-level (not tied to the active business) — drives the
+            // "Company"/"My Branch" sidebar link and the "back up" link.
+            'ownedCompany' => $user?->ownedCompany,
+            'managedBranch' => $user && ! $user->ownedCompany ? $user->managedBranches()->first() : null,
+            'activeBusinessBranch' => Tenant::check()
+                ? Branch::with('company')->find(Business::find(Tenant::id())?->branch_id)
+                : null,
+        ]);
+
         if (! Tenant::check()) {
             $view->with([
                 'dueFollowupsForBell' => collect(),

@@ -12,6 +12,14 @@ use Illuminate\View\View;
 
 class TeamController extends Controller
 {
+    /**
+     * Roles a business's own Team page can never edit/remove — the
+     * business's own Owner, plus anyone with cross-business access from
+     * above (Company Owner / Branch Manager, see App\Models\Company /
+     * Branch) who was auto-attached when this builder was created.
+     */
+    private const PROTECTED_ROLES = ['owner', 'company_owner', 'branch_manager'];
+
     public function index(): View
     {
         $business = Business::findOrFail(Tenant::id());
@@ -64,7 +72,7 @@ class TeamController extends Controller
         $business = Business::findOrFail(Tenant::id());
         $membership = $business->users()->where('users.id', $member->id)->first();
         abort_unless($membership, 404);
-        abort_if($membership->pivot->role === 'owner', 422, "Can't change the owner's permissions.");
+        abort_if(in_array($membership->pivot->role, self::PROTECTED_ROLES, true), 422, "Can't change this member's permissions here.");
 
         $data = $request->validate([
             'modules' => ['array'],
@@ -88,7 +96,7 @@ class TeamController extends Controller
         $business = Business::findOrFail(Tenant::id());
         $membership = $business->users()->where('users.id', $member->id)->first();
         abort_unless($membership, 404);
-        abort_if($membership->pivot->role === 'owner', 422, "Can't remove the owner.");
+        abort_if(in_array($membership->pivot->role, self::PROTECTED_ROLES, true), 422, "Can't remove this member here.");
 
         $business->users()->detach($member->id);
 

@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\AvailablePropertiesController;
+use App\Http\Controllers\BranchController;
+use App\Http\Controllers\BuilderController;
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\BusinessSwitchController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompletedProjectsController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerDocumentController;
@@ -47,6 +51,24 @@ Route::get('/verify/investor/{investor}', [VerifyController::class, 'investor'])
 Route::middleware('auth')->group(function () {
     Route::get('/onboarding/business', [OnboardingController::class, 'create'])->name('onboarding.create');
     Route::post('/onboarding/business', [OnboardingController::class, 'store'])->name('onboarding.store');
+});
+
+// Company → Branch → Builder hierarchy, for owners running multiple
+// builder firms across branches. Authorization is checked inside each
+// controller (company ownership / branch management), since it isn't
+// scoped to the currently active business the way everything else is.
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/company/create', [CompanyController::class, 'create'])->name('company.create');
+    Route::post('/company', [CompanyController::class, 'store'])->name('company.store');
+    Route::get('/company', [CompanyController::class, 'show'])->name('company.show');
+
+    Route::post('/company/branches', [BranchController::class, 'store'])->name('branches.store');
+    Route::get('/branches/{branch}', [BranchController::class, 'show'])->name('branches.show');
+    Route::put('/branches/{branch}', [BranchController::class, 'update'])->name('branches.update');
+
+    Route::post('/branches/{branch}/builders', [BuilderController::class, 'store'])->name('builders.store');
+
+    Route::post('/businesses/{business}/switch', [BusinessSwitchController::class, 'switch'])->name('businesses.switch');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
