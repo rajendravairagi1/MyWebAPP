@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AvailablePropertiesController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BuilderController;
 use App\Http\Controllers\BusinessController;
@@ -95,6 +96,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'owner'])->group(function () {
     Route::get('/reset-data', [ResetDataController::class, 'index'])->name('reset-data.index');
     Route::post('/reset-data', [ResetDataController::class, 'store'])->name('reset-data.store');
+
+    Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
+    Route::get('/backup/download', [BackupController::class, 'download'])->name('backup.download');
+    Route::post('/backup/restore', [BackupController::class, 'restore'])->name('backup.restore');
 });
 
 Route::middleware(['auth', 'verified', 'owner', 'plan:team'])->group(function () {
