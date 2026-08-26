@@ -28,10 +28,22 @@
                     @endif
                 </div>
                 @if ($demoBusiness)
-                    <form method="POST" action="{{ route('admin.demo.reset') }}" onsubmit="return confirm('{{ __('Wipe all data in the demo account? This cannot be undone.') }}')">
-                        @csrf
-                        <button class="text-xs px-3 py-1.5 rounded-md border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 whitespace-nowrap">{{ __('Reset Demo Data') }}</button>
-                    </form>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <form method="POST" action="{{ route('admin.businesses.plan', $demoBusiness) }}" class="inline-flex items-center gap-2">
+                            @csrf
+                            @method('PUT')
+                            <label class="text-xs text-gray-500 dark:text-gray-400">{{ __('Plan') }}</label>
+                            <select name="plan" onchange="this.form.submit()" class="text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <option value="solo" @selected($demoBusiness->plan === 'solo')>{{ __('Solo') }}</option>
+                                <option value="team" @selected($demoBusiness->plan === 'team')>{{ __('Team') }}</option>
+                                <option value="company" @selected($demoBusiness->plan === 'company')>{{ __('Company (unlock)') }}</option>
+                            </select>
+                        </form>
+                        <form method="POST" action="{{ route('admin.demo.reset') }}" onsubmit="return confirm('{{ __('Wipe all data in the demo account? This cannot be undone.') }}')">
+                            @csrf
+                            <button class="text-xs px-3 py-1.5 rounded-md border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 whitespace-nowrap">{{ __('Reset Demo Data') }}</button>
+                        </form>
+                    </div>
                 @endif
             </div>
 
