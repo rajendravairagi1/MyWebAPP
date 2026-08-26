@@ -1,6 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Ledger') }}</h2>
+        <div class="flex items-center justify-between gap-3">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Ledger') }}</h2>
+            <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-manual-entry')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
+                {{ __('+ Manual Entry') }}
+            </button>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -172,46 +177,60 @@
                 @else
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No manual entries yet.') }}</div>
                 @endif
-
-                <form method="POST" action="{{ route('ledger.entries.store') }}" class="p-5 border-t border-gray-100 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 items-end">
-                    @csrf
-                    <div class="col-span-1">
-                        <x-input-label for="entry_type" :value="__('Type')" class="text-xs" />
-                        <select id="entry_type" name="type" required class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                            <option value="income">{{ __('Income') }}</option>
-                            <option value="expense">{{ __('Expense') }}</option>
-                        </select>
-                    </div>
-                    <div class="col-span-1">
-                        <x-input-label for="entry_category" :value="__('Category')" class="text-xs" />
-                        <x-text-input id="entry_category" name="category" type="text" class="mt-1 block w-full text-sm" placeholder="{{ __('optional') }}" />
-                    </div>
-                    <div class="col-span-2">
-                        <x-input-label for="entry_description" :value="__('Description')" class="text-xs" />
-                        <x-text-input id="entry_description" name="description" type="text" class="mt-1 block w-full text-sm" required />
-                    </div>
-                    <div class="col-span-1">
-                        <x-input-label for="entry_amount" :value="__('Amount')" class="text-xs" />
-                        <input id="entry_amount" name="amount" type="number" step="0.01" min="0.01" required class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                    </div>
-                    <div class="col-span-1">
-                        <x-input-label for="entry_date" :value="__('Date')" class="text-xs" />
-                        <input id="entry_date" name="entry_date" type="date" value="{{ now()->format('Y-m-d') }}" required class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                    </div>
-                    <div class="col-span-1">
-                        <x-input-label for="entry_customer" :value="__('Customer')" class="text-xs" />
-                        <select id="entry_customer" name="customer_id" class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                            <option value="">{{ __('None') }}</option>
-                            @foreach ($customers as $c)
-                                <option value="{{ $c->id }}">{{ $c->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-span-1">
-                        <x-primary-button class="w-full justify-center">{{ __('+ Add') }}</x-primary-button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
+
+    <x-modal name="add-manual-entry" max-width="lg" :show="$errors->hasAny(['type', 'category', 'description', 'amount', 'entry_date', 'customer_id'])">
+        <form method="POST" action="{{ route('ledger.entries.store') }}" class="p-6 space-y-4">
+            @csrf
+            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Manual Entry') }}</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('For anything outside a normal sale, e.g. an extra expense or misc. income.') }}</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <x-input-label for="entry_type" :value="__('Type')" />
+                    <select id="entry_type" name="type" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <option value="income">{{ __('Income') }}</option>
+                        <option value="expense">{{ __('Expense') }}</option>
+                    </select>
+                </div>
+                <div>
+                    <x-input-label for="entry_category" :value="__('Category (optional)')" />
+                    <x-text-input id="entry_category" name="category" type="text" class="mt-1 block w-full" />
+                </div>
+            </div>
+
+            <div>
+                <x-input-label for="entry_description" :value="__('Description')" />
+                <x-text-input id="entry_description" name="description" type="text" class="mt-1 block w-full" required />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <x-input-label for="entry_amount" :value="__('Amount')" />
+                    <x-text-input id="entry_amount" name="amount" type="number" step="0.01" min="0.01" class="mt-1 block w-full" required />
+                </div>
+                <div>
+                    <x-input-label for="entry_date" :value="__('Date')" />
+                    <x-text-input id="entry_date" name="entry_date" type="date" value="{{ now()->format('Y-m-d') }}" class="mt-1 block w-full" required />
+                </div>
+            </div>
+
+            <div>
+                <x-input-label for="entry_customer" :value="__('Customer (optional)')" />
+                <select id="entry_customer" name="customer_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    <option value="">{{ __('None') }}</option>
+                    @foreach ($customers as $c)
+                        <option value="{{ $c->id }}">{{ $c->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
+                <x-primary-button>{{ __('+ Add') }}</x-primary-button>
+            </div>
+        </form>
+    </x-modal>
 </x-app-layout>
