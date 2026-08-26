@@ -167,6 +167,17 @@ class QuotationController extends Controller
         }
     }
 
+    public function destroy(Quotation $quotation): RedirectResponse
+    {
+        if ($quotation->invoices()->exists()) {
+            return back()->withErrors(['delete' => "This quotation has already been converted to an invoice and can't be deleted."]);
+        }
+
+        $quotation->delete();
+
+        return redirect()->route('quotations.index')->with('status', 'Quotation deleted.');
+    }
+
     public function markSent(Quotation $quotation): RedirectResponse
     {
         $quotation->update(['status' => 'sent']);

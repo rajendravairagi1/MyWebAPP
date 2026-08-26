@@ -190,6 +190,23 @@ class InvoiceController extends Controller
             ->update(['status' => 'available', 'customer_id' => null]);
     }
 
+    public function destroy(Invoice $invoice): RedirectResponse
+    {
+        if ($invoice->unit_payment_id) {
+            return back()->withErrors(['delete' => 'This is an auto-generated receipt for a payment — delete the payment itself to remove it.']);
+        }
+
+        if ($invoice->payments()->exists()) {
+            return back()->withErrors(['delete' => "This invoice already has payments recorded and can't be deleted — remove the payments first."]);
+        }
+
+        $this->syncProjectUnit($invoice->project_unit_id, null, $invoice->customer_id);
+
+        $invoice->delete();
+
+        return redirect()->route('invoices.index')->with('status', 'Invoice deleted.');
+    }
+
     public function markSent(Invoice $invoice): RedirectResponse
     {
         $invoice->update(['status' => $invoice->amount_paid > 0 ? $invoice->status : 'sent']);

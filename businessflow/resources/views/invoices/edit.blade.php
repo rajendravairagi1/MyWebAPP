@@ -4,7 +4,10 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            @if ($errors->has('delete'))
+                <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-md p-3">{{ $errors->first('delete') }}</div>
+            @endif
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6">
                 <form method="POST" action="{{ route('invoices.update', $invoice) }}" class="space-y-6">
                     @csrf
@@ -15,6 +18,15 @@
                         <a href="{{ route('invoices.show', $invoice) }}" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</a>
                         <x-primary-button>{{ __('Save Changes') }}</x-primary-button>
                     </div>
+                </form>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 flex items-center justify-between">
+                <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('Deleting an invoice cannot be undone.') }}</div>
+                <form method="POST" action="{{ route('invoices.destroy', $invoice) }}" onsubmit="return confirm('{{ __('Delete this invoice?') }}')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="text-sm text-red-600 hover:underline">{{ __('Delete invoice') }}</button>
                 </form>
             </div>
         </div>
