@@ -62,4 +62,24 @@ class Tenant
 
         return in_array($module, static::$permissions['modules'] ?? [], true);
     }
+
+    /**
+     * Money-sensitive sub-permission for modules like Customers and
+     * Projects, which mix non-sensitive info (contact details, unit
+     * status) with sensitive financial info (price, payments, balance).
+     * Always requires base module access first — financials narrows an
+     * already-granted module, it never grants a module on its own.
+     */
+    public static function canFinancials(string $module): bool
+    {
+        if (static::isOwner()) {
+            return true;
+        }
+
+        if (! static::can($module)) {
+            return false;
+        }
+
+        return in_array($module, static::$permissions['financials'] ?? [], true);
+    }
 }

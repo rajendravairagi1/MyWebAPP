@@ -10,6 +10,7 @@
     $unitCount = $customer->units->count();
     $activeUnitCount = $activeUnits->count();
     $primaryUnit = $unitCount === 1 ? $customer->units->first() : null;
+    $canFinancials = \App\Support\Tenant::canFinancials('customers');
 @endphp
 <x-app-layout>
     <x-slot name="header">
@@ -95,10 +96,12 @@
                             <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" /></svg>
                             {{ __('Edit') }}
                         </a>
+                        @if ($canFinancials)
                         <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 dark:text-accent-100 hover:bg-accent-100 dark:hover:bg-slate-600">
                             <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                             {{ __('Statement') }}
                         </a>
+                        @endif
                         <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'upload-document')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
                             <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-19.5 0v6a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25v-6m-19.5 0h19.5M2.25 12.75L4.06 5.19A2.25 2.25 0 016.243 3.75h11.514a2.25 2.25 0 012.183 1.44l1.81 7.56" /></svg>
                             {{ __('Documents') }}
@@ -135,6 +138,7 @@
                         <div class="text-xs text-gray-400 mt-0.5">{{ $activeUnitCount }} {{ __('active') }}</div>
                     @endif
                 </div>
+                @if ($canFinancials)
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Total Value') }}</div>
                     <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($totalValue, 0) }}</div>
@@ -147,16 +151,19 @@
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}</div>
                     <div class="mt-1 text-2xl font-semibold {{ $totalDue > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($totalDue, 0) }}</div>
                 </div>
+                @endif
             </div>
 
             {{-- Properties (active) --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
                     <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Properties') }} ({{ $activeUnitCount }})</span>
+                    @if ($canFinancials)
                     <a href="{{ route('customers.statement', $customer) }}" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium border border-accent-100 dark:border-slate-600 bg-accent-50 dark:bg-slate-700 text-accent-700 dark:text-accent-100 hover:bg-accent-100 dark:hover:bg-slate-600">
                         <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                         {{ __('Download full statement') }}
                     </a>
+                    @endif
                 </div>
 
                 @forelse ($activeUnits as $unit)
@@ -173,12 +180,15 @@
                                 </div>
                                 <div class="text-xs text-gray-400 mt-0.5">{{ $unit->type }}{{ $unit->area_sqft ? ' · '.$unit->area_sqft.' sqft' : '' }}</div>
                             </div>
+                            @if ($canFinancials)
                             <div class="text-right">
                                 <div class="text-xs text-gray-400">{{ __('Price') }}</div>
                                 <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->price, 0) }}</div>
                             </div>
+                            @endif
                         </div>
 
+                        @if ($canFinancials)
                         <div class="mt-3 h-1.5 rounded-full bg-gray-100 dark:bg-slate-700 overflow-hidden">
                             <div class="h-full bg-green-500" style="width: {{ $progress }}%"></div>
                         </div>
@@ -186,6 +196,7 @@
                             <span class="text-gray-500 dark:text-gray-400">{{ __('Collected') }}: <strong class="text-green-600">₹{{ number_format($unit->totalCollected(), 0) }}</strong></span>
                             <span class="text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}: <strong class="{{ $unit->totalOutstanding() > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($unit->totalOutstanding(), 0) }}</strong></span>
                         </div>
+                        @endif
 
                         @if ($unit->invoices->isNotEmpty())
                             <div class="mt-2 flex flex-wrap gap-3 text-xs">
@@ -195,6 +206,7 @@
                             </div>
                         @endif
 
+                        @if ($canFinancials)
                         <div class="mt-4">
                             <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'record-payment-{{ $unit->id }}')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg bg-accent-600 text-white text-sm font-semibold hover:bg-accent-700">
                                 <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
@@ -220,8 +232,10 @@
                                 </form>
                             </details>
                         @endif
+                        @endif
                     </div>
 
+                    @if ($canFinancials)
                     <x-modal name="record-payment-{{ $unit->id }}" max-width="md">
                         <form method="POST" action="{{ route('unit-payments.store', $unit) }}" x-data="{ purpose: 'installment' }" class="p-6 space-y-4">
                             @csrf
@@ -278,6 +292,7 @@
                             </div>
                         </form>
                     </x-modal>
+                    @endif
                 @empty
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No properties assigned yet.') }}</div>
                 @endforelse
@@ -296,7 +311,7 @@
                     <form method="POST" action="{{ route('project-units.assign') }}" class="space-y-4">
                         @csrf
                         <input type="hidden" name="customer_id" value="{{ $customer->id }}">
-                        <x-project-unit-select :projects="$projects" />
+                        <x-project-unit-select :projects="$projects" :show-price="$canFinancials" />
                         <div>
                             <x-input-label for="assign_commitment_date" :value="__('Commitment date (optional)')" />
                             <input id="assign_commitment_date" type="date" name="commitment_date" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
@@ -374,16 +389,18 @@
                                         </div>
                                         <div class="text-xs text-gray-400 mt-0.5">
                                             {{ __('Closed on') }} {{ $unit->archived_at->format('d M Y') }}
-                                            @if ($unit->write_off_at)
+                                            @if ($unit->write_off_at && $canFinancials)
                                                 · {{ __('Written off') }}: ₹{{ number_format($unit->write_off_amount, 0) }}@if ($unit->write_off_note) — {{ $unit->write_off_note }}@endif
                                             @endif
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-3">
+                                        @if ($canFinancials)
                                         <div class="text-right">
                                             <div class="text-xs text-gray-400">{{ __('Collected') }}</div>
                                             <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->totalCollected(), 0) }} / ₹{{ number_format($unit->price, 0) }}</div>
                                         </div>
+                                        @endif
                                         <form method="POST" action="{{ route('project-units.recover', $unit) }}" onsubmit="return confirm('{{ __('Move this property back to active?') }}')">
                                             @csrf
                                             <button class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Recover') }}</button>
@@ -391,7 +408,9 @@
                                     </div>
                                 </div>
 
+                                @if ($canFinancials)
                                 <x-unit-payment-ledger :unit="$unit" :editable="false" />
+                                @endif
                             </div>
                         @endforeach
                     </div>

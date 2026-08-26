@@ -28,6 +28,8 @@ class TeamController extends Controller
             'password' => ['required', 'string', 'min:8'],
             'modules' => ['array'],
             'modules.*' => ['string', 'in:'.implode(',', array_keys(Modules::ALL))],
+            'financials' => ['array'],
+            'financials.*' => ['string', 'in:'.implode(',', Modules::FINANCIAL_MODULES)],
         ]);
 
         $business = Business::findOrFail(Tenant::id());
@@ -47,7 +49,10 @@ class TeamController extends Controller
 
         $business->users()->attach($user->id, [
             'role' => 'supervisor',
-            'permissions' => ['modules' => $data['modules'] ?? []],
+            'permissions' => [
+                'modules' => $data['modules'] ?? [],
+                'financials' => array_values(array_intersect($data['financials'] ?? [], $data['modules'] ?? [])),
+            ],
             'status' => 'active',
         ]);
 
@@ -64,10 +69,15 @@ class TeamController extends Controller
         $data = $request->validate([
             'modules' => ['array'],
             'modules.*' => ['string', 'in:'.implode(',', array_keys(Modules::ALL))],
+            'financials' => ['array'],
+            'financials.*' => ['string', 'in:'.implode(',', Modules::FINANCIAL_MODULES)],
         ]);
 
         $business->users()->updateExistingPivot($member->id, [
-            'permissions' => ['modules' => $data['modules'] ?? []],
+            'permissions' => [
+                'modules' => $data['modules'] ?? [],
+                'financials' => array_values(array_intersect($data['financials'] ?? [], $data['modules'] ?? [])),
+            ],
         ]);
 
         return back()->with('status', 'Permissions updated.');

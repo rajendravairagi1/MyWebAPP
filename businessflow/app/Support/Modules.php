@@ -22,4 +22,13 @@ class Modules
         'investors' => 'Investors',
         'completed_projects' => 'Completed Projects',
     ];
+
+    /**
+     * Modules that mix non-sensitive info with sensitive money info
+     * (price, payments, balance) and so support the extra "financials"
+     * sub-permission on top of base module access. Ledger and Investors
+     * aren't here because they're inherently all financial — there's
+     * nothing non-sensitive to split off.
+     */
+    public const FINANCIAL_MODULES = ['customers', 'projects'];
 }

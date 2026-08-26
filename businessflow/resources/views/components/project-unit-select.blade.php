@@ -1,4 +1,4 @@
-@props(['projects', 'selectedProjectId' => null, 'selectedUnitId' => null])
+@props(['projects', 'selectedProjectId' => null, 'selectedUnitId' => null, 'showPrice' => true])
 
 {{--
     Project shows if it still has a unit available for anyone, or a unit
@@ -19,7 +19,7 @@
         allProjects: @js($projects->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])->values()),
         units: @js($projects->mapWithKeys(fn ($p) => [$p->id => $p->units->map(fn ($u) => [
             'id' => $u->id,
-            'label' => $u->unit_number.($u->type ? ' · '.$u->type : '').' · '.number_format($u->price, 0),
+            'label' => $u->unit_number.($u->type ? ' · '.$u->type : '').($showPrice ? ' · '.number_format($u->price, 0) : ''),
             'status' => $u->status,
             'customerId' => $u->customer_id,
             'archived' => $u->archived_at !== null,

@@ -6,8 +6,9 @@
 
     $unitsCount = $project->units->count();
     $costsCount = $project->costs->count();
+    $canFinancials = \App\Support\Tenant::canFinancials('projects');
     $deleteConfirmMsg = "Delete \"{$project->name}\"? This permanently removes its {$unitsCount} unit(s) and {$costsCount} payment (kharcha) entries";
-    if ($revenue > 0) {
+    if ($revenue > 0 && $canFinancials) {
         $deleteConfirmMsg .= ", including ".number_format($revenue, 0)." already recorded as received";
     }
     $deleteConfirmMsg .= ". Any quotations/invoices linked to it are kept but unlinked. This cannot be undone.";
@@ -44,6 +45,7 @@
                 </div>
             @endif
 
+            @if ($canFinancials)
             {{-- P&L summary --}}
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
@@ -78,6 +80,7 @@
                     </div>
                 </div>
             @endif
+            @endif
 
             {{-- Units --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
@@ -95,9 +98,11 @@
                                 <th class="px-5 py-2 text-left">{{ __('Unit') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Type') }}</th>
                                 <th class="px-5 py-2 text-right">{{ __('Area (sqft)') }}</th>
+                                @if ($canFinancials)
                                 <th class="px-5 py-2 text-right">{{ __('Price') }}</th>
                                 <th class="px-5 py-2 text-right">{{ __('Paid') }}</th>
                                 <th class="px-5 py-2 text-right">{{ __('Balance') }}</th>
+                                @endif
                                 <th class="px-5 py-2 text-left">{{ __('Status') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Customer') }}</th>
                                 <th class="px-5 py-2"></th>
@@ -109,6 +114,7 @@
                                     <td class="px-5 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $unit->unit_number }}</td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $unit->type }}</td>
                                     <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ $unit->area_sqft ?? '—' }}</td>
+                                    @if ($canFinancials)
                                     <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ number_format($unit->price, 0) }}</td>
                                     @if ($unit->customer)
                                         <td class="px-5 py-2 text-right text-green-600">{{ number_format($unit->totalCollected(), 0) }}</td>
@@ -116,6 +122,7 @@
                                     @else
                                         <td class="px-5 py-2 text-right text-gray-300 dark:text-slate-600">—</td>
                                         <td class="px-5 py-2 text-right text-gray-300 dark:text-slate-600">—</td>
+                                    @endif
                                     @endif
                                     <td class="px-5 py-2"><x-status-badge :status="$unit->status" /></td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400 min-w-[10rem]">
@@ -265,6 +272,7 @@
             @endforeach
 
             {{-- Costs --}}
+            @if ($canFinancials)
             <div x-data="{
                     fixedCategories: ['land', 'construction', 'material', 'labor', 'approval', 'marketing'],
                     editingCost: { id: null, categorySelect: 'land', categoryOther: '', description: '', amount: '', spent_on: '', vendor: '', notes: '', bill_name: null },
@@ -471,6 +479,7 @@
                 </form>
             </x-modal>
             </div>
+            @endif
 
             {{-- Quotations & Invoices --}}
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
