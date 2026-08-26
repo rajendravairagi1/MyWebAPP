@@ -74,68 +74,95 @@
                         {{ __('Dashboard') }}
                     </x-sidebar-link>
 
-                    <x-sidebar-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
-                        <x-slot name="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9h.01M9 12h.01M9 15h.01M9 18h.01" />
-                        </x-slot>
-                        {{ __('Projects') }}
-                    </x-sidebar-link>
+                    @if (\App\Support\Tenant::can('projects'))
+                        <x-sidebar-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4M9 9h.01M9 12h.01M9 15h.01M9 18h.01" />
+                            </x-slot>
+                            {{ __('Projects') }}
+                        </x-sidebar-link>
+                    @endif
 
-                    <x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
-                        <x-slot name="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m5-2.13a4 4 0 100-8 4 4 0 000 8zm6 2c1.66 0 3-1.34 3-3s-1.34-3-3-3" />
-                        </x-slot>
-                        {{ __('Customers') }}
-                    </x-sidebar-link>
+                    @if (\App\Support\Tenant::can('customers'))
+                        <x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m5-2.13a4 4 0 100-8 4 4 0 000 8zm6 2c1.66 0 3-1.34 3-3s-1.34-3-3-3" />
+                            </x-slot>
+                            {{ __('Customers') }}
+                        </x-sidebar-link>
+                    @endif
 
-                    <x-sidebar-link :href="route('quotations.index')" :active="request()->routeIs('quotations.*')">
-                        <x-slot name="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </x-slot>
-                        {{ __('Quotations') }}
-                    </x-sidebar-link>
+                    @if (\App\Support\Tenant::can('quotations'))
+                        <x-sidebar-link :href="route('quotations.index')" :active="request()->routeIs('quotations.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </x-slot>
+                            {{ __('Quotations') }}
+                        </x-sidebar-link>
+                    @endif
 
-                    <x-sidebar-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
-                        <x-slot name="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l2 2 4-4m3 9l-3-2-3 2-3-2-3 2V5a2 2 0 012-2h8a2 2 0 012 2v16z" />
-                        </x-slot>
-                        {{ __('Invoices') }}
-                    </x-sidebar-link>
+                    @if (\App\Support\Tenant::can('invoices'))
+                        <x-sidebar-link :href="route('invoices.index')" :active="request()->routeIs('invoices.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l2 2 4-4m3 9l-3-2-3 2-3-2-3 2V5a2 2 0 012-2h8a2 2 0 012 2v16z" />
+                            </x-slot>
+                            {{ __('Invoices') }}
+                        </x-sidebar-link>
+                    @endif
 
-                    <x-sidebar-link :href="route('followups.index')" :active="request()->routeIs('followups.*')">
-                        <x-slot name="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                        </x-slot>
-                        {{ __('Follow-ups') }}
-                    </x-sidebar-link>
+                    @if (\App\Support\Tenant::can('followups'))
+                        <x-sidebar-link :href="route('followups.index')" :active="request()->routeIs('followups.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </x-slot>
+                            {{ __('Follow-ups') }}
+                        </x-sidebar-link>
+                    @endif
 
-                    <x-sidebar-link :href="route('available-properties.index')" :active="request()->routeIs('available-properties.*')">
-                        <x-slot name="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                        </x-slot>
-                        {{ __('Available Properties') }}
-                    </x-sidebar-link>
+                    @if (\App\Support\Tenant::can('available_properties'))
+                        <x-sidebar-link :href="route('available-properties.index')" :active="request()->routeIs('available-properties.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                            </x-slot>
+                            {{ __('Available Properties') }}
+                        </x-sidebar-link>
+                    @endif
 
-                    <x-sidebar-link :href="route('ledger.index')" :active="request()->routeIs('ledger.*')">
-                        <x-slot name="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
-                        </x-slot>
-                        {{ __('Ledger') }}
-                    </x-sidebar-link>
+                    @if (\App\Support\Tenant::can('ledger'))
+                        <x-sidebar-link :href="route('ledger.index')" :active="request()->routeIs('ledger.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
+                            </x-slot>
+                            {{ __('Ledger') }}
+                        </x-sidebar-link>
+                    @endif
 
-                    <x-sidebar-link :href="route('investors.index')" :active="request()->routeIs('investors.*')">
-                        <x-slot name="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-                        </x-slot>
-                        {{ __('Investors') }}
-                    </x-sidebar-link>
+                    @if (\App\Support\Tenant::can('investors'))
+                        <x-sidebar-link :href="route('investors.index')" :active="request()->routeIs('investors.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                            </x-slot>
+                            {{ __('Investors') }}
+                        </x-sidebar-link>
+                    @endif
 
-                    <x-sidebar-link :href="route('completed-projects.index')" :active="request()->routeIs('completed-projects.*')">
-                        <x-slot name="icon">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </x-slot>
-                        {{ __('Completed Projects') }}
-                    </x-sidebar-link>
+                    @if (\App\Support\Tenant::can('completed_projects'))
+                        <x-sidebar-link :href="route('completed-projects.index')" :active="request()->routeIs('completed-projects.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </x-slot>
+                            {{ __('Completed Projects') }}
+                        </x-sidebar-link>
+                    @endif
+
+                    @if (\App\Support\Tenant::isOwner())
+                        <x-sidebar-link :href="route('team.index')" :active="request()->routeIs('team.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                            </x-slot>
+                            {{ __('Team') }}
+                        </x-sidebar-link>
+                    @endif
                 </nav>
             </aside>
 

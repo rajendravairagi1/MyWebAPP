@@ -22,6 +22,7 @@ use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ResetDataController;
+use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UnitMediaController;
 use App\Http\Controllers\UnitPaymentController;
 use App\Http\Controllers\VerifyController;
@@ -51,9 +52,20 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::resource('products', ProductController::class)->except(['show']);
+});
+
+Route::middleware(['auth', 'verified', 'owner'])->group(function () {
     Route::get('/reset-data', [ResetDataController::class, 'index'])->name('reset-data.index');
     Route::post('/reset-data', [ResetDataController::class, 'store'])->name('reset-data.store');
 
+    Route::get('/team', [TeamController::class, 'index'])->name('team.index');
+    Route::post('/team', [TeamController::class, 'store'])->name('team.store');
+    Route::put('/team/{member}', [TeamController::class, 'update'])->name('team.update');
+    Route::delete('/team/{member}', [TeamController::class, 'destroy'])->name('team.destroy');
+});
+
+Route::middleware(['auth', 'verified', 'module:customers'])->group(function () {
     Route::resource('customers', CustomerController::class);
     Route::get('/customers/{customer}/statement', [CustomerController::class, 'statement'])->name('customers.statement');
     Route::get('/customers/{customer}/photo', [CustomerController::class, 'photo'])->name('customers.photo');
@@ -61,8 +73,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/customers/{customer}/documents', [CustomerDocumentController::class, 'store'])->name('customer-documents.store');
     Route::get('/customers/{customer}/documents/{document}/download', [CustomerDocumentController::class, 'download'])->name('customer-documents.download');
     Route::delete('/customers/{customer}/documents/{document}', [CustomerDocumentController::class, 'destroy'])->name('customer-documents.destroy');
-    Route::resource('products', ProductController::class)->except(['show']);
+});
 
+Route::middleware(['auth', 'verified', 'module:investors'])->group(function () {
     Route::get('/investors', [InvestorController::class, 'index'])->name('investors.index');
     Route::post('/investors', [InvestorController::class, 'store'])->name('investors.store');
     Route::get('/investors/{investor}', [InvestorController::class, 'show'])->name('investors.show');
@@ -72,10 +85,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/investors/{investor}/transactions', [InvestorController::class, 'storeTransaction'])->name('investor-transactions.store');
     Route::put('/investors/{investor}/transactions/{transaction}', [InvestorController::class, 'updateTransaction'])->name('investor-transactions.update');
     Route::delete('/investors/{investor}/transactions/{transaction}', [InvestorController::class, 'destroyTransaction'])->name('investor-transactions.destroy');
+});
 
+Route::middleware(['auth', 'verified', 'module:available_properties'])->group(function () {
     Route::get('/available-properties', [AvailablePropertiesController::class, 'index'])->name('available-properties.index');
     Route::post('/available-properties', [AvailablePropertiesController::class, 'store'])->name('available-properties.store');
+});
 
+Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::resource('projects', ProjectController::class);
     Route::post('/projects/{project}/costs', [ProjectCostController::class, 'store'])->name('project-costs.store');
     Route::put('/projects/{project}/costs/{cost}', [ProjectCostController::class, 'update'])->name('project-costs.update');
@@ -98,13 +115,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/project-units/{unit}/payments/{payment}', [UnitPaymentController::class, 'destroy'])->name('unit-payments.destroy');
     Route::post('/project-units/{unit}/materials', [MaterialEntryController::class, 'store'])->name('material-entries.store');
     Route::delete('/project-units/{unit}/materials/{entry}', [MaterialEntryController::class, 'destroy'])->name('material-entries.destroy');
+});
 
+Route::middleware(['auth', 'verified', 'module:followups'])->group(function () {
     Route::get('/followups', [FollowupController::class, 'index'])->name('followups.index');
     Route::get('/followups/create', [FollowupController::class, 'create'])->name('followups.create');
     Route::post('/followups', [FollowupController::class, 'store'])->name('followups.store');
     Route::post('/followups/{followup}/complete', [FollowupController::class, 'complete'])->name('followups.complete');
     Route::delete('/followups/{followup}', [FollowupController::class, 'destroy'])->name('followups.destroy');
+});
 
+Route::middleware(['auth', 'verified', 'module:quotations'])->group(function () {
     Route::get('/quotations', [QuotationController::class, 'index'])->name('quotations.index');
     Route::get('/quotations/create', [QuotationController::class, 'create'])->name('quotations.create');
     Route::post('/quotations', [QuotationController::class, 'store'])->name('quotations.store');
@@ -114,7 +135,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/quotations/{quotation}/mark-sent', [QuotationController::class, 'markSent'])->name('quotations.mark-sent');
     Route::post('/quotations/{quotation}/convert', [QuotationController::class, 'convert'])->name('quotations.convert');
     Route::get('/quotations/{quotation}/pdf', [QuotationController::class, 'pdf'])->name('quotations.pdf');
+});
 
+Route::middleware(['auth', 'verified', 'module:invoices'])->group(function () {
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
     Route::get('/invoices/create', [InvoiceController::class, 'create'])->name('invoices.create');
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
@@ -126,11 +149,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::delete('/invoices/{invoice}/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+});
 
+Route::middleware(['auth', 'verified', 'module:ledger'])->group(function () {
     Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
     Route::post('/ledger/entries', [LedgerController::class, 'storeEntry'])->name('ledger.entries.store');
     Route::delete('/ledger/entries/{entry}', [LedgerController::class, 'destroyEntry'])->name('ledger.entries.destroy');
+});
 
+Route::middleware(['auth', 'verified', 'module:completed_projects'])->group(function () {
     Route::get('/completed-projects', [CompletedProjectsController::class, 'index'])->name('completed-projects.index');
 });
 
@@ -138,7 +165,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
+Route::middleware(['auth', 'owner'])->group(function () {
     Route::get('/business', [BusinessController::class, 'edit'])->name('business.edit');
     Route::put('/business', [BusinessController::class, 'update'])->name('business.update');
     Route::get('/business/logo', [BusinessController::class, 'logo'])->name('business.logo');
