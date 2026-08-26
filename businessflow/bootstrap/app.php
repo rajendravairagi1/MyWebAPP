@@ -23,6 +23,7 @@ $builder = Application::configure(basePath: dirname(__DIR__))
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\IdentifyTenant::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\NoCacheForAuthenticatedPages::class,
         ]);
 
         $middleware->alias([

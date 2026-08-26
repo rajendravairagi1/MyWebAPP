@@ -28,7 +28,16 @@ class MigrateController extends Controller
 
         Artisan::call('view:clear');
         Artisan::call('config:clear');
+        Artisan::call('route:clear');
         Artisan::call('migrate', ['--force' => true]);
+
+        // Some shared hosts run with opcache.validate_timestamps off, so a
+        // freshly uploaded PHP file can keep executing the old cached
+        // bytecode until a worker restart — reset it explicitly so a
+        // deploy always takes effect immediately.
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
 
         return response('<pre>'.e(Artisan::output()).'</pre>');
     }
