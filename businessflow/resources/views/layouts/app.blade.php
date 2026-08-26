@@ -208,6 +208,8 @@
                         <div class="flex-1 min-w-0">{{ $header }}</div>
                     @endisset
 
+                    <x-global-search />
+
                     <x-dropdown align="right" width="w-80">
                         <x-slot name="trigger">
                             <button type="button" class="relative text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">

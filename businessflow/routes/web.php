@@ -28,6 +28,7 @@ use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ResetDataController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UnitMediaController;
 use App\Http\Controllers\UnitPaymentController;
@@ -85,6 +86,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/search', SearchController::class)->name('search');
 
     Route::resource('products', ProductController::class)->except(['show']);
 });
