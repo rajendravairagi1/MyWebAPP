@@ -5,6 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ config('app.name', 'BusinessFlow') }} — Real Estate Builder CRM</title>
 
+        @include('partials.pwa-head')
+
         <script>
             (function () {
                 var stored = localStorage.getItem('theme');

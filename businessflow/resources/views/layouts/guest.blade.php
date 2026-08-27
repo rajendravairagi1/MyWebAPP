@@ -7,6 +7,8 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
+        @include('partials.pwa-head')
+
         <script>
             (function () {
                 var stored = localStorage.getItem('theme');
