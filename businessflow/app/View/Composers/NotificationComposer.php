@@ -5,6 +5,7 @@ namespace App\View\Composers;
 use App\Models\Branch;
 use App\Models\Business;
 use App\Models\Followup;
+use App\Models\Meeting;
 use App\Models\ProjectUnit;
 use App\Support\Tenant;
 use Illuminate\Support\Facades\Auth;
@@ -41,6 +42,8 @@ class NotificationComposer
                 'dueFollowupsCount' => 0,
                 'dueCommitmentsForBell' => collect(),
                 'dueCommitmentsCount' => 0,
+                'dueMeetingsForBell' => collect(),
+                'dueMeetingsCount' => 0,
             ]);
 
             return;
@@ -61,11 +64,22 @@ class NotificationComposer
             ->limit(8)
             ->get();
 
+        // Upcoming-within-a-day (not just overdue) — a meeting reminder is
+        // more useful shown ahead of time than only after it's been missed.
+        $dueMeetings = Meeting::with('customer')
+            ->where('status', 'scheduled')
+            ->where('scheduled_at', '<=', now()->addDay())
+            ->orderBy('scheduled_at')
+            ->limit(8)
+            ->get();
+
         $view->with([
             'dueFollowupsForBell' => $due,
             'dueFollowupsCount' => Followup::where('status', 'pending')->where('due_at', '<=', now())->count(),
             'dueCommitmentsForBell' => $overdueCommitments,
             'dueCommitmentsCount' => ProjectUnit::whereNull('archived_at')->whereNotNull('commitment_date')->where('commitment_date', '<=', now()->toDateString())->count(),
+            'dueMeetingsForBell' => $dueMeetings,
+            'dueMeetingsCount' => Meeting::where('status', 'scheduled')->where('scheduled_at', '<=', now()->addDay())->count(),
         ]);
     }
 }

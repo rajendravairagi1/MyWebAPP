@@ -7,6 +7,21 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
+        {{-- "Add to Home Screen" — the manifest and icon are generated
+             per business, so whichever logo is set in Business Settings
+             is exactly what installs on the phone's home screen. --}}
+        <link rel="manifest" href="{{ route('pwa.manifest') }}">
+        <link rel="apple-touch-icon" href="{{ route('pwa.icon', 192) }}">
+        <meta name="theme-color" content="#4f46e5">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="{{ config('app.name', 'BusinessFlow') }}">
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js'); });
+            }
+        </script>
+
         {{-- Set theme + accent color before first paint to avoid a flash --}}
         <script>
             (function () {
@@ -151,6 +166,15 @@
                         </x-sidebar-link>
                     @endif
 
+                    @if (\App\Support\Tenant::can('meetings'))
+                        <x-sidebar-link :href="route('meetings.index')" :active="request()->routeIs('meetings.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008z" />
+                            </x-slot>
+                            {{ __('Meetings') }}
+                        </x-sidebar-link>
+                    @endif
+
                     @if (\App\Support\Tenant::can('available_properties'))
                         <x-sidebar-link :href="route('available-properties.index')" :active="request()->routeIs('available-properties.*')">
                             <x-slot name="icon">
@@ -197,6 +221,15 @@
                     @endif
 
                     @if (\App\Support\Tenant::isOwner())
+                        <x-sidebar-link :href="route('reports.index')" :active="request()->routeIs('reports.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+                            </x-slot>
+                            {{ __('Reports') }}
+                        </x-sidebar-link>
+                    @endif
+
+                    @if (\App\Support\Tenant::isOwner())
                         <x-sidebar-link :href="route('backup.index')" :active="request()->routeIs('backup.*')">
                             <x-slot name="icon">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
@@ -223,8 +256,8 @@
                         <x-slot name="trigger">
                             <button type="button" class="relative text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                                @if (($dueFollowupsCount + $dueCommitmentsCount) > 0)
-                                    <span class="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-red-600 text-white text-[10px] leading-4 text-center font-semibold">{{ $dueFollowupsCount + $dueCommitmentsCount }}</span>
+                                @if (($dueFollowupsCount + $dueCommitmentsCount + $dueMeetingsCount) > 0)
+                                    <span class="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-red-600 text-white text-[10px] leading-4 text-center font-semibold">{{ $dueFollowupsCount + $dueCommitmentsCount + $dueMeetingsCount }}</span>
                                 @endif
                             </button>
                         </x-slot>
@@ -255,6 +288,22 @@
                             @empty
                                 <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ __('Nothing overdue right now.') }}</div>
                             @endforelse
+
+                            <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-t border-b border-gray-100 dark:border-slate-700">
+                                {{ __('Meetings today / soon') }}
+                            </div>
+                            @forelse ($dueMeetingsForBell as $meeting)
+                                <a href="{{ route('meetings.index') }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700">
+                                    <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ $meeting->title }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $meeting->customer?->name }}{{ $meeting->location ? ' · '.$meeting->location : '' }}</div>
+                                    <div class="text-xs {{ $meeting->scheduled_at->isPast() ? 'text-red-500' : 'text-gray-400' }}">{{ $meeting->scheduled_at->format('d M, h:i A') }} · {{ $meeting->scheduled_at->diffForHumans() }}</div>
+                                </a>
+                            @empty
+                                <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ __('No meetings coming up.') }}</div>
+                            @endforelse
+                            @if (\App\Support\Tenant::can('meetings'))
+                                <a href="{{ route('meetings.index') }}" class="block px-4 py-2 text-xs text-center text-accent-600 border-t border-gray-100 dark:border-slate-700 hover:underline">{{ __('View all meetings') }}</a>
+                            @endif
                         </x-slot>
                     </x-dropdown>
 

@@ -17,6 +17,7 @@ class Modules
         'quotations' => 'Quotations',
         'invoices' => 'Invoices',
         'followups' => 'Follow-ups',
+        'meetings' => 'Meetings',
         'available_properties' => 'Available Properties',
         'ledger' => 'Ledger',
         'investors' => 'Investors',

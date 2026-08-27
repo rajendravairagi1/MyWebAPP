@@ -19,6 +19,7 @@ use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\MaterialEntryController;
+use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\MigrateController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PaymentController;
@@ -27,7 +28,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
+use App\Http\Controllers\PwaController;
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResetDataController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TeamController;
@@ -49,6 +52,9 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::put('/businesses/{business}/plan', [AdminController::class, 'updatePlan'])->name('businesses.plan');
     Route::post('/demo/reset', [AdminController::class, 'resetDemo'])->name('demo.reset');
 });
+
+Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
+Route::get('/pwa-icon/{size}', [PwaController::class, 'icon'])->name('pwa.icon')->where('size', '[0-9]+');
 
 Route::get('/install', [InstallController::class, 'index'])->name('install.index');
 Route::post('/install', [InstallController::class, 'store'])->name('install.store');
@@ -100,6 +106,9 @@ Route::middleware(['auth', 'verified', 'owner'])->group(function () {
     Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
     Route::get('/backup/download', [BackupController::class, 'download'])->name('backup.download');
     Route::post('/backup/restore', [BackupController::class, 'restore'])->name('backup.restore');
+
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/download', [ReportController::class, 'download'])->name('reports.download');
 });
 
 Route::middleware(['auth', 'verified', 'owner', 'plan:team'])->group(function () {
@@ -169,6 +178,17 @@ Route::middleware(['auth', 'verified', 'module:followups'])->group(function () {
     Route::post('/followups', [FollowupController::class, 'store'])->name('followups.store');
     Route::post('/followups/{followup}/complete', [FollowupController::class, 'complete'])->name('followups.complete');
     Route::delete('/followups/{followup}', [FollowupController::class, 'destroy'])->name('followups.destroy');
+});
+
+Route::middleware(['auth', 'verified', 'module:meetings'])->group(function () {
+    Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings.index');
+    Route::get('/meetings/create', [MeetingController::class, 'create'])->name('meetings.create');
+    Route::post('/meetings', [MeetingController::class, 'store'])->name('meetings.store');
+    Route::get('/meetings/{meeting}/edit', [MeetingController::class, 'edit'])->name('meetings.edit');
+    Route::put('/meetings/{meeting}', [MeetingController::class, 'update'])->name('meetings.update');
+    Route::post('/meetings/{meeting}/complete', [MeetingController::class, 'complete'])->name('meetings.complete');
+    Route::post('/meetings/{meeting}/cancel', [MeetingController::class, 'cancel'])->name('meetings.cancel');
+    Route::delete('/meetings/{meeting}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'module:quotations'])->group(function () {
