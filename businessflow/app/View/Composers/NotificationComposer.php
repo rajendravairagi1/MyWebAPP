@@ -23,17 +23,29 @@ class NotificationComposer
     public function compose(View $view): void
     {
         $user = Auth::user();
+        $isPlatformAdmin = $user && $user->email === config('platform.admin_email');
+        $activeBusiness = Tenant::check() ? Business::find(Tenant::id()) : null;
 
         $view->with([
             // Account-level (not tied to the active business) — drives the
             // "Company"/"My Branch" sidebar link and the "back up" link.
             'ownedCompany' => $user?->ownedCompany,
             'managedBranch' => $user && ! $user->ownedCompany ? $user->managedBranches()->first() : null,
-            'activeBusinessBranch' => Tenant::check()
-                ? Branch::with('company')->find(Business::find(Tenant::id())?->branch_id)
-                : null,
+            'activeBusinessBranch' => $activeBusiness ? Branch::with('company')->find($activeBusiness->branch_id) : null,
             'canCreateCompany' => $user && ! $user->ownedCompany && $user->hasCompanyPlan(),
-            'isPlatformAdmin' => $user && $user->email === config('platform.admin_email'),
+            'isPlatformAdmin' => $isPlatformAdmin,
+        ]);
+
+        // Nudge toward renewal starting 7 days out — never for the platform
+        // admin themselves, and never once it's actually expired (they're
+        // already redirected to the "subscription expired" page by then,
+        // see App\Http\Middleware\EnsureSubscriptionActive).
+        $expiresOn = ! $isPlatformAdmin ? $activeBusiness?->effectiveExpiresAt() : null;
+        $daysRemaining = $expiresOn ? now()->startOfDay()->diffInDays($expiresOn->copy()->startOfDay(), false) : null;
+
+        $view->with([
+            'subscriptionExpiresOn' => ($daysRemaining !== null && $daysRemaining >= 0 && $daysRemaining <= 7) ? $expiresOn : null,
+            'subscriptionDaysRemaining' => ($daysRemaining !== null && $daysRemaining >= 0 && $daysRemaining <= 7) ? $daysRemaining : null,
         ]);
 
         if (! Tenant::check()) {

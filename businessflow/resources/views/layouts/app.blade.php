@@ -243,12 +243,22 @@
                         <x-slot name="trigger">
                             <button type="button" class="relative text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                                @if (($dueFollowupsCount + $dueCommitmentsCount + $dueMeetingsCount) > 0)
-                                    <span class="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full bg-red-600 text-white text-[10px] leading-4 text-center font-semibold">{{ $dueFollowupsCount + $dueCommitmentsCount + $dueMeetingsCount }}</span>
+                                @php $bellCount = $dueFollowupsCount + $dueCommitmentsCount + $dueMeetingsCount + ($subscriptionDaysRemaining !== null ? 1 : 0); @endphp
+                                @if ($bellCount > 0)
+                                    <span class="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full {{ $subscriptionDaysRemaining !== null ? 'bg-amber-500' : 'bg-red-600' }} text-white text-[10px] leading-4 text-center font-semibold">{{ $bellCount }}</span>
                                 @endif
                             </button>
                         </x-slot>
                         <x-slot name="content">
+                            @if ($subscriptionDaysRemaining !== null)
+                                <div class="px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
+                                    <div class="text-sm font-semibold text-amber-800 dark:text-amber-400">
+                                        {{ $subscriptionDaysRemaining === 0 ? __('Your plan expires today!') : __('Your plan expires in :days day(s)', ['days' => $subscriptionDaysRemaining]) }}
+                                    </div>
+                                    <div class="text-xs text-amber-700 dark:text-amber-500 mt-0.5">{{ __('Valid till') }} {{ $subscriptionExpiresOn->format('d M Y') }} — {{ __('please contact us to renew and avoid losing access.') }}</div>
+                                </div>
+                            @endif
+
                             <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-slate-700">
                                 {{ __('Follow-ups due') }}
                             </div>
@@ -370,5 +380,9 @@
                 </main>
             </div>
         </div>
+
+        @if ($subscriptionDaysRemaining !== null)
+            @include('partials.renewal-modal')
+        @endif
     </body>
 </html>
