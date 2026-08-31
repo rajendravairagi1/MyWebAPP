@@ -156,7 +156,10 @@
 
             @if ($canInvoices)
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
-                    <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Recent invoices') }}</div>
+                    <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+                        <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Recent invoices') }}</span>
+                        <a href="{{ route('invoices.index') }}" class="text-xs text-accent-600 hover:underline">{{ __('View all →') }}</a>
+                    </div>
                     @if ($recentInvoices->isEmpty())
                         <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No invoices yet — create your first one above.') }}</div>
                     @else
@@ -178,6 +181,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        <a href="{{ route('invoices.index') }}" class="block px-5 py-2.5 text-xs text-center text-accent-600 border-t border-gray-100 dark:border-slate-700 hover:underline">{{ __('View all invoices →') }}</a>
                     @endif
                 </div>
             @endif
