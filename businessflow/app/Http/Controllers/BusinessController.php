@@ -16,8 +16,9 @@ class BusinessController extends Controller
     public function edit(): View
     {
         $business = Business::findOrFail(Tenant::id());
+        $currencies = config('business.currencies');
 
-        return view('business.edit', compact('business'));
+        return view('business.edit', compact('business', 'currencies'));
     }
 
     public function update(Request $request): RedirectResponse
@@ -31,6 +32,7 @@ class BusinessController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'website' => ['nullable', 'string', 'max:255'],
             'invoice_prefix' => ['nullable', 'string', 'max:20'],
+            'currency' => ['required', 'in:'.implode(',', array_keys(config('business.currencies')))],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 

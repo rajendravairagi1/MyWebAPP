@@ -76,6 +76,18 @@
                         </div>
                     </div>
 
+                    <div>
+                        <x-input-label for="currency" :value="__('Currency')" />
+                        <select id="currency" name="currency" required
+                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
+                            @foreach ($currencies as $value => $label)
+                                <option value="{{ $value }}" @selected(old('currency', $business->currency) === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">{{ __('Changes the symbol shown on every amount, invoice, and report in this account — it doesn\'t convert existing numbers.') }}</p>
+                        <x-input-error :messages="$errors->get('currency')" class="mt-2" />
+                    </div>
+
                     <div class="flex justify-end">
                         <x-primary-button>{{ __('Save') }}</x-primary-button>
                     </div>
