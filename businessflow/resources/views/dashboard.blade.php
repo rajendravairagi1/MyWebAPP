@@ -28,7 +28,7 @@
             @if ($canProjects && $canProjectsFinancials)
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ __('Portfolio — projects & property deals') }}</div>
+                        <div class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ __('Portfolio — all projects') }}</div>
                         <a href="{{ route('projects.index') }}" class="text-xs text-accent-600 hover:underline">{{ __('View projects →') }}</a>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
@@ -50,6 +50,9 @@
                             <div class="mt-1 text-xl font-semibold {{ $portfolioProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ number_format($portfolioProfit, 0) }}</div>
                         </div>
                     </div>
+                    @if ($dealsProfit != 0)
+                        <p class="text-xs text-gray-400 mt-3">{{ __('Profit/Loss includes :amount profit from Property Deals (their purchase/sale amounts aren\'t counted in Cost/Received since those properties were never yours).', ['amount' => \App\Support\Tenant::currencySymbol().number_format($dealsProfit, 0)]) }}</p>
+                    @endif
 
                     @if ($projects->isNotEmpty())
                         <div class="mt-6 pt-5 border-t border-gray-100 dark:border-slate-700">

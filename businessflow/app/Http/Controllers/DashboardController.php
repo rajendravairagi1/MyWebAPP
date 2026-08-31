@@ -23,18 +23,17 @@ class DashboardController extends Controller
 
         $projects = Project::withCount('units')->get();
 
-        // A sold resale deal is real cost-in/money-out for the business
-        // just like a project, so it's folded into the same Cost/Received
-        // figures here — Profit stays literally Received minus Cost.
+        // A resale deal's property was never the business's own — only
+        // the margin it earned belongs on this P&L, not the underlying
+        // purchase/sale amounts (which would inflate Cost/Received for
+        // money that was never really the business's own to begin with).
         $soldDeals = PropertyDeal::where('status', 'sold')->get();
         $dealsOpenCount = PropertyDeal::where('status', 'open')->count();
         $dealsSoldCount = $soldDeals->count();
-        $dealsCost = (float) $soldDeals->sum('purchase_price');
-        $dealsRevenue = (float) $soldDeals->sum('sale_price');
         $dealsProfit = (float) $soldDeals->sum(fn (PropertyDeal $d) => $d->profit());
 
-        $portfolioCost = (float) ProjectCost::sum('amount') + $dealsCost;
-        $portfolioRevenue = (float) Invoice::whereNotNull('project_id')->sum('amount_paid') + $dealsRevenue;
+        $portfolioCost = (float) ProjectCost::sum('amount');
+        $portfolioRevenue = (float) Invoice::whereNotNull('project_id')->sum('amount_paid');
 
         $dueFollowups = Followup::with('customer')
             ->where('status', 'pending')
@@ -55,7 +54,7 @@ class DashboardController extends Controller
             'ongoingProjectCount' => $projects->where('status', 'ongoing')->count(),
             'portfolioCost' => $portfolioCost,
             'portfolioRevenue' => $portfolioRevenue,
-            'portfolioProfit' => $portfolioRevenue - $portfolioCost,
+            'portfolioProfit' => $portfolioRevenue - $portfolioCost + $dealsProfit,
             'dealsOpenCount' => $dealsOpenCount,
             'dealsSoldCount' => $dealsSoldCount,
             'dealsProfit' => $dealsProfit,
