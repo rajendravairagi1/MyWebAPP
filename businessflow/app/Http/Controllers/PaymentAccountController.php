@@ -19,6 +19,76 @@ class PaymentAccountController extends Controller
         return view('payment-accounts.index', compact('accounts'));
     }
 
+    /**
+     * Every transaction recorded against this account/person, from all
+     * three places money can be tagged with one — unit payments, generic
+     * invoice payments, and manual ledger entries — combined into one
+     * dated statement with a running in/out/balance total. This is the
+     * only place those three sources get merged like this.
+     */
+    public function show(PaymentAccount $account): View
+    {
+        $rows = collect();
+
+        UnitPayment::with(['unit.project', 'customer' => fn ($q) => $q->withTrashed()])
+            ->where('payment_account_id', $account->id)
+            ->get()
+            ->each(function (UnitPayment $payment) use ($rows) {
+                $rows->push((object) [
+                    'date' => $payment->paid_at,
+                    'direction' => 'in',
+                    'amount' => (float) $payment->amount,
+                    'description' => $payment->loan_id ? 'Bank loan disbursement' : $payment->purposeLabel(),
+                    'context' => trim(($payment->unit?->project?->name ?? '').' · '.($payment->unit?->unit_number ?? ''), ' ·'),
+                    'party' => $payment->customer?->name,
+                    'link' => $payment->customer_id ? route('customers.show', $payment->customer_id) : null,
+                ]);
+            });
+
+        Payment::with(['invoice.customer' => fn ($q) => $q->withTrashed()])
+            ->where('payment_account_id', $account->id)
+            ->get()
+            ->each(function (Payment $payment) use ($rows) {
+                $rows->push((object) [
+                    'date' => $payment->paid_at,
+                    'direction' => 'in',
+                    'amount' => (float) $payment->amount,
+                    'description' => 'Invoice payment',
+                    'context' => $payment->invoice?->number,
+                    'party' => $payment->invoice?->customer?->name,
+                    'link' => $payment->invoice_id ? route('invoices.show', $payment->invoice_id) : null,
+                ]);
+            });
+
+        LedgerEntry::with(['customer' => fn ($q) => $q->withTrashed(), 'project'])
+            ->where('payment_account_id', $account->id)
+            ->get()
+            ->each(function (LedgerEntry $entry) use ($rows) {
+                $rows->push((object) [
+                    'date' => $entry->entry_date,
+                    'direction' => $entry->type === 'income' ? 'in' : 'out',
+                    'amount' => (float) $entry->amount,
+                    'description' => $entry->description,
+                    'context' => $entry->project?->name ?? $entry->category,
+                    'party' => $entry->customer?->name,
+                    'link' => $entry->project_id ? route('projects.show', $entry->project_id) : null,
+                ]);
+            });
+
+        $rows = $rows->sortByDesc('date')->values();
+
+        $totalIn = (float) $rows->where('direction', 'in')->sum('amount');
+        $totalOut = (float) $rows->where('direction', 'out')->sum('amount');
+
+        return view('payment-accounts.show', [
+            'account' => $account,
+            'rows' => $rows,
+            'totalIn' => $totalIn,
+            'totalOut' => $totalOut,
+            'balance' => $totalIn - $totalOut,
+        ]);
+    }
+
     public function store(Request $request): RedirectResponse
     {
         PaymentAccount::create($this->validated($request));

@@ -124,6 +124,7 @@ Route::middleware(['auth', 'verified', 'owner'])->group(function () {
     Route::get('/reports/download', [ReportController::class, 'download'])->name('reports.download');
 
     Route::get('/payment-accounts', [PaymentAccountController::class, 'index'])->name('payment-accounts.index');
+    Route::get('/payment-accounts/{account}', [PaymentAccountController::class, 'show'])->name('payment-accounts.show');
     Route::post('/payment-accounts', [PaymentAccountController::class, 'store'])->name('payment-accounts.store');
     Route::put('/payment-accounts/{account}', [PaymentAccountController::class, 'update'])->name('payment-accounts.update');
     Route::delete('/payment-accounts/{account}', [PaymentAccountController::class, 'destroy'])->name('payment-accounts.destroy');

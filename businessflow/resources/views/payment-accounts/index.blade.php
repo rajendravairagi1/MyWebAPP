@@ -39,7 +39,9 @@
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
                             @foreach ($accounts as $account)
                                 <tr>
-                                    <td class="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{{ $account->name }}</td>
+                                    <td class="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">
+                                        <a href="{{ route('payment-accounts.show', $account) }}" class="text-accent-600 hover:underline">{{ $account->name }}</a>
+                                    </td>
                                     <td class="px-5 py-3">
                                         @if ($account->isCash())
                                             <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">{{ __('Cash-in-hand') }}</span>
@@ -51,7 +53,8 @@
                                     <td class="px-5 py-3 text-gray-500 dark:text-gray-400">{{ $account->maskedAccountNumber() ?? '—' }}</td>
                                     <td class="px-5 py-3 text-gray-500 dark:text-gray-400">{{ $account->notes ?? '—' }}</td>
                                     <td class="px-5 py-3 text-right whitespace-nowrap">
-                                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-account-{{ $account->id }}')" class="text-accent-600 hover:underline text-xs">{{ __('Edit') }}</button>
+                                        <a href="{{ route('payment-accounts.show', $account) }}" class="text-gray-500 dark:text-gray-400 hover:underline text-xs">{{ __('Ledger') }}</a>
+                                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-account-{{ $account->id }}')" class="text-accent-600 hover:underline text-xs ml-2">{{ __('Edit') }}</button>
                                         <form method="POST" action="{{ route('payment-accounts.destroy', $account) }}" onsubmit="return confirm('{{ __('Delete this account?') }}')" class="inline">
                                             @csrf
                                             @method('DELETE')
