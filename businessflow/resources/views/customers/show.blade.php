@@ -204,6 +204,9 @@
                         <div class="mt-1.5 flex flex-wrap gap-x-6 gap-y-1 text-xs">
                             <span class="text-gray-500 dark:text-gray-400">{{ __('Collected') }}: <strong class="text-green-600">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->totalCollected(), 0) }}</strong></span>
                             <span class="text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}: <strong class="{{ $unit->totalOutstanding() > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->totalOutstanding(), 0) }}</strong></span>
+                            @if ($firstPayment = $unit->firstPayment())
+                                <span class="text-gray-500 dark:text-gray-400">{{ __('Booked with') }}: <strong class="text-gray-700 dark:text-gray-300">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($firstPayment->amount, 0) }}</strong> <span class="text-gray-400">({{ $firstPayment->paid_at->format('d M Y') }})</span></span>
+                            @endif
                         </div>
                         <x-loan-panel :unit="$unit" />
                         @endif

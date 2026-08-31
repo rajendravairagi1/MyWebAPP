@@ -134,6 +134,54 @@
                 </div>
             </div>
 
+            {{-- Property deals — resale/trading, separate from own projects --}}
+            @if ($deals->isNotEmpty())
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100 flex items-center justify-between">
+                        <span>{{ __('Property Deals') }} <span class="text-xs font-normal text-gray-400">— {{ __('buy from one party, sell to another') }}</span></span>
+                        <a href="{{ route('property-deals.index') }}" class="text-xs text-accent-600 hover:underline font-normal">{{ __('Manage →') }}</a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-left text-xs uppercase text-gray-400 dark:text-gray-500">
+                                    <th class="px-5 py-2">{{ __('Property') }}</th>
+                                    <th class="px-5 py-2">{{ __('Seller') }}</th>
+                                    <th class="px-5 py-2 text-right">{{ __('Purchase') }}</th>
+                                    <th class="px-5 py-2">{{ __('Buyer') }}</th>
+                                    <th class="px-5 py-2 text-right">{{ __('Sale') }}</th>
+                                    <th class="px-5 py-2 text-right">{{ __('Profit') }}</th>
+                                    <th class="px-5 py-2">{{ __('Status') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
+                                @foreach ($deals as $deal)
+                                    @php $profit = $deal->profit(); @endphp
+                                    <tr>
+                                        <td class="px-5 py-2 text-gray-900 dark:text-gray-100">{{ $deal->property_title }}</td>
+                                        <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $deal->seller_name ?? '—' }}</td>
+                                        <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($deal->purchase_price, 0) }}</td>
+                                        <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $deal->buyer_name ?? '—' }}</td>
+                                        <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">{{ $deal->sale_price !== null ? \App\Support\Tenant::currencySymbol().number_format($deal->sale_price, 0) : '—' }}</td>
+                                        <td class="px-5 py-2 text-right font-medium {{ $profit === null ? 'text-gray-400' : ($profit >= 0 ? 'text-green-600' : 'text-red-600') }}">
+                                            {{ $profit !== null ? \App\Support\Tenant::currencySymbol().number_format($profit, 0) : '—' }}
+                                        </td>
+                                        <td class="px-5 py-2">
+                                            <span @class([
+                                                'text-xs px-2 py-0.5 rounded font-medium',
+                                                'bg-amber-100 text-amber-700' => $deal->status === 'open',
+                                                'bg-green-100 text-green-700' => $deal->status === 'sold',
+                                                'bg-gray-100 text-gray-500' => $deal->status === 'cancelled',
+                                            ])>{{ $deal->statusLabel() }}</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            @endif
+
             {{-- Manual entries --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">

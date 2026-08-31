@@ -65,9 +65,11 @@ class LedgerController extends Controller
         $customers = Customer::orderBy('name')->get();
         $allProjects = Project::orderBy('name')->get();
 
+        $deals = PropertyDeal::orderByDesc('deal_date')->orderByDesc('id')->get();
+
         return view('ledger.index', compact(
             'totalSaleValue', 'totalCollected', 'totalOutstanding', 'totalPurchases', 'netProfit',
-            'manualIncome', 'manualExpense', 'dealsProfit', 'projects', 'customerRows', 'entries', 'customers', 'allProjects'
+            'manualIncome', 'manualExpense', 'dealsProfit', 'deals', 'projects', 'customerRows', 'entries', 'customers', 'allProjects'
         ));
     }
 

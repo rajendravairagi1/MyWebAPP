@@ -42,6 +42,9 @@
                 <div class="text-right">
                     <div class="text-xs text-gray-400">{{ __('Price') }}</div>
                     <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->price, 0) }}</div>
+                    @if ($firstPayment = $unit->firstPayment())
+                        <div class="text-xs text-gray-400 mt-1">{{ __('Booked with') }} {{ \App\Support\Tenant::currencySymbol() }}{{ number_format($firstPayment->amount, 0) }} <span class="text-gray-400">({{ $firstPayment->paid_at->format('d M Y') }})</span></div>
+                    @endif
                 </div>
             </div>
 

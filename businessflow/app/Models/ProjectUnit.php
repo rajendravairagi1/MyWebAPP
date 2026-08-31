@@ -58,6 +58,17 @@ class ProjectUnit extends Model
         return $this->hasMany(UnitPayment::class)->latest('paid_at')->latest('id');
     }
 
+    /**
+     * The payment that first secured this booking — kept visible on its
+     * own regardless of what purpose it was logged under (token, an
+     * installment, etc.), since later payments would otherwise bury it
+     * inside a growing "Collected" total.
+     */
+    public function firstPayment(): ?UnitPayment
+    {
+        return $this->payments->sortBy([['paid_at', 'asc'], ['id', 'asc']])->first();
+    }
+
     public function loan(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Loan::class);

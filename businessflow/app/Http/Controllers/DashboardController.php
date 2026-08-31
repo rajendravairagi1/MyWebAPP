@@ -22,8 +22,19 @@ class DashboardController extends Controller
             ->sum('total');
 
         $projects = Project::withCount('units')->get();
-        $portfolioCost = ProjectCost::sum('amount');
-        $portfolioRevenue = Invoice::whereNotNull('project_id')->sum('amount_paid');
+
+        // A sold resale deal is real cost-in/money-out for the business
+        // just like a project, so it's folded into the same Cost/Received
+        // figures here — Profit stays literally Received minus Cost.
+        $soldDeals = PropertyDeal::where('status', 'sold')->get();
+        $dealsOpenCount = PropertyDeal::where('status', 'open')->count();
+        $dealsSoldCount = $soldDeals->count();
+        $dealsCost = (float) $soldDeals->sum('purchase_price');
+        $dealsRevenue = (float) $soldDeals->sum('sale_price');
+        $dealsProfit = (float) $soldDeals->sum(fn (PropertyDeal $d) => $d->profit());
+
+        $portfolioCost = (float) ProjectCost::sum('amount') + $dealsCost;
+        $portfolioRevenue = (float) Invoice::whereNotNull('project_id')->sum('amount_paid') + $dealsRevenue;
 
         $dueFollowups = Followup::with('customer')
             ->where('status', 'pending')
@@ -31,16 +42,6 @@ class DashboardController extends Controller
             ->orderBy('due_at')
             ->limit(5)
             ->get();
-
-        // Resale/trading deals are a separate line of business from the
-        // builder's own construction projects, so they get their own
-        // card here rather than being folded into "Portfolio — all
-        // projects" (which would make Cost/Received no longer add up to
-        // the Profit shown, since a deal has no ProjectCost/Invoice rows).
-        $soldDeals = PropertyDeal::where('status', 'sold')->get();
-        $dealsOpenCount = PropertyDeal::where('status', 'open')->count();
-        $dealsSoldCount = $soldDeals->count();
-        $dealsProfit = (float) $soldDeals->sum(fn (PropertyDeal $d) => $d->profit());
 
         return view('dashboard', [
             'customerCount' => Customer::count(),

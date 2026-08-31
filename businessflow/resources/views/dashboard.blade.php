@@ -28,7 +28,7 @@
             @if ($canProjects && $canProjectsFinancials)
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="flex items-center justify-between mb-4">
-                        <div class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ __('Portfolio — all projects') }}</div>
+                        <div class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ __('Portfolio — projects & property deals') }}</div>
                         <a href="{{ route('projects.index') }}" class="text-xs text-accent-600 hover:underline">{{ __('View projects →') }}</a>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
