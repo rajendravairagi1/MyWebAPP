@@ -102,10 +102,12 @@
                     </div>
                 </div>
                 <input type="text" name="reference" placeholder="{{ __('Reference (optional)') }}" class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                @if ($accounts && $accounts->isNotEmpty())
+                @php $bankAccounts = $accounts ? $accounts->filter(fn ($a) => ! $a->isCash()) : null; @endphp
+                @if ($bankAccounts && $bankAccounts->isNotEmpty())
+                    {{-- Disbursements always come in by bank transfer — no cash-in-hand accounts here. --}}
                     <select name="payment_account_id" class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                         <option value="">{{ __('Received in (optional)') }}</option>
-                        @foreach ($accounts as $account)
+                        @foreach ($bankAccounts as $account)
                             <option value="{{ $account->id }}">{{ $account->label() }}</option>
                         @endforeach
                     </select>

@@ -18,7 +18,7 @@
             @endif
 
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ __('Money doesn\'t always land in one account — wife\'s, father\'s, a partner\'s, or more than one account for the same person. List every account it actually moves through here — add the bank and account number so accounts belonging to the same person stay tellable apart — so every payment can record exactly which one — useful later for ITR.') }}
+                {{ __('Money doesn\'t always land in one account — wife\'s, father\'s, a partner\'s, or more than one account for the same person. List every account it actually moves through here — add the bank and account number so accounts belonging to the same person stay tellable apart. Cash is different — it never lands in an account, so add the person physically holding it (e.g. Rajesh) as a "Cash-in-hand" entry instead — Cash payments can only be assigned to one of those. Useful later for ITR.') }}
             </p>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
@@ -29,6 +29,7 @@
                         <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
                                 <th class="px-5 py-3 text-left">{{ __('Name') }}</th>
+                                <th class="px-5 py-3 text-left">{{ __('Type') }}</th>
                                 <th class="px-5 py-3 text-left">{{ __('Bank') }}</th>
                                 <th class="px-5 py-3 text-left">{{ __('Account No.') }}</th>
                                 <th class="px-5 py-3 text-left">{{ __('Notes') }}</th>
@@ -39,6 +40,13 @@
                             @foreach ($accounts as $account)
                                 <tr>
                                     <td class="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{{ $account->name }}</td>
+                                    <td class="px-5 py-3">
+                                        @if ($account->isCash())
+                                            <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">{{ __('Cash-in-hand') }}</span>
+                                        @else
+                                            <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">{{ __('Bank') }}</span>
+                                        @endif
+                                    </td>
                                     <td class="px-5 py-3 text-gray-500 dark:text-gray-400">{{ $account->bank_name ?? '—' }}</td>
                                     <td class="px-5 py-3 text-gray-500 dark:text-gray-400">{{ $account->maskedAccountNumber() ?? '—' }}</td>
                                     <td class="px-5 py-3 text-gray-500 dark:text-gray-400">{{ $account->notes ?? '—' }}</td>
@@ -60,15 +68,24 @@
     </div>
 
     <x-modal name="add-account" max-width="md" :show="$errors->has('name')">
-        <form method="POST" action="{{ route('payment-accounts.store') }}" class="p-6 space-y-4">
+        <form method="POST" action="{{ route('payment-accounts.store') }}" x-data="{ type: 'bank' }" class="p-6 space-y-4">
             @csrf
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add Account') }}</h2>
+            <div>
+                <x-input-label for="type" :value="__('Type')" />
+                <select id="type" name="type" x-model="type" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    @foreach (\App\Models\PaymentAccount::TYPES as $val => $label)
+                        <option value="{{ $val }}">{{ $label }}</option>
+                    @endforeach
+                </select>
+                <p class="mt-1 text-xs text-gray-400" x-show="type === 'cash'" x-cloak>{{ __('For cash payments — no account to record, just who is physically holding the money right now.') }}</p>
+            </div>
             <div>
                 <x-input-label for="name" :value="__('Name')" />
                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Wife — Priya, Self, Father — Ramesh') }}" required autofocus />
                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-4" x-show="type === 'bank'" x-cloak>
                 <div>
                     <x-input-label for="bank_name" :value="__('Bank (optional)')" />
                     <x-text-input id="bank_name" name="bank_name" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. HDFC') }}" />
@@ -92,15 +109,23 @@
 
     @foreach ($accounts as $account)
         <x-modal name="edit-account-{{ $account->id }}" max-width="md">
-            <form method="POST" action="{{ route('payment-accounts.update', $account) }}" class="p-6 space-y-4">
+            <form method="POST" action="{{ route('payment-accounts.update', $account) }}" x-data="{ type: '{{ $account->type }}' }" class="p-6 space-y-4">
                 @csrf
                 @method('PUT')
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Account') }}</h2>
                 <div>
+                    <x-input-label :value="__('Type')" />
+                    <select name="type" x-model="type" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        @foreach (\App\Models\PaymentAccount::TYPES as $val => $label)
+                            <option value="{{ $val }}" @selected($account->type === $val)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
                     <x-input-label :value="__('Name')" />
                     <x-text-input name="name" type="text" class="mt-1 block w-full" value="{{ $account->name }}" required />
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4" x-show="type === 'bank'" x-cloak>
                     <div>
                         <x-input-label :value="__('Bank (optional)')" />
                         <x-text-input name="bank_name" type="text" class="mt-1 block w-full" value="{{ $account->bank_name }}" />

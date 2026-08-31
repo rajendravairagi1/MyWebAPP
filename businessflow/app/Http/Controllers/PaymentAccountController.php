@@ -54,11 +54,21 @@ class PaymentAccountController extends Controller
 
     protected function validated(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'in:bank,cash'],
             'bank_name' => ['nullable', 'string', 'max:255'],
             'account_number' => ['nullable', 'string', 'max:50'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        // A cash-in-hand "account" is just a person — bank details
+        // never apply to it, even if the form happened to submit some.
+        if ($data['type'] === 'cash') {
+            $data['bank_name'] = null;
+            $data['account_number'] = null;
+        }
+
+        return $data;
     }
 }

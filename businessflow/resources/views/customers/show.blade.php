@@ -250,7 +250,7 @@
 
                     @if ($canFinancials)
                     <x-modal name="record-payment-{{ $unit->id }}" max-width="md">
-                        <form method="POST" action="{{ route('unit-payments.store', $unit) }}" x-data="{ purpose: 'installment' }" class="p-6 space-y-4">
+                        <form method="POST" action="{{ route('unit-payments.store', $unit) }}" x-data="{ purpose: 'installment', method: 'cash', paymentAccountId: '' }" class="p-6 space-y-4">
                             @csrf
                             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Record Payment') }}</h2>
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $unit->project->name }} · {{ $unit->unit_number }}</p>
@@ -284,7 +284,7 @@
                                 </div>
                                 <div>
                                     <x-input-label for="method-{{ $unit->id }}" :value="__('Method')" />
-                                    <select id="method-{{ $unit->id }}" name="method" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                    <select id="method-{{ $unit->id }}" name="method" x-model="method" x-on:change="paymentAccountId = ''" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                         <option value="cash">{{ __('Cash') }}</option>
                                         <option value="upi">{{ __('UPI') }}</option>
                                         <option value="bank_transfer">{{ __('Bank transfer') }}</option>
@@ -299,11 +299,11 @@
                                 </div>
                                 @if ($paymentAccounts->isNotEmpty())
                                     <div class="col-span-1 sm:col-span-2">
-                                        <x-input-label for="payment_account_id-{{ $unit->id }}" :value="__('Received In (optional)')" />
-                                        <select id="payment_account_id-{{ $unit->id }}" name="payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                        <x-input-label for="payment_account_id-{{ $unit->id }}" x-text="method === 'cash' ? '{{ __('Who is holding this cash? (optional)') }}' : '{{ __('Received In (optional)') }}'" />
+                                        <select id="payment_account_id-{{ $unit->id }}" name="payment_account_id" x-model="paymentAccountId" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                             <option value="">{{ __('— Not specified —') }}</option>
                                             @foreach ($paymentAccounts as $account)
-                                                <option value="{{ $account->id }}">{{ $account->label() }}</option>
+                                                <option value="{{ $account->id }}" x-bind:hidden="method {{ $account->isCash() ? '!==' : '===' }} 'cash'">{{ $account->label() }}</option>
                                             @endforeach
                                         </select>
                                     </div>

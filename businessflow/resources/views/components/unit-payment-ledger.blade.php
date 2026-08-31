@@ -42,7 +42,7 @@
                                 <details class="relative">
                                     <summary class="cursor-pointer px-2 py-1 rounded border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 list-none [&::-webkit-details-marker]:hidden">{{ __('Edit') }}</summary>
                                     @php $paymentPurposeIsCustom = ! array_key_exists($payment->purpose, \App\Models\UnitPayment::PURPOSES); @endphp
-                                    <form method="POST" action="{{ route('unit-payments.update', [$unit, $payment]) }}" x-data="{ purpose: '{{ $paymentPurposeIsCustom ? 'other' : $payment->purpose }}' }" class="absolute right-0 z-10 mt-2 grid grid-cols-2 gap-1.5 text-left w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-3 rounded-md">
+                                    <form method="POST" action="{{ route('unit-payments.update', [$unit, $payment]) }}" x-data="{ purpose: '{{ $paymentPurposeIsCustom ? 'other' : $payment->purpose }}', method: '{{ $payment->method ?: 'cash' }}', paymentAccountId: '{{ $payment->payment_account_id }}' }" class="absolute right-0 z-10 mt-2 grid grid-cols-2 gap-1.5 text-left w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-3 rounded-md">
                                         @csrf
                                         @method('PUT')
                                         <select name="purpose" x-model="purpose" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
@@ -56,17 +56,17 @@
                                         <textarea name="description" rows="2" placeholder="{{ __('Description') }}" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">{{ $payment->description }}</textarea>
                                         <input type="number" step="0.01" min="0.01" name="amount" value="{{ $payment->amount }}" required class="col-span-1 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
                                         <input type="date" name="paid_at" value="{{ $payment->paid_at->format('Y-m-d') }}" required class="col-span-1 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
-                                        <select name="method" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                        <select name="method" x-model="method" x-on:change="paymentAccountId = ''" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
                                             @foreach (['cash' => 'Cash', 'upi' => 'UPI', 'bank_transfer' => 'Bank transfer', 'cheque' => 'Cheque', 'card' => 'Card', 'other' => 'Other'] as $val => $label)
-                                                <option value="{{ $val }}" @selected($payment->method === $val)>{{ $label }}</option>
+                                                <option value="{{ $val }}">{{ $label }}</option>
                                             @endforeach
                                         </select>
                                         <input type="text" name="reference" value="{{ $payment->reference }}" placeholder="{{ __('Reference') }}" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
                                         @if ($accounts && $accounts->isNotEmpty())
-                                            <select name="payment_account_id" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                            <select name="payment_account_id" x-model="paymentAccountId" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
                                                 <option value="">{{ __('Received in — not specified') }}</option>
                                                 @foreach ($accounts as $account)
-                                                    <option value="{{ $account->id }}" @selected($payment->payment_account_id === $account->id)>{{ $account->label() }}</option>
+                                                    <option value="{{ $account->id }}" x-bind:hidden="method {{ $account->isCash() ? '!==' : '===' }} 'cash'">{{ $account->label() }}</option>
                                                 @endforeach
                                             </select>
                                         @endif
