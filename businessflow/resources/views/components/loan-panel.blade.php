@@ -1,4 +1,4 @@
-@props(['unit'])
+@props(['unit', 'accounts' => null])
 
 @if ($unit->loan)
     @php $loan = $unit->loan; @endphp
@@ -78,6 +78,9 @@
                                 @if ($disbursement->reference)
                                     <div class="text-xs text-gray-400">{{ __('Ref') }}: {{ $disbursement->reference }}</div>
                                 @endif
+                                @if ($disbursement->account)
+                                    <div class="text-xs text-gray-400">{{ __('Received in') }}: {{ $disbursement->account->name }}</div>
+                                @endif
                             </div>
                             <div class="font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($disbursement->amount, 0) }}</div>
                         </div>
@@ -99,6 +102,14 @@
                     </div>
                 </div>
                 <input type="text" name="reference" placeholder="{{ __('Reference (optional)') }}" class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                @if ($accounts && $accounts->isNotEmpty())
+                    <select name="payment_account_id" class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <option value="">{{ __('Received in (optional)') }}</option>
+                        @foreach ($accounts as $account)
+                            <option value="{{ $account->id }}">{{ $account->name }}</option>
+                        @endforeach
+                    </select>
+                @endif
                 <div class="flex justify-end">
                     <x-primary-button>{{ __('Add Disbursement') }}</x-primary-button>
                 </div>

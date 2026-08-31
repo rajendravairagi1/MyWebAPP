@@ -208,7 +208,7 @@
                                 <span class="text-gray-500 dark:text-gray-400">{{ __('Booked with') }}: <strong class="text-gray-700 dark:text-gray-300">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($firstPayment->amount, 0) }}</strong> <span class="text-gray-400">({{ $firstPayment->paid_at->format('d M Y') }})</span></span>
                             @endif
                         </div>
-                        <x-loan-panel :unit="$unit" />
+                        <x-loan-panel :unit="$unit" :accounts="$paymentAccounts" />
                         @endif
 
                         @if ($unit->invoices->isNotEmpty())
@@ -227,7 +227,7 @@
                             </button>
                         </div>
 
-                        <x-unit-payment-ledger :unit="$unit" :editable="true" />
+                        <x-unit-payment-ledger :unit="$unit" :editable="true" :accounts="$paymentAccounts" />
 
                         @if ($unit->totalOutstanding() > 0)
                             <details class="mt-3 group">
@@ -297,6 +297,17 @@
                                     <x-input-label for="reference-{{ $unit->id }}" :value="__('Reference (optional)')" />
                                     <x-text-input id="reference-{{ $unit->id }}" name="reference" type="text" class="mt-1 block w-full" />
                                 </div>
+                                @if ($paymentAccounts->isNotEmpty())
+                                    <div class="col-span-1 sm:col-span-2">
+                                        <x-input-label for="payment_account_id-{{ $unit->id }}" :value="__('Received In (optional)')" />
+                                        <select id="payment_account_id-{{ $unit->id }}" name="payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                            <option value="">{{ __('— Not specified —') }}</option>
+                                            @foreach ($paymentAccounts as $account)
+                                                <option value="{{ $account->id }}">{{ $account->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="flex justify-end gap-3">

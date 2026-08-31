@@ -24,6 +24,7 @@ use App\Http\Controllers\MaterialEntryController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\MigrateController;
 use App\Http\Controllers\OnboardingController;
+use App\Http\Controllers\PaymentAccountController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
@@ -121,6 +122,11 @@ Route::middleware(['auth', 'verified', 'owner'])->group(function () {
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/download', [ReportController::class, 'download'])->name('reports.download');
+
+    Route::get('/payment-accounts', [PaymentAccountController::class, 'index'])->name('payment-accounts.index');
+    Route::post('/payment-accounts', [PaymentAccountController::class, 'store'])->name('payment-accounts.store');
+    Route::put('/payment-accounts/{account}', [PaymentAccountController::class, 'update'])->name('payment-accounts.update');
+    Route::delete('/payment-accounts/{account}', [PaymentAccountController::class, 'destroy'])->name('payment-accounts.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'owner', 'plan:team'])->group(function () {

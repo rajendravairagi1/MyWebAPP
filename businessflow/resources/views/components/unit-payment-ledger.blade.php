@@ -1,4 +1,4 @@
-@props(['unit', 'editable' => true])
+@props(['unit', 'editable' => true, 'accounts' => null])
 
 @php
     $purposeStyles = [
@@ -29,6 +29,7 @@
                         <div class="mt-1.5 text-xs text-gray-400">
                             {{ $payment->method ? ucfirst(str_replace('_', ' ', $payment->method)) : __('Method not set') }}
                             @if ($payment->reference) · {{ __('Ref') }}: {{ $payment->reference }} @endif
+                            @if ($payment->account) · {{ __('Received in') }}: <span class="text-gray-500 dark:text-gray-300">{{ $payment->account->name }}</span> @endif
                         </div>
                     </div>
                     <div class="text-right shrink-0 pr-1">
@@ -61,6 +62,14 @@
                                             @endforeach
                                         </select>
                                         <input type="text" name="reference" value="{{ $payment->reference }}" placeholder="{{ __('Reference') }}" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                        @if ($accounts && $accounts->isNotEmpty())
+                                            <select name="payment_account_id" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                                <option value="">{{ __('Received in — not specified') }}</option>
+                                                @foreach ($accounts as $account)
+                                                    <option value="{{ $account->id }}" @selected($payment->payment_account_id === $account->id)>{{ $account->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        @endif
                                         <button class="col-span-2 mt-1 px-2 py-1 bg-accent-600 text-white text-[11px] font-semibold rounded hover:bg-accent-700">{{ __('Save') }}</button>
                                     </form>
                                 </details>

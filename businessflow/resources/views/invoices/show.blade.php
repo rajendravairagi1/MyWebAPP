@@ -122,6 +122,7 @@
                                     <span class="text-gray-500 dark:text-gray-400">· {{ $payment->paid_at->format('d M Y') }}</span>
                                     @if ($payment->method)<span class="text-gray-500 dark:text-gray-400">· {{ ucfirst(str_replace('_', ' ', $payment->method)) }}</span>@endif
                                     @if ($payment->reference)<span class="text-gray-400">· {{ $payment->reference }}</span>@endif
+                                    @if ($payment->account)<span class="text-gray-400">· {{ __('Received in') }}: {{ $payment->account->name }}</span>@endif
                                 </div>
                                 <form method="POST" action="{{ route('payments.destroy', [$invoice, $payment]) }}" onsubmit="return confirm('{{ __('Remove this payment?') }}')">
                                     @csrf
@@ -161,6 +162,17 @@
                         <div>
                             <x-primary-button class="w-full justify-center">{{ __('Record Payment') }}</x-primary-button>
                         </div>
+                        @if ($paymentAccounts->isNotEmpty())
+                            <div class="col-span-2 sm:col-span-5">
+                                <x-input-label for="payment_account_id" :value="__('Received In (optional)')" class="text-xs" />
+                                <select id="payment_account_id" name="payment_account_id" class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md">
+                                    <option value="">{{ __('— Not specified —') }}</option>
+                                    @foreach ($paymentAccounts as $account)
+                                        <option value="{{ $account->id }}">{{ $account->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
                     </form>
                 @endif
             </div>

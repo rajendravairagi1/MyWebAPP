@@ -14,6 +14,7 @@ class PaymentController extends Controller
         $data = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.01', 'max:'.max(0.01, $invoice->balanceDue())],
             'method' => ['nullable', 'string', 'max:50'],
+            'payment_account_id' => ['nullable', 'integer'],
             'paid_at' => ['required', 'date'],
             'reference' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],
@@ -25,6 +26,7 @@ class PaymentController extends Controller
             paidAt: $data['paid_at'],
             reference: $data['reference'] ?? null,
             notes: $data['notes'] ?? null,
+            paymentAccountId: $data['payment_account_id'] ?? null,
         );
 
         return back()->with('status', 'Payment recorded.');

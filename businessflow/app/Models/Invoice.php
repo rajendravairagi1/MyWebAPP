@@ -83,7 +83,7 @@ class Invoice extends Model
         return number_format(max(0, $this->total - $this->amount_paid), 2, '.', '');
     }
 
-    public function recordPayment(float $amount, ?string $method, string $paidAt, ?string $reference, ?string $notes): Payment
+    public function recordPayment(float $amount, ?string $method, string $paidAt, ?string $reference, ?string $notes, ?int $paymentAccountId = null): Payment
     {
         $isFirstPayment = ! $this->payments()->exists();
 
@@ -91,6 +91,7 @@ class Invoice extends Model
             'business_id' => $this->business_id,
             'amount' => $amount,
             'method' => $method,
+            'payment_account_id' => $paymentAccountId,
             'paid_at' => $paidAt,
             'reference' => $reference,
             'notes' => $notes,

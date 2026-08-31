@@ -52,6 +52,7 @@ class UnitPaymentController extends Controller
             'purpose_other' => ['nullable', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:1000'],
             'method' => ['nullable', 'string', 'max:50'],
+            'payment_account_id' => ['nullable', 'integer'],
             'paid_at' => ['required', 'date'],
             'reference' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],

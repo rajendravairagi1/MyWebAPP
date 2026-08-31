@@ -46,6 +46,7 @@ class LoanController extends Controller
             'paid_at' => ['required', 'date'],
             'reference' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'payment_account_id' => ['nullable', 'integer'],
         ]);
 
         UnitPaymentRecorder::record($loan->unit, [
@@ -57,6 +58,7 @@ class LoanController extends Controller
             'reference' => $data['reference'] ?? null,
             'notes' => $data['notes'] ?? null,
             'loan_id' => $loan->id,
+            'payment_account_id' => $data['payment_account_id'] ?? null,
         ]);
 
         return back()->with('status', 'Disbursement recorded.');

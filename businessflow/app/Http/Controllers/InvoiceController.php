@@ -88,9 +88,10 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice): View
     {
-        $invoice->load(['customer', 'items.product', 'payments', 'project', 'projectUnit']);
+        $invoice->load(['customer', 'items.product', 'payments.account', 'project', 'projectUnit']);
+        $paymentAccounts = \App\Models\PaymentAccount::orderBy('name')->get();
 
-        return view('invoices.show', compact('invoice'));
+        return view('invoices.show', compact('invoice', 'paymentAccounts'));
     }
 
     public function edit(Invoice $invoice): View

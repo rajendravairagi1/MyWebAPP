@@ -20,6 +20,7 @@ class UnitPayment extends Model
         'purpose',
         'description',
         'method',
+        'payment_account_id',
         'paid_at',
         'reference',
         'notes',
@@ -57,6 +58,11 @@ class UnitPayment extends Model
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);
+    }
+
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(PaymentAccount::class, 'payment_account_id');
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Customer;
 use App\Models\LedgerEntry;
+use App\Models\PaymentAccount;
 use App\Models\Project;
 use App\Models\ProjectCost;
 use App\Models\ProjectUnit;
@@ -60,16 +61,18 @@ class LedgerController extends Controller
             'unit' => $unit,
         ]);
 
-        $entries = LedgerEntry::with(['customer' => fn ($q) => $q->withTrashed(), 'project'])->orderByDesc('entry_date')->orderByDesc('id')->limit(100)->get();
+        $entries = LedgerEntry::with(['customer' => fn ($q) => $q->withTrashed(), 'project', 'account'])->orderByDesc('entry_date')->orderByDesc('id')->limit(100)->get();
 
         $customers = Customer::orderBy('name')->get();
         $allProjects = Project::orderBy('name')->get();
 
         $deals = PropertyDeal::orderByDesc('deal_date')->orderByDesc('id')->get();
 
+        $paymentAccounts = PaymentAccount::orderBy('name')->get();
+
         return view('ledger.index', compact(
             'totalSaleValue', 'totalCollected', 'totalOutstanding', 'totalPurchases', 'netProfit',
-            'manualIncome', 'manualExpense', 'dealsProfit', 'deals', 'projects', 'customerRows', 'entries', 'customers', 'allProjects'
+            'manualIncome', 'manualExpense', 'dealsProfit', 'deals', 'projects', 'customerRows', 'entries', 'customers', 'allProjects', 'paymentAccounts'
         ));
     }
 
@@ -80,6 +83,7 @@ class LedgerController extends Controller
             'category' => ['nullable', 'string', 'max:100'],
             'description' => ['required', 'string', 'max:255'],
             'amount' => ['required', 'numeric', 'min:0.01'],
+            'payment_account_id' => ['nullable', 'integer'],
             'entry_date' => ['required', 'date'],
             'customer_id' => ['nullable', 'exists:customers,id'],
             'project_id' => ['nullable', 'exists:projects,id'],

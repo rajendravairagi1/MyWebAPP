@@ -17,6 +17,7 @@ class LedgerEntry extends Model
         'category',
         'description',
         'amount',
+        'payment_account_id',
         'entry_date',
         'customer_id',
         'project_id',
@@ -36,5 +37,10 @@ class LedgerEntry extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(PaymentAccount::class, 'payment_account_id');
     }
 }

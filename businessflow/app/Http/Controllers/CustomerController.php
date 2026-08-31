@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\Customer;
+use App\Models\PaymentAccount;
 use App\Models\Project;
 use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -59,14 +60,16 @@ class CustomerController extends Controller
             'units.project',
             'units.invoices',
             'units.payments.invoice',
-            'units.loan.disbursements',
+            'units.payments.account',
+            'units.loan.disbursements.account',
             'followups' => fn ($q) => $q->orderByRaw("status = 'done'")->orderBy('due_at'),
             'documents' => fn ($q) => $q->latest(),
         ]);
 
         $projects = Project::with(['units' => fn ($q) => $q->orderBy('unit_number')])->orderBy('name')->get();
+        $paymentAccounts = PaymentAccount::orderBy('name')->get();
 
-        return view('customers.show', compact('customer', 'projects'));
+        return view('customers.show', compact('customer', 'projects', 'paymentAccounts'));
     }
 
     public function statement(Customer $customer)

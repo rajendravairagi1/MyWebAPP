@@ -199,6 +199,7 @@
                                     <th class="px-5 py-2">{{ __('Category') }}</th>
                                     <th class="px-5 py-2">{{ __('Description') }}</th>
                                     <th class="px-5 py-2">{{ __('Linked to') }}</th>
+                                    <th class="px-5 py-2">{{ __('Account') }}</th>
                                     <th class="px-5 py-2 text-right">{{ __('Amount') }}</th>
                                     <th class="px-5 py-2"></th>
                                 </tr>
@@ -217,6 +218,7 @@
                                             @if ($entry->project)<a href="{{ route('projects.show', $entry->project) }}" class="text-accent-600 hover:underline">{{ $entry->project->name }}</a>@endif
                                             @if (!$entry->customer && !$entry->project) — @endif
                                         </td>
+                                        <td class="px-5 py-2 text-gray-500 dark:text-gray-400">{{ $entry->account->name ?? '—' }}</td>
                                         <td class="px-5 py-2 text-right font-medium {{ $entry->type === 'income' ? 'text-green-600' : 'text-red-600' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($entry->amount, 0) }}</td>
                                         <td class="px-5 py-2 text-right">
                                             <form method="POST" action="{{ route('ledger.entries.destroy', $entry) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')">
@@ -238,7 +240,7 @@
     </div>
 
     <x-modal name="add-manual-entry" max-width="lg" :show="$errors->hasAny(['type', 'category', 'description', 'amount', 'entry_date', 'customer_id'])">
-        <form method="POST" action="{{ route('ledger.entries.store') }}" class="p-6 space-y-4">
+        <form method="POST" action="{{ route('ledger.entries.store') }}" x-data="{ type: 'income' }" class="p-6 space-y-4">
             @csrf
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Manual Entry') }}</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('For anything outside a normal sale, e.g. an extra expense or misc. income.') }}</p>
@@ -246,7 +248,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <x-input-label for="entry_type" :value="__('Type')" />
-                    <select id="entry_type" name="type" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    <select id="entry_type" name="type" x-model="type" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                         <option value="income">{{ __('Income') }}</option>
                         <option value="expense">{{ __('Expense') }}</option>
                     </select>
@@ -282,6 +284,18 @@
                     @endforeach
                 </select>
             </div>
+
+            @if ($paymentAccounts->isNotEmpty())
+                <div>
+                    <x-input-label for="entry_payment_account_id" x-text="type === 'expense' ? '{{ __('Paid From (optional)') }}' : '{{ __('Received In (optional)') }}'" />
+                    <select id="entry_payment_account_id" name="payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <option value="">{{ __('— Not specified —') }}</option>
+                        @foreach ($paymentAccounts as $account)
+                            <option value="{{ $account->id }}">{{ $account->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endif
 
             <div class="flex justify-end gap-3 pt-2">
                 <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
