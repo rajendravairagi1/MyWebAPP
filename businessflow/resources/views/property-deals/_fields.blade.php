@@ -49,10 +49,10 @@
     <div>
         <x-input-label :value="__('Status')" />
         <select name="status" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-            <option value="open" @selected($deal->status === 'open')>{{ __('Open') }}</option>
-            <option value="sold" @selected($deal->status === 'sold')>{{ __('Sold') }}</option>
+            <option value="open" @selected($deal->status !== 'cancelled')>{{ __('Open / Sold (auto)') }}</option>
             <option value="cancelled" @selected($deal->status === 'cancelled')>{{ __('Cancelled') }}</option>
         </select>
+        <p class="text-xs text-gray-400 mt-1">{{ __('Becomes "Sold" automatically as soon as a Sale Price is filled in above — remove the sale price to move it back to Open.') }}</p>
     </div>
 @endif
 

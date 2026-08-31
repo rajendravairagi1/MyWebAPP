@@ -28,7 +28,10 @@ class PropertyDealController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        PropertyDeal::create($this->validated($request));
+        $data = $this->validated($request);
+        $data = $this->resolveStatus($data, null);
+
+        PropertyDeal::create($data);
 
         return back()->with('status', 'Deal added.');
     }
@@ -36,16 +39,39 @@ class PropertyDealController extends Controller
     public function update(Request $request, PropertyDeal $deal): RedirectResponse
     {
         $data = $this->validated($request);
-
-        // Selling for the first time (or re-marking sold) without an
-        // explicit date defaults to today, same as elsewhere in the app.
-        if ($data['status'] === 'sold' && ! $deal->sold_date && empty($data['sold_date'])) {
-            $data['sold_date'] = now()->toDateString();
-        }
+        $data = $this->resolveStatus($data, $deal);
 
         $deal->update($data);
 
         return back()->with('status', 'Deal updated.');
+    }
+
+    /**
+     * A deal counts as "sold" the moment it has a sale price — whether
+     * that was typed in on the very first save or added later via edit —
+     * so the summary totals and status badge never disagree with the
+     * profit already showing on the row. Cancelling is still explicit.
+     */
+    protected function resolveStatus(array $data, ?PropertyDeal $deal): array
+    {
+        if ($data['status'] === 'cancelled') {
+            return $data;
+        }
+
+        if (! empty($data['sale_price'])) {
+            $data['status'] = 'sold';
+
+            // Selling for the first time (or re-marking sold) without an
+            // explicit date defaults to today, same as elsewhere in the app.
+            if (empty($data['sold_date']) && ! $deal?->sold_date) {
+                $data['sold_date'] = now()->toDateString();
+            }
+        } else {
+            $data['status'] = 'open';
+            $data['sold_date'] = null;
+        }
+
+        return $data;
     }
 
     public function destroy(PropertyDeal $deal): RedirectResponse
