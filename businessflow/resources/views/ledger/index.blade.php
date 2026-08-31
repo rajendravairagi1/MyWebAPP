@@ -218,7 +218,7 @@
                                             @if ($entry->project)<a href="{{ route('projects.show', $entry->project) }}" class="text-accent-600 hover:underline">{{ $entry->project->name }}</a>@endif
                                             @if (!$entry->customer && !$entry->project) — @endif
                                         </td>
-                                        <td class="px-5 py-2 text-gray-500 dark:text-gray-400">{{ $entry->account->name ?? '—' }}</td>
+                                        <td class="px-5 py-2 text-gray-500 dark:text-gray-400">{{ $entry->account?->label() ?? '—' }}</td>
                                         <td class="px-5 py-2 text-right font-medium {{ $entry->type === 'income' ? 'text-green-600' : 'text-red-600' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($entry->amount, 0) }}</td>
                                         <td class="px-5 py-2 text-right">
                                             <form method="POST" action="{{ route('ledger.entries.destroy', $entry) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')">
@@ -291,7 +291,7 @@
                     <select id="entry_payment_account_id" name="payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                         <option value="">{{ __('— Not specified —') }}</option>
                         @foreach ($paymentAccounts as $account)
-                            <option value="{{ $account->id }}">{{ $account->name }}</option>
+                            <option value="{{ $account->id }}">{{ $account->label() }}</option>
                         @endforeach
                     </select>
                 </div>

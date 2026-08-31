@@ -18,7 +18,7 @@
             @endif
 
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ __('Money doesn\'t always land in one account — wife\'s, father\'s, a partner\'s. List every account it actually moves through here, so every payment can record exactly which one — useful later for ITR.') }}
+                {{ __('Money doesn\'t always land in one account — wife\'s, father\'s, a partner\'s, or more than one account for the same person. List every account it actually moves through here — add the bank and account number so accounts belonging to the same person stay tellable apart — so every payment can record exactly which one — useful later for ITR.') }}
             </p>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
@@ -29,6 +29,8 @@
                         <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
                                 <th class="px-5 py-3 text-left">{{ __('Name') }}</th>
+                                <th class="px-5 py-3 text-left">{{ __('Bank') }}</th>
+                                <th class="px-5 py-3 text-left">{{ __('Account No.') }}</th>
                                 <th class="px-5 py-3 text-left">{{ __('Notes') }}</th>
                                 <th class="px-5 py-3"></th>
                             </tr>
@@ -37,6 +39,8 @@
                             @foreach ($accounts as $account)
                                 <tr>
                                     <td class="px-5 py-3 font-medium text-gray-900 dark:text-gray-100">{{ $account->name }}</td>
+                                    <td class="px-5 py-3 text-gray-500 dark:text-gray-400">{{ $account->bank_name ?? '—' }}</td>
+                                    <td class="px-5 py-3 text-gray-500 dark:text-gray-400">{{ $account->maskedAccountNumber() ?? '—' }}</td>
                                     <td class="px-5 py-3 text-gray-500 dark:text-gray-400">{{ $account->notes ?? '—' }}</td>
                                     <td class="px-5 py-3 text-right whitespace-nowrap">
                                         <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-account-{{ $account->id }}')" class="text-accent-600 hover:underline text-xs">{{ __('Edit') }}</button>
@@ -64,9 +68,20 @@
                 <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Wife — Priya, Self, Father — Ramesh') }}" required autofocus />
                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <x-input-label for="bank_name" :value="__('Bank (optional)')" />
+                    <x-text-input id="bank_name" name="bank_name" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. HDFC') }}" />
+                </div>
+                <div>
+                    <x-input-label for="account_number" :value="__('Account number (optional)')" />
+                    <x-text-input id="account_number" name="account_number" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. 50100123456789') }}" />
+                    <p class="mt-1 text-xs text-gray-400">{{ __('Only the last 4 digits show elsewhere — safe to enter the full number.') }}</p>
+                </div>
+            </div>
             <div>
                 <x-input-label for="notes" :value="__('Notes (optional)')" />
-                <textarea id="notes" name="notes" rows="2" placeholder="{{ __('e.g. bank name, last 4 digits — whatever helps you recognize it') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500"></textarea>
+                <textarea id="notes" name="notes" rows="2" placeholder="{{ __('anything else that helps you recognize it') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500"></textarea>
             </div>
             <div class="flex justify-end gap-3">
                 <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
@@ -84,6 +99,16 @@
                 <div>
                     <x-input-label :value="__('Name')" />
                     <x-text-input name="name" type="text" class="mt-1 block w-full" value="{{ $account->name }}" required />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label :value="__('Bank (optional)')" />
+                        <x-text-input name="bank_name" type="text" class="mt-1 block w-full" value="{{ $account->bank_name }}" />
+                    </div>
+                    <div>
+                        <x-input-label :value="__('Account number (optional)')" />
+                        <x-text-input name="account_number" type="text" class="mt-1 block w-full" value="{{ $account->account_number }}" />
+                    </div>
                 </div>
                 <div>
                     <x-input-label :value="__('Notes (optional)')" />

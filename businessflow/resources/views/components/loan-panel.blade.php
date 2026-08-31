@@ -79,7 +79,7 @@
                                     <div class="text-xs text-gray-400">{{ __('Ref') }}: {{ $disbursement->reference }}</div>
                                 @endif
                                 @if ($disbursement->account)
-                                    <div class="text-xs text-gray-400">{{ __('Received in') }}: {{ $disbursement->account->name }}</div>
+                                    <div class="text-xs text-gray-400">{{ __('Received in') }}: {{ $disbursement->account->label() }}</div>
                                 @endif
                             </div>
                             <div class="font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($disbursement->amount, 0) }}</div>
@@ -106,7 +106,7 @@
                     <select name="payment_account_id" class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                         <option value="">{{ __('Received in (optional)') }}</option>
                         @foreach ($accounts as $account)
-                            <option value="{{ $account->id }}">{{ $account->name }}</option>
+                            <option value="{{ $account->id }}">{{ $account->label() }}</option>
                         @endforeach
                     </select>
                 @endif

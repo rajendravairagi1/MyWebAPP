@@ -56,6 +56,8 @@ class PaymentAccountController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'bank_name' => ['nullable', 'string', 'max:255'],
+            'account_number' => ['nullable', 'string', 'max:50'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
     }

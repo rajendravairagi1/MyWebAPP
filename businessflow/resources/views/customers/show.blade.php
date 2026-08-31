@@ -303,7 +303,7 @@
                                         <select id="payment_account_id-{{ $unit->id }}" name="payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                             <option value="">{{ __('— Not specified —') }}</option>
                                             @foreach ($paymentAccounts as $account)
-                                                <option value="{{ $account->id }}">{{ $account->name }}</option>
+                                                <option value="{{ $account->id }}">{{ $account->label() }}</option>
                                             @endforeach
                                         </select>
                                     </div>

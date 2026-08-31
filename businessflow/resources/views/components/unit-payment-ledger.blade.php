@@ -29,7 +29,7 @@
                         <div class="mt-1.5 text-xs text-gray-400">
                             {{ $payment->method ? ucfirst(str_replace('_', ' ', $payment->method)) : __('Method not set') }}
                             @if ($payment->reference) · {{ __('Ref') }}: {{ $payment->reference }} @endif
-                            @if ($payment->account) · {{ __('Received in') }}: <span class="text-gray-500 dark:text-gray-300">{{ $payment->account->name }}</span> @endif
+                            @if ($payment->account) · {{ __('Received in') }}: <span class="text-gray-500 dark:text-gray-300">{{ $payment->account->label() }}</span> @endif
                         </div>
                     </div>
                     <div class="text-right shrink-0 pr-1">
@@ -66,7 +66,7 @@
                                             <select name="payment_account_id" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
                                                 <option value="">{{ __('Received in — not specified') }}</option>
                                                 @foreach ($accounts as $account)
-                                                    <option value="{{ $account->id }}" @selected($payment->payment_account_id === $account->id)>{{ $account->name }}</option>
+                                                    <option value="{{ $account->id }}" @selected($payment->payment_account_id === $account->id)>{{ $account->label() }}</option>
                                                 @endforeach
                                             </select>
                                         @endif
