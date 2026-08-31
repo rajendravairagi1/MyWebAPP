@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\PaymentAccount;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,6 +46,7 @@ class ProjectController extends Controller
     {
         $project->load([
             'costs' => fn ($q) => $q->latest('spent_on'),
+            'costs.account',
             // A unit that's fully paid off or written off is done — it
             // no longer needs managing here, and it's already visible via
             // the customer's History or the Completed Projects page.
@@ -58,7 +60,9 @@ class ProjectController extends Controller
 
         $customers = Customer::orderBy('name')->get();
 
-        return view('projects.show', compact('project', 'costsByCategory', 'customers'));
+        $paymentAccounts = PaymentAccount::orderBy('name')->get();
+
+        return view('projects.show', compact('project', 'costsByCategory', 'customers', 'paymentAccounts'));
     }
 
     public function edit(Project $project): View

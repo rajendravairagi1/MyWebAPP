@@ -20,6 +20,7 @@ class ProjectCostController extends Controller
             'amount' => ['required', 'numeric', 'min:0.01'],
             'spent_on' => ['required', 'date'],
             'vendor' => ['nullable', 'string', 'max:255'],
+            'payment_account_id' => ['nullable', 'integer'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'bill' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,pdf,webp'],
         ]);
@@ -52,6 +53,7 @@ class ProjectCostController extends Controller
             'amount' => ['required', 'numeric', 'min:0.01'],
             'spent_on' => ['required', 'date'],
             'vendor' => ['nullable', 'string', 'max:255'],
+            'payment_account_id' => ['nullable', 'integer'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'bill' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,pdf,webp'],
         ]);

@@ -275,7 +275,7 @@
             @if ($canFinancials)
             <div x-data="{
                     fixedCategories: ['land', 'construction', 'material', 'labor', 'approval', 'marketing'],
-                    editingCost: { id: null, categorySelect: 'land', categoryOther: '', description: '', amount: '', spent_on: '', vendor: '', notes: '', bill_name: null },
+                    editingCost: { id: null, categorySelect: 'land', categoryOther: '', description: '', amount: '', spent_on: '', vendor: '', payment_account_id: '', notes: '', bill_name: null },
                     openEdit(cost) {
                         const isFixed = this.fixedCategories.includes(cost.category);
                         this.editingCost = {
@@ -302,6 +302,7 @@
                                 <th class="px-5 py-2 text-left">{{ __('Category') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Description') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Vendor') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Paid From') }}</th>
                                 <th class="px-5 py-2 text-right">{{ __('Amount') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Bill') }}</th>
                                 <th class="px-5 py-2"></th>
@@ -314,6 +315,7 @@
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400 capitalize">{{ $entry->category }}</td>
                                     <td class="px-5 py-2 text-gray-900 dark:text-gray-100">{{ $entry->description }}</td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $entry->vendor }}</td>
+                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $entry->account?->label() ?? '—' }}</td>
                                     <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">{{ number_format($entry->amount, 2) }}</td>
                                     <td class="px-5 py-2">
                                         @if ($entry->bill_path)
@@ -330,6 +332,7 @@
                                             'amount' => (float) $entry->amount,
                                             'spent_on' => $entry->spent_on->format('Y-m-d'),
                                             'vendor' => $entry->vendor,
+                                            'payment_account_id' => $entry->payment_account_id,
                                             'notes' => $entry->notes,
                                             'bill_name' => $entry->bill_name,
                                         ]))" class="text-xs text-accent-600 hover:underline mr-3">{{ __('Edit') }}</button>
@@ -392,6 +395,19 @@
                         <x-text-input id="vendor" name="vendor" type="text" placeholder="{{ __('e.g. Ram Lal Cement Store, Contractor name') }}" class="mt-1 block w-full" />
                         <p class="mt-1 text-xs text-gray-400">{{ __('Who you gave this money to. Leave blank if not needed.') }}</p>
                     </div>
+
+                    @if ($paymentAccounts->isNotEmpty())
+                        <div>
+                            <x-input-label for="payment_account_id" :value="__('Paid From (optional)')" />
+                            <select id="payment_account_id" name="payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <option value="">{{ __('— Not specified —') }}</option>
+                                @foreach ($paymentAccounts as $account)
+                                    <option value="{{ $account->id }}">{{ $account->label() }}</option>
+                                @endforeach
+                            </select>
+                            <p class="mt-1 text-xs text-gray-400">{{ __('Which account or person\'s cash this was paid from.') }}</p>
+                        </div>
+                    @endif
 
                     <div>
                         <x-input-label for="notes" :value="__('Notes (optional)')" />
@@ -458,6 +474,18 @@
                         <x-input-label for="edit_vendor" :value="__('Paid to / Vendor (optional)')" />
                         <input id="edit_vendor" name="vendor" type="text" x-model="editingCost.vendor" placeholder="{{ __('e.g. Ram Lal Cement Store, Contractor name') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     </div>
+
+                    @if ($paymentAccounts->isNotEmpty())
+                        <div>
+                            <x-input-label for="edit_payment_account_id" :value="__('Paid From (optional)')" />
+                            <select id="edit_payment_account_id" name="payment_account_id" x-model="editingCost.payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <option value="">{{ __('— Not specified —') }}</option>
+                                @foreach ($paymentAccounts as $account)
+                                    <option value="{{ $account->id }}">{{ $account->label() }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
 
                     <div>
                         <x-input-label for="edit_notes" :value="__('Notes (optional)')" />

@@ -19,6 +19,7 @@ class ProjectCost extends Model
         'amount',
         'spent_on',
         'vendor',
+        'payment_account_id',
         'notes',
         'bill_path',
         'bill_name',
@@ -32,5 +33,10 @@ class ProjectCost extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(PaymentAccount::class, 'payment_account_id');
     }
 }

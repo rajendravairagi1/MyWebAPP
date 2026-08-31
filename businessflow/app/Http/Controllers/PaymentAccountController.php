@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LedgerEntry;
 use App\Models\Payment;
 use App\Models\PaymentAccount;
+use App\Models\ProjectCost;
 use App\Models\UnitPayment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,10 +22,11 @@ class PaymentAccountController extends Controller
 
     /**
      * Every transaction recorded against this account/person, from all
-     * three places money can be tagged with one — unit payments, generic
-     * invoice payments, and manual ledger entries — combined into one
-     * dated statement with a running in/out/balance total. This is the
-     * only place those three sources get merged like this.
+     * four places money can be tagged with one — unit payments, generic
+     * invoice payments, project costs (expenses), and manual ledger
+     * entries — combined into one dated statement with a running
+     * in/out/balance total. This is the only place those four sources
+     * get merged like this.
      */
     public function show(PaymentAccount $account): View
     {
@@ -57,6 +59,21 @@ class PaymentAccountController extends Controller
                     'context' => $payment->invoice?->number,
                     'party' => $payment->invoice?->customer?->name,
                     'link' => $payment->invoice_id ? route('invoices.show', $payment->invoice_id) : null,
+                ]);
+            });
+
+        ProjectCost::with('project')
+            ->where('payment_account_id', $account->id)
+            ->get()
+            ->each(function (ProjectCost $cost) use ($rows) {
+                $rows->push((object) [
+                    'date' => $cost->spent_on,
+                    'direction' => 'out',
+                    'amount' => (float) $cost->amount,
+                    'description' => $cost->description,
+                    'context' => $cost->project?->name,
+                    'party' => $cost->vendor,
+                    'link' => $cost->project_id ? route('projects.show', $cost->project_id) : null,
                 ]);
             });
 
@@ -113,6 +130,7 @@ class PaymentAccountController extends Controller
     {
         $inUse = UnitPayment::where('payment_account_id', $account->id)->exists()
             || Payment::where('payment_account_id', $account->id)->exists()
+            || ProjectCost::where('payment_account_id', $account->id)->exists()
             || LedgerEntry::where('payment_account_id', $account->id)->exists();
 
         abort_if($inUse, 422, 'This account has payments recorded against it — rename it instead of deleting, so those records keep their trail.');
