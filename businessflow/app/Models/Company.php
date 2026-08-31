@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Company extends Model
 {
-    protected $fillable = ['owner_user_id', 'name', 'subscription_expires_at'];
+    protected $fillable = ['owner_user_id', 'name', 'subscription_expires_at', 'renewal_alert_dismissed_at'];
 
     protected $casts = [
         'subscription_expires_at' => 'date',
+        'renewal_alert_dismissed_at' => 'datetime',
     ];
 
     public function owner(): BelongsTo

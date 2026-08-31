@@ -15,6 +15,7 @@ class Business extends Model
         'branch_id',
         'plan',
         'subscription_expires_at',
+        'renewal_alert_dismissed_at',
         'is_demo',
         'name',
         'address',
@@ -36,6 +37,7 @@ class Business extends Model
         'enabled_modules' => 'array',
         'is_demo' => 'boolean',
         'subscription_expires_at' => 'date',
+        'renewal_alert_dismissed_at' => 'datetime',
     ];
 
     /**

@@ -251,16 +251,25 @@
                         </x-slot>
                         <x-slot name="content">
                             @if ($adminRenewalCount > 0)
-                                <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
-                                    {{ __('Accounts needing renewal') }}
+                                <div class="flex items-center justify-between px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ __('Accounts needing renewal') }}</span>
+                                    <a href="{{ route('admin.expiring') }}" class="text-xs text-accent-600 hover:underline">{{ __('View all') }}</a>
                                 </div>
                                 @foreach ($adminRenewalAlerts as $alert)
-                                    <a href="{{ route('admin.index') }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 border-b border-amber-100 dark:border-amber-900/30">
-                                        <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ $alert['name'] }}</div>
-                                        <div class="text-xs {{ $alert['expired'] ? 'text-red-600' : 'text-amber-600' }}">
-                                            {{ $alert['expired'] ? __('Expired') : __('Expires') }} {{ $alert['expires_at']->format('d M Y') }}
-                                        </div>
-                                    </a>
+                                    <div class="flex items-center justify-between gap-2 px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 border-b border-amber-100 dark:border-amber-900/30">
+                                        <a href="{{ route('admin.expiring') }}" class="min-w-0 flex-1">
+                                            <div class="text-sm text-gray-800 dark:text-gray-100 font-medium truncate">{{ $alert['name'] }}</div>
+                                            <div class="text-xs {{ $alert['expired'] ? 'text-red-600' : 'text-amber-600' }}">
+                                                {{ $alert['expired'] ? __('Expired') : __('Expires') }} {{ $alert['expires_at']->format('d M Y') }}
+                                            </div>
+                                        </a>
+                                        <form method="POST" action="{{ route($alert['type'] === 'company' ? 'admin.companies.dismiss-renewal' : 'admin.businesses.dismiss-renewal', $alert['id']) }}" onclick="event.stopPropagation();">
+                                            @csrf
+                                            <button type="submit" class="shrink-0 text-xs px-2 py-1 rounded border border-gray-300 dark:border-slate-600 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-600" title="{{ __('Mark done — hide until next renewal') }}">
+                                                {{ __('Done') }}
+                                            </button>
+                                        </form>
+                                    </div>
                                 @endforeach
                             @endif
 

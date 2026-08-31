@@ -121,7 +121,12 @@ class AdminController extends Controller
             'subscription_expires_at' => ['nullable', 'date'],
         ]);
 
-        $business->update(['subscription_expires_at' => $data['subscription_expires_at'] ?? null]);
+        $business->update([
+            'subscription_expires_at' => $data['subscription_expires_at'] ?? null,
+            // A new date means a new renewal cycle — never let a stale
+            // dismissal hide the next one.
+            'renewal_alert_dismissed_at' => null,
+        ]);
 
         return back()->with('status', $data['subscription_expires_at']
             ? "\"{$business->name}\" is now valid through {$data['subscription_expires_at']}."
@@ -134,11 +139,43 @@ class AdminController extends Controller
             'subscription_expires_at' => ['nullable', 'date'],
         ]);
 
-        $company->update(['subscription_expires_at' => $data['subscription_expires_at'] ?? null]);
+        $company->update([
+            'subscription_expires_at' => $data['subscription_expires_at'] ?? null,
+            'renewal_alert_dismissed_at' => null,
+        ]);
 
         return back()->with('status', $data['subscription_expires_at']
             ? "\"{$company->name}\" is now valid through {$data['subscription_expires_at']}."
             : "\"{$company->name}\" has no expiry set (won't be locked out).");
+    }
+
+    /**
+     * "Done" on a renewal nudge — hides it from the bell/Expiring Soon
+     * page until subscription_expires_at is changed again (see above).
+     */
+    public function dismissBusinessRenewal(\App\Models\Business $business): RedirectResponse
+    {
+        $business->update(['renewal_alert_dismissed_at' => now()]);
+
+        return back()->with('status', "Renewal reminder for \"{$business->name}\" dismissed for this cycle.");
+    }
+
+    public function dismissCompanyRenewal(Company $company): RedirectResponse
+    {
+        $company->update(['renewal_alert_dismissed_at' => now()]);
+
+        return back()->with('status', "Renewal reminder for \"{$company->name}\" dismissed for this cycle.");
+    }
+
+    /**
+     * Dedicated page (separate from the bell) listing every builder/solo/
+     * company account whose expiry is within 7 days or already past.
+     */
+    public function expiringSoon(): View
+    {
+        return view('admin.expiring', [
+            'alerts' => \App\Support\RenewalAlerts::all(),
+        ]);
     }
 
     /**

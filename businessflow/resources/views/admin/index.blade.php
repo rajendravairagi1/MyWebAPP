@@ -2,9 +2,14 @@
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Platform Admin') }}</h2>
-            <a href="{{ route('admin.create') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
-                {{ __('+ Add Customer Account') }}
-            </a>
+            <div class="flex items-center gap-3">
+                <a href="{{ route('admin.expiring') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20">
+                    {{ __('Expiring Soon') }}
+                </a>
+                <a href="{{ route('admin.create') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
+                    {{ __('+ Add Customer Account') }}
+                </a>
+            </div>
         </div>
     </x-slot>
 

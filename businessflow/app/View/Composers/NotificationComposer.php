@@ -4,10 +4,10 @@ namespace App\View\Composers;
 
 use App\Models\Branch;
 use App\Models\Business;
-use App\Models\Company;
 use App\Models\Followup;
 use App\Models\Meeting;
 use App\Models\ProjectUnit;
+use App\Support\RenewalAlerts;
 use App\Support\Tenant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -54,7 +54,7 @@ class NotificationComposer
         // has no billing of its own, so the Company row is what to chase)
         // due within 7 days OR already expired, so admin sees this the
         // moment they log in rather than only after opening /admin.
-        $view->with($isPlatformAdmin ? $this->adminRenewalAlerts() : [
+        $view->with($isPlatformAdmin ? $this->adminRenewalAlertsForBell() : [
             'adminRenewalAlerts' => collect(),
             'adminRenewalCount' => 0,
         ]);
@@ -109,33 +109,9 @@ class NotificationComposer
     /**
      * @return array{adminRenewalAlerts: \Illuminate\Support\Collection, adminRenewalCount: int}
      */
-    private function adminRenewalAlerts(): array
+    private function adminRenewalAlertsForBell(): array
     {
-        $cutoff = now()->addDays(7)->endOfDay();
-
-        $businesses = Business::whereNull('branch_id')
-            ->where('is_demo', false)
-            ->whereNotNull('subscription_expires_at')
-            ->where('subscription_expires_at', '<=', $cutoff)
-            ->orderBy('subscription_expires_at')
-            ->get()
-            ->map(fn (Business $b) => [
-                'name' => $b->name,
-                'expires_at' => $b->subscription_expires_at,
-                'expired' => $b->isSubscriptionExpired(),
-            ]);
-
-        $companies = Company::whereNotNull('subscription_expires_at')
-            ->where('subscription_expires_at', '<=', $cutoff)
-            ->orderBy('subscription_expires_at')
-            ->get()
-            ->map(fn (Company $c) => [
-                'name' => $c->name.' ('.__('Company').')',
-                'expires_at' => $c->subscription_expires_at,
-                'expired' => $c->subscription_expires_at->copy()->endOfDay()->isPast(),
-            ]);
-
-        $alerts = $businesses->concat($companies)->sortBy('expires_at')->take(10)->values();
+        $alerts = RenewalAlerts::all()->take(10)->values();
 
         return [
             'adminRenewalAlerts' => $alerts,
