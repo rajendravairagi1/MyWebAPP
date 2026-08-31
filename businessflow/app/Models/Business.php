@@ -14,6 +14,7 @@ class Business extends Model
     protected $fillable = [
         'branch_id',
         'plan',
+        'subscription_expires_at',
         'is_demo',
         'name',
         'address',
@@ -34,6 +35,7 @@ class Business extends Model
         'tax_config' => 'array',
         'enabled_modules' => 'array',
         'is_demo' => 'boolean',
+        'subscription_expires_at' => 'date',
     ];
 
     /**
@@ -45,6 +47,30 @@ class Business extends Model
     public function effectivePlan(): string
     {
         return $this->branch_id ? 'company' : $this->plan;
+    }
+
+    /**
+     * The expiry date that actually gates access — a business inside a
+     * branch has no billing of its own, so it inherits its Company's
+     * expiry instead of its own (unset) column.
+     */
+    public function effectiveExpiresAt(): ?\Illuminate\Support\Carbon
+    {
+        if ($this->branch_id) {
+            return $this->branch?->company?->subscription_expires_at;
+        }
+
+        return $this->subscription_expires_at;
+    }
+
+    public function isSubscriptionExpired(): bool
+    {
+        $expires = $this->effectiveExpiresAt();
+
+        // The expiry date is the last day access is valid through, not the
+        // first day it's cut off — so "expires 31 Aug" still works all day
+        // on the 31st and only locks out starting the 1st.
+        return $expires !== null && $expires->copy()->endOfDay()->isPast();
     }
 
     public function users(): BelongsToMany

@@ -59,6 +59,7 @@
                                 <th class="px-5 py-2 text-left">{{ __('Business') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Owner') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Plan') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Valid till') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
@@ -83,6 +84,21 @@
                                             </select>
                                         </form>
                                     </td>
+                                    <td class="px-5 py-2">
+                                        @if ($business->subscription_expires_at)
+                                            <span class="text-xs px-1.5 py-0.5 rounded {{ $business->isSubscriptionExpired() ? 'bg-red-100 text-red-700' : ($business->subscription_expires_at->diffInDays(now(), false) >= -7 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') }}">
+                                                {{ $business->isSubscriptionExpired() ? __('Expired') : __('Till') }} {{ $business->subscription_expires_at->format('d M Y') }}
+                                            </span>
+                                        @else
+                                            <span class="text-xs text-gray-400">{{ __('No expiry') }}</span>
+                                        @endif
+                                        <form method="POST" action="{{ route('admin.businesses.expiry', $business) }}" class="inline-flex items-center gap-1 mt-1">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="date" name="subscription_expires_at" value="{{ $business->subscription_expires_at?->format('Y-m-d') }}" class="text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
+                                            <button class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                        </form>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -102,6 +118,7 @@
                                 <th class="px-5 py-2 text-left">{{ __('Company') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Owner') }}</th>
                                 <th class="px-5 py-2 text-right">{{ __('Branches') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Valid till') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
@@ -110,6 +127,22 @@
                                     <td class="px-5 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $company->name }}</td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $company->owner->name }} <span class="text-gray-400">({{ $company->owner->email }})</span></td>
                                     <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ $company->branches_count }}</td>
+                                    <td class="px-5 py-2">
+                                        @if ($company->subscription_expires_at)
+                                            @php $expired = $company->subscription_expires_at->copy()->endOfDay()->isPast(); @endphp
+                                            <span class="text-xs px-1.5 py-0.5 rounded {{ $expired ? 'bg-red-100 text-red-700' : ($company->subscription_expires_at->diffInDays(now(), false) >= -7 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') }}">
+                                                {{ $expired ? __('Expired') : __('Till') }} {{ $company->subscription_expires_at->format('d M Y') }}
+                                            </span>
+                                        @else
+                                            <span class="text-xs text-gray-400">{{ __('No expiry') }}</span>
+                                        @endif
+                                        <form method="POST" action="{{ route('admin.companies.expiry', $company) }}" class="inline-flex items-center gap-1 mt-1">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="date" name="subscription_expires_at" value="{{ $company->subscription_expires_at?->format('Y-m-d') }}" class="text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
+                                            <button class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                        </form>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

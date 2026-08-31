@@ -33,6 +33,7 @@ use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResetDataController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\UnitMediaController;
 use App\Http\Controllers\UnitPaymentController;
@@ -50,6 +51,8 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::get('/create', [AdminController::class, 'create'])->name('create');
     Route::post('/', [AdminController::class, 'store'])->name('store');
     Route::put('/businesses/{business}/plan', [AdminController::class, 'updatePlan'])->name('businesses.plan');
+    Route::put('/businesses/{business}/expiry', [AdminController::class, 'updateExpiry'])->name('businesses.expiry');
+    Route::put('/companies/{company}/expiry', [AdminController::class, 'updateCompanyExpiry'])->name('companies.expiry');
     Route::post('/demo/reset', [AdminController::class, 'resetDemo'])->name('demo.reset');
 });
 
@@ -71,6 +74,8 @@ Route::get('/verify/investor/{investor}', [VerifyController::class, 'investor'])
 Route::middleware('auth')->group(function () {
     Route::get('/onboarding/business', [OnboardingController::class, 'create'])->name('onboarding.create');
     Route::post('/onboarding/business', [OnboardingController::class, 'store'])->name('onboarding.store');
+
+    Route::get('/subscription-expired', [SubscriptionController::class, 'expired'])->name('subscription.expired');
 });
 
 // Company → Branch → Builder hierarchy, for owners running multiple

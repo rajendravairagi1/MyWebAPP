@@ -22,6 +22,7 @@ $builder = Application::configure(basePath: dirname(__DIR__))
         $middleware->removeFromGroup('web', \Illuminate\Routing\Middleware\SubstituteBindings::class);
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\IdentifyTenant::class,
+            \App\Http\Middleware\EnsureSubscriptionActive::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\NoCacheForAuthenticatedPages::class,
         ]);

@@ -99,6 +99,13 @@
                         <p x-show="plan === 'company'" x-cloak class="mt-2 text-xs text-gray-400">{{ __('They\'ll log in straight to their Company Dashboard and can add branches and builders themselves.') }}</p>
                     </div>
 
+                    <div class="border-t border-gray-100 dark:border-slate-700 pt-4">
+                        <x-input-label for="subscription_expires_at" :value="__('Valid till (optional)')" />
+                        <x-text-input id="subscription_expires_at" name="subscription_expires_at" type="date" class="mt-1 block w-full sm:w-56" />
+                        <p class="text-xs text-gray-400 mt-1">{{ __('Leave blank for no expiry. Access pauses automatically the day after this date — you can change it anytime from the account list.') }}</p>
+                        <x-input-error :messages="$errors->get('subscription_expires_at')" class="mt-2" />
+                    </div>
+
                     <div class="flex justify-end gap-3 pt-2">
                         <a href="{{ route('admin.index') }}" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</a>
                         <x-primary-button>{{ __('Create Account') }}</x-primary-button>

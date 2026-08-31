@@ -54,6 +54,7 @@ class AdminController extends Controller
             'currency' => ['required_unless:plan,company', 'nullable', 'string', 'size:3'],
             'timezone' => ['required_unless:plan,company', 'nullable', 'string', 'timezone'],
             'is_demo' => ['nullable', 'boolean'],
+            'subscription_expires_at' => ['nullable', 'date'],
         ]);
 
         if (User::where('email', $data['owner_email'])->exists()) {
@@ -70,6 +71,7 @@ class AdminController extends Controller
             Company::create([
                 'owner_user_id' => $user->id,
                 'name' => $data['account_name'],
+                'subscription_expires_at' => $data['subscription_expires_at'] ?? null,
             ]);
 
             return redirect()->route('admin.index')->with('status', "Company account \"{$data['account_name']}\" created for {$user->email}.");
@@ -83,6 +85,7 @@ class AdminController extends Controller
             'timezone' => $data['timezone'],
             'invoice_prefix' => 'INV',
             'plan' => $data['plan'],
+            'subscription_expires_at' => $data['subscription_expires_at'] ?? null,
             'is_demo' => $request->boolean('is_demo'),
         ], [
             'role' => 'owner',
@@ -103,6 +106,39 @@ class AdminController extends Controller
         $business->update(['plan' => $data['plan']]);
 
         return back()->with('status', "\"{$business->name}\" is now on the {$data['plan']} plan.");
+    }
+
+    /**
+     * Payment is collected manually outside the app, so this is how you
+     * record when a business paid through to — access is cut off the day
+     * after (see App\Http\Middleware\EnsureSubscriptionActive).
+     */
+    public function updateExpiry(Request $request, \App\Models\Business $business): RedirectResponse
+    {
+        abort_if($business->branch_id, 422, "This builder's billing is set on its Company, not per-builder.");
+
+        $data = $request->validate([
+            'subscription_expires_at' => ['nullable', 'date'],
+        ]);
+
+        $business->update(['subscription_expires_at' => $data['subscription_expires_at'] ?? null]);
+
+        return back()->with('status', $data['subscription_expires_at']
+            ? "\"{$business->name}\" is now valid through {$data['subscription_expires_at']}."
+            : "\"{$business->name}\" has no expiry set (won't be locked out).");
+    }
+
+    public function updateCompanyExpiry(Request $request, Company $company): RedirectResponse
+    {
+        $data = $request->validate([
+            'subscription_expires_at' => ['nullable', 'date'],
+        ]);
+
+        $company->update(['subscription_expires_at' => $data['subscription_expires_at'] ?? null]);
+
+        return back()->with('status', $data['subscription_expires_at']
+            ? "\"{$company->name}\" is now valid through {$data['subscription_expires_at']}."
+            : "\"{$company->name}\" has no expiry set (won't be locked out).");
     }
 
     /**
