@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Broker;
+use App\Models\BrokerTransaction;
+use App\Models\ProjectUnit;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class BrokerController extends Controller
+{
+    public function index(): View
+    {
+        $brokers = Broker::withCount('transactions')->orderBy('name')->get();
+
+        return view('brokers.index', compact('brokers'));
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $broker = Broker::create($this->validated($request));
+
+        return redirect()->route('brokers.show', $broker)->with('status', 'Broker added.');
+    }
+
+    public function show(Broker $broker): View
+    {
+        $broker->load('transactions.unit.project');
+        $units = ProjectUnit::with('project')
+            ->where('status', '!=', 'available')
+            ->whereNull('archived_at')
+            ->get()
+            ->sortBy([['project.name', 'asc'], ['unit_number', 'asc']]);
+
+        return view('brokers.show', compact('broker', 'units'));
+    }
+
+    public function update(Request $request, Broker $broker): RedirectResponse
+    {
+        $broker->update($this->validated($request));
+
+        return back()->with('status', 'Broker updated.');
+    }
+
+    public function destroy(Broker $broker): RedirectResponse
+    {
+        $broker->delete();
+
+        return redirect()->route('brokers.index')->with('status', 'Broker deleted.');
+    }
+
+    protected function validated(Request $request): array
+    {
+        return $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+    }
+
+    public function storeTransaction(Request $request, Broker $broker): RedirectResponse
+    {
+        $data = $this->validatedTransaction($request);
+
+        $broker->transactions()->create($data + ['recorded_by' => auth()->id()]);
+
+        return back()->with('status', (new BrokerTransaction($data))->typeLabel().' recorded.');
+    }
+
+    public function updateTransaction(Request $request, Broker $broker, BrokerTransaction $transaction): RedirectResponse
+    {
+        abort_unless($transaction->broker_id === $broker->id, 404);
+
+        $transaction->update($this->validatedTransaction($request));
+
+        return back()->with('status', 'Transaction updated.');
+    }
+
+    public function destroyTransaction(Broker $broker, BrokerTransaction $transaction): RedirectResponse
+    {
+        abort_unless($transaction->broker_id === $broker->id, 404);
+
+        $transaction->delete();
+
+        return back()->with('status', 'Transaction removed.');
+    }
+
+    /**
+     * A commission can be typed in directly (fixed amount) or calculated
+     * as a % of the linked property's price — either way the resolved
+     * figure lands in `amount`, which stays the single source of truth
+     * for every total this model computes.
+     */
+    protected function validatedTransaction(Request $request): array
+    {
+        $data = $request->validate([
+            'type' => ['required', 'in:commission_accrued,payment_paid'],
+            'commission_mode' => ['nullable', 'in:percent,fixed'],
+            'project_unit_id' => ['nullable', 'integer'],
+            'commission_percent' => ['nullable', 'numeric', 'min:0.01', 'max:100'],
+            'amount' => ['nullable', 'numeric', 'min:0.01'],
+            'transaction_date' => ['required', 'date'],
+            'method' => ['nullable', 'string', 'max:50'],
+            'reference' => ['nullable', 'string', 'max:100'],
+            'description' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $unit = null;
+        if (! empty($data['project_unit_id'])) {
+            $unit = ProjectUnit::findOrFail($data['project_unit_id']);
+        }
+
+        if ($data['type'] === 'commission_accrued' && ($data['commission_mode'] ?? null) === 'percent') {
+            abort_unless($unit, 422, 'Select a property to calculate a percentage commission.');
+            abort_unless($data['commission_percent'] ?? null, 422, 'Enter a commission percentage.');
+            $data['amount'] = round((float) $unit->price * (float) $data['commission_percent'] / 100, 2);
+        } else {
+            abort_unless($data['amount'] ?? null, 422, 'Enter a commission amount.');
+            $data['commission_percent'] = null;
+        }
+
+        unset($data['commission_mode']);
+
+        return $data;
+    }
+}

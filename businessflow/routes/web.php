@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AvailablePropertiesController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\BrokerController;
 use App\Http\Controllers\BuilderController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\BusinessSwitchController;
@@ -150,6 +151,17 @@ Route::middleware(['auth', 'verified', 'module:investors'])->group(function () {
     Route::post('/investors/{investor}/transactions', [InvestorController::class, 'storeTransaction'])->name('investor-transactions.store');
     Route::put('/investors/{investor}/transactions/{transaction}', [InvestorController::class, 'updateTransaction'])->name('investor-transactions.update');
     Route::delete('/investors/{investor}/transactions/{transaction}', [InvestorController::class, 'destroyTransaction'])->name('investor-transactions.destroy');
+});
+
+Route::middleware(['auth', 'verified', 'module:brokers'])->group(function () {
+    Route::get('/brokers', [BrokerController::class, 'index'])->name('brokers.index');
+    Route::post('/brokers', [BrokerController::class, 'store'])->name('brokers.store');
+    Route::get('/brokers/{broker}', [BrokerController::class, 'show'])->name('brokers.show');
+    Route::put('/brokers/{broker}', [BrokerController::class, 'update'])->name('brokers.update');
+    Route::delete('/brokers/{broker}', [BrokerController::class, 'destroy'])->name('brokers.destroy');
+    Route::post('/brokers/{broker}/transactions', [BrokerController::class, 'storeTransaction'])->name('broker-transactions.store');
+    Route::put('/brokers/{broker}/transactions/{transaction}', [BrokerController::class, 'updateTransaction'])->name('broker-transactions.update');
+    Route::delete('/brokers/{broker}/transactions/{transaction}', [BrokerController::class, 'destroyTransaction'])->name('broker-transactions.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'module:available_properties'])->group(function () {

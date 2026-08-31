@@ -21,6 +21,7 @@ class Modules
         'available_properties' => 'Available Properties',
         'ledger' => 'Ledger',
         'investors' => 'Investors',
+        'brokers' => 'Brokers',
         'completed_projects' => 'Completed Projects',
     ];
 
