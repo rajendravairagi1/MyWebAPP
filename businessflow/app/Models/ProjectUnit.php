@@ -58,6 +58,11 @@ class ProjectUnit extends Model
         return $this->hasMany(UnitPayment::class)->latest('paid_at')->latest('id');
     }
 
+    public function loan(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Loan::class);
+    }
+
     public function materialEntries(): HasMany
     {
         return $this->hasMany(MaterialEntry::class)->latest('entered_on')->latest('id');

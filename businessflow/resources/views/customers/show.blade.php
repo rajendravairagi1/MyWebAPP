@@ -205,6 +205,7 @@
                             <span class="text-gray-500 dark:text-gray-400">{{ __('Collected') }}: <strong class="text-green-600">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->totalCollected(), 0) }}</strong></span>
                             <span class="text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}: <strong class="{{ $unit->totalOutstanding() > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->totalOutstanding(), 0) }}</strong></span>
                         </div>
+                        <x-loan-panel :unit="$unit" />
                         @endif
 
                         @if ($unit->invoices->isNotEmpty())

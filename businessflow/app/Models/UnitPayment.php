@@ -15,6 +15,7 @@ class UnitPayment extends Model
         'business_id',
         'project_unit_id',
         'customer_id',
+        'loan_id',
         'amount',
         'purpose',
         'description',
@@ -51,6 +52,11 @@ class UnitPayment extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function loan(): BelongsTo
+    {
+        return $this->belongsTo(Loan::class);
     }
 
     /**
