@@ -68,6 +68,31 @@
                 </div>
             @endif
 
+            {{-- Resale/trading deals — separate line of business from the
+                 builder's own projects above, so it gets its own P&L. --}}
+            @if (\App\Support\Tenant::can('property_deals') && ($dealsOpenCount > 0 || $dealsSoldCount > 0))
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ __('Property Deals') }}</div>
+                        <a href="{{ route('property-deals.index') }}" class="text-xs text-accent-600 hover:underline">{{ __('View deals →') }}</a>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Open') }}</div>
+                            <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $dealsOpenCount }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Sold') }}</div>
+                            <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $dealsSoldCount }}</div>
+                        </div>
+                        <div>
+                            <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Total Profit') }}</div>
+                            <div class="mt-1 text-xl font-semibold {{ $dealsProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($dealsProfit, 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 @if ($canCustomers)
                     <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">

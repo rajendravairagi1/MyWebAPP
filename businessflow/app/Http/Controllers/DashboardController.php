@@ -7,6 +7,7 @@ use App\Models\Followup;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\ProjectCost;
+use App\Models\PropertyDeal;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -31,6 +32,16 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Resale/trading deals are a separate line of business from the
+        // builder's own construction projects, so they get their own
+        // card here rather than being folded into "Portfolio — all
+        // projects" (which would make Cost/Received no longer add up to
+        // the Profit shown, since a deal has no ProjectCost/Invoice rows).
+        $soldDeals = PropertyDeal::where('status', 'sold')->get();
+        $dealsOpenCount = PropertyDeal::where('status', 'open')->count();
+        $dealsSoldCount = $soldDeals->count();
+        $dealsProfit = (float) $soldDeals->sum(fn (PropertyDeal $d) => $d->profit());
+
         return view('dashboard', [
             'customerCount' => Customer::count(),
             'unpaidCount' => $unpaidInvoices->count(),
@@ -44,6 +55,9 @@ class DashboardController extends Controller
             'portfolioCost' => $portfolioCost,
             'portfolioRevenue' => $portfolioRevenue,
             'portfolioProfit' => $portfolioRevenue - $portfolioCost,
+            'dealsOpenCount' => $dealsOpenCount,
+            'dealsSoldCount' => $dealsSoldCount,
+            'dealsProfit' => $dealsProfit,
             'dueFollowups' => $dueFollowups,
         ]);
     }

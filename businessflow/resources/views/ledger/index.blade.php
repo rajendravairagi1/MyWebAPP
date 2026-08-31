@@ -44,7 +44,12 @@
                     <div class="mt-1 text-xl font-semibold {{ $netProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($netProfit, 0) }}</div>
                 </div>
             </div>
-            <p class="text-xs text-gray-400 -mt-3">{{ __('Total Sales is the full booked value (for reference only). Profit = Collected + manual income − Purchases — only money actually received counts as profit; Outstanding isn\'t profit until it\'s collected.') }}</p>
+            <p class="text-xs text-gray-400 -mt-3">
+                {{ __('Total Sales is the full booked value (for reference only). Profit = Collected + manual income + property deal profit − Purchases — only money actually received counts as profit; Outstanding isn\'t profit until it\'s collected.') }}
+                @if ($dealsProfit != 0)
+                    {{ __('Includes :amount profit from Property Deals.', ['amount' => \App\Support\Tenant::currencySymbol().number_format($dealsProfit, 0)]) }}
+                @endif
+            </p>
 
             {{-- Per-project breakdown --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">

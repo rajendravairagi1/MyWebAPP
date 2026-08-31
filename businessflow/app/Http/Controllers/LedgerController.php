@@ -7,6 +7,7 @@ use App\Models\LedgerEntry;
 use App\Models\Project;
 use App\Models\ProjectCost;
 use App\Models\ProjectUnit;
+use App\Models\PropertyDeal;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -26,6 +27,10 @@ class LedgerController extends Controller
 
         $manualIncome = (float) LedgerEntry::where('type', 'income')->sum('amount');
         $manualExpense = (float) LedgerEntry::where('type', 'expense')->sum('amount');
+        // Resale/trading deals aren't tied to a project (see
+        // PropertyDeal), so their margin is folded in here as its own
+        // term rather than mixed into Purchases/collected-from-units.
+        $dealsProfit = (float) PropertyDeal::where('status', 'sold')->get()->sum(fn (PropertyDeal $d) => $d->profit());
 
         $totalSaleValue = (float) $soldUnits->sum('price');
         $totalCollected = (float) $soldUnits->sum(fn ($u) => $u->totalCollected());
@@ -34,7 +39,7 @@ class LedgerController extends Controller
         // Profit is on money actually in hand, not the full booked sale
         // value — an unpaid/outstanding sale isn't profit until it's
         // collected, and a written-off balance never will be.
-        $netProfit = $totalCollected + $manualIncome - $totalPurchases;
+        $netProfit = $totalCollected + $manualIncome + $dealsProfit - $totalPurchases;
 
         $projects = Project::withCount('units')->orderBy('name')->get()->map(function (Project $project) use ($soldUnits) {
             $units = $soldUnits->where('project_id', $project->id);
@@ -62,7 +67,7 @@ class LedgerController extends Controller
 
         return view('ledger.index', compact(
             'totalSaleValue', 'totalCollected', 'totalOutstanding', 'totalPurchases', 'netProfit',
-            'manualIncome', 'manualExpense', 'projects', 'customerRows', 'entries', 'customers', 'allProjects'
+            'manualIncome', 'manualExpense', 'dealsProfit', 'projects', 'customerRows', 'entries', 'customers', 'allProjects'
         ));
     }
 
