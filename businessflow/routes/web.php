@@ -27,6 +27,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PropertyDealController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
@@ -162,6 +163,13 @@ Route::middleware(['auth', 'verified', 'module:brokers'])->group(function () {
     Route::post('/brokers/{broker}/transactions', [BrokerController::class, 'storeTransaction'])->name('broker-transactions.store');
     Route::put('/brokers/{broker}/transactions/{transaction}', [BrokerController::class, 'updateTransaction'])->name('broker-transactions.update');
     Route::delete('/brokers/{broker}/transactions/{transaction}', [BrokerController::class, 'destroyTransaction'])->name('broker-transactions.destroy');
+});
+
+Route::middleware(['auth', 'verified', 'module:property_deals'])->group(function () {
+    Route::get('/property-deals', [PropertyDealController::class, 'index'])->name('property-deals.index');
+    Route::post('/property-deals', [PropertyDealController::class, 'store'])->name('property-deals.store');
+    Route::put('/property-deals/{deal}', [PropertyDealController::class, 'update'])->name('property-deals.update');
+    Route::delete('/property-deals/{deal}', [PropertyDealController::class, 'destroy'])->name('property-deals.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'module:available_properties'])->group(function () {
