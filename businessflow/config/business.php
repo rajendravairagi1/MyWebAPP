@@ -29,4 +29,18 @@ return [
         'AUD' => 'Australian Dollar (AUD)',
         'CAD' => 'Canadian Dollar (CAD)',
     ],
+
+    // Symbols shown throughout the app in place of a hardcoded ₹ — every
+    // amount is prefixed with the active business's own symbol (see
+    // Business::currencySymbol()). AUD/CAD keep their country prefix so
+    // they're never confused with a plain USD "$".
+    'currency_symbols' => [
+        'USD' => '$',
+        'INR' => '₹',
+        'EUR' => '€',
+        'GBP' => '£',
+        'AED' => 'AED ',
+        'AUD' => 'A$',
+        'CAD' => 'C$',
+    ],
 ];

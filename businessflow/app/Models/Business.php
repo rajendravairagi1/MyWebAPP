@@ -65,6 +65,20 @@ class Business extends Model
         return $this->subscription_expires_at;
     }
 
+    /**
+     * The symbol shown before every amount in this business's own pages/
+     * PDFs — resolved from its `currency` column, never hardcoded ₹.
+     */
+    public function currencySymbol(): string
+    {
+        return static::symbolFor($this->currency);
+    }
+
+    public static function symbolFor(?string $currency): string
+    {
+        return config('business.currency_symbols')[$currency] ?? '₹';
+    }
+
     public function isSubscriptionExpired(): bool
     {
         $expires = $this->effectiveExpiresAt();

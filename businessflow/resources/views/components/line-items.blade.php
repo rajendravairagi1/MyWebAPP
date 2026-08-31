@@ -85,7 +85,7 @@
                 <td class="py-1 text-right text-gray-900 dark:text-gray-100" x-text="subtotal().toFixed(2)"></td>
             </tr>
             <tr>
-                <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Discount') }} <span class="text-gray-400">(₹)</span></td>
+                <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Discount') }} <span class="text-gray-400">({{ \App\Support\Tenant::currencySymbol() }})</span></td>
                 <td class="py-1 text-right">
                     <input type="text" inputmode="decimal" x-model.number="overallDiscount" @focus="$event.target.select()" placeholder="0"
                         class="w-full text-sm text-right border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md">

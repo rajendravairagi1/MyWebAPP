@@ -35,19 +35,19 @@
                     </div>
                     <div>
                         <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Collected') }}</div>
-                        <div class="mt-1 text-xl font-semibold text-green-600">₹{{ number_format($companyTotals['collected'], 0) }}</div>
+                        <div class="mt-1 text-xl font-semibold text-green-600">{{ $companyCurrencySymbol }}{{ number_format($companyTotals['collected'], 0) }}</div>
                     </div>
                     <div>
                         <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}</div>
-                        <div class="mt-1 text-xl font-semibold {{ $companyTotals['outstanding'] > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($companyTotals['outstanding'], 0) }}</div>
+                        <div class="mt-1 text-xl font-semibold {{ $companyTotals['outstanding'] > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ $companyCurrencySymbol }}{{ number_format($companyTotals['outstanding'], 0) }}</div>
                     </div>
                     <div>
                         <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Cost') }}</div>
-                        <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($companyTotals['cost'], 0) }}</div>
+                        <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">{{ $companyCurrencySymbol }}{{ number_format($companyTotals['cost'], 0) }}</div>
                     </div>
                     <div class="col-span-2 sm:col-span-1">
                         <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Profit / Loss') }}</div>
-                        <div class="mt-1 text-xl font-semibold {{ $companyTotals['profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($companyTotals['profit'], 0) }}</div>
+                        <div class="mt-1 text-xl font-semibold {{ $companyTotals['profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ $companyCurrencySymbol }}{{ number_format($companyTotals['profit'], 0) }}</div>
                     </div>
                 </div>
 
@@ -84,15 +84,15 @@
                                 </div>
                                 <div>
                                     <div class="text-gray-400">{{ __('Collected') }}</div>
-                                    <div class="font-semibold text-green-600">₹{{ number_format($stats['collected'], 0) }}</div>
+                                    <div class="font-semibold text-green-600">{{ $companyCurrencySymbol }}{{ number_format($stats['collected'], 0) }}</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-400">{{ __('Outstanding') }}</div>
-                                    <div class="font-semibold {{ $stats['outstanding'] > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($stats['outstanding'], 0) }}</div>
+                                    <div class="font-semibold {{ $stats['outstanding'] > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ $companyCurrencySymbol }}{{ number_format($stats['outstanding'], 0) }}</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-400">{{ __('Profit') }}</div>
-                                    <div class="font-semibold {{ $stats['profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($stats['profit'], 0) }}</div>
+                                    <div class="font-semibold {{ $stats['profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ $companyCurrencySymbol }}{{ number_format($stats['profit'], 0) }}</div>
                                 </div>
                             </div>
                         </a>

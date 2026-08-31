@@ -40,10 +40,10 @@
                                         <a href="{{ route('investors.show', $investor) }}" class="text-accent-600 hover:underline font-medium">{{ $investor->name }}</a>
                                     </td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $investor->phone ?? '—' }}</td>
-                                    <td class="px-5 py-3 text-right text-gray-900 dark:text-gray-100">₹{{ number_format($investor->totalInvested(), 2) }}</td>
-                                    <td class="px-5 py-3 text-right text-gray-900 dark:text-gray-100">₹{{ number_format($investor->totalProfitCredited(), 2) }}</td>
-                                    <td class="px-5 py-3 text-right text-gray-900 dark:text-gray-100">₹{{ number_format($investor->totalPaidOut(), 2) }}</td>
-                                    <td class="px-5 py-3 text-right font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($investor->balance(), 2) }}</td>
+                                    <td class="px-5 py-3 text-right text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($investor->totalInvested(), 2) }}</td>
+                                    <td class="px-5 py-3 text-right text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($investor->totalProfitCredited(), 2) }}</td>
+                                    <td class="px-5 py-3 text-right text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($investor->totalPaidOut(), 2) }}</td>
+                                    <td class="px-5 py-3 text-right font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($investor->balance(), 2) }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

@@ -87,7 +87,7 @@
                                             <div class="flex flex-wrap gap-1">
                                                 @foreach ($modules as $key)
                                                     <span class="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400">
-                                                        {{ \App\Support\Modules::ALL[$key] ?? $key }}@if (in_array($key, \App\Support\Modules::FINANCIAL_MODULES) && in_array($key, $financials)) <span class="text-accent-600 dark:text-accent-400" title="{{ __('Can see money details') }}">₹</span>@endif
+                                                        {{ \App\Support\Modules::ALL[$key] ?? $key }}@if (in_array($key, \App\Support\Modules::FINANCIAL_MODULES) && in_array($key, $financials)) <span class="text-accent-600 dark:text-accent-400" title="{{ __('Can see money details') }}">{{ \App\Support\Tenant::currencySymbol() }}</span>@endif
                                                     </span>
                                                 @endforeach
                                             </div>

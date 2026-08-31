@@ -45,14 +45,14 @@
                                     @endif
                                     · {{ __('Closed on') }} {{ $unit->archived_at->format('d M Y') }}
                                     @if ($unit->write_off_at)
-                                        · {{ __('Written off') }}: ₹{{ number_format($unit->write_off_amount, 0) }}@if ($unit->write_off_note) — {{ $unit->write_off_note }}@endif
+                                        · {{ __('Written off') }}: {{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->write_off_amount, 0) }}@if ($unit->write_off_note) — {{ $unit->write_off_note }}@endif
                                     @endif
                                 </div>
                             </div>
                             <div class="flex items-center gap-3">
                                 <div class="text-right">
                                     <div class="text-xs text-gray-400">{{ __('Collected') }}</div>
-                                    <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->totalCollected(), 0) }} / ₹{{ number_format($unit->price, 0) }}</div>
+                                    <div class="font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->totalCollected(), 0) }} / {{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->price, 0) }}</div>
                                 </div>
                                 <form method="POST" action="{{ route('project-units.recover', $unit) }}" onsubmit="return confirm('{{ __('Move this property back to active?') }}')">
                                     @csrf

@@ -49,15 +49,15 @@
                     </div>
                     <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                         <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Total Cost') }}</div>
-                        <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($totalCost, 0) }}</div>
+                        <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalCost, 0) }}</div>
                     </div>
                     <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                         <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Received') }}</div>
-                        <div class="mt-1 text-2xl font-semibold text-green-600">₹{{ number_format($totalRevenue, 0) }}</div>
+                        <div class="mt-1 text-2xl font-semibold text-green-600">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalRevenue, 0) }}</div>
                     </div>
                     <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                         <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Profit') }}</div>
-                        <div class="mt-1 text-2xl font-semibold {{ $totalProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($totalProfit, 0) }}</div>
+                        <div class="mt-1 text-2xl font-semibold {{ $totalProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalProfit, 0) }}</div>
                     </div>
                 </div>
             @endif
@@ -85,15 +85,15 @@
                             <div class="mt-4 pt-4 border-t border-gray-100 dark:border-slate-700 grid grid-cols-3 gap-2 text-xs">
                                 <div>
                                     <div class="text-gray-500 dark:text-gray-400">{{ __('Cost') }}</div>
-                                    <div class="text-gray-900 dark:text-gray-100 font-semibold mt-0.5">₹{{ number_format($cost, 0) }}</div>
+                                    <div class="text-gray-900 dark:text-gray-100 font-semibold mt-0.5">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($cost, 0) }}</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-500 dark:text-gray-400">{{ __('Received') }}</div>
-                                    <div class="text-green-600 font-semibold mt-0.5">₹{{ number_format($revenue, 0) }}</div>
+                                    <div class="text-green-600 font-semibold mt-0.5">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($revenue, 0) }}</div>
                                 </div>
                                 <div>
                                     <div class="text-gray-500 dark:text-gray-400">{{ __('Profit') }}</div>
-                                    <div class="font-semibold mt-0.5 {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($profit, 0) }}</div>
+                                    <div class="font-semibold mt-0.5 {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($profit, 0) }}</div>
                                 </div>
                             </div>
                         </a>

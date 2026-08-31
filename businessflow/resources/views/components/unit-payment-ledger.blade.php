@@ -32,7 +32,7 @@
                         </div>
                     </div>
                     <div class="text-right shrink-0 pr-1">
-                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">₹{{ number_format($payment->amount, 0) }}</div>
+                        <div class="text-lg font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($payment->amount, 0) }}</div>
                         <div class="mt-1.5 flex items-center justify-end gap-1.5 text-xs">
                             @if ($payment->invoice)
                                 <a href="{{ route('invoices.show', $payment->invoice) }}" class="px-2 py-1 rounded border border-accent-200 dark:border-accent-800 text-accent-600 dark:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/20">{{ $payment->invoice->number }}</a>

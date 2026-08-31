@@ -25,23 +25,23 @@
             <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Total Sales') }}</div>
-                    <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($totalSaleValue, 0) }}</div>
+                    <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalSaleValue, 0) }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Collected') }}</div>
-                    <div class="mt-1 text-xl font-semibold text-green-600">₹{{ number_format($totalCollected, 0) }}</div>
+                    <div class="mt-1 text-xl font-semibold text-green-600">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalCollected, 0) }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}</div>
-                    <div class="mt-1 text-xl font-semibold {{ $totalOutstanding > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($totalOutstanding, 0) }}</div>
+                    <div class="mt-1 text-xl font-semibold {{ $totalOutstanding > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalOutstanding, 0) }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Purchases / Costs') }}</div>
-                    <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($totalPurchases, 0) }}</div>
+                    <div class="mt-1 text-xl font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalPurchases, 0) }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Net Profit') }}</div>
-                    <div class="mt-1 text-xl font-semibold {{ $netProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($netProfit, 0) }}</div>
+                    <div class="mt-1 text-xl font-semibold {{ $netProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($netProfit, 0) }}</div>
                 </div>
             </div>
             <p class="text-xs text-gray-400 -mt-3">{{ __('Total Sales is the full booked value (for reference only). Profit = Collected + manual income − Purchases — only money actually received counts as profit; Outstanding isn\'t profit until it\'s collected.') }}</p>
@@ -67,11 +67,11 @@
                                 <tr>
                                     <td class="px-5 py-2"><a href="{{ route('projects.show', $row->project) }}" class="text-accent-600 hover:underline">{{ $row->project->name }}</a></td>
                                     <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ $row->unitCount }}</td>
-                                    <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">₹{{ number_format($row->saleValue, 0) }}</td>
-                                    <td class="px-5 py-2 text-right text-green-600">₹{{ number_format($row->collected, 0) }}</td>
-                                    <td class="px-5 py-2 text-right {{ $row->outstanding > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($row->outstanding, 0) }}</td>
-                                    <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">₹{{ number_format($row->purchases, 0) }}</td>
-                                    <td class="px-5 py-2 text-right font-medium {{ $row->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($row->profit, 0) }}</td>
+                                    <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($row->saleValue, 0) }}</td>
+                                    <td class="px-5 py-2 text-right text-green-600">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($row->collected, 0) }}</td>
+                                    <td class="px-5 py-2 text-right {{ $row->outstanding > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($row->outstanding, 0) }}</td>
+                                    <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($row->purchases, 0) }}</td>
+                                    <td class="px-5 py-2 text-right font-medium {{ $row->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($row->profit, 0) }}</td>
                                 </tr>
                             @empty
                                 <tr><td colspan="7" class="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">{{ __('No projects with sales or costs yet.') }}</td></tr>
@@ -110,9 +110,9 @@
                                         @endif
                                     </td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $row->unit->project->name }} · {{ $row->unit->unit_number }}</td>
-                                    <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">₹{{ number_format($row->unit->price, 0) }}</td>
-                                    <td class="px-5 py-2 text-right text-green-600">₹{{ number_format($row->unit->totalCollected(), 0) }}</td>
-                                    <td class="px-5 py-2 text-right {{ $row->unit->totalOutstanding() > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($row->unit->totalOutstanding(), 0) }}</td>
+                                    <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($row->unit->price, 0) }}</td>
+                                    <td class="px-5 py-2 text-right text-green-600">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($row->unit->totalCollected(), 0) }}</td>
+                                    <td class="px-5 py-2 text-right {{ $row->unit->totalOutstanding() > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($row->unit->totalOutstanding(), 0) }}</td>
                                     <td class="px-5 py-2">
                                         @if ($row->unit->write_off_at)
                                             <span class="text-xs px-2 py-0.5 rounded font-medium bg-red-100 text-red-700">{{ __('Written off') }}</span>
@@ -164,7 +164,7 @@
                                             @if ($entry->project)<a href="{{ route('projects.show', $entry->project) }}" class="text-accent-600 hover:underline">{{ $entry->project->name }}</a>@endif
                                             @if (!$entry->customer && !$entry->project) — @endif
                                         </td>
-                                        <td class="px-5 py-2 text-right font-medium {{ $entry->type === 'income' ? 'text-green-600' : 'text-red-600' }}">₹{{ number_format($entry->amount, 0) }}</td>
+                                        <td class="px-5 py-2 text-right font-medium {{ $entry->type === 'income' ? 'text-green-600' : 'text-red-600' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($entry->amount, 0) }}</td>
                                         <td class="px-5 py-2 text-right">
                                             <form method="POST" action="{{ route('ledger.entries.destroy', $entry) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')">
                                                 @csrf

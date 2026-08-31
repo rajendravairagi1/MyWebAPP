@@ -67,7 +67,7 @@ class IdentifyTenant
             return redirect()->route('onboarding.create');
         }
 
-        Tenant::set($businessId, $membership->pivot->role, $membership->pivot->permissions, $membership->effectivePlan());
+        Tenant::set($businessId, $membership->pivot->role, $membership->pivot->permissions, $membership->effectivePlan(), $membership->currency);
 
         return $next($request);
     }

@@ -66,6 +66,12 @@ class CompanyController extends Controller
             }
         }
 
-        return view('company.show', compact('company', 'branches', 'branchStats', 'companyTotals'));
+        // Company-wide totals mix every branch's builders together, so
+        // there's no single "correct" currency if they ever differ — in
+        // practice a company operates in one country/currency, so the
+        // first builder found stands in for the whole company view.
+        $companyCurrencySymbol = \App\Models\Business::symbolFor($branches->flatMap->businesses->first()?->currency);
+
+        return view('company.show', compact('company', 'branches', 'branchStats', 'companyTotals', 'companyCurrencySymbol'));
     }
 }

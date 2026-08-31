@@ -150,15 +150,15 @@
                 @if ($canFinancials)
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Total Value') }}</div>
-                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($totalValue, 0) }}</div>
+                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalValue, 0) }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Collected') }}</div>
-                    <div class="mt-1 text-2xl font-semibold text-green-600">₹{{ number_format($totalPaid, 0) }}</div>
+                    <div class="mt-1 text-2xl font-semibold text-green-600">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalPaid, 0) }}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                     <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}</div>
-                    <div class="mt-1 text-2xl font-semibold {{ $totalDue > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($totalDue, 0) }}</div>
+                    <div class="mt-1 text-2xl font-semibold {{ $totalDue > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalDue, 0) }}</div>
                 </div>
                 @endif
             </div>
@@ -192,7 +192,7 @@
                             @if ($canFinancials)
                             <div class="text-right">
                                 <div class="text-xs text-gray-400">{{ __('Price') }}</div>
-                                <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->price, 0) }}</div>
+                                <div class="font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->price, 0) }}</div>
                             </div>
                             @endif
                         </div>
@@ -202,8 +202,8 @@
                             <div class="h-full bg-green-500" style="width: {{ $progress }}%"></div>
                         </div>
                         <div class="mt-1.5 flex flex-wrap gap-x-6 gap-y-1 text-xs">
-                            <span class="text-gray-500 dark:text-gray-400">{{ __('Collected') }}: <strong class="text-green-600">₹{{ number_format($unit->totalCollected(), 0) }}</strong></span>
-                            <span class="text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}: <strong class="{{ $unit->totalOutstanding() > 0 ? 'text-red-600' : 'text-gray-400' }}">₹{{ number_format($unit->totalOutstanding(), 0) }}</strong></span>
+                            <span class="text-gray-500 dark:text-gray-400">{{ __('Collected') }}: <strong class="text-green-600">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->totalCollected(), 0) }}</strong></span>
+                            <span class="text-gray-500 dark:text-gray-400">{{ __('Outstanding') }}: <strong class="{{ $unit->totalOutstanding() > 0 ? 'text-red-600' : 'text-gray-400' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->totalOutstanding(), 0) }}</strong></span>
                         </div>
                         @endif
 
@@ -237,7 +237,7 @@
                                         <label class="text-[11px] text-gray-500 dark:text-gray-400">{{ __('Reason (optional)') }}</label>
                                         <input type="text" name="note" placeholder="{{ __('e.g. Customer unable to pay, settled verbally') }}" class="mt-0.5 block w-full text-sm rounded-md border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-red-500 focus:ring-red-500">
                                     </div>
-                                    <button class="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-500 whitespace-nowrap">{{ __('Confirm Write-off') }} (₹{{ number_format($unit->totalOutstanding(), 0) }})</button>
+                                    <button class="inline-flex items-center justify-center h-9 px-4 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-500 whitespace-nowrap">{{ __('Confirm Write-off') }} ({{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->totalOutstanding(), 0) }})</button>
                                 </form>
                             </details>
                         @endif
@@ -272,7 +272,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <x-input-label for="amount-{{ $unit->id }}" :value="__('Amount')" />
-                                    <input id="amount-{{ $unit->id }}" type="number" step="0.01" min="0.01" name="amount" required placeholder="₹" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                    <input id="amount-{{ $unit->id }}" type="number" step="0.01" min="0.01" name="amount" required placeholder="{{ \App\Support\Tenant::currencySymbol() }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 </div>
                                 <div>
                                     <x-input-label for="paid_at-{{ $unit->id }}" :value="__('Date')" />
@@ -399,7 +399,7 @@
                                         <div class="text-xs text-gray-400 mt-0.5">
                                             {{ __('Closed on') }} {{ $unit->archived_at->format('d M Y') }}
                                             @if ($unit->write_off_at && $canFinancials)
-                                                · {{ __('Written off') }}: ₹{{ number_format($unit->write_off_amount, 0) }}@if ($unit->write_off_note) — {{ $unit->write_off_note }}@endif
+                                                · {{ __('Written off') }}: {{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->write_off_amount, 0) }}@if ($unit->write_off_note) — {{ $unit->write_off_note }}@endif
                                             @endif
                                         </div>
                                     </div>
@@ -407,7 +407,7 @@
                                         @if ($canFinancials)
                                         <div class="text-right">
                                             <div class="text-xs text-gray-400">{{ __('Collected') }}</div>
-                                            <div class="font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->totalCollected(), 0) }} / ₹{{ number_format($unit->price, 0) }}</div>
+                                            <div class="font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->totalCollected(), 0) }} / {{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->price, 0) }}</div>
                                         </div>
                                         @endif
                                         <form method="POST" action="{{ route('project-units.recover', $unit) }}" onsubmit="return confirm('{{ __('Move this property back to active?') }}')">
@@ -540,7 +540,7 @@
 
                     <div>
                         <x-input-label for="note" :value="__('Note')" />
-                        <x-text-input id="note" name="note" type="text" class="mt-1 block w-full" required placeholder="{{ __('e.g. Said will pay ₹50,000 by 25th') }}" />
+                        <x-text-input id="note" name="note" type="text" class="mt-1 block w-full" required placeholder="{{ __('e.g. Said will pay :symbol50,000 by 25th', ['symbol' => \App\Support\Tenant::currencySymbol()]) }}" />
                     </div>
                     <div>
                         <x-input-label for="due_at" :value="__('Due')" />

@@ -41,7 +41,7 @@
                 </div>
                 <div class="text-right">
                     <div class="text-xs text-gray-400">{{ __('Price') }}</div>
-                    <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($unit->price, 0) }}</div>
+                    <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->price, 0) }}</div>
                 </div>
             </div>
 

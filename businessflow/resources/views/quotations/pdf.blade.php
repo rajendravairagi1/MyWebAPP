@@ -66,18 +66,18 @@
                 <tr>
                     <td>{{ $item->description }}</td>
                     <td class="text-right">{{ rtrim(rtrim($item->quantity, '0'), '.') ?: '0' }}</td>
-                    <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
-                    <td class="text-right">{{ number_format($item->line_total, 2) }}</td>
+                    <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($item->unit_price, 2) }}</td>
+                    <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($item->line_total, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
 
     <table class="totals">
-        <tr><td>Subtotal</td><td class="text-right">{{ number_format($quotation->subtotal, 2) }}</td></tr>
-        <tr><td>Discount</td><td class="text-right">{{ number_format($quotation->discount_total, 2) }}</td></tr>
-        <tr><td>Tax</td><td class="text-right">{{ number_format($quotation->tax_total, 2) }}</td></tr>
-        <tr class="grand"><td>Total</td><td class="text-right">{{ number_format($quotation->total, 2) }}</td></tr>
+        <tr><td>Subtotal</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($quotation->subtotal, 2) }}</td></tr>
+        <tr><td>Discount</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($quotation->discount_total, 2) }}</td></tr>
+        <tr><td>Tax</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($quotation->tax_total, 2) }}</td></tr>
+        <tr class="grand"><td>Total</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($quotation->total, 2) }}</td></tr>
     </table>
 
     @if ($quotation->notes)

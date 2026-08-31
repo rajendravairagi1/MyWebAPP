@@ -108,8 +108,8 @@ class ReportController extends Controller
             'rows' => $rows->toArray(),
             'totals' => [
                 'Invoices' => (string) $invoices->count(),
-                'Total invoiced' => '₹'.number_format($invoices->sum('total'), 2),
-                'Total collected' => '₹'.number_format($invoices->sum('amount_paid'), 2),
+                'Total invoiced' => Tenant::currencySymbol().number_format($invoices->sum('total'), 2),
+                'Total collected' => Tenant::currencySymbol().number_format($invoices->sum('amount_paid'), 2),
             ],
         ];
     }
@@ -158,7 +158,7 @@ class ReportController extends Controller
             'rows' => $rows->toArray(),
             'totals' => [
                 'Payments' => (string) $all->count(),
-                'Total collected' => '₹'.number_format($all->sum('amount'), 2),
+                'Total collected' => Tenant::currencySymbol().number_format($all->sum('amount'), 2),
             ],
         ];
     }
@@ -211,7 +211,7 @@ class ReportController extends Controller
             'rows' => $rows->toArray(),
             'totals' => [
                 'Projects' => (string) $projects->count(),
-                'Total profit / loss' => '₹'.number_format($projects->sum(fn (Project $p) => $p->profit()), 2),
+                'Total profit / loss' => Tenant::currencySymbol().number_format($projects->sum(fn (Project $p) => $p->profit()), 2),
             ],
         ];
     }

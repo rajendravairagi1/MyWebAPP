@@ -48,7 +48,11 @@ class BranchController extends Controller
             }
         }
 
-        return view('branches.show', compact('branch', 'businessStats', 'isCompanyOwner', 'branchTotals'));
+        // Branch-wide totals mix every builder together — assumes one
+        // currency per branch (see CompanyController::show()).
+        $branchCurrencySymbol = \App\Models\Business::symbolFor($branch->businesses->first()?->currency);
+
+        return view('branches.show', compact('branch', 'businessStats', 'isCompanyOwner', 'branchTotals', 'branchCurrencySymbol'));
     }
 
     public function update(Request $request, Branch $branch): RedirectResponse

@@ -67,28 +67,28 @@
                 <tr>
                     <td>{{ $item->description }}</td>
                     <td class="text-right">{{ rtrim(rtrim($item->quantity, '0'), '.') ?: '0' }}</td>
-                    <td class="text-right">{{ number_format($item->unit_price, 2) }}</td>
-                    <td class="text-right">{{ number_format($item->line_total, 2) }}</td>
+                    <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($item->unit_price, 2) }}</td>
+                    <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($item->line_total, 2) }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
 
     <table class="totals">
-        <tr><td>Subtotal</td><td class="text-right">{{ number_format($invoice->subtotal, 2) }}</td></tr>
-        <tr><td>Discount</td><td class="text-right">{{ number_format($invoice->discount_total, 2) }}</td></tr>
-        <tr><td>Tax</td><td class="text-right">{{ number_format($invoice->tax_total, 2) }}</td></tr>
-        <tr class="grand"><td>Total</td><td class="text-right">{{ number_format($invoice->total, 2) }}</td></tr>
-        <tr><td>Paid</td><td class="text-right">{{ number_format($invoice->amount_paid, 2) }}</td></tr>
-        <tr><td class="balance">Balance due</td><td class="text-right balance">{{ $invoice->balanceDue() }}</td></tr>
+        <tr><td>Subtotal</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->subtotal, 2) }}</td></tr>
+        <tr><td>Discount</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->discount_total, 2) }}</td></tr>
+        <tr><td>Tax</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->tax_total, 2) }}</td></tr>
+        <tr class="grand"><td>Total</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->total, 2) }}</td></tr>
+        <tr><td>Paid</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->amount_paid, 2) }}</td></tr>
+        <tr><td class="balance">Balance due</td><td class="text-right balance">{{ $business->currencySymbol() }}{{ $invoice->balanceDue() }}</td></tr>
     </table>
 
     @if ($invoice->projectUnit && $invoice->counts_toward_property_price)
         <table class="totals" style="margin-top: 4px;">
             <tr><td class="muted" colspan="2" style="padding-top: 10px; font-size: 10px; text-transform: uppercase;">{{ $invoice->projectUnit->unit_number }} — property balance</td></tr>
-            <tr><td>Property price</td><td class="text-right">{{ number_format($invoice->projectUnit->price, 2) }}</td></tr>
-            <tr><td>Total received so far</td><td class="text-right">{{ number_format($invoice->projectUnit->totalCollected(), 2) }}</td></tr>
-            <tr class="grand"><td>Property balance remaining</td><td class="text-right">{{ number_format($invoice->projectUnit->totalOutstanding(), 2) }}</td></tr>
+            <tr><td>Property price</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->projectUnit->price, 2) }}</td></tr>
+            <tr><td>Total received so far</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->projectUnit->totalCollected(), 2) }}</td></tr>
+            <tr class="grand"><td>Property balance remaining</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->projectUnit->totalOutstanding(), 2) }}</td></tr>
         </table>
     @elseif ($invoice->projectUnit)
         <p class="muted" style="margin-top: 10px; font-size: 10px;">This is a separate charge for {{ $invoice->projectUnit->unit_number }} — not counted toward the property price.</p>

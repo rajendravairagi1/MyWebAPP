@@ -1,9 +1,10 @@
 @php
+    $currencySymbol = \App\Support\Tenant::currencySymbol();
     $waMessage = "Investment Statement — {$investor->name}\n\n"
-        ."Total Investment: ₹".number_format($investor->totalInvested(), 2)."\n"
-        ."Total Profit Credited: ₹".number_format($investor->totalProfitCredited(), 2)."\n"
-        ."Total Paid: ₹".number_format($investor->totalPaidOut(), 2)."\n"
-        ."Balance: ₹".number_format($investor->balance(), 2)."\n\n"
+        ."Total Investment: {$currencySymbol}".number_format($investor->totalInvested(), 2)."\n"
+        ."Total Profit Credited: {$currencySymbol}".number_format($investor->totalProfitCredited(), 2)."\n"
+        ."Total Paid: {$currencySymbol}".number_format($investor->totalPaidOut(), 2)."\n"
+        ."Balance: {$currencySymbol}".number_format($investor->balance(), 2)."\n\n"
         ."Verify: ".\Illuminate\Support\Facades\URL::signedRoute('verify.investor', ['investor' => $investor->id]);
     $waPhoneDigits = $investor->phone ? preg_replace('/\D/', '', $investor->phone) : '';
     if (strlen($waPhoneDigits) === 10) {
@@ -68,19 +69,19 @@
                 <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div class="bg-gray-50 dark:bg-slate-700/40 rounded-md p-4">
                         <div class="text-xs text-gray-400">{{ __('Total Investment') }}</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($investor->totalInvested(), 2) }}</div>
+                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($investor->totalInvested(), 2) }}</div>
                     </div>
                     <div class="bg-gray-50 dark:bg-slate-700/40 rounded-md p-4">
                         <div class="text-xs text-gray-400">{{ __('Total Profit Credited') }}</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($investor->totalProfitCredited(), 2) }}</div>
+                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($investor->totalProfitCredited(), 2) }}</div>
                     </div>
                     <div class="bg-gray-50 dark:bg-slate-700/40 rounded-md p-4">
                         <div class="text-xs text-gray-400">{{ __('Total Paid') }}</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($investor->totalPaidOut(), 2) }}</div>
+                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($investor->totalPaidOut(), 2) }}</div>
                     </div>
                     <div class="bg-gray-50 dark:bg-slate-700/40 rounded-md p-4">
                         <div class="text-xs text-gray-400">{{ __('Balance (Owed to Investor)') }}</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">₹{{ number_format($investor->balance(), 2) }}</div>
+                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($investor->balance(), 2) }}</div>
                     </div>
                 </div>
             </div>
@@ -117,7 +118,7 @@
                                         ])>{{ $transaction->typeLabel() }}</span>
                                     </td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $transaction->project?->name ?? '—' }}</td>
-                                    <td class="px-5 py-3 text-right font-medium text-gray-900 dark:text-gray-100">₹{{ number_format($transaction->amount, 2) }}</td>
+                                    <td class="px-5 py-3 text-right font-medium text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($transaction->amount, 2) }}</td>
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $transaction->detailsSummary() ?: '—' }}</td>
                                     <td class="px-5 py-3 text-right whitespace-nowrap">
                                         <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-transaction-{{ $transaction->id }}')" class="text-accent-600 hover:underline text-xs">{{ __('Edit') }}</button>

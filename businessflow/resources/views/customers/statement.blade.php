@@ -58,9 +58,9 @@
 
     <table class="summary">
         <tr>
-            <td><div class="label">Sale value</div><div class="value">{{ number_format($totalValue, 2) }}</div></td>
-            <td><div class="label">Total received</div><div class="value">{{ number_format($totalPaid, 2) }}</div></td>
-            <td><div class="label">Balance due</div><div class="value {{ $totalDue > 0 ? 'balance-pos' : 'balance-zero' }}">{{ number_format($totalDue, 2) }}</div></td>
+            <td><div class="label">Sale value</div><div class="value">{{ $business->currencySymbol() }}{{ number_format($totalValue, 2) }}</div></td>
+            <td><div class="label">Total received</div><div class="value">{{ $business->currencySymbol() }}{{ number_format($totalPaid, 2) }}</div></td>
+            <td><div class="label">Balance due</div><div class="value {{ $totalDue > 0 ? 'balance-pos' : 'balance-zero' }}">{{ $business->currencySymbol() }}{{ number_format($totalDue, 2) }}</div></td>
         </tr>
     </table>
 
@@ -82,9 +82,9 @@
                     <tr>
                         <td>{{ $unit->project->name }}</td>
                         <td>{{ $unit->unit_number }}</td>
-                        <td class="text-right">{{ number_format($unit->price, 2) }}</td>
-                        <td class="text-right">{{ number_format($unit->totalCollected(), 2) }}</td>
-                        <td class="text-right">{{ number_format($unit->totalOutstanding(), 2) }}</td>
+                        <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($unit->price, 2) }}</td>
+                        <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($unit->totalCollected(), 2) }}</td>
+                        <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($unit->totalOutstanding(), 2) }}</td>
                         <td>
                             {{ $unit->write_off_at ? 'Written off' : ucfirst($unit->status) }}
                         </td>
@@ -112,9 +112,9 @@
                     <td>{{ $invoice->number }}</td>
                     <td>{{ $invoice->created_at->format('d M Y') }}</td>
                     <td>{{ $invoice->project?->name ?? '—' }}{{ $invoice->projectUnit ? ' · '.$invoice->projectUnit->unit_number : '' }}</td>
-                    <td class="text-right">{{ number_format($invoice->total, 2) }}</td>
-                    <td class="text-right">{{ number_format($invoice->amount_paid, 2) }}</td>
-                    <td class="text-right">{{ $invoice->balanceDue() }}</td>
+                    <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->total, 2) }}</td>
+                    <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->amount_paid, 2) }}</td>
+                    <td class="text-right">{{ $business->currencySymbol() }}{{ $invoice->balanceDue() }}</td>
                 </tr>
             @empty
                 <tr><td colspan="6" class="muted">No invoices yet.</td></tr>
@@ -161,7 +161,7 @@
                     <td>{{ $payment->for }}</td>
                     <td>{{ $payment->method ? ucfirst(str_replace('_', ' ', $payment->method)) : '—' }}</td>
                     <td>{{ $payment->reference ?? '—' }}</td>
-                    <td class="text-right">{{ number_format($payment->amount, 2) }}</td>
+                    <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($payment->amount, 2) }}</td>
                 </tr>
             @empty
                 <tr><td colspan="6" class="muted">No payments recorded yet.</td></tr>
@@ -186,7 +186,7 @@
                     <tr>
                         <td>{{ $unit->unit_number }}</td>
                         <td>{{ $unit->write_off_at->format('d M Y') }}</td>
-                        <td class="text-right">{{ number_format($unit->write_off_amount, 2) }}</td>
+                        <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($unit->write_off_amount, 2) }}</td>
                         <td>{{ $unit->write_off_note ?? '—' }}</td>
                     </tr>
                 @endforeach

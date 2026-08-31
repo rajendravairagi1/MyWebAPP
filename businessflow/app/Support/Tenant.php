@@ -18,12 +18,15 @@ class Tenant
 
     protected static ?string $plan = null;
 
-    public static function set(?int $id, ?string $role = null, ?array $permissions = null, ?string $plan = null): void
+    protected static ?string $currency = null;
+
+    public static function set(?int $id, ?string $role = null, ?array $permissions = null, ?string $plan = null, ?string $currency = null): void
     {
         static::$id = $id;
         static::$role = $role;
         static::$permissions = $permissions;
         static::$plan = $plan;
+        static::$currency = $currency;
     }
 
     public static function id(): ?int
@@ -42,6 +45,18 @@ class Tenant
         static::$role = null;
         static::$permissions = null;
         static::$plan = null;
+        static::$currency = null;
+    }
+
+    /**
+     * The active business's own currency symbol — resolved once at
+     * IdentifyTenant time and cached here for the rest of the request, so
+     * every page can show ₹/$/€/etc. without a fresh Business lookup.
+     * Falls back to ₹ outside a tenant context (e.g. the platform admin).
+     */
+    public static function currencySymbol(): string
+    {
+        return \App\Models\Business::symbolFor(static::$currency);
     }
 
     public static function role(): ?string

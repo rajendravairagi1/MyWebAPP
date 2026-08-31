@@ -52,10 +52,10 @@
 
     <table class="summary">
         <tr>
-            <td><div class="label">Total investment</div><div class="value">{{ number_format($investor->totalInvested(), 2) }}</div></td>
-            <td><div class="label">Total profit credited</div><div class="value">{{ number_format($investor->totalProfitCredited(), 2) }}</div></td>
-            <td><div class="label">Total paid</div><div class="value">{{ number_format($investor->totalPaidOut(), 2) }}</div></td>
-            <td><div class="label">Balance</div><div class="value">{{ number_format($investor->balance(), 2) }}</div></td>
+            <td><div class="label">Total investment</div><div class="value">{{ $business->currencySymbol() }}{{ number_format($investor->totalInvested(), 2) }}</div></td>
+            <td><div class="label">Total profit credited</div><div class="value">{{ $business->currencySymbol() }}{{ number_format($investor->totalProfitCredited(), 2) }}</div></td>
+            <td><div class="label">Total paid</div><div class="value">{{ $business->currencySymbol() }}{{ number_format($investor->totalPaidOut(), 2) }}</div></td>
+            <td><div class="label">Balance</div><div class="value">{{ $business->currencySymbol() }}{{ number_format($investor->balance(), 2) }}</div></td>
         </tr>
     </table>
 
@@ -81,7 +81,7 @@
                     <td>{{ $transaction->method ? ucfirst(str_replace('_', ' ', $transaction->method)) : '—' }}</td>
                     <td>{{ $transaction->reference ?? '—' }}</td>
                     <td>{{ $transaction->description ?? '—' }}</td>
-                    <td class="text-right">{{ number_format($transaction->amount, 2) }}</td>
+                    <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($transaction->amount, 2) }}</td>
                 </tr>
             @empty
                 <tr><td colspan="7" class="muted">No transactions recorded yet.</td></tr>
