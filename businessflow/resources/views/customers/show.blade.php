@@ -207,10 +207,11 @@
                             @if ($firstPayment = $unit->firstPayment())
                                 <span class="text-gray-500 dark:text-gray-400">{{ __('Booked with') }}: <strong class="text-gray-700 dark:text-gray-300">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($firstPayment->amount, 0) }}</strong> <span class="text-gray-400">({{ $firstPayment->paid_at->format('d M Y') }})</span></span>
                             @endif
-                            @if (\App\Support\Tenant::can('brokers') && $unit->broker)
-                                <span class="text-gray-500 dark:text-gray-400">{{ __('Broker') }}: <a href="{{ route('brokers.show', $unit->broker) }}" class="text-accent-600 hover:underline">{{ $unit->broker->name }}</a></span>
-                            @endif
                         </div>
+                        {{-- Broker is intentionally not shown on this page — it can be
+                             visible to the customer directly (screen open in front of
+                             them). Check the Property Deals table or the broker's own
+                             page instead. --}}
                         <x-loan-panel :unit="$unit" :accounts="$paymentAccounts" />
                         @endif
 
