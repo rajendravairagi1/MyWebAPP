@@ -19,6 +19,9 @@
             <span>{{ __('Sanctioned') }}: <strong>{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($loan->sanctioned_amount, 0) }}</strong></span>
             <span>{{ __('Disbursed') }}: <strong>{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($loan->totalDisbursed(), 0) }}</strong> ({{ $loan->percentDisbursed() }}%)</span>
             <span>{{ __('Remaining') }}: <strong>{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($loan->remainingToDisburse(), 0) }}</strong></span>
+            @if ($loan->interest_rate)
+                <span>{{ __('Interest') }}: <strong>{{ rtrim(rtrim(number_format($loan->interest_rate, 2), '0'), '.') }}%</strong></span>
+            @endif
         </div>
     </div>
 @else
@@ -37,6 +40,7 @@
             <div class="flex items-center justify-between gap-3 mb-4">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Bank Loan') }}</h2>
                 <div class="flex items-center gap-3 shrink-0">
+                    <a href="{{ route('loans.statement', $loan) }}" class="text-xs text-accent-600 hover:underline">{{ __('Download Statement (PDF)') }}</a>
                     <button type="button" x-on:click="editingLoan = !editingLoan" class="text-xs text-accent-600 hover:underline" x-text="editingLoan ? '{{ __('Cancel') }}' : '{{ __('Edit') }}'"></button>
                     <form method="POST" action="{{ route('loans.destroy', $loan) }}" onsubmit="return confirm('{{ __('Remove this loan record? Disbursements already recorded stay in the payment ledger.') }}')">
                         @csrf
@@ -60,6 +64,10 @@
                 <div>
                     <x-input-label :value="__('Sanctioned Amount')" />
                     <input type="number" step="0.01" min="0.01" name="sanctioned_amount" value="{{ $loan->sanctioned_amount }}" required class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                </div>
+                <div>
+                    <x-input-label :value="__('Interest Rate % p.a. (optional)')" />
+                    <input type="number" step="0.01" min="0" max="100" name="interest_rate" value="{{ $loan->interest_rate }}" class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                 </div>
                 <div>
                     <x-input-label :value="__('Sanctioned On (optional)')" />
@@ -90,6 +98,9 @@
                 @if ($loan->loan_account_number)
                     <div>{{ __('Loan A/C No.') }}: <span class="text-gray-800 dark:text-gray-200 font-medium">{{ $loan->loan_account_number }}</span></div>
                 @endif
+                @if ($loan->interest_rate)
+                    <div>{{ __('Interest Rate') }}: <span class="text-gray-800 dark:text-gray-200 font-medium">{{ rtrim(rtrim(number_format($loan->interest_rate, 2), '0'), '.') }}% p.a.</span></div>
+                @endif
                 @if ($loan->sanctioned_at)
                     <div>{{ __('Sanctioned on') }}: <span class="text-gray-800 dark:text-gray-200 font-medium">{{ $loan->sanctioned_at->format('d M Y') }}</span></div>
                 @endif
@@ -105,7 +116,7 @@
                     @foreach ($loan->disbursements as $disbursement)
                         <div class="flex items-center justify-between text-sm bg-gray-50 dark:bg-slate-700/40 rounded-md px-3 py-2">
                             <div>
-                                <div class="text-gray-800 dark:text-gray-200">{{ $disbursement->paid_at->format('d M Y') }}</div>
+                                <div class="text-gray-800 dark:text-gray-200">{{ $disbursement->paid_at->format('d M Y') }} @if ($disbursement->method)<span class="text-xs text-gray-400">· {{ ucfirst(str_replace('_', ' ', $disbursement->method)) }}</span>@endif</div>
                                 @if ($disbursement->reference)
                                     <div class="text-xs text-gray-400">{{ __('Ref') }}: {{ $disbursement->reference }}</div>
                                 @endif
@@ -132,7 +143,15 @@
                         <input type="date" name="paid_at" value="{{ now()->format('Y-m-d') }}" required class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     </div>
                 </div>
-                <input type="text" name="reference" placeholder="{{ __('Reference (optional)') }}" class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                <div class="grid grid-cols-2 gap-3">
+                    <select name="method" class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <option value="bank_transfer">{{ __('Bank Transfer') }}</option>
+                        <option value="cheque">{{ __('Cheque') }}</option>
+                        <option value="neft">{{ __('NEFT') }}</option>
+                        <option value="rtgs">{{ __('RTGS') }}</option>
+                    </select>
+                    <input type="text" name="reference" placeholder="{{ __('Reference / Cheque No. (optional)') }}" class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                </div>
                 @php $bankAccounts = $accounts ? $accounts->filter(fn ($a) => ! $a->isCash()) : null; @endphp
                 @if ($bankAccounts && $bankAccounts->isNotEmpty())
                     {{-- Disbursements always come in by bank transfer — no cash-in-hand accounts here. --}}
@@ -147,6 +166,38 @@
                     <x-primary-button>{{ __('Add Disbursement') }}</x-primary-button>
                 </div>
             </form>
+
+            <div class="border-t border-gray-100 dark:border-slate-700 pt-4 mt-4">
+                <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Documents') }} ({{ $loan->documents->count() }})</p>
+                <p class="text-xs text-gray-400 mb-2">{{ __('Loan approval, sanction letter, or anything else worth keeping with this loan.') }}</p>
+
+                @if ($loan->documents->isNotEmpty())
+                    <ul class="space-y-1.5 mb-3">
+                        @foreach ($loan->documents as $document)
+                            <li class="flex items-center justify-between gap-3 text-xs bg-gray-50 dark:bg-slate-700/40 rounded-md px-3 py-2">
+                                <a href="{{ route('loan-documents.download', [$loan, $document]) }}" class="flex items-center gap-1.5 min-w-0 text-accent-600 hover:underline">
+                                    <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                    <span class="truncate">{{ $document->name }}</span>
+                                </a>
+                                <div class="flex items-center gap-2 shrink-0 text-gray-400">
+                                    <span>{{ $document->humanSize() }}</span>
+                                    <form method="POST" action="{{ route('loan-documents.destroy', [$loan, $document]) }}" onsubmit="return confirm('{{ __('Delete this document?') }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-red-600 hover:underline">{{ __('Delete') }}</button>
+                                    </form>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                <form method="POST" action="{{ route('loan-documents.store', $loan) }}" enctype="multipart/form-data" class="flex items-center gap-2">
+                    @csrf
+                    <input name="file" type="file" required class="block w-full text-xs text-gray-600 dark:text-gray-300 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
+                    <button class="shrink-0 px-2.5 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('Upload') }}</button>
+                </form>
+            </div>
         @else
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">{{ __('Add Bank Loan') }}</h2>
             <form method="POST" action="{{ route('loans.store', $unit) }}" class="space-y-4">
@@ -165,9 +216,15 @@
                         <input type="number" step="0.01" min="0.01" name="sanctioned_amount" required placeholder="{{ \App\Support\Tenant::currencySymbol() }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     </div>
                 </div>
-                <div>
-                    <x-input-label :value="__('Sanctioned Date (optional)')" />
-                    <input type="date" name="sanctioned_at" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label :value="__('Interest Rate % p.a. (optional)')" />
+                        <input type="number" step="0.01" min="0" max="100" name="interest_rate" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    </div>
+                    <div>
+                        <x-input-label :value="__('Sanctioned Date (optional)')" />
+                        <input type="date" name="sanctioned_at" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    </div>
                 </div>
                 <div>
                     <x-input-label :value="__('Notes (optional)')" />

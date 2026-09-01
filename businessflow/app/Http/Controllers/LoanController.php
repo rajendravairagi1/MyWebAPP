@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Business;
 use App\Models\Loan;
 use App\Models\ProjectUnit;
+use App\Support\Tenant;
 use App\Support\UnitPaymentRecorder;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -44,6 +47,7 @@ class LoanController extends Controller
         $data = $request->validate([
             'amount' => ['required', 'numeric', 'min:0.01'],
             'paid_at' => ['required', 'date'],
+            'method' => ['nullable', 'in:bank_transfer,cheque,neft,rtgs'],
             'reference' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'payment_account_id' => ['nullable', 'integer'],
@@ -53,7 +57,7 @@ class LoanController extends Controller
             'amount' => $data['amount'],
             'purpose' => 'installment',
             'description' => 'Bank loan disbursement — '.$loan->bank_name,
-            'method' => 'bank_transfer',
+            'method' => $data['method'] ?? 'bank_transfer',
             'paid_at' => $data['paid_at'],
             'reference' => $data['reference'] ?? null,
             'notes' => $data['notes'] ?? null,
@@ -64,12 +68,28 @@ class LoanController extends Controller
         return back()->with('status', 'Disbursement recorded.');
     }
 
+    /**
+     * A bank-ready statement for this one loan — sanction details plus
+     * every disbursement with its date, method, cheque/reference number
+     * and receiving account, so it can be handed to the customer or the
+     * bank without having to explain the numbers by hand.
+     */
+    public function statement(Loan $loan): \Illuminate\Http\Response
+    {
+        $loan->load(['unit.project', 'customer', 'disbursements.account']);
+        $business = Business::find(Tenant::id());
+
+        return Pdf::loadView('loans.statement', compact('loan', 'business'))
+            ->download('Loan Statement - '.$loan->bank_name.' - '.$loan->customer->name.'.pdf');
+    }
+
     private function validated(Request $request): array
     {
         return $request->validate([
             'bank_name' => ['required', 'string', 'max:255'],
             'loan_account_number' => ['nullable', 'string', 'max:100'],
             'sanctioned_amount' => ['required', 'numeric', 'min:0.01'],
+            'interest_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'sanctioned_at' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);

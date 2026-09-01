@@ -19,12 +19,14 @@ class Loan extends Model
         'bank_name',
         'loan_account_number',
         'sanctioned_amount',
+        'interest_rate',
         'sanctioned_at',
         'notes',
     ];
 
     protected $casts = [
         'sanctioned_amount' => 'decimal:2',
+        'interest_rate' => 'decimal:2',
         'sanctioned_at' => 'date',
     ];
 
@@ -36,6 +38,11 @@ class Loan extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(LoanDocument::class)->latest();
     }
 
     /**

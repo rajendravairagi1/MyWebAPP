@@ -64,6 +64,7 @@ class CustomerController extends Controller
             'units.payments.invoice',
             'units.payments.account',
             'units.loan.disbursements.account',
+            'units.loan.documents',
             'followups' => fn ($q) => $q->orderByRaw("status = 'done'")->orderBy('due_at'),
             'documents' => fn ($q) => $q->latest(),
         ]);

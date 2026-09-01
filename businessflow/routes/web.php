@@ -20,6 +20,7 @@ use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\LoanDocumentController;
 use App\Http\Controllers\MaterialCreditController;
 use App\Http\Controllers\MaterialEntryController;
 use App\Http\Controllers\MeetingController;
@@ -213,6 +214,10 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::put('/loans/{loan}', [LoanController::class, 'update'])->name('loans.update');
     Route::delete('/loans/{loan}', [LoanController::class, 'destroy'])->name('loans.destroy');
     Route::post('/loans/{loan}/disbursements', [LoanController::class, 'storeDisbursement'])->name('loans.disbursements.store');
+    Route::get('/loans/{loan}/statement', [LoanController::class, 'statement'])->name('loans.statement');
+    Route::post('/loans/{loan}/documents', [LoanDocumentController::class, 'store'])->name('loan-documents.store');
+    Route::get('/loans/{loan}/documents/{document}', [LoanDocumentController::class, 'download'])->name('loan-documents.download');
+    Route::delete('/loans/{loan}/documents/{document}', [LoanDocumentController::class, 'destroy'])->name('loan-documents.destroy');
     Route::post('/project-units/{unit}/materials', [MaterialEntryController::class, 'store'])->name('material-entries.store');
     Route::put('/project-units/{unit}/materials/{entry}', [MaterialEntryController::class, 'update'])->name('material-entries.update');
     Route::delete('/project-units/{unit}/materials/{entry}', [MaterialEntryController::class, 'destroy'])->name('material-entries.destroy');
