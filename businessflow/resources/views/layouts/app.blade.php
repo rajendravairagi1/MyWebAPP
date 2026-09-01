@@ -225,6 +225,24 @@
                         </x-sidebar-link>
                     @endif
 
+                    @if (\App\Support\Tenant::isOwner())
+                        <x-sidebar-link :href="route('payment-accounts.index')" :active="request()->routeIs('payment-accounts.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                            </x-slot>
+                            {{ __('Payment Accounts') }}
+                        </x-sidebar-link>
+                    @endif
+
+                    @if (\App\Support\Tenant::isOwner())
+                        <x-sidebar-link :href="route('material-credit.index')" :active="request()->routeIs('material-credit.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25M21 7.5v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                            </x-slot>
+                            {{ __('Material Credit') }}
+                        </x-sidebar-link>
+                    @endif
+
                     @if (\App\Support\Tenant::isOwner() && \App\Support\Tenant::planAllows('team'))
                         <x-sidebar-link :href="route('team.index')" :active="request()->routeIs('team.*')">
                             <x-slot name="icon">
@@ -249,24 +267,6 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
                             </x-slot>
                             {{ __('Backup') }}
-                        </x-sidebar-link>
-                    @endif
-
-                    @if (\App\Support\Tenant::isOwner())
-                        <x-sidebar-link :href="route('payment-accounts.index')" :active="request()->routeIs('payment-accounts.*')">
-                            <x-slot name="icon">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
-                            </x-slot>
-                            {{ __('Payment Accounts') }}
-                        </x-sidebar-link>
-                    @endif
-
-                    @if (\App\Support\Tenant::isOwner())
-                        <x-sidebar-link :href="route('material-credit.index')" :active="request()->routeIs('material-credit.*')">
-                            <x-slot name="icon">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25M21 7.5v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-                            </x-slot>
-                            {{ __('Material Udhar') }}
                         </x-sidebar-link>
                     @endif
                 </nav>
