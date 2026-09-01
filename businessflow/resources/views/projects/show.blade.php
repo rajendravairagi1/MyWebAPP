@@ -129,6 +129,9 @@
                                         @if ($unit->customer)
                                             <a href="{{ route('customers.show', $unit->customer) }}" class="text-accent-600 hover:underline block mb-1">{{ $unit->customer->name }}</a>
                                         @endif
+                                        @if (\App\Support\Tenant::can('brokers') && $unit->broker)
+                                            <div class="text-xs text-gray-400 mb-1">{{ __('Broker') }}: <a href="{{ route('brokers.show', $unit->broker) }}" class="text-accent-600 hover:underline">{{ $unit->broker->name }}</a></div>
+                                        @endif
                                         <form method="POST" action="{{ route('project-units.assign') }}">
                                             @csrf
                                             <input type="hidden" name="project_unit_id" value="{{ $unit->id }}">

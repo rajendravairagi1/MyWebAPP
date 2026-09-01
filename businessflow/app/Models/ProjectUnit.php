@@ -21,6 +21,7 @@ class ProjectUnit extends Model
         'price',
         'status',
         'customer_id',
+        'broker_id',
         'commitment_date',
         'commitment_note',
         'archived_at',
@@ -46,6 +47,11 @@ class ProjectUnit extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function broker(): BelongsTo
+    {
+        return $this->belongsTo(Broker::class);
     }
 
     public function invoices(): HasMany

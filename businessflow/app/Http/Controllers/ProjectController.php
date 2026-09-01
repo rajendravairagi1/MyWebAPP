@@ -52,6 +52,7 @@ class ProjectController extends Controller
             // the customer's History or the Completed Projects page.
             'units' => fn ($q) => $q->whereNull('archived_at')->orderBy('unit_number'),
             'units.materialEntries',
+            'units.broker',
             'quotations' => fn ($q) => $q->latest(),
             'invoices' => fn ($q) => $q->latest(),
         ]);

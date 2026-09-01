@@ -9,6 +9,37 @@
     <x-text-input name="address" type="text" class="mt-1 block w-full" value="{{ old('address', $deal->address ?? '') }}" />
 </div>
 
+@if (\App\Support\Tenant::can('brokers'))
+    <div class="border border-gray-200 dark:border-slate-700 rounded-md p-3 space-y-3">
+        <x-input-label :value="__('Broker (optional)')" />
+        @if ($brokers->isNotEmpty())
+            <div class="flex gap-5 text-sm text-gray-700 dark:text-gray-300">
+                <label class="flex items-center gap-1.5">
+                    <input type="radio" x-model="brokerMode" value="existing" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                    {{ __('Existing broker') }}
+                </label>
+                <label class="flex items-center gap-1.5">
+                    <input type="radio" x-model="brokerMode" value="new" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                    {{ __('+ New broker') }}
+                </label>
+            </div>
+        @endif
+        <div x-show="brokerMode === 'existing'" @if ($brokers->isEmpty()) x-cloak @endif>
+            <select name="broker_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                <option value="">{{ __('— No broker —') }}</option>
+                @foreach ($brokers as $broker)
+                    <option value="{{ $broker->id }}" @selected(old('broker_id', $deal->broker_id ?? '') == $broker->id)>{{ $broker->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div x-show="brokerMode === 'new'" @if ($brokers->isNotEmpty()) x-cloak @endif class="grid grid-cols-2 gap-3">
+            <x-text-input name="new_broker_name" type="text" placeholder="{{ __('Broker name') }}" class="mt-1 block w-full" />
+            <x-text-input name="new_broker_phone" type="text" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+        </div>
+        <p class="text-xs text-gray-400">{{ __('So you can record their commission (% or fixed) later, from this deal\'s profit.') }}</p>
+    </div>
+@endif
+
 <div class="grid grid-cols-2 gap-4">
     <div>
         <x-input-label :value="__('Seller Name')" />

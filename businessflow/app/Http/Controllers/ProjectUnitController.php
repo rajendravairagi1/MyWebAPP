@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Project;
 use App\Models\ProjectUnit;
+use App\Support\BrokerResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -68,6 +69,9 @@ class ProjectUnitController extends Controller
             'project_unit_id' => ['required', 'integer'],
             'customer_id' => ['nullable', 'integer'],
             'commitment_date' => ['nullable', 'date'],
+            'broker_id' => ['nullable', 'integer'],
+            'new_broker_name' => ['nullable', 'string', 'max:255'],
+            'new_broker_phone' => ['nullable', 'string', 'max:30'],
         ]);
 
         $unit = ProjectUnit::findOrFail($data['project_unit_id']);
@@ -75,6 +79,7 @@ class ProjectUnitController extends Controller
         if (empty($data['customer_id'])) {
             $unit->update([
                 'customer_id' => null,
+                'broker_id' => null,
                 'status' => $unit->status === 'sold' ? $unit->status : 'available',
             ]);
             $unit->project?->syncCompletionStatus();
@@ -86,6 +91,7 @@ class ProjectUnitController extends Controller
 
         $unit->update([
             'customer_id' => $customer->id,
+            'broker_id' => BrokerResolver::resolve($data) ?? $unit->broker_id,
             'status' => $unit->status === 'available' ? 'booked' : $unit->status,
             'commitment_date' => $data['commitment_date'] ?? $unit->commitment_date,
         ]);

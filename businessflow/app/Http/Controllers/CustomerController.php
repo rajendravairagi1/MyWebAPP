@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Broker;
 use App\Models\Business;
 use App\Models\Customer;
 use App\Models\PaymentAccount;
@@ -58,6 +59,7 @@ class CustomerController extends Controller
             'quotations' => fn ($q) => $q->latest()->limit(10),
             'invoices' => fn ($q) => $q->latest()->limit(10),
             'units.project',
+            'units.broker',
             'units.invoices',
             'units.payments.invoice',
             'units.payments.account',
@@ -68,8 +70,9 @@ class CustomerController extends Controller
 
         $projects = Project::with(['units' => fn ($q) => $q->orderBy('unit_number')])->orderBy('name')->get();
         $paymentAccounts = PaymentAccount::orderBy('name')->get();
+        $brokers = Broker::orderBy('name')->get();
 
-        return view('customers.show', compact('customer', 'projects', 'paymentAccounts'));
+        return view('customers.show', compact('customer', 'projects', 'paymentAccounts', 'brokers'));
     }
 
     public function statement(Customer $customer)

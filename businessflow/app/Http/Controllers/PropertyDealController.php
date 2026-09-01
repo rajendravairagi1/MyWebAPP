@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Broker;
 use App\Models\PropertyDeal;
+use App\Support\BrokerResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -11,7 +13,7 @@ class PropertyDealController extends Controller
 {
     public function index(): View
     {
-        $deals = PropertyDeal::orderByDesc('deal_date')->orderByDesc('id')->get();
+        $deals = PropertyDeal::with('broker')->orderByDesc('deal_date')->orderByDesc('id')->get();
 
         $sold = $deals->where('status', 'sold');
 
@@ -23,12 +25,15 @@ class PropertyDealController extends Controller
             'total_profit' => (float) $sold->sum(fn (PropertyDeal $d) => $d->profit()),
         ];
 
-        return view('property-deals.index', compact('deals', 'totals'));
+        $brokers = Broker::orderBy('name')->get();
+
+        return view('property-deals.index', compact('deals', 'totals', 'brokers'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);
+        $data['broker_id'] = BrokerResolver::resolve($data);
         $data = $this->resolveStatus($data, null);
 
         PropertyDeal::create($data);
@@ -39,6 +44,7 @@ class PropertyDealController extends Controller
     public function update(Request $request, PropertyDeal $deal): RedirectResponse
     {
         $data = $this->validated($request);
+        $data['broker_id'] = BrokerResolver::resolve($data);
         $data = $this->resolveStatus($data, $deal);
 
         $deal->update($data);
@@ -85,6 +91,9 @@ class PropertyDealController extends Controller
     {
         return $request->validate([
             'property_title' => ['required', 'string', 'max:255'],
+            'broker_id' => ['nullable', 'integer'],
+            'new_broker_name' => ['nullable', 'string', 'max:255'],
+            'new_broker_phone' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:1000'],
             'seller_name' => ['nullable', 'string', 'max:255'],
             'seller_phone' => ['nullable', 'string', 'max:30'],

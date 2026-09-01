@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PropertyDeal extends Model
 {
@@ -13,6 +14,7 @@ class PropertyDeal extends Model
     protected $fillable = [
         'business_id',
         'property_title',
+        'broker_id',
         'address',
         'seller_name',
         'seller_phone',
@@ -53,5 +55,10 @@ class PropertyDeal extends Model
             'cancelled' => 'Cancelled',
             default => 'Open',
         };
+    }
+
+    public function broker(): BelongsTo
+    {
+        return $this->belongsTo(Broker::class);
     }
 }

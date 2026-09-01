@@ -15,6 +15,7 @@ class BrokerTransaction extends Model
         'business_id',
         'broker_id',
         'project_unit_id',
+        'property_deal_id',
         'type',
         'amount',
         'commission_percent',
@@ -39,6 +40,11 @@ class BrokerTransaction extends Model
     public function unit(): BelongsTo
     {
         return $this->belongsTo(ProjectUnit::class, 'project_unit_id');
+    }
+
+    public function deal(): BelongsTo
+    {
+        return $this->belongsTo(PropertyDeal::class, 'property_deal_id');
     }
 
     public function recorder(): BelongsTo

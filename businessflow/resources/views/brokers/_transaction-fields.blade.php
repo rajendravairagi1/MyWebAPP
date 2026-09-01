@@ -12,7 +12,7 @@
 
 <div x-show="type === 'commission_accrued'" x-cloak>
     <x-input-label :value="__('Property (optional)')" />
-    <select name="project_unit_id" x-model="unitId" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+    <select name="project_unit_id" x-model="unitId" x-on:change="if (unitId) dealId = ''" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
         <option value="">{{ __('— Not tied to a property —') }}</option>
         @foreach ($units as $unit)
             <option value="{{ $unit->id }}">{{ $unit->project->name }} · {{ $unit->unit_number }} ({{ \App\Support\Tenant::currencySymbol() }}{{ number_format($unit->price, 0) }})</option>
@@ -20,9 +20,19 @@
     </select>
 </div>
 
+<div x-show="type === 'commission_accrued'" x-cloak>
+    <x-input-label :value="__('Or a Property Deal (optional)')" />
+    <select name="property_deal_id" x-model="dealId" x-on:change="if (dealId) unitId = ''" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+        <option value="">{{ __('— Not tied to a deal —') }}</option>
+        @foreach ($deals as $deal)
+            <option value="{{ $deal->id }}">{{ $deal->property_title }} ({{ \App\Support\Tenant::currencySymbol() }}{{ number_format($deal->sale_price, 0) }})</option>
+        @endforeach
+    </select>
+</div>
+
 <div x-show="type === 'commission_accrued'" x-cloak class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
     <label class="inline-flex items-center gap-1.5"><input type="radio" name="commission_mode" value="fixed" x-model="mode"> {{ __('Fixed amount') }}</label>
-    <label class="inline-flex items-center gap-1.5"><input type="radio" name="commission_mode" value="percent" x-model="mode"> {{ __('% of property price') }}</label>
+    <label class="inline-flex items-center gap-1.5"><input type="radio" name="commission_mode" value="percent" x-model="mode"> {{ __('% of property / sale price') }}</label>
 </div>
 
 <div x-show="type === 'commission_accrued' && mode === 'percent'" x-cloak class="grid grid-cols-2 gap-4">

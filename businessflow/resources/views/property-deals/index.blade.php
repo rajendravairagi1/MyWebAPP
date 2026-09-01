@@ -61,6 +61,9 @@
                                     <th class="px-5 py-3 text-right">{{ __('Sale') }}</th>
                                     <th class="px-5 py-3 text-right">{{ __('Profit') }}</th>
                                     <th class="px-5 py-3 text-left">{{ __('Status') }}</th>
+                                    @if (\App\Support\Tenant::can('brokers'))
+                                        <th class="px-5 py-3 text-left">{{ __('Broker') }}</th>
+                                    @endif
                                     <th class="px-5 py-3"></th>
                                 </tr>
                             </thead>
@@ -89,6 +92,15 @@
                                                 'bg-gray-100 text-gray-500' => $deal->status === 'cancelled',
                                             ])>{{ $deal->statusLabel() }}</span>
                                         </td>
+                                        @if (\App\Support\Tenant::can('brokers'))
+                                            <td class="px-5 py-3 text-gray-600 dark:text-gray-400">
+                                                @if ($deal->broker)
+                                                    <a href="{{ route('brokers.show', $deal->broker) }}" class="text-accent-600 hover:underline">{{ $deal->broker->name }}</a>
+                                                @else
+                                                    —
+                                                @endif
+                                            </td>
+                                        @endif
                                         <td class="px-5 py-3 text-right whitespace-nowrap">
                                             <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-deal-{{ $deal->id }}')" class="text-accent-600 hover:underline text-xs">{{ __('Edit') }}</button>
                                             <form method="POST" action="{{ route('property-deals.destroy', $deal) }}" onsubmit="return confirm('{{ __('Delete this deal?') }}')" class="inline">
@@ -108,7 +120,7 @@
     </div>
 
     <x-modal name="add-deal" max-width="md" :show="$errors->has('property_title')">
-        <form method="POST" action="{{ route('property-deals.store') }}" class="p-6 space-y-4">
+        <form method="POST" action="{{ route('property-deals.store') }}" class="p-6 space-y-4" x-data="{ brokerMode: {{ $brokers->isEmpty() ? "'new'" : "'existing'" }} }">
             @csrf
             <input type="hidden" name="status" value="open">
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add Deal') }}</h2>
@@ -122,7 +134,7 @@
 
     @foreach ($deals as $deal)
         <x-modal name="edit-deal-{{ $deal->id }}" max-width="md">
-            <form method="POST" action="{{ route('property-deals.update', $deal) }}" class="p-6 space-y-4">
+            <form method="POST" action="{{ route('property-deals.update', $deal) }}" class="p-6 space-y-4" x-data="{ brokerMode: {{ $deal->broker_id ? "'existing'" : ($brokers->isEmpty() ? "'new'" : "'existing'") }} }">
                 @csrf
                 @method('PUT')
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Deal') }}</h2>

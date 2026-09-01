@@ -92,6 +92,8 @@
                                     <td class="px-5 py-3 text-gray-600 dark:text-gray-400">
                                         @if ($transaction->unit)
                                             {{ $transaction->unit->project->name }} · {{ $transaction->unit->unit_number }}
+                                        @elseif ($transaction->deal)
+                                            {{ $transaction->deal->property_title }} <span class="text-xs text-gray-400">({{ __('deal') }})</span>
                                         @else
                                             —
                                         @endif
@@ -116,7 +118,7 @@
     </div>
 
     <x-modal name="record-commission" max-width="md">
-        <form method="POST" action="{{ route('broker-transactions.store', $broker) }}" x-data="{ type: 'commission_accrued', mode: 'fixed', unitId: '', percent: '', amount: '', unitPrices: {{ \Illuminate\Support\Js::from($units->pluck('price', 'id')) }}, get computed() { return this.unitId && this.percent ? (parseFloat(this.unitPrices[this.unitId] || 0) * parseFloat(this.percent || 0) / 100) : 0 } }" class="p-6 space-y-4">
+        <form method="POST" action="{{ route('broker-transactions.store', $broker) }}" x-data="{ type: 'commission_accrued', mode: 'fixed', unitId: '', dealId: '', percent: '', amount: '', unitPrices: {{ \Illuminate\Support\Js::from($units->pluck('price', 'id')) }}, dealPrices: {{ \Illuminate\Support\Js::from($deals->pluck('sale_price', 'id')) }}, get computed() { const base = this.unitId ? (this.unitPrices[this.unitId] || 0) : (this.dealId ? (this.dealPrices[this.dealId] || 0) : 0); return base && this.percent ? (parseFloat(base) * parseFloat(this.percent || 0) / 100) : 0 } }" class="p-6 space-y-4">
             @csrf
             <input type="hidden" name="type" value="commission_accrued">
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add Commission') }}</h2>
@@ -130,7 +132,7 @@
     </x-modal>
 
     <x-modal name="record-payment" max-width="md">
-        <form method="POST" action="{{ route('broker-transactions.store', $broker) }}" x-data="{ type: 'payment_paid', mode: 'fixed', unitId: '', percent: '', amount: '', unitPrices: {} , computed: 0 }" class="p-6 space-y-4">
+        <form method="POST" action="{{ route('broker-transactions.store', $broker) }}" x-data="{ type: 'payment_paid', mode: 'fixed', unitId: '', dealId: '', percent: '', amount: '', unitPrices: {}, dealPrices: {}, computed: 0 }" class="p-6 space-y-4">
             @csrf
             <input type="hidden" name="type" value="payment_paid">
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add Payment Paid') }}</h2>
@@ -145,7 +147,7 @@
 
     @foreach ($broker->transactions as $transaction)
         <x-modal name="edit-transaction-{{ $transaction->id }}" max-width="md">
-            <form method="POST" action="{{ route('broker-transactions.update', [$broker, $transaction]) }}" x-data="{ type: '{{ $transaction->type }}', mode: '{{ $transaction->commission_percent ? 'percent' : 'fixed' }}', unitId: '{{ $transaction->project_unit_id }}', percent: '{{ $transaction->commission_percent }}', amount: '{{ $transaction->amount }}', unitPrices: {{ \Illuminate\Support\Js::from($units->pluck('price', 'id')) }}, get computed() { return this.unitId && this.percent ? (parseFloat(this.unitPrices[this.unitId] || 0) * parseFloat(this.percent || 0) / 100) : 0 } }" class="p-6 space-y-4">
+            <form method="POST" action="{{ route('broker-transactions.update', [$broker, $transaction]) }}" x-data="{ type: '{{ $transaction->type }}', mode: '{{ $transaction->commission_percent ? 'percent' : 'fixed' }}', unitId: '{{ $transaction->project_unit_id }}', dealId: '{{ $transaction->property_deal_id }}', percent: '{{ $transaction->commission_percent }}', amount: '{{ $transaction->amount }}', unitPrices: {{ \Illuminate\Support\Js::from($units->pluck('price', 'id')) }}, dealPrices: {{ \Illuminate\Support\Js::from($deals->pluck('sale_price', 'id')) }}, get computed() { const base = this.unitId ? (this.unitPrices[this.unitId] || 0) : (this.dealId ? (this.dealPrices[this.dealId] || 0) : 0); return base && this.percent ? (parseFloat(base) * parseFloat(this.percent || 0) / 100) : 0 } }" class="p-6 space-y-4">
                 @csrf
                 @method('PUT')
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Transaction') }}</h2>
