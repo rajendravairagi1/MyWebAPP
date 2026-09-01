@@ -220,8 +220,9 @@
                                         </td>
                                         <td class="px-5 py-2 text-gray-500 dark:text-gray-400">{{ $entry->account?->label() ?? '—' }}</td>
                                         <td class="px-5 py-2 text-right font-medium {{ $entry->type === 'income' ? 'text-green-600' : 'text-red-600' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($entry->amount, 0) }}</td>
-                                        <td class="px-5 py-2 text-right">
-                                            <form method="POST" action="{{ route('ledger.entries.destroy', $entry) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')">
+                                        <td class="px-5 py-2 text-right whitespace-nowrap">
+                                            <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-entry-{{ $entry->id }}')" class="text-xs text-accent-600 hover:underline mr-2">{{ __('Edit') }}</button>
+                                            <form method="POST" action="{{ route('ledger.entries.destroy', $entry) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')" class="inline">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button class="text-xs text-red-600 hover:underline">{{ __('Delete') }}</button>
@@ -303,4 +304,71 @@
             </div>
         </form>
     </x-modal>
+
+    @foreach ($entries as $entry)
+        <x-modal name="edit-entry-{{ $entry->id }}" max-width="lg">
+            <form method="POST" action="{{ route('ledger.entries.update', $entry) }}" x-data="{ type: '{{ $entry->type }}' }" class="p-6 space-y-4">
+                @csrf
+                @method('PUT')
+                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Manual Entry') }}</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label :value="__('Type')" />
+                        <select name="type" x-model="type" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            <option value="income" @selected($entry->type === 'income')>{{ __('Income') }}</option>
+                            <option value="expense" @selected($entry->type === 'expense')>{{ __('Expense') }}</option>
+                        </select>
+                    </div>
+                    <div>
+                        <x-input-label :value="__('Category (optional)')" />
+                        <x-text-input name="category" type="text" class="mt-1 block w-full" value="{{ $entry->category }}" />
+                    </div>
+                </div>
+
+                <div>
+                    <x-input-label :value="__('Description')" />
+                    <x-text-input name="description" type="text" class="mt-1 block w-full" required value="{{ $entry->description }}" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <x-input-label :value="__('Amount')" />
+                        <x-text-input name="amount" type="number" step="0.01" min="0.01" class="mt-1 block w-full" required value="{{ $entry->amount }}" />
+                    </div>
+                    <div>
+                        <x-input-label :value="__('Date')" />
+                        <x-text-input name="entry_date" type="date" value="{{ $entry->entry_date->format('Y-m-d') }}" class="mt-1 block w-full" required />
+                    </div>
+                </div>
+
+                <div>
+                    <x-input-label :value="__('Customer (optional)')" />
+                    <select name="customer_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <option value="">{{ __('None') }}</option>
+                        @foreach ($customers as $c)
+                            <option value="{{ $c->id }}" @selected($entry->customer_id === $c->id)>{{ $c->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                @if ($paymentAccounts->isNotEmpty())
+                    <div>
+                        <x-input-label x-text="type === 'expense' ? '{{ __('Paid From (optional)') }}' : '{{ __('Received In (optional)') }}'" />
+                        <select name="payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            <option value="">{{ __('— Not specified —') }}</option>
+                            @foreach ($paymentAccounts as $account)
+                                <option value="{{ $account->id }}" @selected($entry->payment_account_id === $account->id)>{{ $account->label() }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endif
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
+                    <x-primary-button>{{ __('Save') }}</x-primary-button>
+                </div>
+            </form>
+        </x-modal>
+    @endforeach
 </x-app-layout>

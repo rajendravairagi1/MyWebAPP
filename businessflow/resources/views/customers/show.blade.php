@@ -132,6 +132,13 @@
                             </button>
                         @endif
                     </div>
+                    @if (\App\Support\Tenant::isOwner())
+                        <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('{{ __('Delete this customer? Their sale history stays visible in the Ledger, and they can be restored anytime from Customers → Deleted customers.') }}')" class="text-right">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-xs text-red-600 hover:underline">{{ __('Delete customer') }}</button>
+                        </form>
+                    @endif
                 </div>
             </div>
 
@@ -186,6 +193,11 @@
                                     <span class="text-gray-700 dark:text-gray-300">{{ $unit->unit_number }}</span>
                                     <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400">#{{ $unit->id }}</span>
                                     <x-status-badge :status="$unit->status" />
+                                    <form method="POST" action="{{ route('project-units.assign') }}" onsubmit="return confirm('{{ __('Unassign this property from :name? This does not delete the property or its payment history.', ['name' => $customer->name]) }}')" class="inline">
+                                        @csrf
+                                        <input type="hidden" name="project_unit_id" value="{{ $unit->id }}">
+                                        <button class="text-xs text-red-600 hover:underline">{{ __('Unassign — wrong property?') }}</button>
+                                    </form>
                                 </div>
                                 <div class="text-xs text-gray-400 mt-0.5">{{ $unit->type }}{{ $unit->area_sqft ? ' · '.$unit->area_sqft.' sqft' : '' }}</div>
                             </div>
@@ -558,6 +570,10 @@
                                             <button class="text-xs text-accent-600 hover:underline">{{ __('Mark done') }}</button>
                                         </form>
                                     @endif
+                                    <details class="relative">
+                                        <summary class="cursor-pointer text-xs text-accent-600 hover:underline list-none [&::-webkit-details-marker]:hidden">{{ __('Edit') }}</summary>
+                                        @include('followups._edit-fields', ['followup' => $followup])
+                                    </details>
                                     <form method="POST" action="{{ route('followups.destroy', $followup) }}" onsubmit="return confirm('{{ __('Remove this follow-up?') }}')">
                                         @csrf
                                         @method('DELETE')

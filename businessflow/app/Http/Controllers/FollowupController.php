@@ -54,6 +54,26 @@ class FollowupController extends Controller
         return redirect()->route('customers.show', $data['customer_id'])->with('status', 'Follow-up scheduled.');
     }
 
+    public function update(Request $request, Followup $followup): RedirectResponse
+    {
+        $data = $request->validate([
+            'note' => ['required', 'string', 'max:1000'],
+            'category' => ['nullable', 'in:general,installment,registry,site_visit,documentation,other'],
+            'category_other' => ['nullable', 'string', 'max:100'],
+            'due_at' => ['required', 'date'],
+        ]);
+
+        $data['category'] = $data['category'] ?? 'general';
+        if ($data['category'] === 'other' && filled($data['category_other'] ?? null)) {
+            $data['category'] = $data['category_other'];
+        }
+        unset($data['category_other']);
+
+        $followup->update($data);
+
+        return back()->with('status', 'Follow-up updated.');
+    }
+
     public function complete(Followup $followup): RedirectResponse
     {
         $followup->update(['status' => 'done']);

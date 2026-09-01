@@ -32,6 +32,33 @@ class PaymentController extends Controller
         return back()->with('status', 'Payment recorded.');
     }
 
+    public function update(Request $request, Invoice $invoice, Payment $payment): RedirectResponse
+    {
+        abort_unless($payment->invoice_id === $invoice->id, 404);
+
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'method' => ['nullable', 'string', 'max:50'],
+            'payment_account_id' => ['nullable', 'integer'],
+            'paid_at' => ['required', 'date'],
+            'reference' => ['nullable', 'string', 'max:100'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $payment->update($data);
+
+        $totalPaid = $invoice->payments()->sum('amount');
+        $status = match (true) {
+            $totalPaid <= 0 => 'sent',
+            $totalPaid >= $invoice->total => 'paid',
+            default => 'partially_paid',
+        };
+
+        $invoice->forceFill(['amount_paid' => $totalPaid, 'status' => $status])->save();
+
+        return back()->with('status', 'Payment updated.');
+    }
+
     public function destroy(Invoice $invoice, Payment $payment): RedirectResponse
     {
         abort_unless($payment->invoice_id === $invoice->id, 404);

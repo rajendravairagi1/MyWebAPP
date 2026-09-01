@@ -22,6 +22,11 @@
 
                 @if ($quotation->invoices->isEmpty())
                     <a href="{{ route('quotations.edit', $quotation) }}" class="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Edit') }}</a>
+                    <form method="POST" action="{{ route('quotations.destroy', $quotation) }}" onsubmit="return confirm('{{ __('Delete this quotation? This cannot be undone.') }}')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="px-4 py-2 border border-red-200 dark:border-red-800 text-red-600 text-sm font-medium rounded-md hover:bg-red-50 dark:hover:bg-red-900/30">{{ __('Delete') }}</button>
+                    </form>
                 @endif
 
                 @if ($quotation->status === 'draft')

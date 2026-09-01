@@ -31,17 +31,48 @@
 @endif
 
 <x-modal name="loan-{{ $unit->id }}" max-width="md">
-    <div class="p-6">
+    <div class="p-6" x-data="{ editingLoan: false }">
         @if ($unit->loan)
             @php $loan = $unit->loan; @endphp
             <div class="flex items-center justify-between gap-3 mb-4">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Bank Loan') }}</h2>
-                <form method="POST" action="{{ route('loans.destroy', $loan) }}" onsubmit="return confirm('{{ __('Remove this loan record? Disbursements already recorded stay in the payment ledger.') }}')">
-                    @csrf
-                    @method('DELETE')
-                    <button class="text-xs text-red-600 hover:underline">{{ __('Remove loan') }}</button>
-                </form>
+                <div class="flex items-center gap-3 shrink-0">
+                    <button type="button" x-on:click="editingLoan = !editingLoan" class="text-xs text-accent-600 hover:underline" x-text="editingLoan ? '{{ __('Cancel') }}' : '{{ __('Edit') }}'"></button>
+                    <form method="POST" action="{{ route('loans.destroy', $loan) }}" onsubmit="return confirm('{{ __('Remove this loan record? Disbursements already recorded stay in the payment ledger.') }}')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="text-xs text-red-600 hover:underline">{{ __('Remove loan') }}</button>
+                    </form>
+                </div>
             </div>
+
+            <form method="POST" action="{{ route('loans.update', $loan) }}" x-show="editingLoan" x-cloak class="grid grid-cols-2 gap-3 mb-4 border border-gray-200 dark:border-slate-700 rounded-md p-3">
+                @csrf
+                @method('PUT')
+                <div class="col-span-2">
+                    <x-input-label :value="__('Bank')" />
+                    <input type="text" name="bank_name" value="{{ $loan->bank_name }}" required class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                </div>
+                <div>
+                    <x-input-label :value="__('Loan A/C No. (optional)')" />
+                    <input type="text" name="loan_account_number" value="{{ $loan->loan_account_number }}" class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                </div>
+                <div>
+                    <x-input-label :value="__('Sanctioned Amount')" />
+                    <input type="number" step="0.01" min="0.01" name="sanctioned_amount" value="{{ $loan->sanctioned_amount }}" required class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                </div>
+                <div>
+                    <x-input-label :value="__('Sanctioned On (optional)')" />
+                    <input type="date" name="sanctioned_at" value="{{ $loan->sanctioned_at?->format('Y-m-d') }}" class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                </div>
+                <div class="col-span-2">
+                    <x-input-label :value="__('Notes (optional)')" />
+                    <textarea name="notes" rows="2" class="mt-1 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ $loan->notes }}</textarea>
+                </div>
+                <div class="col-span-2 flex justify-end">
+                    <button class="px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('Save') }}</button>
+                </div>
+            </form>
 
             <div class="grid grid-cols-2 gap-3 mb-4">
                 <div class="bg-gray-50 dark:bg-slate-700/40 rounded-md p-3">
@@ -54,7 +85,7 @@
                 </div>
             </div>
 
-            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1 mb-4">
+            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1 mb-4" x-show="!editingLoan">
                 <div>{{ __('Bank') }}: <span class="text-gray-800 dark:text-gray-200 font-medium">{{ $loan->bank_name }}</span></div>
                 @if ($loan->loan_account_number)
                     <div>{{ __('Loan A/C No.') }}: <span class="text-gray-800 dark:text-gray-200 font-medium">{{ $loan->loan_account_number }}</span></div>

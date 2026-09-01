@@ -57,6 +57,10 @@ class ProjectUnitController extends Controller
     {
         abort_unless($unit->project_id === $project->id, 404);
 
+        if ($unit->payments()->exists()) {
+            return back()->withErrors(['delete' => "This property has payments recorded against it and can't be deleted — unassign the customer instead if it was booked by mistake."]);
+        }
+
         $unit->delete();
         $project->syncCompletionStatus();
 

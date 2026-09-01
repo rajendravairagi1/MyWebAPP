@@ -41,8 +41,13 @@
                                             <span class="text-gray-400">—</span>
                                         @endif
                                     </td>
-                                    <td class="px-5 py-3 text-right">
+                                    <td class="px-5 py-3 text-right whitespace-nowrap">
                                         <a href="{{ route('products.edit', $product) }}" class="text-accent-600 hover:underline">{{ __('Edit') }}</a>
+                                        <form method="POST" action="{{ route('products.destroy', $product) }}" onsubmit="return confirm('{{ __('Delete this product?') }}')" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="text-red-600 hover:underline ml-2">{{ __('Delete') }}</button>
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach

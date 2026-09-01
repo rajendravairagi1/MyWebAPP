@@ -21,6 +21,10 @@
             @csrf
             <button class="text-xs text-accent-600 hover:underline">{{ __('Mark done') }}</button>
         </form>
+        <details class="relative">
+            <summary class="cursor-pointer text-xs text-accent-600 hover:underline list-none [&::-webkit-details-marker]:hidden">{{ __('Edit') }}</summary>
+            @include('followups._edit-fields', ['followup' => $followup])
+        </details>
         <form method="POST" action="{{ route('followups.destroy', $followup) }}" onsubmit="return confirm('{{ __('Remove this follow-up?') }}')">
             @csrf
             @method('DELETE')

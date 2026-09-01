@@ -22,8 +22,8 @@
             </div>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 flex items-center justify-between">
-                <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('Deleting a customer cannot be undone.') }}</div>
-                <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('{{ __('Delete this customer?') }}')">
+                <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('Their sale history stays visible in the Ledger, and they can be restored anytime from Customers → Deleted customers.') }}</div>
+                <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('{{ __('Delete this customer? Their sale history stays visible in the Ledger, and they can be restored anytime from Customers → Deleted customers.') }}')">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="text-sm text-red-600 hover:underline">{{ __('Delete customer') }}</button>

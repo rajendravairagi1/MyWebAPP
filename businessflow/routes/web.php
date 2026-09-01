@@ -214,6 +214,7 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::delete('/loans/{loan}', [LoanController::class, 'destroy'])->name('loans.destroy');
     Route::post('/loans/{loan}/disbursements', [LoanController::class, 'storeDisbursement'])->name('loans.disbursements.store');
     Route::post('/project-units/{unit}/materials', [MaterialEntryController::class, 'store'])->name('material-entries.store');
+    Route::put('/project-units/{unit}/materials/{entry}', [MaterialEntryController::class, 'update'])->name('material-entries.update');
     Route::delete('/project-units/{unit}/materials/{entry}', [MaterialEntryController::class, 'destroy'])->name('material-entries.destroy');
 });
 
@@ -221,6 +222,7 @@ Route::middleware(['auth', 'verified', 'module:followups'])->group(function () {
     Route::get('/followups', [FollowupController::class, 'index'])->name('followups.index');
     Route::get('/followups/create', [FollowupController::class, 'create'])->name('followups.create');
     Route::post('/followups', [FollowupController::class, 'store'])->name('followups.store');
+    Route::put('/followups/{followup}', [FollowupController::class, 'update'])->name('followups.update');
     Route::post('/followups/{followup}/complete', [FollowupController::class, 'complete'])->name('followups.complete');
     Route::delete('/followups/{followup}', [FollowupController::class, 'destroy'])->name('followups.destroy');
 });
@@ -261,12 +263,14 @@ Route::middleware(['auth', 'verified', 'module:invoices'])->group(function () {
     Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
 
     Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
+    Route::put('/invoices/{invoice}/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/invoices/{invoice}/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'module:ledger'])->group(function () {
     Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
     Route::post('/ledger/entries', [LedgerController::class, 'storeEntry'])->name('ledger.entries.store');
+    Route::put('/ledger/entries/{entry}', [LedgerController::class, 'updateEntry'])->name('ledger.entries.update');
     Route::delete('/ledger/entries/{entry}', [LedgerController::class, 'destroyEntry'])->name('ledger.entries.destroy');
 });
 

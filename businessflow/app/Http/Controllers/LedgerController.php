@@ -94,6 +94,24 @@ class LedgerController extends Controller
         return back()->with('status', 'Ledger entry added.');
     }
 
+    public function updateEntry(Request $request, LedgerEntry $entry): RedirectResponse
+    {
+        $data = $request->validate([
+            'type' => ['required', 'in:income,expense'],
+            'category' => ['nullable', 'string', 'max:100'],
+            'description' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'payment_account_id' => ['nullable', 'integer'],
+            'entry_date' => ['required', 'date'],
+            'customer_id' => ['nullable', 'exists:customers,id'],
+            'project_id' => ['nullable', 'exists:projects,id'],
+        ]);
+
+        $entry->update($data);
+
+        return back()->with('status', 'Ledger entry updated.');
+    }
+
     public function destroyEntry(LedgerEntry $entry): RedirectResponse
     {
         $entry->delete();

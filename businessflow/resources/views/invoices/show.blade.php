@@ -26,6 +26,15 @@
                 </button>
                 @if ($invoice->payments->isEmpty())
                     <a href="{{ route('invoices.edit', $invoice) }}" class="px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Edit') }}</a>
+                    @if (! $invoice->unit_payment_id)
+                        <form method="POST" action="{{ route('invoices.destroy', $invoice) }}" onsubmit="return confirm('{{ __('Delete this invoice? This cannot be undone.') }}')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="px-4 py-2 border border-red-200 dark:border-red-800 text-red-600 text-sm font-medium rounded-md hover:bg-red-50 dark:hover:bg-red-900/30">{{ __('Delete') }}</button>
+                        </form>
+                    @endif
+                @else
+                    <span class="inline-flex items-center px-3 py-2 text-xs text-gray-400" title="{{ __('Can\'t edit or delete once a payment is recorded — remove the payment(s) below first if this invoice was created by mistake.') }}">{{ __('Edit/Delete locked — has payments recorded') }}</span>
                 @endif
                 @if ($invoice->status === 'draft')
                     <form method="POST" action="{{ route('invoices.mark-sent', $invoice) }}">
@@ -124,11 +133,37 @@
                                     @if ($payment->reference)<span class="text-gray-400">· {{ $payment->reference }}</span>@endif
                                     @if ($payment->account)<span class="text-gray-400">· {{ __('Received in') }}: {{ $payment->account->label() }}</span>@endif
                                 </div>
-                                <form method="POST" action="{{ route('payments.destroy', [$invoice, $payment]) }}" onsubmit="return confirm('{{ __('Remove this payment?') }}')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="text-xs text-red-600 hover:underline">{{ __('Remove') }}</button>
-                                </form>
+                                <div class="flex items-center gap-3 shrink-0">
+                                    <details class="relative">
+                                        <summary class="cursor-pointer text-xs text-accent-600 hover:underline list-none [&::-webkit-details-marker]:hidden">{{ __('Edit') }}</summary>
+                                        <form method="POST" action="{{ route('payments.update', [$invoice, $payment]) }}" class="absolute right-0 z-10 mt-2 w-72 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-3 rounded-md space-y-2 text-left">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="number" step="0.01" min="0.01" name="amount" value="{{ $payment->amount }}" required class="w-full text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                            <input type="date" name="paid_at" value="{{ $payment->paid_at->format('Y-m-d') }}" required class="w-full text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                            <select name="method" class="w-full text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                                @foreach (['cash' => 'Cash', 'bank_transfer' => 'Bank transfer', 'card' => 'Card', 'upi' => 'UPI', 'other' => 'Other'] as $val => $label)
+                                                    <option value="{{ $val }}" @selected($payment->method === $val)>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                            <input type="text" name="reference" value="{{ $payment->reference }}" placeholder="{{ __('Reference') }}" class="w-full text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                            @if ($paymentAccounts->isNotEmpty())
+                                                <select name="payment_account_id" class="w-full text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                                    <option value="">{{ __('— Not specified —') }}</option>
+                                                    @foreach ($paymentAccounts as $account)
+                                                        <option value="{{ $account->id }}" @selected($payment->payment_account_id === $account->id)>{{ $account->label() }}</option>
+                                                    @endforeach
+                                                </select>
+                                            @endif
+                                            <button class="w-full mt-1 px-2 py-1 bg-accent-600 text-white text-[11px] font-semibold rounded hover:bg-accent-700">{{ __('Save') }}</button>
+                                        </form>
+                                    </details>
+                                    <form method="POST" action="{{ route('payments.destroy', [$invoice, $payment]) }}" onsubmit="return confirm('{{ __('Remove this payment?') }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-xs text-red-600 hover:underline">{{ __('Remove') }}</button>
+                                    </form>
+                                </div>
                             </li>
                         @endforeach
                     </ul>

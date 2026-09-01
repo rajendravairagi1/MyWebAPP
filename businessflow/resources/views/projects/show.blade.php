@@ -254,17 +254,39 @@
                         @if ($unit->materialEntries->isNotEmpty())
                             <div class="border-t border-gray-100 dark:border-slate-700 pt-3 max-h-56 overflow-y-auto space-y-1.5">
                                 @foreach ($unit->materialEntries as $entry)
-                                    <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 gap-2">
-                                        <span>
-                                            {{ $entry->entered_on->format('d M') }} —
-                                            {{ $entry->material_name }}
-                                            <span class="{{ $entry->direction === 'in' ? 'text-green-600' : 'text-red-600' }}">{{ $entry->direction === 'in' ? '+' : '-' }}{{ rtrim(rtrim(number_format($entry->quantity, 2), '0'), '.') }} {{ $entry->unit_label }}</span>
-                                            @if ($entry->note) — {{ $entry->note }} @endif
-                                        </span>
-                                        <form method="POST" action="{{ route('material-entries.destroy', [$unit, $entry]) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')">
+                                    <div x-data="{ editing: false }">
+                                        <div class="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 gap-2" x-show="!editing">
+                                            <span>
+                                                {{ $entry->entered_on->format('d M') }} —
+                                                {{ $entry->material_name }}
+                                                <span class="{{ $entry->direction === 'in' ? 'text-green-600' : 'text-red-600' }}">{{ $entry->direction === 'in' ? '+' : '-' }}{{ rtrim(rtrim(number_format($entry->quantity, 2), '0'), '.') }} {{ $entry->unit_label }}</span>
+                                                @if ($entry->note) — {{ $entry->note }} @endif
+                                            </span>
+                                            <div class="flex items-center gap-2 shrink-0">
+                                                <button type="button" x-on:click="editing = true" class="text-accent-600 hover:underline">{{ __('Edit') }}</button>
+                                                <form method="POST" action="{{ route('material-entries.destroy', [$unit, $entry]) }}" onsubmit="return confirm('{{ __('Remove this entry?') }}')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="text-red-500 hover:underline">{{ __('Remove') }}</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <form method="POST" action="{{ route('material-entries.update', [$unit, $entry]) }}" x-show="editing" x-cloak class="grid grid-cols-2 gap-1.5 bg-gray-50 dark:bg-slate-700/40 p-2 rounded-md">
                                             @csrf
-                                            @method('DELETE')
-                                            <button class="text-red-500 hover:underline shrink-0">{{ __('Remove') }}</button>
+                                            @method('PUT')
+                                            <input type="text" name="material_name" value="{{ $entry->material_name }}" required class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                            <input type="number" step="0.01" min="0.01" name="quantity" value="{{ $entry->quantity }}" required class="text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                            <input type="text" name="unit_label" value="{{ $entry->unit_label }}" placeholder="{{ __('unit') }}" class="text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                            <select name="direction" class="text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                                <option value="in" @selected($entry->direction === 'in')>{{ __('Received') }}</option>
+                                                <option value="out" @selected($entry->direction === 'out')>{{ __('Used') }}</option>
+                                            </select>
+                                            <input type="date" name="entered_on" value="{{ $entry->entered_on->format('Y-m-d') }}" required class="text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                            <input type="text" name="note" value="{{ $entry->note }}" placeholder="{{ __('note') }}" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                            <div class="col-span-2 flex justify-end gap-2 mt-1">
+                                                <button type="button" x-on:click="editing = false" class="px-2 py-1 text-[11px] text-gray-500 dark:text-gray-400">{{ __('Cancel') }}</button>
+                                                <button class="px-2 py-1 bg-accent-600 text-white text-[11px] font-semibold rounded hover:bg-accent-700">{{ __('Save') }}</button>
+                                            </div>
                                         </form>
                                     </div>
                                 @endforeach

@@ -45,8 +45,56 @@
                     @if ($firstPayment = $unit->firstPayment())
                         <div class="text-xs text-gray-400 mt-1">{{ __('Booked with') }} {{ \App\Support\Tenant::currencySymbol() }}{{ number_format($firstPayment->amount, 0) }} <span class="text-gray-400">({{ $firstPayment->paid_at->format('d M Y') }})</span></div>
                     @endif
+                    <div class="mt-2 flex items-center justify-end gap-3">
+                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-unit')" class="text-xs text-accent-600 hover:underline">{{ __('Edit') }}</button>
+                        <form method="POST" action="{{ route('project-units.destroy', [$unit->project, $unit]) }}" onsubmit="return confirm('{{ __('Delete this property? This cannot be undone.') }}')">
+                            @csrf
+                            @method('DELETE')
+                            <button class="text-xs text-red-600 hover:underline">{{ __('Delete') }}</button>
+                        </form>
+                    </div>
                 </div>
             </div>
+
+            <x-modal name="edit-unit" max-width="md">
+                <form method="POST" action="{{ route('project-units.update', [$unit->project, $unit]) }}" class="p-6 space-y-4">
+                    @csrf
+                    @method('PUT')
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Property') }}</h2>
+                    <div>
+                        <x-input-label :value="__('Unit number')" />
+                        <x-text-input name="unit_number" type="text" class="mt-1 block w-full" value="{{ $unit->unit_number }}" required />
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label :value="__('Type (optional)')" />
+                            <x-text-input name="type" type="text" class="mt-1 block w-full" value="{{ $unit->type }}" />
+                        </div>
+                        <div>
+                            <x-input-label :value="__('Area sqft (optional)')" />
+                            <x-text-input name="area_sqft" type="number" step="0.01" min="0" class="mt-1 block w-full" value="{{ $unit->area_sqft }}" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label :value="__('Price')" />
+                            <x-text-input name="price" type="number" step="0.01" min="0" class="mt-1 block w-full" value="{{ $unit->price }}" required />
+                        </div>
+                        <div>
+                            <x-input-label :value="__('Status')" />
+                            <select name="status" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <option value="available" @selected($unit->status === 'available')>{{ __('Available') }}</option>
+                                <option value="booked" @selected($unit->status === 'booked')>{{ __('Booked') }}</option>
+                                <option value="sold" @selected($unit->status === 'sold')>{{ __('Sold') }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
+                        <x-primary-button>{{ __('Save') }}</x-primary-button>
+                    </div>
+                </form>
+            </x-modal>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="flex border-b border-gray-100 dark:border-slate-700 text-sm overflow-x-auto">
