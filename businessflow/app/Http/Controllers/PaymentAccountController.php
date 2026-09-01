@@ -67,10 +67,10 @@ class PaymentAccountController extends Controller
             ->get()
             ->each(function (ProjectCost $cost) use ($rows) {
                 $rows->push((object) [
-                    'date' => $cost->spent_on,
+                    'date' => $cost->moneyMovedOn(),
                     'direction' => 'out',
                     'amount' => (float) $cost->amount,
-                    'description' => $cost->description,
+                    'description' => $cost->is_credit ? $cost->description.' ('.__('udhar settled').')' : $cost->description,
                     'context' => $cost->project?->name,
                     'party' => $cost->vendor,
                     'link' => $cost->project_id ? route('projects.show', $cost->project_id) : null,

@@ -20,6 +20,7 @@ use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\LoanController;
+use App\Http\Controllers\MaterialCreditController;
 use App\Http\Controllers\MaterialEntryController;
 use App\Http\Controllers\MeetingController;
 use App\Http\Controllers\MigrateController;
@@ -128,6 +129,7 @@ Route::middleware(['auth', 'verified', 'owner'])->group(function () {
     Route::post('/payment-accounts', [PaymentAccountController::class, 'store'])->name('payment-accounts.store');
     Route::put('/payment-accounts/{account}', [PaymentAccountController::class, 'update'])->name('payment-accounts.update');
     Route::delete('/payment-accounts/{account}', [PaymentAccountController::class, 'destroy'])->name('payment-accounts.destroy');
+    Route::get('/material-credit', [MaterialCreditController::class, 'index'])->name('material-credit.index');
 });
 
 Route::middleware(['auth', 'verified', 'owner', 'plan:team'])->group(function () {
@@ -190,6 +192,7 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::put('/projects/{project}/costs/{cost}', [ProjectCostController::class, 'update'])->name('project-costs.update');
     Route::delete('/projects/{project}/costs/{cost}', [ProjectCostController::class, 'destroy'])->name('project-costs.destroy');
     Route::get('/projects/{project}/costs/{cost}/bill', [ProjectCostController::class, 'bill'])->name('project-costs.bill');
+    Route::post('/projects/{project}/costs/{cost}/settle', [ProjectCostController::class, 'settle'])->name('project-costs.settle');
     Route::post('/projects/{project}/units', [ProjectUnitController::class, 'store'])->name('project-units.store');
     Route::put('/projects/{project}/units/{unit}', [ProjectUnitController::class, 'update'])->name('project-units.update');
     Route::delete('/projects/{project}/units/{unit}', [ProjectUnitController::class, 'destroy'])->name('project-units.destroy');

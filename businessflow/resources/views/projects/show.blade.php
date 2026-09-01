@@ -275,7 +275,7 @@
             @if ($canFinancials)
             <div x-data="{
                     fixedCategories: ['land', 'construction', 'material', 'labor', 'approval', 'marketing'],
-                    editingCost: { id: null, categorySelect: 'land', categoryOther: '', description: '', amount: '', spent_on: '', vendor: '', payment_account_id: '', notes: '', bill_name: null },
+                    editingCost: { id: null, categorySelect: 'land', categoryOther: '', description: '', amount: '', spent_on: '', vendor: '', payment_account_id: '', is_credit: false, notes: '', bill_name: null },
                     openEdit(cost) {
                         const isFixed = this.fixedCategories.includes(cost.category);
                         this.editingCost = {
@@ -315,7 +315,15 @@
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400 capitalize">{{ $entry->category }}</td>
                                     <td class="px-5 py-2 text-gray-900 dark:text-gray-100">{{ $entry->description }}</td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $entry->vendor }}</td>
-                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $entry->account?->label() ?? '—' }}</td>
+                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400">
+                                        @if ($entry->isOutstandingCredit())
+                                            <a href="{{ route('material-credit.index') }}" class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:underline">{{ __('Udhar (baki)') }}</a>
+                                        @elseif ($entry->is_credit)
+                                            {{ $entry->account?->label() ?? '—' }} <span class="text-xs text-gray-400">({{ __('udhar paid') }})</span>
+                                        @else
+                                            {{ $entry->account?->label() ?? '—' }}
+                                        @endif
+                                    </td>
                                     <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">{{ number_format($entry->amount, 2) }}</td>
                                     <td class="px-5 py-2">
                                         @if ($entry->bill_path)
@@ -333,6 +341,7 @@
                                             'spent_on' => $entry->spent_on->format('Y-m-d'),
                                             'vendor' => $entry->vendor,
                                             'payment_account_id' => $entry->payment_account_id,
+                                            'is_credit' => $entry->is_credit && ! $entry->credit_settled_at,
                                             'notes' => $entry->notes,
                                             'bill_name' => $entry->bill_name,
                                         ]))" class="text-xs text-accent-600 hover:underline mr-3">{{ __('Edit') }}</button>
@@ -351,7 +360,7 @@
             </div>
 
             <x-modal name="add-cost" :show="$errors->has('category') || $errors->has('description') || $errors->has('amount') || $errors->has('spent_on') || $errors->has('bill')">
-                <form method="POST" action="{{ route('project-costs.store', $project) }}" enctype="multipart/form-data" class="p-6 space-y-4" x-data="{ category: 'land' }">
+                <form method="POST" action="{{ route('project-costs.store', $project) }}" enctype="multipart/form-data" class="p-6 space-y-4" x-data="{ category: 'land', isCredit: false }">
                     @csrf
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add a Payment') }}</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Record money you paid out for this project.') }}</p>
@@ -396,8 +405,16 @@
                         <p class="mt-1 text-xs text-gray-400">{{ __('Who you gave this money to. Leave blank if not needed.') }}</p>
                     </div>
 
+                    <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3">
+                        <input id="is_credit" name="is_credit" type="checkbox" value="1" x-model="isCredit" class="mt-0.5 rounded border-gray-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500">
+                        <label for="is_credit" class="text-sm text-amber-800 dark:text-amber-300">
+                            {{ __('Udhar liya — vendor se maal/labour liya, abhi payment nahi kiya.') }}
+                            <span class="block text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">{{ __('Shows on the Material Udhar page until you mark it paid — no account is picked now.') }}</span>
+                        </label>
+                    </div>
+
                     @if ($paymentAccounts->isNotEmpty())
-                        <div>
+                        <div x-show="!isCredit" x-cloak>
                             <x-input-label for="payment_account_id" :value="__('Paid From (optional)')" />
                             <select id="payment_account_id" name="payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 <option value="">{{ __('— Not specified —') }}</option>
@@ -475,8 +492,16 @@
                         <input id="edit_vendor" name="vendor" type="text" x-model="editingCost.vendor" placeholder="{{ __('e.g. Ram Lal Cement Store, Contractor name') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     </div>
 
+                    <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3">
+                        <input id="edit_is_credit" name="is_credit" type="checkbox" value="1" x-model="editingCost.is_credit" class="mt-0.5 rounded border-gray-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500">
+                        <label for="edit_is_credit" class="text-sm text-amber-800 dark:text-amber-300">
+                            {{ __('Udhar liya — vendor se maal/labour liya, abhi payment nahi kiya.') }}
+                            <span class="block text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">{{ __('Shows on the Material Udhar page until you mark it paid — no account is picked now.') }}</span>
+                        </label>
+                    </div>
+
                     @if ($paymentAccounts->isNotEmpty())
-                        <div>
+                        <div x-show="!editingCost.is_credit" x-cloak>
                             <x-input-label for="edit_payment_account_id" :value="__('Paid From (optional)')" />
                             <select id="edit_payment_account_id" name="payment_account_id" x-model="editingCost.payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 <option value="">{{ __('— Not specified —') }}</option>

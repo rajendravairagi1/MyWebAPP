@@ -20,6 +20,8 @@ class ProjectCost extends Model
         'spent_on',
         'vendor',
         'payment_account_id',
+        'is_credit',
+        'credit_settled_at',
         'notes',
         'bill_path',
         'bill_name',
@@ -28,6 +30,8 @@ class ProjectCost extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'spent_on' => 'date',
+        'is_credit' => 'boolean',
+        'credit_settled_at' => 'date',
     ];
 
     public function project(): BelongsTo
@@ -38,5 +42,24 @@ class ProjectCost extends Model
     public function account(): BelongsTo
     {
         return $this->belongsTo(PaymentAccount::class, 'payment_account_id');
+    }
+
+    /**
+     * Material/labor taken on credit ("udhar") from a vendor, still
+     * unpaid — no money has actually left any account for it yet.
+     */
+    public function isOutstandingCredit(): bool
+    {
+        return $this->is_credit && ! $this->credit_settled_at;
+    }
+
+    /**
+     * The date money actually moved for this cost — the original spend
+     * date normally, but the settlement date once a credit purchase is
+     * paid off (that's when it really left the account).
+     */
+    public function moneyMovedOn(): \Illuminate\Support\Carbon
+    {
+        return $this->credit_settled_at ?? $this->spent_on;
     }
 }

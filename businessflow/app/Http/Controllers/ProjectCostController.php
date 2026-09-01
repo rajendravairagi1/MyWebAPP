@@ -13,22 +13,10 @@ class ProjectCostController extends Controller
 {
     public function store(Request $request, Project $project): RedirectResponse
     {
-        $data = $request->validate([
-            'category' => ['required', 'in:land,construction,material,labor,approval,marketing,other'],
-            'category_other' => ['nullable', 'string', 'max:100'],
-            'description' => ['required', 'string', 'max:255'],
-            'amount' => ['required', 'numeric', 'min:0.01'],
-            'spent_on' => ['required', 'date'],
-            'vendor' => ['nullable', 'string', 'max:255'],
-            'payment_account_id' => ['nullable', 'integer'],
-            'notes' => ['nullable', 'string', 'max:1000'],
-            'bill' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,pdf,webp'],
-        ]);
+        $data = $request->validate($this->rules());
 
-        if ($data['category'] === 'other' && filled($data['category_other'] ?? null)) {
-            $data['category'] = $data['category_other'];
-        }
-        unset($data['category_other']);
+        $data = $this->applyCategory($data);
+        $data = $this->applyCreditRules($request, $data);
 
         if ($request->hasFile('bill')) {
             $file = $request->file('bill');
@@ -39,29 +27,17 @@ class ProjectCostController extends Controller
 
         $project->costs()->create($data);
 
-        return back()->with('status', 'Payment added.');
+        return back()->with('status', $data['is_credit'] ? 'Payment added — marked as Udhar (unpaid), showing on the Material Udhar page.' : 'Payment added.');
     }
 
     public function update(Request $request, Project $project, ProjectCost $cost): RedirectResponse
     {
         abort_unless($cost->project_id === $project->id, 404);
 
-        $data = $request->validate([
-            'category' => ['required', 'in:land,construction,material,labor,approval,marketing,other'],
-            'category_other' => ['nullable', 'string', 'max:100'],
-            'description' => ['required', 'string', 'max:255'],
-            'amount' => ['required', 'numeric', 'min:0.01'],
-            'spent_on' => ['required', 'date'],
-            'vendor' => ['nullable', 'string', 'max:255'],
-            'payment_account_id' => ['nullable', 'integer'],
-            'notes' => ['nullable', 'string', 'max:1000'],
-            'bill' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,pdf,webp'],
-        ]);
+        $data = $request->validate($this->rules());
 
-        if ($data['category'] === 'other' && filled($data['category_other'] ?? null)) {
-            $data['category'] = $data['category_other'];
-        }
-        unset($data['category_other']);
+        $data = $this->applyCategory($data);
+        $data = $this->applyCreditRules($request, $data);
 
         if ($request->hasFile('bill')) {
             if ($cost->bill_path) {
@@ -76,6 +52,68 @@ class ProjectCostController extends Controller
         $cost->update($data);
 
         return back()->with('status', 'Payment updated.');
+    }
+
+    /**
+     * Settle an outstanding "udhar" — the money actually leaves an
+     * account only now, on this date, not on the original spend date.
+     */
+    public function settle(Request $request, Project $project, ProjectCost $cost): RedirectResponse
+    {
+        abort_unless($cost->project_id === $project->id, 404);
+        abort_unless($cost->isOutstandingCredit(), 422, 'This entry is not an outstanding credit purchase.');
+
+        $data = $request->validate([
+            'payment_account_id' => ['required', 'integer'],
+            'credit_settled_at' => ['required', 'date'],
+        ]);
+
+        $cost->update($data);
+
+        return back()->with('status', 'Udhar marked as paid.');
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'category' => ['required', 'in:land,construction,material,labor,approval,marketing,other'],
+            'category_other' => ['nullable', 'string', 'max:100'],
+            'description' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'spent_on' => ['required', 'date'],
+            'vendor' => ['nullable', 'string', 'max:255'],
+            'payment_account_id' => ['nullable', 'integer'],
+            'is_credit' => ['nullable', 'boolean'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+            'bill' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,pdf,webp'],
+        ];
+    }
+
+    protected function applyCategory(array $data): array
+    {
+        if ($data['category'] === 'other' && filled($data['category_other'] ?? null)) {
+            $data['category'] = $data['category_other'];
+        }
+        unset($data['category_other']);
+
+        return $data;
+    }
+
+    /**
+     * Udhar (credit) means nothing has been paid yet — no account, no
+     * settle date, regardless of what the hidden dropdown happened to
+     * submit. Un-checking it just means this was a normal payment.
+     */
+    protected function applyCreditRules(Request $request, array $data): array
+    {
+        $data['is_credit'] = $request->boolean('is_credit');
+
+        if ($data['is_credit']) {
+            $data['payment_account_id'] = null;
+            $data['credit_settled_at'] = null;
+        }
+
+        return $data;
     }
 
     public function destroy(Project $project, ProjectCost $cost): RedirectResponse

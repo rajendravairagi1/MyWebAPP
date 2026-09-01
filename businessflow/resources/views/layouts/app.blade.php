@@ -251,6 +251,15 @@
                             {{ __('Payment Accounts') }}
                         </x-sidebar-link>
                     @endif
+
+                    @if (\App\Support\Tenant::isOwner())
+                        <x-sidebar-link :href="route('material-credit.index')" :active="request()->routeIs('material-credit.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25M21 7.5v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+                            </x-slot>
+                            {{ __('Material Udhar') }}
+                        </x-sidebar-link>
+                    @endif
                 </nav>
             </aside>
 
