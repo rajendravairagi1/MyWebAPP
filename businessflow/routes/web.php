@@ -210,6 +210,8 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::put('/project-units/{unit}/payments/{payment}', [UnitPaymentController::class, 'update'])->name('unit-payments.update');
     Route::delete('/project-units/{unit}/payments/{payment}', [UnitPaymentController::class, 'destroy'])->name('unit-payments.destroy');
 
+    Route::get('/loans', [LoanController::class, 'index'])->name('loans.index');
+    Route::get('/loans/{loan}', [LoanController::class, 'show'])->name('loans.show');
     Route::post('/project-units/{unit}/loan', [LoanController::class, 'store'])->name('loans.store');
     Route::put('/loans/{loan}', [LoanController::class, 'update'])->name('loans.update');
     Route::delete('/loans/{loan}', [LoanController::class, 'destroy'])->name('loans.destroy');

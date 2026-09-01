@@ -4,15 +4,46 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\Loan;
+use App\Models\PaymentAccount;
 use App\Models\ProjectUnit;
 use App\Support\Tenant;
 use App\Support\UnitPaymentRecorder;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class LoanController extends Controller
 {
+    /**
+     * Every bank loan across every customer, one row each — the "which
+     * customer owes/received what from which bank" list that used to
+     * only exist buried one property at a time on each customer's page.
+     */
+    public function index(): View
+    {
+        $loans = Loan::with(['customer', 'unit.project'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        $totals = [
+            'count' => $loans->count(),
+            'sanctioned' => (float) $loans->sum('sanctioned_amount'),
+            'disbursed' => (float) $loans->sum(fn (Loan $l) => $l->totalDisbursed()),
+            'remaining' => (float) $loans->sum(fn (Loan $l) => $l->remainingToDisburse()),
+        ];
+
+        return view('loans.index', compact('loans', 'totals'));
+    }
+
+    public function show(Loan $loan): View
+    {
+        $loan->load(['customer', 'unit.project', 'disbursements.account', 'documents']);
+        $accounts = PaymentAccount::orderBy('name')->get();
+
+        return view('loans.show', compact('loan', 'accounts'));
+    }
+
     public function store(Request $request, ProjectUnit $unit): RedirectResponse
     {
         abort_if(! $unit->customer_id, 422, 'Assign this property to a customer before adding a bank loan.');

@@ -117,6 +117,15 @@
                         </x-sidebar-link>
                     @endif
 
+                    @if (\App\Support\Tenant::can('projects'))
+                        <x-sidebar-link :href="route('loans.index')" :active="request()->routeIs('loans.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21" />
+                            </x-slot>
+                            {{ __('Loans') }}
+                        </x-sidebar-link>
+                    @endif
+
                     @if (\App\Support\Tenant::can('customers'))
                         <x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
                             <x-slot name="icon">
