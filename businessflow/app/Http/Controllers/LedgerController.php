@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BrokerTransaction;
 use App\Models\Customer;
 use App\Models\LedgerEntry;
 use App\Models\PaymentAccount;
@@ -33,6 +34,11 @@ class LedgerController extends Controller
         // term rather than mixed into Purchases/collected-from-units.
         $dealsProfit = (float) PropertyDeal::where('status', 'sold')->get()->sum(fn (PropertyDeal $d) => $d->profit());
 
+        // Same cash-basis rule as the rest of this page — commission
+        // owed to a broker but not yet paid hasn't left the business, so
+        // only the paid-out portion counts against profit.
+        $brokerCommissionPaid = (float) BrokerTransaction::where('type', 'payment_paid')->sum('amount');
+
         $totalSaleValue = (float) $soldUnits->sum('price');
         $totalCollected = (float) $soldUnits->sum(fn ($u) => $u->totalCollected());
         $totalOutstanding = (float) $soldUnits->sum(fn ($u) => $u->totalOutstanding());
@@ -40,7 +46,7 @@ class LedgerController extends Controller
         // Profit is on money actually in hand, not the full booked sale
         // value — an unpaid/outstanding sale isn't profit until it's
         // collected, and a written-off balance never will be.
-        $netProfit = $totalCollected + $manualIncome + $dealsProfit - $totalPurchases;
+        $netProfit = $totalCollected + $manualIncome + $dealsProfit - $totalPurchases - $brokerCommissionPaid;
 
         $projects = Project::withCount('units')->orderBy('name')->get()->map(function (Project $project) use ($soldUnits) {
             $units = $soldUnits->where('project_id', $project->id);
@@ -72,7 +78,7 @@ class LedgerController extends Controller
 
         return view('ledger.index', compact(
             'totalSaleValue', 'totalCollected', 'totalOutstanding', 'totalPurchases', 'netProfit',
-            'manualIncome', 'manualExpense', 'dealsProfit', 'deals', 'projects', 'customerRows', 'entries', 'customers', 'allProjects', 'paymentAccounts'
+            'manualIncome', 'manualExpense', 'dealsProfit', 'brokerCommissionPaid', 'deals', 'projects', 'customerRows', 'entries', 'customers', 'allProjects', 'paymentAccounts'
         ));
     }
 

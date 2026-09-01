@@ -34,6 +34,16 @@
                     <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'record-payment')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
                         {{ __('+ Add Payment Paid') }}
                     </button>
+                    <a href="{{ route('brokers.statement', $broker) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                        {{ __('Download Statement (PDF)') }}
+                    </a>
+                    @if ($broker->balance() > 0)
+                        <a href="{{ route('brokers.invoice', $broker) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                            {{ __('Download Invoice (PDF)') }}
+                        </a>
+                    @endif
                     <form method="POST" action="{{ route('brokers.destroy', $broker) }}" onsubmit="return confirm('{{ __('Delete this broker and all their transactions? This cannot be undone.') }}')">
                         @csrf
                         @method('DELETE')
@@ -113,6 +123,41 @@
                         </tbody>
                     </table>
                 @endif
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">
+                    {{ __('Documents') }} ({{ $broker->documents->count() }})
+                </div>
+                <p class="px-5 pt-3 text-xs text-gray-400">{{ __('Agreements, KYC, or anything else worth keeping with this broker.') }}</p>
+
+                @if ($broker->documents->isNotEmpty())
+                    <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm mt-2">
+                        @foreach ($broker->documents as $document)
+                            <li class="px-5 py-3 flex items-center justify-between gap-4">
+                                <a href="{{ route('broker-documents.download', [$broker, $document]) }}" class="flex items-center gap-2 min-w-0 text-accent-600 hover:underline">
+                                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                                    <span class="truncate">{{ $document->name }}</span>
+                                </a>
+                                <div class="flex items-center gap-3 shrink-0 text-xs text-gray-400">
+                                    <span>{{ $document->humanSize() }}</span>
+                                    <span>{{ $document->created_at->format('d M Y') }}</span>
+                                    <form method="POST" action="{{ route('broker-documents.destroy', [$broker, $document]) }}" onsubmit="return confirm('{{ __('Delete this document?') }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-red-600 hover:underline">{{ __('Delete') }}</button>
+                                    </form>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+
+                <form method="POST" action="{{ route('broker-documents.store', $broker) }}" enctype="multipart/form-data" class="p-5 border-t border-gray-100 dark:border-slate-700 flex flex-wrap items-center gap-3">
+                    @csrf
+                    <input name="file" type="file" required class="block text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
+                    <x-primary-button>{{ __('Upload') }}</x-primary-button>
+                </form>
             </div>
         </div>
     </div>

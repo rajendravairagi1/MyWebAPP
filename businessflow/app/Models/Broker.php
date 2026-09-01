@@ -24,6 +24,11 @@ class Broker extends Model
         return $this->hasMany(BrokerTransaction::class)->latest('transaction_date')->latest('id');
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(BrokerDocument::class)->latest();
+    }
+
     public function totalCommissionAccrued(): float
     {
         return (float) $this->transactions()->where('type', 'commission_accrued')->sum('amount');

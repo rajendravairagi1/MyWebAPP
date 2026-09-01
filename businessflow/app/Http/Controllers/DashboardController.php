@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BrokerTransaction;
 use App\Models\Customer;
 use App\Models\Followup;
 use App\Models\Invoice;
@@ -35,6 +36,12 @@ class DashboardController extends Controller
         $portfolioCost = (float) ProjectCost::sum('amount');
         $portfolioRevenue = (float) Invoice::whereNotNull('project_id')->sum('amount_paid');
 
+        // Only what's actually been paid out to a broker counts against
+        // profit — commission accrued but not yet paid isn't money that's
+        // left the business, same cash-basis logic used everywhere else
+        // on this page.
+        $brokerCommissionPaid = (float) BrokerTransaction::where('type', 'payment_paid')->sum('amount');
+
         $dueFollowups = Followup::with('customer')
             ->where('status', 'pending')
             ->where('due_at', '<=', now()->addDay())
@@ -54,10 +61,11 @@ class DashboardController extends Controller
             'ongoingProjectCount' => $projects->where('status', 'ongoing')->count(),
             'portfolioCost' => $portfolioCost,
             'portfolioRevenue' => $portfolioRevenue,
-            'portfolioProfit' => $portfolioRevenue - $portfolioCost + $dealsProfit,
+            'portfolioProfit' => $portfolioRevenue - $portfolioCost + $dealsProfit - $brokerCommissionPaid,
             'dealsOpenCount' => $dealsOpenCount,
             'dealsSoldCount' => $dealsSoldCount,
             'dealsProfit' => $dealsProfit,
+            'brokerCommissionPaid' => $brokerCommissionPaid,
             'dueFollowups' => $dueFollowups,
         ]);
     }

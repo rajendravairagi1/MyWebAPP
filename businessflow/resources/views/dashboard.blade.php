@@ -53,6 +53,9 @@
                     @if ($dealsProfit != 0)
                         <p class="text-xs text-gray-400 mt-3">{{ __('Profit/Loss includes :amount profit from Property Deals (their purchase/sale amounts aren\'t counted in Cost/Received since those properties were never yours).', ['amount' => \App\Support\Tenant::currencySymbol().number_format($dealsProfit, 0)]) }}</p>
                     @endif
+                    @if ($brokerCommissionPaid != 0)
+                        <p class="text-xs text-gray-400 mt-1">{{ __(':amount paid out in broker commission is already deducted from Profit/Loss.', ['amount' => \App\Support\Tenant::currencySymbol().number_format($brokerCommissionPaid, 0)]) }}</p>
+                    @endif
 
                     @if ($projects->isNotEmpty())
                         <div class="mt-6 pt-5 border-t border-gray-100 dark:border-slate-700">

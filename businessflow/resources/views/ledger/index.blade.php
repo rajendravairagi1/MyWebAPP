@@ -45,9 +45,12 @@
                 </div>
             </div>
             <p class="text-xs text-gray-400 -mt-3">
-                {{ __('Total Sales is the full booked value (for reference only). Profit = Collected + manual income + property deal profit − Purchases — only money actually received counts as profit; Outstanding isn\'t profit until it\'s collected.') }}
+                {{ __('Total Sales is the full booked value (for reference only). Profit = Collected + manual income + property deal profit − Purchases − broker commission paid — only money actually received/paid counts; Outstanding isn\'t profit until it\'s collected.') }}
                 @if ($dealsProfit != 0)
                     {{ __('Includes :amount profit from Property Deals.', ['amount' => \App\Support\Tenant::currencySymbol().number_format($dealsProfit, 0)]) }}
+                @endif
+                @if ($brokerCommissionPaid != 0)
+                    {{ __(':amount paid out in broker commission is deducted.', ['amount' => \App\Support\Tenant::currencySymbol().number_format($brokerCommissionPaid, 0)]) }}
                 @endif
             </p>
 

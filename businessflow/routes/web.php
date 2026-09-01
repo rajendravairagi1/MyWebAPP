@@ -5,6 +5,7 @@ use App\Http\Controllers\AvailablePropertiesController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\BrokerController;
+use App\Http\Controllers\BrokerDocumentController;
 use App\Http\Controllers\BuilderController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\BusinessSwitchController;
@@ -173,6 +174,11 @@ Route::middleware(['auth', 'verified', 'module:brokers'])->group(function () {
     Route::post('/brokers/{broker}/transactions', [BrokerController::class, 'storeTransaction'])->name('broker-transactions.store');
     Route::put('/brokers/{broker}/transactions/{transaction}', [BrokerController::class, 'updateTransaction'])->name('broker-transactions.update');
     Route::delete('/brokers/{broker}/transactions/{transaction}', [BrokerController::class, 'destroyTransaction'])->name('broker-transactions.destroy');
+    Route::get('/brokers/{broker}/statement', [BrokerController::class, 'statement'])->name('brokers.statement');
+    Route::get('/brokers/{broker}/invoice', [BrokerController::class, 'invoice'])->name('brokers.invoice');
+    Route::post('/brokers/{broker}/documents', [BrokerDocumentController::class, 'store'])->name('broker-documents.store');
+    Route::get('/brokers/{broker}/documents/{document}', [BrokerDocumentController::class, 'download'])->name('broker-documents.download');
+    Route::delete('/brokers/{broker}/documents/{document}', [BrokerDocumentController::class, 'destroy'])->name('broker-documents.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'module:property_deals'])->group(function () {

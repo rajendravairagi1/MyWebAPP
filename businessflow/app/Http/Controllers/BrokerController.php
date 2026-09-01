@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Broker;
 use App\Models\BrokerTransaction;
+use App\Models\Business;
 use App\Models\ProjectUnit;
 use App\Models\PropertyDeal;
+use App\Support\Tenant;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -28,7 +31,7 @@ class BrokerController extends Controller
 
     public function show(Broker $broker): View
     {
-        $broker->load('transactions.unit.project', 'transactions.deal');
+        $broker->load('transactions.unit.project', 'transactions.deal', 'documents');
         $units = ProjectUnit::with('project')
             ->where('status', '!=', 'available')
             ->whereNull('archived_at')
@@ -40,6 +43,39 @@ class BrokerController extends Controller
         $deals = PropertyDeal::whereNotNull('sale_price')->orderByDesc('deal_date')->get();
 
         return view('brokers.show', compact('broker', 'units', 'deals'));
+    }
+
+    /**
+     * Full ledger for this broker — every commission earned and every
+     * payment paid out, with the running balance — so it can be handed
+     * over as proof of account instead of reading numbers off screen.
+     */
+    public function statement(Broker $broker): \Illuminate\Http\Response
+    {
+        $broker->load('transactions.unit.project', 'transactions.deal');
+        $business = Business::find(Tenant::id());
+
+        return Pdf::loadView('brokers.statement', compact('broker', 'business'))
+            ->download('Broker Statement - '.$broker->name.'.pdf');
+    }
+
+    /**
+     * A billing document for the balance currently due — every commission
+     * line earned, less what's already been paid, netting to the amount
+     * being asked for now. Meant to actually hand or send to the broker,
+     * unlike the full Statement which is a record of everything that
+     * ever happened (earned and paid) rather than a bill.
+     */
+    public function invoice(Broker $broker): \Illuminate\Http\Response
+    {
+        abort_if($broker->balance() <= 0, 422, 'Nothing is currently owed to this broker.');
+
+        $broker->load('transactions.unit.project', 'transactions.deal');
+        $business = Business::find(Tenant::id());
+        $commissionLines = $broker->transactions->where('type', 'commission_accrued');
+
+        return Pdf::loadView('brokers.invoice', compact('broker', 'business', 'commissionLines'))
+            ->download('Commission Invoice - '.$broker->name.'.pdf');
     }
 
     public function update(Request $request, Broker $broker): RedirectResponse
