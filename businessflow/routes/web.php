@@ -35,6 +35,7 @@ use App\Http\Controllers\PropertyDealController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
+use App\Http\Controllers\PropertyShareController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReportController;
@@ -53,6 +54,13 @@ Route::get('/', function () {
 });
 
 Route::get('/demo', DemoLoginController::class)->name('demo.login');
+
+// Public, no-login property brochure — a link generated from inside the
+// app and handed to a customer directly, so it deliberately sits outside
+// every auth/tenant-gated group above.
+Route::get('/p/{token}', [PropertyShareController::class, 'show'])->name('property-share.show');
+Route::get('/p/{token}/pdf', [PropertyShareController::class, 'pdf'])->name('property-share.pdf');
+Route::get('/p/{token}/photos/{media}', [PropertyShareController::class, 'photo'])->name('property-share.photo');
 
 Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
@@ -209,6 +217,7 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::post('/project-units/{unit}/recover', [ProjectUnitController::class, 'recover'])->name('project-units.recover');
     Route::post('/project-units/{unit}/commitment', [ProjectUnitController::class, 'updateCommitment'])->name('project-units.commitment');
     Route::get('/project-units/{unit}', [ProjectUnitController::class, 'show'])->name('project-units.show');
+    Route::post('/project-units/{unit}/share', [PropertyShareController::class, 'generate'])->name('property-share.generate');
     Route::post('/project-units/{unit}/media', [UnitMediaController::class, 'store'])->name('unit-media.store');
     Route::get('/project-units/{unit}/media/{media}', [UnitMediaController::class, 'show'])->name('unit-media.show');
     Route::get('/project-units/{unit}/media/{media}/download', [UnitMediaController::class, 'download'])->name('unit-media.download');

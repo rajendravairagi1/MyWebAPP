@@ -44,6 +44,21 @@ class ProjectUnit extends Model
         return $this->belongsTo(Project::class);
     }
 
+    /**
+     * The token used in this property's public, no-login share link —
+     * generated once on first use and kept stable after that so a link
+     * already handed to a customer never breaks.
+     */
+    public function shareToken(): string
+    {
+        if (! $this->share_token) {
+            $this->share_token = \Illuminate\Support\Str::random(32);
+            $this->save();
+        }
+
+        return $this->share_token;
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);

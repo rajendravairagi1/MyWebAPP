@@ -21,20 +21,32 @@
     </head>
     <body class="font-sans antialiased bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100">
         <div class="max-w-2xl mx-auto px-4 py-6 space-y-5">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
                 @if ($unit->business?->logoDataUri())
-                    <img src="{{ $unit->business->logoDataUri() }}" alt="{{ $unit->business->name }}" class="h-8">
+                    <img src="{{ $unit->business->logoDataUri() }}" alt="{{ $unit->business->name }}" class="h-10">
                 @endif
-                <span class="font-semibold tracking-tight">{{ $unit->business?->name ?? config('app.name') }}</span>
+                <div class="min-w-0">
+                    <div class="font-semibold tracking-tight truncate">{{ $unit->business?->name ?? config('app.name') }}</div>
+                    @php $contactLine = $unit->business ? collect([$unit->business->phone, $unit->business->email, $unit->business->website])->filter()->implode(' · ') : ''; @endphp
+                    @if ($contactLine)
+                        <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $contactLine }}</div>
+                    @endif
+                </div>
             </div>
 
             @if ($photos->isNotEmpty())
-                <div x-data="{ active: 0 }" class="rounded-xl overflow-hidden bg-black">
+                <div x-data="{ active: 0, count: {{ $photos->count() }} }" class="relative rounded-xl overflow-hidden bg-black">
                     @foreach ($photos as $i => $photo)
                         <img x-show="active === {{ $i }}" x-cloak src="{{ route('property-share.photo', [$unit->share_token, $photo]) }}" alt="{{ $unit->project->name }}" class="w-full h-72 object-cover">
                     @endforeach
                     @if ($photos->count() > 1)
-                        <div class="flex justify-center gap-1.5 py-2 bg-black">
+                        <button type="button" x-on:click="active = (active - 1 + count) % count" class="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                        </button>
+                        <button type="button" x-on:click="active = (active + 1) % count" class="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                        <div class="absolute bottom-0 inset-x-0 flex justify-center gap-1.5 py-2 bg-gradient-to-t from-black/60 to-transparent">
                             @foreach ($photos as $i => $photo)
                                 <button type="button" x-on:click="active = {{ $i }}" :class="active === {{ $i }} ? 'bg-white' : 'bg-white/40'" class="h-1.5 w-1.5 rounded-full"></button>
                             @endforeach

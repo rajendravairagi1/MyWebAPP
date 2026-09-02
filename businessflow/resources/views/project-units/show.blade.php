@@ -17,6 +17,18 @@
                 <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-md p-3">{{ $errors->first() }}</div>
             @endif
 
+            @if (session('shareUrl'))
+                <div class="bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 rounded-lg p-4 space-y-3" x-data="{ shareUrl: '{{ session('shareUrl') }}', copied: false }">
+                    <div class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ __('Shareable link — anyone with this link can view this property, no login needed.') }}</div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="text" readonly x-model="shareUrl" x-on:click="$event.target.select()" class="flex-1 min-w-0 text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm">
+                        <button type="button" x-on:click="navigator.clipboard.writeText(shareUrl); copied = true; setTimeout(() => copied = false, 2000)" class="inline-flex items-center h-9 px-3 rounded-lg text-sm font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700" x-text="copied ? '{{ __('Copied!') }}' : '{{ __('Copy') }}'"></button>
+                        <a :href="'https://wa.me/?text=' + encodeURIComponent(shareUrl)" target="_blank" rel="noopener" class="inline-flex items-center h-9 px-3 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700">{{ __('WhatsApp') }}</a>
+                        <a href="{{ route('property-share.pdf', $unit->shareToken()) }}" class="inline-flex items-center h-9 px-3 rounded-lg text-sm font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download PDF') }}</a>
+                    </div>
+                </div>
+            @endif
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5 flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
@@ -46,6 +58,10 @@
                         <div class="text-xs text-gray-400 mt-1">{{ __('Booked with') }} {{ \App\Support\Tenant::currencySymbol() }}{{ number_format($firstPayment->amount, 0) }} <span class="text-gray-400">({{ $firstPayment->paid_at->format('d M Y') }})</span></div>
                     @endif
                     <div class="mt-2 flex items-center justify-end gap-3">
+                        <form method="POST" action="{{ route('property-share.generate', $unit) }}" class="inline">
+                            @csrf
+                            <button class="text-xs text-accent-600 hover:underline">{{ __('Share Property') }}</button>
+                        </form>
                         <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-unit')" class="text-xs text-accent-600 hover:underline">{{ __('Edit') }}</button>
                         <form method="POST" action="{{ route('project-units.destroy', [$unit->project, $unit]) }}" onsubmit="return confirm('{{ __('Delete this property? This cannot be undone.') }}')">
                             @csrf
