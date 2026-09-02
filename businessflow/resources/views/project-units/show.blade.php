@@ -99,7 +99,6 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="flex border-b border-gray-100 dark:border-slate-700 text-sm overflow-x-auto">
                     <button type="button" @click="tab = 'photos'" :class="tab === 'photos' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Photos') }} ({{ $unit->photos->count() }})</button>
-                    <button type="button" @click="tab = 'videos'" :class="tab === 'videos' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Videos') }} ({{ $unit->videos->count() }})</button>
                     <button type="button" @click="tab = 'layout'" :class="tab === 'layout' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Layout') }} ({{ $unit->layouts->count() }})</button>
                     <button type="button" @click="tab = 'papers'" :class="tab === 'papers' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Papers') }} ({{ $unit->documents->count() }})</button>
                 </div>
@@ -120,31 +119,6 @@
                                         @method('DELETE')
                                         <button class="bg-white/90 dark:bg-slate-900/90 text-red-600 rounded-full h-6 w-6 flex items-center justify-center text-xs shadow">&times;</button>
                                     </form>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-
-                <div x-show="tab === 'videos'" x-cloak class="p-5 space-y-4">
-                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'upload-video')" class="text-sm text-accent-600 hover:underline">{{ __('+ Upload videos') }}</button>
-                    @if ($unit->videos->isEmpty())
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No videos uploaded yet.') }}</p>
-                    @else
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            @foreach ($unit->videos as $video)
-                                <div class="space-y-1">
-                                    <video controls preload="metadata" class="w-full rounded-md border border-gray-200 dark:border-slate-700 bg-black">
-                                        <source src="{{ route('unit-media.show', [$unit, $video]) }}" type="{{ $video->mime_type }}">
-                                    </video>
-                                    <div class="flex items-center justify-between gap-2 text-xs text-gray-400">
-                                        <span class="truncate">{{ $video->original_name }} · {{ $video->humanSize() }}</span>
-                                        <form method="POST" action="{{ route('unit-media.destroy', [$unit, $video]) }}" onsubmit="return confirm('{{ __('Delete this video?') }}')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="text-red-600 hover:underline shrink-0">{{ __('Delete') }}</button>
-                                        </form>
-                                    </div>
                                 </div>
                             @endforeach
                         </div>
@@ -188,23 +162,6 @@
                     <input type="file" name="files[]" accept="image/*" multiple required
                         class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
                     <p class="text-xs text-gray-400 mt-1">{{ __('Photos are compressed automatically for fast loading.') }}</p>
-                </div>
-                <div class="flex justify-end gap-3">
-                    <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
-                    <x-primary-button>{{ __('Upload') }}</x-primary-button>
-                </div>
-            </form>
-        </x-modal>
-
-        <x-modal name="upload-video" max-width="md">
-            <form method="POST" action="{{ route('unit-media.store', $unit) }}" enctype="multipart/form-data" class="p-6 space-y-4">
-                @csrf
-                <input type="hidden" name="type" value="video">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Videos') }}</h2>
-                <div>
-                    <input type="file" name="files[]" accept="video/*" multiple required
-                        class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
-                    <p class="text-xs text-gray-400 mt-1">{{ __('Compressed automatically when possible — bigger videos may take a bit longer to upload.') }}</p>
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>

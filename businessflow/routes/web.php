@@ -42,6 +42,7 @@ use App\Http\Controllers\ResetDataController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\UnitMediaController;
 use App\Http\Controllers\UnitPaymentController;
 use App\Http\Controllers\VerifyController;
@@ -295,6 +296,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/profile/two-factor', [TwoFactorController::class, 'show'])->name('two-factor.show');
+    Route::post('/profile/two-factor', [TwoFactorController::class, 'store'])->name('two-factor.store');
+    Route::delete('/profile/two-factor', [TwoFactorController::class, 'destroy'])->name('two-factor.destroy');
+    Route::post('/profile/two-factor/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes'])->name('two-factor.recovery-codes');
 });
 
 Route::middleware(['auth', 'owner'])->group(function () {
