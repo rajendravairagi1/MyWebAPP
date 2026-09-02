@@ -279,21 +279,18 @@
                         <div class="flex items-center gap-2 text-sm text-amber-800 dark:text-amber-300 min-w-0">
                             <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>
                             <span class="truncate">
-                                {{ __('You are in the') }} <strong>{{ $activeBusinessBranch->name }}</strong> {{ __('Branch') }}
+                                {{ __('Branch') }}: <strong>{{ $activeBusinessBranch->name }}</strong>
                                 @if ($activeBusinessName) — {{ $activeBusinessName }} @endif
                             </span>
                         </div>
-                        @if ($isCompanyOwnerOfActiveBranch)
-                            <a href="{{ route('company.show') }}" class="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap bg-amber-600 text-white hover:bg-amber-700">
-                                <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
-                                {{ __('Back to Company Dashboard') }}
-                            </a>
-                        @else
-                            <a href="{{ route('branches.show', $activeBusinessBranch) }}" class="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap bg-amber-600 text-white hover:bg-amber-700">
-                                <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
-                                {{ __('Back to Branch Dashboard') }}
-                            </a>
-                        @endif
+                        {{-- Always back to THIS branch's own dashboard (its
+                             real, single-branch numbers) — never the
+                             company-wide summary of every branch mixed
+                             together, which isn't what "back" means here. --}}
+                        <a href="{{ route('branches.show', $activeBusinessBranch) }}" class="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap bg-amber-600 text-white hover:bg-amber-700">
+                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+                            {{ __('Back to :branch Dashboard', ['branch' => $activeBusinessBranch->name]) }}
+                        </a>
                     </div>
                 @endif
 
@@ -306,6 +303,30 @@
                     @endisset
 
                     <x-global-search />
+
+                    @if ($ownedCompany && $ownedCompanyBranches->isNotEmpty())
+                        <x-dropdown align="right" width="w-64">
+                            <x-slot name="trigger">
+                                <button type="button" class="flex items-center gap-1 text-sm text-gray-600 dark:text-slate-300 hover:text-gray-800 dark:hover:text-slate-100">
+                                    <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>
+                                    <span class="hidden sm:inline">{{ __('Branches') }}</span>
+                                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                                </button>
+                            </x-slot>
+                            <x-slot name="content">
+                                <x-dropdown-link :href="route('company.show')">
+                                    <span class="font-medium">{{ __('Company Overview') }}</span>
+                                    <span class="block text-xs text-gray-400">{{ __('All branches combined') }}</span>
+                                </x-dropdown-link>
+                                <div class="border-t border-gray-100 dark:border-slate-700"></div>
+                                @foreach ($ownedCompanyBranches as $branch)
+                                    <x-dropdown-link :href="route('branches.show', $branch)">
+                                        {{ $branch->name }}
+                                    </x-dropdown-link>
+                                @endforeach
+                            </x-slot>
+                        </x-dropdown>
+                    @endif
 
                     <x-dropdown align="right" width="w-80">
                         <x-slot name="trigger">
