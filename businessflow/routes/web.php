@@ -32,6 +32,8 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PropertyDealController;
+use App\Http\Controllers\PropertyDealMediaController;
+use App\Http\Controllers\PropertyDealShareController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
@@ -61,6 +63,11 @@ Route::get('/demo', DemoLoginController::class)->name('demo.login');
 Route::get('/p/{token}', [PropertyShareController::class, 'show'])->name('property-share.show');
 Route::get('/p/{token}/pdf', [PropertyShareController::class, 'pdf'])->name('property-share.pdf');
 Route::get('/p/{token}/photos/{media}', [PropertyShareController::class, 'photo'])->name('property-share.photo');
+
+// Same as above, but for a direct resale deal rather than a project unit.
+Route::get('/pd/{token}', [PropertyDealShareController::class, 'show'])->name('property-deal-share.show');
+Route::get('/pd/{token}/pdf', [PropertyDealShareController::class, 'pdf'])->name('property-deal-share.pdf');
+Route::get('/pd/{token}/photos/{media}', [PropertyDealShareController::class, 'photo'])->name('property-deal-share.photo');
 
 Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
@@ -195,8 +202,14 @@ Route::middleware(['auth', 'verified', 'module:brokers'])->group(function () {
 Route::middleware(['auth', 'verified', 'module:property_deals'])->group(function () {
     Route::get('/property-deals', [PropertyDealController::class, 'index'])->name('property-deals.index');
     Route::post('/property-deals', [PropertyDealController::class, 'store'])->name('property-deals.store');
+    Route::get('/property-deals/{deal}', [PropertyDealController::class, 'show'])->name('property-deals.show');
     Route::put('/property-deals/{deal}', [PropertyDealController::class, 'update'])->name('property-deals.update');
     Route::delete('/property-deals/{deal}', [PropertyDealController::class, 'destroy'])->name('property-deals.destroy');
+    Route::post('/property-deals/{deal}/share', [PropertyDealShareController::class, 'generate'])->name('property-deal-share.generate');
+    Route::post('/property-deals/{deal}/media', [PropertyDealMediaController::class, 'store'])->name('property-deal-media.store');
+    Route::get('/property-deals/{deal}/media/{media}', [PropertyDealMediaController::class, 'show'])->name('property-deal-media.show');
+    Route::get('/property-deals/{deal}/media/{media}/download', [PropertyDealMediaController::class, 'download'])->name('property-deal-media.download');
+    Route::delete('/property-deals/{deal}/media/{media}', [PropertyDealMediaController::class, 'destroy'])->name('property-deal-media.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'module:available_properties'])->group(function () {

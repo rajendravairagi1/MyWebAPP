@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\ProjectUnit;
+use App\Models\PropertyDeal;
+use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,7 +22,15 @@ class AvailablePropertiesController extends Controller
 
         $projects = Project::orderBy('name')->get(['id', 'name']);
 
-        return view('available-properties.index', compact('units', 'projects'));
+        $deals = collect();
+        if (Tenant::can('property_deals')) {
+            $deals = PropertyDeal::with('photos')
+                ->where('status', 'open')
+                ->orderBy('property_title')
+                ->get();
+        }
+
+        return view('available-properties.index', compact('units', 'projects', 'deals'));
     }
 
     /**

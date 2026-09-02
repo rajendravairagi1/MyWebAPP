@@ -57,6 +57,13 @@
         class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
 </div>
 
+<div>
+    <x-input-label :value="__('Asking Price (optional)')" />
+    <input type="number" step="0.01" min="0.01" name="asking_price" placeholder="{{ \App\Support\Tenant::currencySymbol() }}" value="{{ old('asking_price', $deal->asking_price ?? '') }}"
+        class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+    <p class="text-xs text-gray-400 mt-1">{{ __('The price shown to a customer on the shareable link and PDF — your Purchase Price never appears there.') }}</p>
+</div>
+
 <div class="border-t border-gray-100 dark:border-slate-700 pt-4">
     <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ __('Buyer (once sold)') }}</p>
     <div class="grid grid-cols-2 gap-4">
@@ -103,4 +110,24 @@
 <div>
     <x-input-label :value="__('Notes (optional)')" />
     <textarea name="notes" rows="2" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('notes', $deal->notes ?? '') }}</textarea>
+</div>
+
+<div class="border-t border-gray-100 dark:border-slate-700 pt-4">
+    <p class="text-xs text-gray-400 mb-3">{{ __('Who a customer should contact about this property — shown on the shareable link and PDF, separate from the seller/buyer above.') }}</p>
+    <div class="space-y-4">
+        <div>
+            <x-input-label :value="__('Contact name (optional)')" />
+            <x-text-input name="contact_name" type="text" class="mt-1 block w-full" value="{{ old('contact_name', $deal->contact_name ?? '') }}" />
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <x-input-label :value="__('Contact mobile (optional)')" />
+                <x-text-input name="contact_phone" type="text" class="mt-1 block w-full" value="{{ old('contact_phone', $deal->contact_phone ?? '') }}" />
+            </div>
+            <div>
+                <x-input-label :value="__('Contact email (optional)')" />
+                <x-text-input name="contact_email" type="email" class="mt-1 block w-full" value="{{ old('contact_email', $deal->contact_email ?? '') }}" />
+            </div>
+        </div>
+    </div>
 </div>

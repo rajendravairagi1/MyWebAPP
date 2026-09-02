@@ -13,7 +13,7 @@ class PropertyDealController extends Controller
 {
     public function index(): View
     {
-        $deals = PropertyDeal::with('broker')->orderByDesc('deal_date')->orderByDesc('id')->get();
+        $deals = PropertyDeal::with('broker')->withCount('photos')->orderByDesc('deal_date')->orderByDesc('id')->get();
 
         $sold = $deals->where('status', 'sold');
 
@@ -28,6 +28,13 @@ class PropertyDealController extends Controller
         $brokers = Broker::orderBy('name')->get();
 
         return view('property-deals.index', compact('deals', 'totals', 'brokers'));
+    }
+
+    public function show(PropertyDeal $deal): View
+    {
+        $brokers = Broker::orderBy('name')->get();
+
+        return view('property-deals.show', compact('deal', 'brokers'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -98,6 +105,7 @@ class PropertyDealController extends Controller
             'seller_name' => ['nullable', 'string', 'max:255'],
             'seller_phone' => ['nullable', 'string', 'max:30'],
             'purchase_price' => ['required', 'numeric', 'min:0.01'],
+            'asking_price' => ['nullable', 'numeric', 'min:0.01'],
             'buyer_name' => ['nullable', 'string', 'max:255'],
             'buyer_phone' => ['nullable', 'string', 'max:30'],
             'sale_price' => ['nullable', 'numeric', 'min:0.01'],
@@ -105,6 +113,9 @@ class PropertyDealController extends Controller
             'deal_date' => ['nullable', 'date'],
             'sold_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'contact_name' => ['nullable', 'string', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
         ]);
     }
 }

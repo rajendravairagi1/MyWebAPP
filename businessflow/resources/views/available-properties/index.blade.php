@@ -68,6 +68,44 @@
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No properties available for sale right now.') }}</div>
                 @endforelse
             </div>
+
+            @if ($deals->isNotEmpty())
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">
+                        {{ __('Direct Deals') }} ({{ $deals->count() }})
+                    </div>
+                    @foreach ($deals as $deal)
+                        <div class="p-5 border-b border-gray-100 dark:border-slate-700 last:border-b-0">
+                            <div class="flex flex-wrap items-start justify-between gap-3">
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <a href="{{ route('property-deals.show', $deal) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:text-accent-600">{{ $deal->property_title }}</a>
+                                        <span class="text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">{{ __('Deal') }}</span>
+                                        @if ($deal->photos->count())
+                                            <span class="text-xs text-gray-400">{{ __('· :count media', ['count' => $deal->photos->count()]) }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-xs text-gray-400 mt-0.5">
+                                        @if ($deal->address){{ $deal->address }}@endif
+                                    </div>
+                                </div>
+                                @if ($deal->asking_price)
+                                    <div class="text-right">
+                                        <div class="text-xs text-gray-400">{{ __('Asking Price') }}</div>
+                                        <div class="font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($deal->asking_price, 0) }}</div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <a href="{{ route('property-deals.show', $deal) }}" class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
+                                    {{ __('View Details') }}
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </div>
 

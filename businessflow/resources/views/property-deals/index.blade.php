@@ -72,9 +72,12 @@
                                     @php $profit = $deal->profit(); @endphp
                                     <tr>
                                         <td class="px-5 py-3">
-                                            <div class="font-medium text-gray-900 dark:text-gray-100">{{ $deal->property_title }}</div>
+                                            <a href="{{ route('property-deals.show', $deal) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:text-accent-600">{{ $deal->property_title }}</a>
                                             @if ($deal->address)
                                                 <div class="text-xs text-gray-400">{{ $deal->address }}</div>
+                                            @endif
+                                            @if ($deal->photos_count)
+                                                <div class="text-xs text-gray-400">{{ __('· :count media', ['count' => $deal->photos_count]) }}</div>
                                             @endif
                                         </td>
                                         <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $deal->seller_name ?? '—' }}</td>
