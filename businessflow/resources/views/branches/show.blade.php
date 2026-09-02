@@ -144,13 +144,13 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <x-input-label for="country" :value="__('Country code')" />
-                        <x-text-input id="country" name="country" type="text" maxlength="2" value="IN" class="mt-1 block w-full uppercase" required />
+                        <x-text-input id="country" name="country" type="text" maxlength="2" value="US" class="mt-1 block w-full uppercase" required />
                     </div>
                     <div>
                         <x-input-label for="currency" :value="__('Currency')" />
                         <select id="currency" name="currency" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                             @foreach (config('business.currencies') as $value => $label)
-                                <option value="{{ $value }}" @selected($value === 'INR')>{{ $label }}</option>
+                                <option value="{{ $value }}" @selected($value === 'USD')>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -158,7 +158,7 @@
                         <x-input-label for="timezone" :value="__('Timezone')" />
                         <select id="timezone" name="timezone" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                             @foreach (\DateTimeZone::listIdentifiers() as $tz)
-                                <option value="{{ $tz }}" @selected($tz === 'Asia/Kolkata')>{{ $tz }}</option>
+                                <option value="{{ $tz }}" @selected($tz === 'America/New_York')>{{ $tz }}</option>
                             @endforeach
                         </select>
                     </div>

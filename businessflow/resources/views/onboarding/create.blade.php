@@ -36,8 +36,8 @@
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                             <x-input-label for="country" :value="__('Country code')" />
-                            <x-text-input id="country" name="country" type="text" maxlength="2" placeholder="IN"
-                                class="mt-1 block w-full uppercase" :value="old('country')" required />
+                            <x-text-input id="country" name="country" type="text" maxlength="2" placeholder="US"
+                                class="mt-1 block w-full uppercase" :value="old('country', 'US')" required />
                             <x-input-error :messages="$errors->get('country')" class="mt-2" />
                         </div>
 
@@ -46,7 +46,7 @@
                             <select id="currency" name="currency" required
                                 class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
                                 @foreach ($currencies as $value => $label)
-                                    <option value="{{ $value }}" @selected(old('currency') === $value)>{{ $label }}</option>
+                                    <option value="{{ $value }}" @selected(old('currency', 'USD') === $value)>{{ $label }}</option>
                                 @endforeach
                             </select>
                             <x-input-error :messages="$errors->get('currency')" class="mt-2" />
@@ -57,7 +57,7 @@
                             <select id="timezone" name="timezone" required
                                 class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
                                 @foreach (\DateTimeZone::listIdentifiers() as $tz)
-                                    <option value="{{ $tz }}" @selected(old('timezone') === $tz)>{{ $tz }}</option>
+                                    <option value="{{ $tz }}" @selected(old('timezone', 'America/New_York') === $tz)>{{ $tz }}</option>
                                 @endforeach
                             </select>
                             <x-input-error :messages="$errors->get('timezone')" class="mt-2" />
