@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\View\View;
 
 /**
@@ -18,6 +19,30 @@ use Illuminate\View\View;
  */
 class AdminController extends Controller
 {
+    /**
+     * Same cache-clearing MigrateController already does after every
+     * deploy (view/config/route cache + opcache) — as a one-click button
+     * here for whenever nothing changed except code that's rendering
+     * stale (no host terminal/SSH on this plan, so /migrate?token=... was
+     * the only other way to trigger this).
+     */
+    public function clearCache(): RedirectResponse
+    {
+        foreach (['view:clear', 'config:clear', 'route:clear', 'cache:clear'] as $command) {
+            try {
+                Artisan::call($command);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        if (function_exists('opcache_reset')) {
+            opcache_reset();
+        }
+
+        return back()->with('status', __('Cache cleared — the site is now running the latest deployed code.'));
+    }
+
     public function index(): View
     {
         $businesses = \App\Models\Business::whereNull('branch_id')

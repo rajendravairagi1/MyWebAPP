@@ -75,6 +75,7 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::get('/login-activity', [\App\Http\Controllers\Admin\LoginActivityController::class, 'index'])->name('login-activity');
     Route::delete('/login-activity', [\App\Http\Controllers\Admin\LoginActivityController::class, 'clear'])->name('login-activity.clear');
     Route::post('/demo/reset', [AdminController::class, 'resetDemo'])->name('demo.reset');
+    Route::post('/clear-cache', [AdminController::class, 'clearCache'])->name('clear-cache');
 });
 
 Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
