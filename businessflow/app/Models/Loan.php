@@ -28,6 +28,7 @@ class Loan extends Model
         'sanctioned_amount' => 'decimal:2',
         'interest_rate' => 'decimal:2',
         'sanctioned_at' => 'date',
+        'loan_account_number' => 'encrypted',
     ];
 
     public function unit(): BelongsTo

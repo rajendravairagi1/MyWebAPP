@@ -25,6 +25,7 @@ $builder = Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\EnsureSubscriptionActive::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\NoCacheForAuthenticatedPages::class,
+            \App\Http\Middleware\SecurityHeaders::class,
         ]);
 
         $middleware->alias([

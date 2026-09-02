@@ -35,6 +35,7 @@ use App\Http\Controllers\PropertyDealController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
+use App\Http\Controllers\PropertyShareController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReportController;
@@ -42,6 +43,7 @@ use App\Http\Controllers\ResetDataController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TwoFactorController;
 use App\Http\Controllers\UnitMediaController;
 use App\Http\Controllers\UnitPaymentController;
 use App\Http\Controllers\VerifyController;
@@ -52,6 +54,13 @@ Route::get('/', function () {
 });
 
 Route::get('/demo', DemoLoginController::class)->name('demo.login');
+
+// Public, no-login property brochure — a link generated from inside the
+// app and handed to a customer directly, so it deliberately sits outside
+// every auth/tenant-gated group above.
+Route::get('/p/{token}', [PropertyShareController::class, 'show'])->name('property-share.show');
+Route::get('/p/{token}/pdf', [PropertyShareController::class, 'pdf'])->name('property-share.pdf');
+Route::get('/p/{token}/photos/{media}', [PropertyShareController::class, 'photo'])->name('property-share.photo');
 
 Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
@@ -128,6 +137,7 @@ Route::middleware(['auth', 'verified', 'owner'])->group(function () {
 
     Route::get('/payment-accounts', [PaymentAccountController::class, 'index'])->name('payment-accounts.index');
     Route::get('/payment-accounts/{account}', [PaymentAccountController::class, 'show'])->name('payment-accounts.show');
+    Route::get('/payment-accounts/{account}/statement', [PaymentAccountController::class, 'statement'])->name('payment-accounts.statement');
     Route::post('/payment-accounts', [PaymentAccountController::class, 'store'])->name('payment-accounts.store');
     Route::put('/payment-accounts/{account}', [PaymentAccountController::class, 'update'])->name('payment-accounts.update');
     Route::delete('/payment-accounts/{account}', [PaymentAccountController::class, 'destroy'])->name('payment-accounts.destroy');
@@ -208,6 +218,7 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::post('/project-units/{unit}/recover', [ProjectUnitController::class, 'recover'])->name('project-units.recover');
     Route::post('/project-units/{unit}/commitment', [ProjectUnitController::class, 'updateCommitment'])->name('project-units.commitment');
     Route::get('/project-units/{unit}', [ProjectUnitController::class, 'show'])->name('project-units.show');
+    Route::post('/project-units/{unit}/share', [PropertyShareController::class, 'generate'])->name('property-share.generate');
     Route::post('/project-units/{unit}/media', [UnitMediaController::class, 'store'])->name('unit-media.store');
     Route::get('/project-units/{unit}/media/{media}', [UnitMediaController::class, 'show'])->name('unit-media.show');
     Route::get('/project-units/{unit}/media/{media}/download', [UnitMediaController::class, 'download'])->name('unit-media.download');
@@ -282,6 +293,7 @@ Route::middleware(['auth', 'verified', 'module:invoices'])->group(function () {
 
 Route::middleware(['auth', 'verified', 'module:ledger'])->group(function () {
     Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
+    Route::get('/ledger/statement', [LedgerController::class, 'statement'])->name('ledger.statement');
     Route::post('/ledger/entries', [LedgerController::class, 'storeEntry'])->name('ledger.entries.store');
     Route::put('/ledger/entries/{entry}', [LedgerController::class, 'updateEntry'])->name('ledger.entries.update');
     Route::delete('/ledger/entries/{entry}', [LedgerController::class, 'destroyEntry'])->name('ledger.entries.destroy');
@@ -295,6 +307,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::get('/profile/two-factor', [TwoFactorController::class, 'show'])->name('two-factor.show');
+    Route::post('/profile/two-factor', [TwoFactorController::class, 'store'])->name('two-factor.store');
+    Route::delete('/profile/two-factor', [TwoFactorController::class, 'destroy'])->name('two-factor.destroy');
+    Route::post('/profile/two-factor/recovery-codes', [TwoFactorController::class, 'regenerateRecoveryCodes'])->name('two-factor.recovery-codes');
 });
 
 Route::middleware(['auth', 'owner'])->group(function () {

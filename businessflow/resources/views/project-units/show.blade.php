@@ -17,6 +17,18 @@
                 <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-md p-3">{{ $errors->first() }}</div>
             @endif
 
+            @if (session('shareUrl'))
+                <div class="bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 rounded-lg p-4 space-y-3" x-data="{ shareUrl: '{{ session('shareUrl') }}', copied: false }">
+                    <div class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ __('Shareable link — anyone with this link can view this property, no login needed.') }}</div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="text" readonly x-model="shareUrl" x-on:click="$event.target.select()" class="flex-1 min-w-0 text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm">
+                        <button type="button" x-on:click="navigator.clipboard.writeText(shareUrl); copied = true; setTimeout(() => copied = false, 2000)" class="inline-flex items-center h-9 px-3 rounded-lg text-sm font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700" x-text="copied ? '{{ __('Copied!') }}' : '{{ __('Copy') }}'"></button>
+                        <a :href="'https://wa.me/?text=' + encodeURIComponent(shareUrl)" target="_blank" rel="noopener" class="inline-flex items-center h-9 px-3 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700">{{ __('WhatsApp') }}</a>
+                        <a href="{{ route('property-share.pdf', $unit->shareToken()) }}" class="inline-flex items-center h-9 px-3 rounded-lg text-sm font-medium border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download PDF') }}</a>
+                    </div>
+                </div>
+            @endif
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5 flex flex-wrap items-center justify-between gap-4">
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
@@ -46,6 +58,10 @@
                         <div class="text-xs text-gray-400 mt-1">{{ __('Booked with') }} {{ \App\Support\Tenant::currencySymbol() }}{{ number_format($firstPayment->amount, 0) }} <span class="text-gray-400">({{ $firstPayment->paid_at->format('d M Y') }})</span></div>
                     @endif
                     <div class="mt-2 flex items-center justify-end gap-3">
+                        <form method="POST" action="{{ route('property-share.generate', $unit) }}" class="inline">
+                            @csrf
+                            <button class="text-xs text-accent-600 hover:underline">{{ __('Share Property') }}</button>
+                        </form>
                         <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-unit')" class="text-xs text-accent-600 hover:underline">{{ __('Edit') }}</button>
                         <form method="POST" action="{{ route('project-units.destroy', [$unit->project, $unit]) }}" onsubmit="return confirm('{{ __('Delete this property? This cannot be undone.') }}')">
                             @csrf
@@ -99,7 +115,6 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="flex border-b border-gray-100 dark:border-slate-700 text-sm overflow-x-auto">
                     <button type="button" @click="tab = 'photos'" :class="tab === 'photos' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Photos') }} ({{ $unit->photos->count() }})</button>
-                    <button type="button" @click="tab = 'videos'" :class="tab === 'videos' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Videos') }} ({{ $unit->videos->count() }})</button>
                     <button type="button" @click="tab = 'layout'" :class="tab === 'layout' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Layout') }} ({{ $unit->layouts->count() }})</button>
                     <button type="button" @click="tab = 'papers'" :class="tab === 'papers' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Papers') }} ({{ $unit->documents->count() }})</button>
                 </div>
@@ -120,31 +135,6 @@
                                         @method('DELETE')
                                         <button class="bg-white/90 dark:bg-slate-900/90 text-red-600 rounded-full h-6 w-6 flex items-center justify-center text-xs shadow">&times;</button>
                                     </form>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-
-                <div x-show="tab === 'videos'" x-cloak class="p-5 space-y-4">
-                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'upload-video')" class="text-sm text-accent-600 hover:underline">{{ __('+ Upload videos') }}</button>
-                    @if ($unit->videos->isEmpty())
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No videos uploaded yet.') }}</p>
-                    @else
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            @foreach ($unit->videos as $video)
-                                <div class="space-y-1">
-                                    <video controls preload="metadata" class="w-full rounded-md border border-gray-200 dark:border-slate-700 bg-black">
-                                        <source src="{{ route('unit-media.show', [$unit, $video]) }}" type="{{ $video->mime_type }}">
-                                    </video>
-                                    <div class="flex items-center justify-between gap-2 text-xs text-gray-400">
-                                        <span class="truncate">{{ $video->original_name }} · {{ $video->humanSize() }}</span>
-                                        <form method="POST" action="{{ route('unit-media.destroy', [$unit, $video]) }}" onsubmit="return confirm('{{ __('Delete this video?') }}')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="text-red-600 hover:underline shrink-0">{{ __('Delete') }}</button>
-                                        </form>
-                                    </div>
                                 </div>
                             @endforeach
                         </div>
@@ -188,23 +178,6 @@
                     <input type="file" name="files[]" accept="image/*" multiple required
                         class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
                     <p class="text-xs text-gray-400 mt-1">{{ __('Photos are compressed automatically for fast loading.') }}</p>
-                </div>
-                <div class="flex justify-end gap-3">
-                    <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
-                    <x-primary-button>{{ __('Upload') }}</x-primary-button>
-                </div>
-            </form>
-        </x-modal>
-
-        <x-modal name="upload-video" max-width="md">
-            <form method="POST" action="{{ route('unit-media.store', $unit) }}" enctype="multipart/form-data" class="p-6 space-y-4">
-                @csrf
-                <input type="hidden" name="type" value="video">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Videos') }}</h2>
-                <div>
-                    <input type="file" name="files[]" accept="video/*" multiple required
-                        class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
-                    <p class="text-xs text-gray-400 mt-1">{{ __('Compressed automatically when possible — bigger videos may take a bit longer to upload.') }}</p>
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>

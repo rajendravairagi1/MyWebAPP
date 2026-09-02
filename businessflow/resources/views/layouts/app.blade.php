@@ -452,5 +452,45 @@
         @if ($subscriptionDaysRemaining !== null)
             @include('partials.renewal-modal')
         @endif
+
+        {{-- Auto-logout after 5 minutes of inactivity — hardcoded rather
+             than read from config('session.lifetime'), because that value
+             comes from SESSION_LIFETIME in each site's own .env (never
+             shipped in a deploy — every existing install already has it
+             set to something else) and this needs to work the moment this
+             code deploys, with no manual server config step required.
+             Reading raw numbers off screen here (customer payments,
+             ledgers) is sensitive enough that an unattended, unlocked
+             screen shouldn't stay signed in indefinitely. --}}
+        <script>
+            (function () {
+                var timeoutMs = 5 * 60 * 1000;
+                var timer;
+
+                function doLogout() {
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ route('logout') }}?reason=timeout';
+                    var csrf = document.createElement('input');
+                    csrf.type = 'hidden';
+                    csrf.name = '_token';
+                    csrf.value = document.querySelector('meta[name="csrf-token"]').content;
+                    form.appendChild(csrf);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+
+                function resetTimer() {
+                    clearTimeout(timer);
+                    timer = setTimeout(doLogout, timeoutMs);
+                }
+
+                ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(function (evt) {
+                    window.addEventListener(evt, resetTimer, { passive: true });
+                });
+
+                resetTimer();
+            })();
+        </script>
     </body>
 </html>

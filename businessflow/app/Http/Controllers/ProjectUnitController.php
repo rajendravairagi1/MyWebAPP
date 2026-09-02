@@ -14,7 +14,7 @@ class ProjectUnitController extends Controller
 {
     public function show(ProjectUnit $unit): View
     {
-        $unit->load(['project', 'customer', 'photos', 'videos', 'layouts', 'documents', 'payments']);
+        $unit->load(['project', 'customer', 'photos', 'layouts', 'documents', 'payments']);
 
         return view('project-units.show', compact('unit'));
     }

@@ -73,7 +73,20 @@ class BackupController extends Controller
     public function download(): \Symfony\Component\HttpFoundation\BinaryFileResponse
     {
         $business = \App\Models\Business::findOrFail(Tenant::id());
+        $zipPath = $this->buildZip($business);
+        $filename = Str::slug($business->name).'-backup-'.now()->format('Y-m-d').'.zip';
 
+        return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Builds the same backup zip as download() above, but returns its
+     * temp path instead of streaming it — used by the scheduled
+     * `backup:run` command, which has no web session/download response to
+     * hand this to. Caller is responsible for the temp file afterward.
+     */
+    public function buildZip(\App\Models\Business $business): string
+    {
         $tables = $this->exportTables();
         $mediaPaths = $this->collectMediaPaths($tables);
 
@@ -99,9 +112,7 @@ class BackupController extends Controller
 
         $zip->close();
 
-        $filename = Str::slug($business->name).'-backup-'.now()->format('Y-m-d').'.zip';
-
-        return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
+        return $zipPath;
     }
 
     public function restore(Request $request): RedirectResponse

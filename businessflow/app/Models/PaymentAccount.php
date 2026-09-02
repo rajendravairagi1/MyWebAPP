@@ -19,6 +19,10 @@ class PaymentAccount extends Model
         'notes',
     ];
 
+    protected $casts = [
+        'account_number' => 'encrypted',
+    ];
+
     /**
      * 'bank' = an actual account money lands in (bank transfer, UPI,
      * cheque, card). 'cash' = a person who's physically holding cash —

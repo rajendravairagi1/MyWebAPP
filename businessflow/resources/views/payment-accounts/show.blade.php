@@ -11,6 +11,10 @@
             @else
                 <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">{{ __('Bank') }}</span>
             @endif
+            <a href="{{ route('payment-accounts.statement', $account) }}" class="ml-auto shrink-0 inline-flex items-center gap-1.5 text-sm text-accent-600 hover:underline">
+                <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                {{ __('Download Statement (PDF)') }}
+            </a>
         </div>
     </x-slot>
 
