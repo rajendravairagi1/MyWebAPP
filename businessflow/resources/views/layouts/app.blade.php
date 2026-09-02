@@ -274,6 +274,29 @@
 
             {{-- Main column --}}
             <div class="flex-1 flex flex-col min-w-0">
+                @if ($activeBusinessBranch)
+                    <div class="shrink-0 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 text-sm text-amber-800 dark:text-amber-300 min-w-0">
+                            <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" /></svg>
+                            <span class="truncate">
+                                {{ __('You are in the') }} <strong>{{ $activeBusinessBranch->name }}</strong> {{ __('Branch') }}
+                                @if ($activeBusinessName) — {{ $activeBusinessName }} @endif
+                            </span>
+                        </div>
+                        @if ($isCompanyOwnerOfActiveBranch)
+                            <a href="{{ route('company.show') }}" class="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap bg-amber-600 text-white hover:bg-amber-700">
+                                <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+                                {{ __('Back to Company Dashboard') }}
+                            </a>
+                        @else
+                            <a href="{{ route('branches.show', $activeBusinessBranch) }}" class="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-semibold whitespace-nowrap bg-amber-600 text-white hover:bg-amber-700">
+                                <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
+                                {{ __('Back to Branch Dashboard') }}
+                            </a>
+                        @endif
+                    </div>
+                @endif
+
                 <header class="h-16 shrink-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex items-center gap-4 px-4 sm:px-6">
                     <button @click="mobileOpen = true" type="button" class="lg:hidden text-gray-500 dark:text-slate-400">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -400,15 +423,6 @@
                                     {{ __('Business Settings') }}
                                 </span>
                             </x-dropdown-link>
-
-                            @if ($activeBusinessBranch)
-                                <x-dropdown-link :href="route('branches.show', $activeBusinessBranch)">
-                                    <span class="flex items-center gap-2">
-                                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" /></svg>
-                                        {{ __('Back to') }} {{ $activeBusinessBranch->name }}
-                                    </span>
-                                </x-dropdown-link>
-                            @endif
 
                             <div class="px-4 py-3 border-t border-gray-100 dark:border-slate-700">
                                 <p class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2">{{ __('Theme color') }}</p>

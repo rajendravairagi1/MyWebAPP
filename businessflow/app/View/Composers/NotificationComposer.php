@@ -27,12 +27,21 @@ class NotificationComposer
         $isPlatformAdmin = $user && $user->email === config('platform.admin_email');
         $activeBusiness = Tenant::check() ? Business::find(Tenant::id()) : null;
 
+        $activeBusinessBranch = $activeBusiness ? Branch::with('company')->find($activeBusiness->branch_id) : null;
+
         $view->with([
             // Account-level (not tied to the active business) — drives the
             // "Company"/"My Branch" sidebar link and the "back up" link.
             'ownedCompany' => $user?->ownedCompany,
             'managedBranch' => $user && ! $user->ownedCompany ? $user->managedBranches()->first() : null,
-            'activeBusinessBranch' => $activeBusiness ? Branch::with('company')->find($activeBusiness->branch_id) : null,
+            'activeBusinessBranch' => $activeBusinessBranch,
+            // Whether the branch this business belongs to is owned by the
+            // very Company this user owns — decides whether the "back up"
+            // banner can jump straight to the Company dashboard, or only
+            // as far up as the Branch dashboard (a Branch Manager has no
+            // Company view to go to).
+            'isCompanyOwnerOfActiveBranch' => $activeBusinessBranch && $user?->ownedCompany?->id === $activeBusinessBranch->company_id,
+            'activeBusinessName' => $activeBusiness?->name,
             'canCreateCompany' => $user && ! $user->ownedCompany && $user->hasCompanyPlan(),
             'isPlatformAdmin' => $isPlatformAdmin,
         ]);

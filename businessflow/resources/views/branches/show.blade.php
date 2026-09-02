@@ -2,7 +2,10 @@
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ $branch->name }}</h2>
+                <div class="flex items-center gap-2">
+                    <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ $branch->name }}</h2>
+                    <span class="text-xs px-2 py-0.5 rounded font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">{{ __('Branch') }}</span>
+                </div>
                 <div class="text-xs text-gray-500 dark:text-gray-400">
                     <a href="{{ route('company.show') }}" class="hover:underline">{{ $branch->company->name }}</a>
                 </div>
