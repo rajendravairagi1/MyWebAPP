@@ -24,7 +24,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-6">
             @if (session('status'))
                 <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm rounded-md p-3">{{ session('status') }}</div>
             @endif
@@ -126,18 +126,25 @@
                                         </form>
                                     </td>
                                     <td class="px-5 py-2">
-                                        @if ($business->subscription_expires_at)
-                                            <span class="text-xs px-1.5 py-0.5 rounded {{ $business->isSubscriptionExpired() ? 'bg-red-100 text-red-700' : ($business->subscription_expires_at->diffInDays(now(), false) >= -7 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') }}">
-                                                {{ $business->isSubscriptionExpired() ? __('Expired') : __('Till') }} {{ $business->subscription_expires_at->format('d M Y') }}
-                                            </span>
-                                        @else
-                                            <span class="text-xs text-gray-400">{{ __('No expiry') }}</span>
-                                        @endif
-                                        <form method="POST" action="{{ route('admin.businesses.expiry', $business) }}" class="inline-flex items-center gap-1 mt-1">
+                                        @php
+                                            $expired = $business->isSubscriptionExpired();
+                                            $expiringSoon = ! $expired && $business->subscription_expires_at && $business->subscription_expires_at->diffInDays(now(), false) >= -7;
+                                        @endphp
+                                        <form method="POST" action="{{ route('admin.businesses.expiry', $business) }}" class="flex items-center gap-2">
                                             @csrf
                                             @method('PUT')
-                                            <input type="date" name="subscription_expires_at" value="{{ $business->subscription_expires_at?->format('Y-m-d') }}" class="text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
-                                            <button class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                            @if ($expired)
+                                                <span class="shrink-0 text-xs font-semibold text-red-600">{{ __('Expired') }}</span>
+                                            @elseif ($expiringSoon)
+                                                <span class="shrink-0 text-xs font-semibold text-amber-600">{{ __('Soon') }}</span>
+                                            @endif
+                                            <input type="date" name="subscription_expires_at" value="{{ $business->subscription_expires_at?->format('Y-m-d') }}" @class([
+                                                'w-32 shrink-0 text-xs rounded-md shadow-sm dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 py-1',
+                                                'border-red-300 dark:border-red-800' => $expired,
+                                                'border-amber-300 dark:border-amber-800' => $expiringSoon,
+                                                'border-gray-300 dark:border-slate-600' => ! $expired && ! $expiringSoon,
+                                            ])>
+                                            <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -169,19 +176,25 @@
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $company->owner->name }} <span class="text-gray-400">({{ $company->owner->email }})</span></td>
                                     <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ $company->branches_count }}</td>
                                     <td class="px-5 py-2">
-                                        @if ($company->subscription_expires_at)
-                                            @php $expired = $company->subscription_expires_at->copy()->endOfDay()->isPast(); @endphp
-                                            <span class="text-xs px-1.5 py-0.5 rounded {{ $expired ? 'bg-red-100 text-red-700' : ($company->subscription_expires_at->diffInDays(now(), false) >= -7 ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700') }}">
-                                                {{ $expired ? __('Expired') : __('Till') }} {{ $company->subscription_expires_at->format('d M Y') }}
-                                            </span>
-                                        @else
-                                            <span class="text-xs text-gray-400">{{ __('No expiry') }}</span>
-                                        @endif
-                                        <form method="POST" action="{{ route('admin.companies.expiry', $company) }}" class="inline-flex items-center gap-1 mt-1">
+                                        @php
+                                            $expired = $company->subscription_expires_at?->copy()->endOfDay()->isPast() ?? false;
+                                            $expiringSoon = ! $expired && $company->subscription_expires_at && $company->subscription_expires_at->diffInDays(now(), false) >= -7;
+                                        @endphp
+                                        <form method="POST" action="{{ route('admin.companies.expiry', $company) }}" class="flex items-center gap-2">
                                             @csrf
                                             @method('PUT')
-                                            <input type="date" name="subscription_expires_at" value="{{ $company->subscription_expires_at?->format('Y-m-d') }}" class="text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
-                                            <button class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                            @if ($expired)
+                                                <span class="shrink-0 text-xs font-semibold text-red-600">{{ __('Expired') }}</span>
+                                            @elseif ($expiringSoon)
+                                                <span class="shrink-0 text-xs font-semibold text-amber-600">{{ __('Soon') }}</span>
+                                            @endif
+                                            <input type="date" name="subscription_expires_at" value="{{ $company->subscription_expires_at?->format('Y-m-d') }}" @class([
+                                                'w-32 shrink-0 text-xs rounded-md shadow-sm dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 py-1',
+                                                'border-red-300 dark:border-red-800' => $expired,
+                                                'border-amber-300 dark:border-amber-800' => $expiringSoon,
+                                                'border-gray-300 dark:border-slate-600' => ! $expired && ! $expiringSoon,
+                                            ])>
+                                            <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
                                         </form>
                                     </td>
                                 </tr>
