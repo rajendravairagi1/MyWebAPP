@@ -95,6 +95,8 @@
                                 <input type="checkbox" name="is_demo" value="1" class="rounded border-gray-300 text-accent-600 focus:ring-accent-500">
                                 {{ __('This is the public demo account (shown from the "See Demo" button on the homepage)') }}
                             </label>
+                            <p class="text-xs text-amber-600 dark:text-amber-500 -mt-2">{{ __('Leave this unticked for a real customer — there\'s only ever one public demo, and a customer\'s account marked this way stops showing up anywhere in this panel.') }}</p>
+                            <x-input-error :messages="$errors->get('is_demo')" class="-mt-2" />
                         </div>
                         <p x-show="plan === 'company'" x-cloak class="mt-2 text-xs text-gray-400">{{ __('They\'ll log in straight to their Company Dashboard and can add branches and builders themselves.') }}</p>
                     </div>

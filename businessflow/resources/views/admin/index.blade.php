@@ -32,7 +32,12 @@
                 <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-md p-3">{{ $errors->first() }}</div>
             @endif
 
-            {{-- Demo account --}}
+            {{-- Demo account — normally exactly one row. The oldest one is
+                 treated as the real public demo; any others only exist
+                 because "is_demo" got ticked by mistake while adding a
+                 real customer, which otherwise makes that customer's
+                 whole account silently disappear from the lists below. --}}
+            @php $demoBusiness = $demoBusinesses->first(); @endphp
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5 flex items-center justify-between gap-4">
                 <div>
                     <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Public Demo Account') }}</div>
@@ -54,13 +59,34 @@
                                 <option value="company" @selected($demoBusiness->plan === 'company')>{{ __('Company (unlock)') }}</option>
                             </select>
                         </form>
-                        <form method="POST" action="{{ route('admin.demo.reset') }}" onsubmit="return confirm('{{ __('Wipe all data in the demo account? This cannot be undone.') }}')">
+                        <form method="POST" action="{{ route('admin.demo.reset', $demoBusiness) }}" onsubmit="return confirm('{{ __('Wipe all data in the demo account? This cannot be undone.') }}')">
                             @csrf
                             <button class="text-xs px-3 py-1.5 rounded-md border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 whitespace-nowrap">{{ __('Reset Demo Data') }}</button>
                         </form>
                     </div>
                 @endif
             </div>
+
+            @if ($demoBusinesses->count() > 1)
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-5 space-y-3">
+                    <div class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                        {{ __('These accounts are also marked as the public demo — probably by mistake ("This is the public demo account" got ticked while adding a real customer). While marked this way, they\'re hidden from the Businesses list below, share the same demo login as everyone who clicks "See Demo", and their data would be wiped by "Reset Demo Data" above.') }}
+                    </div>
+                    @foreach ($demoBusinesses->skip(1) as $strayDemo)
+                        @php $strayOwner = $strayDemo->users->first(); @endphp
+                        <div class="flex items-center justify-between gap-3 bg-white dark:bg-slate-800 rounded-md p-3">
+                            <div class="min-w-0">
+                                <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ $strayDemo->name }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $strayOwner?->name }} <span class="text-gray-400">({{ $strayOwner?->email }})</span></div>
+                            </div>
+                            <form method="POST" action="{{ route('admin.businesses.unmark-demo', $strayDemo) }}" class="shrink-0">
+                                @csrf
+                                <button class="text-xs px-3 py-1.5 rounded-md bg-amber-600 text-white hover:bg-amber-700 whitespace-nowrap">{{ __('Not a demo — restore as normal account') }}</button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
 
             {{-- Standalone businesses (Solo / Team plans) --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">

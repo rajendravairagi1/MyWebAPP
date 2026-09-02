@@ -78,10 +78,11 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::put('/companies/{company}/expiry', [AdminController::class, 'updateCompanyExpiry'])->name('companies.expiry');
     Route::post('/businesses/{business}/dismiss-renewal', [AdminController::class, 'dismissBusinessRenewal'])->name('businesses.dismiss-renewal');
     Route::post('/companies/{company}/dismiss-renewal', [AdminController::class, 'dismissCompanyRenewal'])->name('companies.dismiss-renewal');
+    Route::post('/businesses/{business}/unmark-demo', [AdminController::class, 'unmarkDemo'])->name('businesses.unmark-demo');
     Route::get('/expiring', [AdminController::class, 'expiringSoon'])->name('expiring');
     Route::get('/login-activity', [\App\Http\Controllers\Admin\LoginActivityController::class, 'index'])->name('login-activity');
     Route::delete('/login-activity', [\App\Http\Controllers\Admin\LoginActivityController::class, 'clear'])->name('login-activity.clear');
-    Route::post('/demo/reset', [AdminController::class, 'resetDemo'])->name('demo.reset');
+    Route::post('/demo/reset/{business}', [AdminController::class, 'resetDemo'])->name('demo.reset');
     Route::post('/clear-cache', [AdminController::class, 'clearCache'])->name('clear-cache');
 });
 
