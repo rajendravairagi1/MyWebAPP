@@ -26,21 +26,6 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $user = Auth::user();
-
-        if ($user->hasEnabledTwoFactor()) {
-            // The password check above already logged this user in via
-            // Auth::attempt() — undo that immediately and hold them at
-            // the 2FA challenge instead, so a real session only exists
-            // once the second factor is verified too.
-            Auth::logout();
-
-            $request->session()->put('2fa.user.id', $user->id);
-            $request->session()->put('2fa.remember', $request->boolean('remember'));
-
-            return redirect()->route('two-factor.challenge');
-        }
-
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
@@ -56,10 +41,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
 
         $request->session()->regenerateToken();
-
-        if ($request->query('reason') === 'timeout') {
-            return redirect()->route('login')->with('status', __('You were logged out after 5 minutes of inactivity.'));
-        }
 
         return redirect('/');
     }

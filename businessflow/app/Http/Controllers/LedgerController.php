@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Business;
 use App\Models\BrokerTransaction;
 use App\Models\Customer;
 use App\Models\LedgerEntry;
@@ -11,8 +10,6 @@ use App\Models\Project;
 use App\Models\ProjectCost;
 use App\Models\ProjectUnit;
 use App\Models\PropertyDeal;
-use App\Support\Tenant;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -83,34 +80,6 @@ class LedgerController extends Controller
             'totalSaleValue', 'totalCollected', 'totalOutstanding', 'totalPurchases', 'netProfit',
             'manualIncome', 'manualExpense', 'dealsProfit', 'brokerCommissionPaid', 'deals', 'projects', 'customerRows', 'entries', 'customers', 'allProjects', 'paymentAccounts'
         ));
-    }
-
-    /**
-     * A full income/expense statement as a PDF — every manual ledger
-     * entry plus the same summary totals shown on the Ledger page, handed
-     * over as proof of account instead of reading numbers off screen.
-     */
-    public function statement(): \Illuminate\Http\Response
-    {
-        $manualIncome = (float) LedgerEntry::where('type', 'income')->sum('amount');
-        $manualExpense = (float) LedgerEntry::where('type', 'expense')->sum('amount');
-        $dealsProfit = (float) PropertyDeal::where('status', 'sold')->get()->sum(fn (PropertyDeal $d) => $d->profit());
-        $brokerCommissionPaid = (float) BrokerTransaction::where('type', 'payment_paid')->sum('amount');
-
-        $soldUnits = ProjectUnit::whereIn('status', ['booked', 'sold'])->get();
-        $totalCollected = (float) $soldUnits->sum(fn ($u) => $u->totalCollected());
-        $totalPurchases = (float) ProjectCost::sum('amount') + $manualExpense;
-        $netProfit = $totalCollected + $manualIncome + $dealsProfit - $totalPurchases - $brokerCommissionPaid;
-
-        $entries = LedgerEntry::with(['customer' => fn ($q) => $q->withTrashed(), 'project', 'account'])
-            ->orderByDesc('entry_date')->orderByDesc('id')->get();
-
-        $business = Business::find(Tenant::id());
-
-        return Pdf::loadView('ledger.statement', compact(
-            'manualIncome', 'manualExpense', 'dealsProfit', 'brokerCommissionPaid',
-            'totalCollected', 'totalPurchases', 'netProfit', 'entries', 'business'
-        ))->download('Ledger Statement - '.now()->format('Y-m-d').'.pdf');
     }
 
     public function storeEntry(Request $request): RedirectResponse

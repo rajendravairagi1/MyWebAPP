@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProjectUnit;
 use App\Models\UnitMedia;
 use App\Support\ImageCompressor;
+use App\Support\VideoCompressor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -19,6 +20,7 @@ class UnitMediaController extends Controller
      */
     protected const RULES = [
         'photo' => ['mimes' => 'jpg,jpeg,png,webp', 'max' => 20480],
+        'video' => ['mimes' => 'mp4,mov,avi,webm,mkv,3gp', 'max' => 102400],
         'layout' => ['mimes' => 'jpg,jpeg,png,webp,pdf', 'max' => 20480],
         'document' => ['mimes' => 'pdf,jpg,jpeg,png', 'max' => 20480],
     ];
@@ -26,7 +28,7 @@ class UnitMediaController extends Controller
     public function store(Request $request, ProjectUnit $unit): RedirectResponse
     {
         $type = $request->validate([
-            'type' => ['required', 'in:photo,layout,document'],
+            'type' => ['required', 'in:photo,video,layout,document'],
         ])['type'];
 
         $rule = self::RULES[$type];
@@ -55,6 +57,16 @@ class UnitMediaController extends Controller
             $tmp = $absolute.'.compressed';
 
             if (ImageCompressor::compress($absolute, $tmp) && filesize($tmp) > 0 && filesize($tmp) < $size) {
+                rename($tmp, $absolute);
+                $size = filesize($absolute);
+            } else {
+                @unlink($tmp);
+            }
+        } elseif ($type === 'video') {
+            $tmp = $absolute.'.compressed.mp4';
+
+            if (VideoCompressor::compress($absolute, $tmp) && filesize($tmp) > 0 && filesize($tmp) < $size) {
+                unlink($absolute);
                 rename($tmp, $absolute);
                 $size = filesize($absolute);
             } else {

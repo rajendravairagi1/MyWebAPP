@@ -12,7 +12,7 @@ class AvailablePropertiesController extends Controller
 {
     public function index(): View
     {
-        $units = ProjectUnit::with(['project', 'photos'])
+        $units = ProjectUnit::with(['project', 'photos', 'videos'])
             ->where('status', 'available')
             ->whereNull('archived_at')
             ->get()
@@ -59,6 +59,6 @@ class AvailablePropertiesController extends Controller
 
         $project->syncCompletionStatus();
 
-        return redirect()->route('project-units.show', $unit)->with('status', 'Property added — you can now upload photos, layout and papers.');
+        return redirect()->route('project-units.show', $unit)->with('status', 'Property added — you can now upload photos, videos, layout and papers.');
     }
 }

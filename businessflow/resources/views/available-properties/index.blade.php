@@ -33,8 +33,8 @@
                                     @if ($unit->type)
                                         <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400">{{ $unit->type }}</span>
                                     @endif
-                                    @if ($unit->photos->count())
-                                        <span class="text-xs text-gray-400">{{ __('· :count media', ['count' => $unit->photos->count()]) }}</span>
+                                    @if ($unit->photos->count() || $unit->videos->count())
+                                        <span class="text-xs text-gray-400">{{ __('· :count media', ['count' => $unit->photos->count() + $unit->videos->count()]) }}</span>
                                     @endif
                                 </div>
                                 <div class="text-xs text-gray-400 mt-0.5">
