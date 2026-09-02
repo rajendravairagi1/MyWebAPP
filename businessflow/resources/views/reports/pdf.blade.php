@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>{{ $report['title'] }}</title>
     <style>
-        body { font-family: sans-serif; font-size: 11px; color: #1a202c; }
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 11px; color: #1a202c; }
         .muted { color: #718096; }
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }
         th { text-align: left; background: #f7fafc; padding: 5px 8px; font-size: 9px; text-transform: uppercase; color: #718096; }

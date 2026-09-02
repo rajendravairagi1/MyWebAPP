@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>{{ $quotation->number }}</title>
     <style>
-        body { font-family: sans-serif; font-size: 12px; color: #1a202c; }
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 12px; color: #1a202c; }
         h1 { font-size: 20px; margin-bottom: 0; }
         .muted { color: #718096; }
         table { width: 100%; border-collapse: collapse; margin-top: 16px; }

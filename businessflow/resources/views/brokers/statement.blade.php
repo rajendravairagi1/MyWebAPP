@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Broker Statement - {{ $broker->name }}</title>
     <style>
-        body { font-family: sans-serif; font-size: 12px; color: #1a202c; }
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 12px; color: #1a202c; }
         h1 { font-size: 20px; margin-bottom: 0; }
         h2 { font-size: 13px; margin: 22px 0 6px; color: #2d3748; }
         .muted { color: #718096; }
