@@ -15,6 +15,28 @@
 
             <div class="p-4 sm:p-8 bg-white dark:bg-slate-800 shadow sm:rounded-lg">
                 <div class="max-w-xl">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Language') }}</h2>
+                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        {{ __('Which language the app is shown in — just for you. Everyone else on your team keeps their own choice.') }}
+                    </p>
+                    <form method="POST" action="{{ route('profile.locale') }}" class="mt-4 flex flex-wrap items-center gap-3">
+                        @csrf
+                        @method('PUT')
+                        <select name="locale" class="border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            @foreach (config('locales') as $code => $label)
+                                <option value="{{ $code }}" @selected(($user->locale ?? 'en') === $code)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <x-primary-button>{{ __('Save') }}</x-primary-button>
+                        @if (session('status') === 'locale-updated')
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Saved.') }}</p>
+                        @endif
+                    </form>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-8 bg-white dark:bg-slate-800 shadow sm:rounded-lg">
+                <div class="max-w-xl">
                     @include('profile.partials.update-password-form')
                 </div>
             </div>

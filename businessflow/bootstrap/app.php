@@ -21,6 +21,7 @@ $builder = Application::configure(basePath: dirname(__DIR__))
         // re-appended after our middleware to force the correct order.
         $middleware->removeFromGroup('web', \Illuminate\Routing\Middleware\SubstituteBindings::class);
         $middleware->appendToGroup('web', [
+            \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\IdentifyTenant::class,
             \App\Http\Middleware\EnsureSubscriptionActive::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,

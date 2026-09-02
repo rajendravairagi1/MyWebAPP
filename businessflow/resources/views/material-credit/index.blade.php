@@ -13,11 +13,11 @@
             @endif
 
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ __('Material or labor taken on credit from a vendor — nothing paid yet. Marked with the "Udhar liya" checkbox when adding a Payment (Kharcha) entry on a project.') }}
+                {{ __('Material or labor taken on credit from a vendor — nothing paid yet. Marked with the "Taken on credit" checkbox when adding a Payment entry on a project.') }}
             </p>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
-                <div class="text-xs uppercase text-gray-400">{{ __('Total Udhar Outstanding') }}</div>
+                <div class="text-xs uppercase text-gray-400">{{ __('Total Credit Outstanding') }}</div>
                 <div class="mt-1 text-3xl font-bold text-red-600">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($totalOutstanding, 0) }}</div>
             </div>
 
@@ -66,7 +66,7 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden" x-data="{ paying: null }">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Outstanding — one by one') }} ({{ $outstanding->count() }})</div>
                 @if ($outstanding->isEmpty())
-                    <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No udhar outstanding right now.') }}</div>
+                    <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No credit outstanding right now.') }}</div>
                 @else
                     <div class="overflow-x-auto">
                         <table class="min-w-full text-sm">

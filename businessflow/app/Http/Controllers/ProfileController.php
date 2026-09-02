@@ -38,6 +38,22 @@ class ProfileController extends Controller
     }
 
     /**
+     * Switches the language the app is shown in for this user only —
+     * every other team member on the same business keeps their own
+     * preference (see App\Http\Middleware\SetLocale).
+     */
+    public function updateLocale(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'locale' => ['required', 'string', 'in:'.implode(',', array_keys(config('locales')))],
+        ]);
+
+        $request->user()->update(['locale' => $data['locale']]);
+
+        return Redirect::route('profile.edit')->with('status', 'locale-updated');
+    }
+
+    /**
      * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse

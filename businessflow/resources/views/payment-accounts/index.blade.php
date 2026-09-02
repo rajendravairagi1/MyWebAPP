@@ -18,7 +18,7 @@
             @endif
 
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ __('Money doesn\'t always land in one account — wife\'s, father\'s, a partner\'s, or more than one account for the same person. List every account it actually moves through here — add the bank and account number so accounts belonging to the same person stay tellable apart. Cash is different — it never lands in an account, so add the person physically holding it (e.g. Rajesh) as a "Cash-in-hand" entry instead — Cash payments can only be assigned to one of those. Useful later for ITR.') }}
+                {{ __('Money doesn\'t always land in one account — a spouse\'s, a partner\'s, or more than one account for the same person. List every account it actually moves through here — add the bank and account number so accounts belonging to the same person stay tellable apart. Cash is different — it never lands in an account, so add the person physically holding it (e.g. Alex) as a "Cash-in-hand" entry instead — Cash payments can only be assigned to one of those. Useful later for tax filing.') }}
             </p>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
@@ -87,7 +87,7 @@
             </div>
             <div>
                 <x-input-label for="name" :value="__('Name')" />
-                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Wife — Priya, Self, Father — Ramesh') }}" required autofocus />
+                <x-text-input id="name" name="name" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Spouse — Jane, Self, Partner — Mike') }}" required autofocus />
                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
             <div class="grid grid-cols-2 gap-4" x-show="type === 'bank'" x-cloak>

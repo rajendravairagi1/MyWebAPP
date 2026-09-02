@@ -7,7 +7,7 @@
     $unitsCount = $project->units->count();
     $costsCount = $project->costs->count();
     $canFinancials = \App\Support\Tenant::canFinancials('projects');
-    $deleteConfirmMsg = "Delete \"{$project->name}\"? This permanently removes its {$unitsCount} unit(s) and {$costsCount} payment (kharcha) entries";
+    $deleteConfirmMsg = "Delete \"{$project->name}\"? This permanently removes its {$unitsCount} unit(s) and {$costsCount} payment entries";
     if ($revenue > 0 && $canFinancials) {
         $deleteConfirmMsg .= ", including ".number_format($revenue, 0)." already recorded as received";
     }
@@ -334,7 +334,7 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-4">
                     <div>
-                        <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Payments (Kharcha)') }} ({{ $project->costs->count() }})</div>
+                        <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Payments') }} ({{ $project->costs->count() }})</div>
                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Money you have spent on this project — land, material, labor, etc.') }}</div>
                     </div>
                     <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-cost')" class="shrink-0 inline-flex items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('+ Add Payment') }}</button>
@@ -363,9 +363,9 @@
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $entry->vendor }}</td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">
                                         @if ($entry->isOutstandingCredit())
-                                            <a href="{{ route('material-credit.index') }}" class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:underline">{{ __('Udhar (baki)') }}</a>
+                                            <a href="{{ route('material-credit.index') }}" class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:underline">{{ __('On Credit') }}</a>
                                         @elseif ($entry->is_credit)
-                                            {{ $entry->account?->label() ?? '—' }} <span class="text-xs text-gray-400">({{ __('udhar paid') }})</span>
+                                            {{ $entry->account?->label() ?? '—' }} <span class="text-xs text-gray-400">({{ __('credit paid') }})</span>
                                         @else
                                             {{ $entry->account?->label() ?? '—' }}
                                         @endif
@@ -448,15 +448,15 @@
 
                     <div>
                         <x-input-label for="vendor" :value="__('Paid to / Vendor (optional)')" />
-                        <x-text-input id="vendor" name="vendor" type="text" placeholder="{{ __('e.g. Ram Lal Cement Store, Contractor name') }}" class="mt-1 block w-full" />
+                        <x-text-input id="vendor" name="vendor" type="text" placeholder="{{ __('e.g. ABC Building Supply, Contractor name') }}" class="mt-1 block w-full" />
                         <p class="mt-1 text-xs text-gray-400">{{ __('Who you gave this money to. Leave blank if not needed.') }}</p>
                     </div>
 
                     <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3">
                         <input id="is_credit" name="is_credit" type="checkbox" value="1" x-model="isCredit" class="mt-0.5 rounded border-gray-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500">
                         <label for="is_credit" class="text-sm text-amber-800 dark:text-amber-300">
-                            {{ __('Udhar liya — vendor se maal/labour liya, abhi payment nahi kiya.') }}
-                            <span class="block text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">{{ __('Shows on the Material Udhar page until you mark it paid — no account is picked now.') }}</span>
+                            {{ __('Taken on credit — received material/labor from the vendor, payment not made yet.') }}
+                            <span class="block text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">{{ __('Shows on the Material Credit page until you mark it paid — no account is picked now.') }}</span>
                         </label>
                     </div>
 
@@ -536,14 +536,14 @@
 
                     <div>
                         <x-input-label for="edit_vendor" :value="__('Paid to / Vendor (optional)')" />
-                        <input id="edit_vendor" name="vendor" type="text" x-model="editingCost.vendor" placeholder="{{ __('e.g. Ram Lal Cement Store, Contractor name') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <input id="edit_vendor" name="vendor" type="text" x-model="editingCost.vendor" placeholder="{{ __('e.g. ABC Building Supply, Contractor name') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     </div>
 
                     <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3">
                         <input id="edit_is_credit" name="is_credit" type="checkbox" value="1" x-model="editingCost.is_credit" class="mt-0.5 rounded border-gray-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500">
                         <label for="edit_is_credit" class="text-sm text-amber-800 dark:text-amber-300">
-                            {{ __('Udhar liya — vendor se maal/labour liya, abhi payment nahi kiya.') }}
-                            <span class="block text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">{{ __('Shows on the Material Udhar page until you mark it paid — no account is picked now.') }}</span>
+                            {{ __('Taken on credit — received material/labor from the vendor, payment not made yet.') }}
+                            <span class="block text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">{{ __('Shows on the Material Credit page until you mark it paid — no account is picked now.') }}</span>
                         </label>
                     </div>
 

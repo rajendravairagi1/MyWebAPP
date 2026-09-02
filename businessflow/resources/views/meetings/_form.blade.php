@@ -46,7 +46,7 @@
 
 <div>
     <x-input-label for="attendees" :value="__('Attendees (optional)')" />
-    <x-text-input id="attendees" name="attendees" type="text" class="mt-1 block w-full" :value="$old('attendees')" placeholder="{{ __('e.g. Rakesh (Site Manager), Priya (Sales)') }}" />
+    <x-text-input id="attendees" name="attendees" type="text" class="mt-1 block w-full" :value="$old('attendees')" placeholder="{{ __('e.g. Mike (Site Manager), Sarah (Sales)') }}" />
     <x-input-error :messages="$errors->get('attendees')" class="mt-2" />
 </div>
 
