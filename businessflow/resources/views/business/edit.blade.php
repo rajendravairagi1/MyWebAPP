@@ -9,6 +9,41 @@
                 <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm rounded-md p-3">{{ session('status') }}</div>
             @endif
 
+            @php
+                $planLabels = ['solo' => __('Solo'), 'team' => __('Team'), 'company' => __('Company')];
+                $planExpiresAt = $business->effectiveExpiresAt();
+                $planExpired = $business->isSubscriptionExpired();
+                $planDaysRemaining = $planExpiresAt ? now()->startOfDay()->diffInDays($planExpiresAt->copy()->startOfDay(), false) : null;
+            @endphp
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <div class="text-xs uppercase tracking-wide text-gray-400">{{ __('Your Plan') }}</div>
+                    <div class="mt-1 flex items-center gap-2">
+                        <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ $planLabels[$business->effectivePlan()] ?? ucfirst($business->effectivePlan()) }}</span>
+                        @if ($business->branch_id)
+                            <span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400">{{ __('via your Company') }}</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="text-right">
+                    @if ($planExpiresAt)
+                        <span @class([
+                            'text-xs px-2 py-1 rounded font-medium',
+                            'bg-red-100 text-red-700' => $planExpired,
+                            'bg-amber-100 text-amber-700' => ! $planExpired && $planDaysRemaining !== null && $planDaysRemaining <= 7,
+                            'bg-green-100 text-green-700' => ! $planExpired && $planDaysRemaining !== null && $planDaysRemaining > 7,
+                        ])>
+                            {{ $planExpired ? __('Expired') : __('Valid till') }} {{ $planExpiresAt->format('d M Y') }}
+                        </span>
+                        @if (! $planExpired && $planDaysRemaining !== null)
+                            <div class="text-xs text-gray-400 mt-1">{{ trans_choice(':count day left|:count days left', $planDaysRemaining, ['count' => $planDaysRemaining]) }}</div>
+                        @endif
+                    @else
+                        <span class="text-xs text-gray-400">{{ __('No expiry set') }}</span>
+                    @endif
+                </div>
+            </div>
+
             <p class="text-sm text-gray-500 dark:text-gray-400">
                 {{ __('This is what shows up on your Invoices, Quotations, and Statements — your logo, name, phone, email, address, and website.') }}
             </p>
