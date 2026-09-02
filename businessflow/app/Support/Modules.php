@@ -33,5 +33,5 @@ class Modules
      * aren't here because they're inherently all financial — there's
      * nothing non-sensitive to split off.
      */
-    public const FINANCIAL_MODULES = ['customers', 'projects'];
+    public const FINANCIAL_MODULES = ['customers', 'projects', 'property_deals'];
 }

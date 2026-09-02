@@ -1,3 +1,4 @@
+@php $canFinancials = \App\Support\Tenant::canFinancials('property_deals'); @endphp
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center gap-2">
@@ -45,8 +46,10 @@
                     </div>
                     <div class="text-xs text-gray-400 mt-1">
                         @if ($deal->address){{ $deal->address }}@endif
-                        @if ($deal->seller_name) · {{ __('Bought from') }} {{ $deal->seller_name }}@endif
-                        @if ($deal->buyer_name) · {{ __('Sold to') }} {{ $deal->buyer_name }}@endif
+                        @if ($canFinancials)
+                            @if ($deal->seller_name) · {{ __('Bought from') }} {{ $deal->seller_name }}@endif
+                            @if ($deal->buyer_name) · {{ __('Sold to') }} {{ $deal->buyer_name }}@endif
+                        @endif
                     </div>
                     @if ($deal->contact_name || $deal->contact_phone || $deal->contact_email)
                         <div class="text-xs text-gray-400 mt-1">
@@ -62,43 +65,51 @@
                     </form>
                 </div>
                 <div class="text-right">
-                    <div class="text-xs text-gray-400">{{ __('Purchase') }}</div>
-                    <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($deal->purchase_price, 0) }}</div>
-                    @if ($deal->asking_price)
-                        <div class="text-xs text-gray-400 mt-1">{{ __('Asking') }}: {{ \App\Support\Tenant::currencySymbol() }}{{ number_format($deal->asking_price, 0) }}</div>
+                    @if ($canFinancials)
+                        <div class="text-xs text-gray-400">{{ __('Purchase') }}</div>
+                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($deal->purchase_price, 0) }}</div>
                     @endif
-                    @if (($profit = $deal->profit()) !== null)
+                    @if ($deal->asking_price)
+                        <div class="{{ $canFinancials ? 'text-xs text-gray-400 mt-1' : 'text-lg font-semibold text-gray-900 dark:text-gray-100' }}">{{ $canFinancials ? __('Asking').': ' : '' }}{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($deal->asking_price, 0) }}</div>
+                    @endif
+                    @if ($canFinancials && ($profit = $deal->profit()) !== null)
                         <div class="text-xs {{ $profit >= 0 ? 'text-green-600' : 'text-red-600' }} mt-1">{{ __('Profit') }}: {{ \App\Support\Tenant::currencySymbol() }}{{ number_format($profit, 0) }}</div>
                     @endif
-                    <div class="mt-2 flex items-center justify-end gap-3">
-                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-deal')" class="text-xs text-accent-600 hover:underline">{{ __('Edit') }}</button>
-                        <form method="POST" action="{{ route('property-deals.destroy', $deal) }}" onsubmit="return confirm('{{ __('Delete this deal?') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="text-xs text-red-600 hover:underline">{{ __('Delete') }}</button>
-                        </form>
-                    </div>
+                    @if ($canFinancials)
+                        <div class="mt-2 flex items-center justify-end gap-3">
+                            <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-deal')" class="text-xs text-accent-600 hover:underline">{{ __('Edit') }}</button>
+                            <form method="POST" action="{{ route('property-deals.destroy', $deal) }}" onsubmit="return confirm('{{ __('Delete this deal?') }}')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="text-xs text-red-600 hover:underline">{{ __('Delete') }}</button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             </div>
 
-            <x-modal name="edit-deal" max-width="md">
-                <form method="POST" action="{{ route('property-deals.update', $deal) }}" class="p-6 space-y-4" x-data="{ brokerMode: {{ $deal->broker_id ? "'existing'" : ($brokers->isEmpty() ? "'new'" : "'existing'") }} }">
-                    @csrf
-                    @method('PUT')
-                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Deal') }}</h2>
-                    @include('property-deals._fields', ['deal' => $deal])
-                    <div class="flex justify-end gap-3">
-                        <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
-                        <x-primary-button>{{ __('Save') }}</x-primary-button>
-                    </div>
-                </form>
-            </x-modal>
+            @if ($canFinancials)
+                <x-modal name="edit-deal" max-width="md">
+                    <form method="POST" action="{{ route('property-deals.update', $deal) }}" class="p-6 space-y-4" x-data="{ brokerMode: {{ $deal->broker_id ? "'existing'" : ($brokers->isEmpty() ? "'new'" : "'existing'") }} }">
+                        @csrf
+                        @method('PUT')
+                        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Deal') }}</h2>
+                        @include('property-deals._fields', ['deal' => $deal])
+                        <div class="flex justify-end gap-3">
+                            <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
+                            <x-primary-button>{{ __('Save') }}</x-primary-button>
+                        </div>
+                    </form>
+                </x-modal>
+            @endif
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="flex border-b border-gray-100 dark:border-slate-700 text-sm overflow-x-auto">
                     <button type="button" @click="tab = 'photos'" :class="tab === 'photos' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Photos') }} ({{ $deal->photos->count() }})</button>
-                    <button type="button" @click="tab = 'layout'" :class="tab === 'layout' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Layout') }} ({{ $deal->layouts->count() }})</button>
-                    <button type="button" @click="tab = 'papers'" :class="tab === 'papers' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Papers') }} ({{ $deal->documents->count() }})</button>
+                    @if ($canFinancials)
+                        <button type="button" @click="tab = 'layout'" :class="tab === 'layout' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Layout') }} ({{ $deal->layouts->count() }})</button>
+                        <button type="button" @click="tab = 'papers'" :class="tab === 'papers' ? 'border-accent-600 text-accent-600' : 'border-transparent text-gray-500 dark:text-gray-400'" class="px-5 py-3 border-b-2 font-medium whitespace-nowrap">{{ __('Papers') }} ({{ $deal->documents->count() }})</button>
+                    @endif
                 </div>
 
                 <div x-show="tab === 'photos'" class="p-5 space-y-4">
@@ -123,31 +134,33 @@
                     @endif
                 </div>
 
-                <div x-show="tab === 'layout'" x-cloak class="p-5 space-y-4">
-                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'upload-layout')" class="text-sm text-accent-600 hover:underline">{{ __('+ Upload layout') }}</button>
-                    @if ($deal->layouts->isEmpty())
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No layout uploaded yet.') }}</p>
-                    @else
-                        <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
-                            @foreach ($deal->layouts as $item)
-                                @include('property-deals._media-row', ['item' => $item])
-                            @endforeach
-                        </ul>
-                    @endif
-                </div>
+                @if ($canFinancials)
+                    <div x-show="tab === 'layout'" x-cloak class="p-5 space-y-4">
+                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'upload-layout')" class="text-sm text-accent-600 hover:underline">{{ __('+ Upload layout') }}</button>
+                        @if ($deal->layouts->isEmpty())
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No layout uploaded yet.') }}</p>
+                        @else
+                            <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
+                                @foreach ($deal->layouts as $item)
+                                    @include('property-deals._media-row', ['item' => $item])
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
 
-                <div x-show="tab === 'papers'" x-cloak class="p-5 space-y-4">
-                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'upload-document')" class="text-sm text-accent-600 hover:underline">{{ __('+ Upload papers') }}</button>
-                    @if ($deal->documents->isEmpty())
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No papers uploaded yet.') }}</p>
-                    @else
-                        <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
-                            @foreach ($deal->documents as $item)
-                                @include('property-deals._media-row', ['item' => $item])
-                            @endforeach
-                        </ul>
-                    @endif
-                </div>
+                    <div x-show="tab === 'papers'" x-cloak class="p-5 space-y-4">
+                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'upload-document')" class="text-sm text-accent-600 hover:underline">{{ __('+ Upload papers') }}</button>
+                        @if ($deal->documents->isEmpty())
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No papers uploaded yet.') }}</p>
+                        @else
+                            <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
+                                @foreach ($deal->documents as $item)
+                                    @include('property-deals._media-row', ['item' => $item])
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -168,36 +181,38 @@
             </form>
         </x-modal>
 
-        <x-modal name="upload-layout" max-width="md">
-            <form method="POST" action="{{ route('property-deal-media.store', $deal) }}" enctype="multipart/form-data" class="p-6 space-y-4">
-                @csrf
-                <input type="hidden" name="type" value="layout">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Layout') }}</h2>
-                <div>
-                    <input type="file" name="files[]" accept="image/*,application/pdf" multiple required
-                        class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
-                </div>
-                <div class="flex justify-end gap-3">
-                    <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
-                    <x-primary-button>{{ __('Upload') }}</x-primary-button>
-                </div>
-            </form>
-        </x-modal>
+        @if ($canFinancials)
+            <x-modal name="upload-layout" max-width="md">
+                <form method="POST" action="{{ route('property-deal-media.store', $deal) }}" enctype="multipart/form-data" class="p-6 space-y-4">
+                    @csrf
+                    <input type="hidden" name="type" value="layout">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Layout') }}</h2>
+                    <div>
+                        <input type="file" name="files[]" accept="image/*,application/pdf" multiple required
+                            class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
+                        <x-primary-button>{{ __('Upload') }}</x-primary-button>
+                    </div>
+                </form>
+            </x-modal>
 
-        <x-modal name="upload-document" max-width="md">
-            <form method="POST" action="{{ route('property-deal-media.store', $deal) }}" enctype="multipart/form-data" class="p-6 space-y-4">
-                @csrf
-                <input type="hidden" name="type" value="document">
-                <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Papers') }}</h2>
-                <div>
-                    <input type="file" name="files[]" accept="image/*,application/pdf" multiple required
-                        class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
-                </div>
-                <div class="flex justify-end gap-3">
-                    <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
-                    <x-primary-button>{{ __('Upload') }}</x-primary-button>
-                </div>
-            </form>
-        </x-modal>
+            <x-modal name="upload-document" max-width="md">
+                <form method="POST" action="{{ route('property-deal-media.store', $deal) }}" enctype="multipart/form-data" class="p-6 space-y-4">
+                    @csrf
+                    <input type="hidden" name="type" value="document">
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Papers') }}</h2>
+                    <div>
+                        <input type="file" name="files[]" accept="image/*,application/pdf" multiple required
+                            class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
+                    </div>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
+                        <x-primary-button>{{ __('Upload') }}</x-primary-button>
+                    </div>
+                </form>
+            </x-modal>
+        @endif
     </div>
 </x-app-layout>

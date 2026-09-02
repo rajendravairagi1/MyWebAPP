@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Broker;
 use App\Models\PropertyDeal;
 use App\Support\BrokerResolver;
+use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -37,8 +38,18 @@ class PropertyDealController extends Controller
         return view('property-deals.show', compact('deal', 'brokers'));
     }
 
+    /**
+     * Purchase price, seller/buyer contact and the deal's Layout/Papers
+     * all stay behind the "financials" sub-permission (see Modules) — a
+     * team member given only base Property Deals access is meant to
+     * market and share the property, not learn who the seller is or
+     * what the business paid, which would let them go around the
+     * business and deal with the seller directly.
+     */
     public function store(Request $request): RedirectResponse
     {
+        abort_unless(Tenant::canFinancials('property_deals'), 403);
+
         $data = $this->validated($request);
         $data['broker_id'] = BrokerResolver::resolve($data);
         $data = $this->resolveStatus($data, null);
@@ -50,6 +61,8 @@ class PropertyDealController extends Controller
 
     public function update(Request $request, PropertyDeal $deal): RedirectResponse
     {
+        abort_unless(Tenant::canFinancials('property_deals'), 403);
+
         $data = $this->validated($request);
         $data['broker_id'] = BrokerResolver::resolve($data);
         $data = $this->resolveStatus($data, $deal);
@@ -89,6 +102,8 @@ class PropertyDealController extends Controller
 
     public function destroy(PropertyDeal $deal): RedirectResponse
     {
+        abort_unless(Tenant::canFinancials('property_deals'), 403);
+
         $deal->delete();
 
         return back()->with('status', 'Deal removed.');

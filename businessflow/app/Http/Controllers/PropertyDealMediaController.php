@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\PropertyDeal;
 use App\Models\PropertyDealMedia;
 use App\Support\ImageCompressor;
+use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -28,6 +29,12 @@ class PropertyDealMediaController extends Controller
         $type = $request->validate([
             'type' => ['required', 'in:photo,layout,document'],
         ])['type'];
+
+        // Layout/Papers can carry the seller's original documents (often
+        // showing the actual purchase price), so uploading or viewing
+        // them needs the same "financials" access as the deal itself —
+        // only Photos are open to a marketing-only team member.
+        abort_unless($type === 'photo' || Tenant::canFinancials('property_deals'), 403);
 
         $rule = self::RULES[$type];
 
@@ -75,6 +82,7 @@ class PropertyDealMediaController extends Controller
     public function show(PropertyDeal $deal, PropertyDealMedia $media): BinaryFileResponse
     {
         abort_unless($media->property_deal_id === $deal->id, 404);
+        abort_unless($media->type === 'photo' || Tenant::canFinancials('property_deals'), 403);
 
         $absolute = Storage::disk('local')->path($media->path);
         abort_unless(file_exists($absolute), 404);
@@ -85,6 +93,7 @@ class PropertyDealMediaController extends Controller
     public function download(PropertyDeal $deal, PropertyDealMedia $media): BinaryFileResponse
     {
         abort_unless($media->property_deal_id === $deal->id, 404);
+        abort_unless($media->type === 'photo' || Tenant::canFinancials('property_deals'), 403);
 
         $absolute = Storage::disk('local')->path($media->path);
         abort_unless(file_exists($absolute), 404);
@@ -95,6 +104,7 @@ class PropertyDealMediaController extends Controller
     public function destroy(PropertyDeal $deal, PropertyDealMedia $media): RedirectResponse
     {
         abort_unless($media->property_deal_id === $deal->id, 404);
+        abort_unless($media->type === 'photo' || Tenant::canFinancials('property_deals'), 403);
 
         Storage::disk('local')->delete($media->path);
         $media->delete();
