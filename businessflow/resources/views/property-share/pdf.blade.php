@@ -45,6 +45,21 @@
         @endif
     </table>
 
+    @if ($unit->contact_name || $unit->contact_phone || $unit->contact_email)
+        <h2>Contact for this Property</h2>
+        <table class="info">
+            @if ($unit->contact_name)
+                <tr><td class="label">Name</td><td>{{ $unit->contact_name }}</td></tr>
+            @endif
+            @if ($unit->contact_phone)
+                <tr><td class="label">Mobile</td><td>{{ $unit->contact_phone }}</td></tr>
+            @endif
+            @if ($unit->contact_email)
+                <tr><td class="label">Email</td><td>{{ $unit->contact_email }}</td></tr>
+            @endif
+        </table>
+    @endif
+
     @if ($photos->isNotEmpty())
         <h2>Photos</h2>
         <table class="photos">

@@ -53,6 +53,11 @@
                         @if ($unit->project->location) · {{ $unit->project->location }}@endif
                         @if ($unit->customer) · {{ __('Assigned to') }} {{ $unit->customer->name }}@endif
                     </div>
+                    @if ($unit->contact_name || $unit->contact_phone || $unit->contact_email)
+                        <div class="text-xs text-gray-400 mt-1">
+                            {{ __('Contact') }}: {{ collect([$unit->contact_name, $unit->contact_phone, $unit->contact_email])->filter()->implode(' · ') }}
+                        </div>
+                    @endif
                     <form method="POST" action="{{ route('property-share.generate', $unit) }}" class="mt-3">
                         @csrf
                         <button class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
@@ -109,6 +114,25 @@
                                 <option value="booked" @selected($unit->status === 'booked')>{{ __('Booked') }}</option>
                                 <option value="sold" @selected($unit->status === 'sold')>{{ __('Sold') }}</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-gray-100 dark:border-slate-700">
+                        <p class="text-xs text-gray-400 mb-3">{{ __('Who a customer should contact about this property — shown on the shareable link and PDF, separate from your business\'s own contact details.') }}</p>
+                        <div class="space-y-4">
+                            <div>
+                                <x-input-label :value="__('Contact name (optional)')" />
+                                <x-text-input name="contact_name" type="text" class="mt-1 block w-full" value="{{ $unit->contact_name }}" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <x-input-label :value="__('Contact mobile (optional)')" />
+                                    <x-text-input name="contact_phone" type="text" class="mt-1 block w-full" value="{{ $unit->contact_phone }}" />
+                                </div>
+                                <div>
+                                    <x-input-label :value="__('Contact email (optional)')" />
+                                    <x-text-input name="contact_email" type="email" class="mt-1 block w-full" value="{{ $unit->contact_email }}" />
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 pt-2">

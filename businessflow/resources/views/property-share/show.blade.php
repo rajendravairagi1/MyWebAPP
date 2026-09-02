@@ -87,6 +87,28 @@
                 </div>
             </div>
 
+            @if ($unit->contact_name || $unit->contact_phone || $unit->contact_email)
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-5">
+                    <div class="text-xs uppercase tracking-wide text-gray-400 mb-2">{{ __('Contact for this property') }}</div>
+                    <div class="flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            @if ($unit->contact_name)
+                                <div class="font-medium truncate">{{ $unit->contact_name }}</div>
+                            @endif
+                            @if ($unit->contact_email)
+                                <div class="text-sm text-gray-500 dark:text-gray-400 truncate">{{ $unit->contact_email }}</div>
+                            @endif
+                        </div>
+                        @if ($unit->contact_phone)
+                            <a href="tel:{{ $unit->contact_phone }}" class="shrink-0 inline-flex items-center gap-1.5 h-10 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
+                                <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
+                                {{ $unit->contact_phone }}
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             <div class="flex gap-3">
                 <a href="{{ route('property-share.pdf', $unit->share_token) }}" class="flex-1 inline-flex items-center justify-center gap-1.5 h-11 px-4 rounded-lg text-sm font-semibold whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
                     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>

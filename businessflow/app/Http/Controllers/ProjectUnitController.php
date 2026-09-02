@@ -27,6 +27,9 @@ class ProjectUnitController extends Controller
             'area_sqft' => ['nullable', 'numeric', 'min:0'],
             'price' => ['required', 'numeric', 'min:0'],
             'status' => ['required', 'in:available,booked,sold'],
+            'contact_name' => ['nullable', 'string', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
         ]);
 
         $project->units()->create($data);
@@ -45,6 +48,9 @@ class ProjectUnitController extends Controller
             'area_sqft' => ['nullable', 'numeric', 'min:0'],
             'price' => ['required', 'numeric', 'min:0'],
             'status' => ['required', 'in:available,booked,sold'],
+            'contact_name' => ['nullable', 'string', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
         ]);
 
         $unit->update($data);
