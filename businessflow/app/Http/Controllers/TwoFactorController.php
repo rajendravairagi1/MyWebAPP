@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Support\DocumentQr;
+use App\Support\Totp;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use PragmaRX\Google2FA\Google2FA;
 
 /**
  * Google Authenticator (TOTP) two-factor authentication, managed from
@@ -27,11 +27,11 @@ class TwoFactorController extends Controller
             $secret = $request->session()->get('two_factor.pending_secret');
 
             if (! $secret) {
-                $secret = (new Google2FA())->generateSecretKey();
+                $secret = Totp::generateSecret();
                 $request->session()->put('two_factor.pending_secret', $secret);
             }
 
-            $otpAuthUrl = (new Google2FA())->getQRCodeUrl(
+            $otpAuthUrl = Totp::getOtpAuthUrl(
                 config('app.name', 'BusinessFlow'),
                 $user->email,
                 $secret,
@@ -57,7 +57,7 @@ class TwoFactorController extends Controller
 
         abort_if(! $secret, 422, 'Your setup session expired — reload this page and scan the QR code again.');
 
-        if (! (new Google2FA())->verifyKey($secret, str_replace(' ', '', $request->string('code')))) {
+        if (! Totp::verify($secret, $request->string('code'))) {
             return back()->withErrors(['code' => __('That code is incorrect — check the app and try again.')]);
         }
 
