@@ -192,6 +192,24 @@
                         </div>
                     </div>
 
+                    <div class="border-t border-gray-100 dark:border-slate-700 pt-4">
+                        <p class="text-xs text-gray-400 mb-3">{{ __('Who a customer should contact about this property (optional — shown on the shareable link and PDF).') }}</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="sm:col-span-2">
+                                <x-input-label for="unit_contact_name" :value="__('Contact name')" />
+                                <x-text-input id="unit_contact_name" name="contact_name" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="unit_contact_phone" :value="__('Contact mobile')" />
+                                <x-text-input id="unit_contact_phone" name="contact_phone" type="text" class="mt-1 block w-full" />
+                            </div>
+                            <div>
+                                <x-input-label for="unit_contact_email" :value="__('Contact email')" />
+                                <x-text-input id="unit_contact_email" name="contact_email" type="email" class="mt-1 block w-full" />
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="flex justify-end gap-3 pt-2">
                         <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
                         <x-primary-button>{{ __('+ Add Unit') }}</x-primary-button>

@@ -143,6 +143,28 @@
                 </div>
             </div>
 
+            <div class="border-t border-gray-100 dark:border-slate-700 pt-4">
+                <p class="text-xs text-gray-400 mb-3">{{ __('Who a customer should contact about this property (optional — shown on the shareable link and PDF).') }}</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <x-input-label for="contact_name" :value="__('Contact name')" />
+                        <input type="text" id="contact_name" name="contact_name" value="{{ old('contact_name') }}"
+                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    </div>
+                    <div>
+                        <x-input-label for="contact_phone" :value="__('Contact mobile')" />
+                        <input type="text" id="contact_phone" name="contact_phone" value="{{ old('contact_phone') }}"
+                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    </div>
+                    <div>
+                        <x-input-label for="contact_email" :value="__('Contact email')" />
+                        <input type="email" id="contact_email" name="contact_email" value="{{ old('contact_email') }}"
+                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <x-input-error :messages="$errors->get('contact_email')" class="mt-2" />
+                    </div>
+                </div>
+            </div>
+
             <div class="flex justify-end gap-3">
                 <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
                 <x-primary-button>{{ __('Add Property') }}</x-primary-button>

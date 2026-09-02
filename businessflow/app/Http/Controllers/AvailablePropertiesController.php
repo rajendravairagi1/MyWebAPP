@@ -39,6 +39,9 @@ class AvailablePropertiesController extends Controller
             'type' => ['nullable', 'string', 'max:100'],
             'area_sqft' => ['nullable', 'numeric', 'min:0'],
             'price' => ['required', 'numeric', 'min:0'],
+            'contact_name' => ['nullable', 'string', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
         ]);
 
         $project = ! empty($data['project_id'])
@@ -55,6 +58,9 @@ class AvailablePropertiesController extends Controller
             'area_sqft' => $data['area_sqft'] ?? null,
             'price' => $data['price'],
             'status' => 'available',
+            'contact_name' => $data['contact_name'] ?? null,
+            'contact_phone' => $data['contact_phone'] ?? null,
+            'contact_email' => $data['contact_email'] ?? null,
         ]);
 
         $project->syncCompletionStatus();
