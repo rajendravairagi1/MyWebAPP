@@ -73,6 +73,7 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::post('/companies/{company}/dismiss-renewal', [AdminController::class, 'dismissCompanyRenewal'])->name('companies.dismiss-renewal');
     Route::get('/expiring', [AdminController::class, 'expiringSoon'])->name('expiring');
     Route::get('/login-activity', [\App\Http\Controllers\Admin\LoginActivityController::class, 'index'])->name('login-activity');
+    Route::delete('/login-activity', [\App\Http\Controllers\Admin\LoginActivityController::class, 'clear'])->name('login-activity.clear');
     Route::post('/demo/reset', [AdminController::class, 'resetDemo'])->name('demo.reset');
 });
 

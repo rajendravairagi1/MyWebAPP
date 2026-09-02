@@ -10,18 +10,32 @@
 
     <div class="py-12">
         <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            @if (session('status'))
+                <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm rounded-md p-3">{{ session('status') }}</div>
+            @endif
+
             <p class="text-sm text-gray-500 dark:text-gray-400">
                 {{ __('Every successful login across every account — who, when, from where, and on what device.') }}
             </p>
 
-            <form method="GET" action="{{ route('admin.login-activity') }}" class="flex gap-2">
-                <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('Search name, email, business, or IP…') }}"
-                    class="flex-1 max-w-sm text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                <button class="text-sm px-4 py-2 rounded-md border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Search') }}</button>
-                @if ($search !== '')
-                    <a href="{{ route('admin.login-activity') }}" class="text-sm px-4 py-2 rounded-md text-gray-500 dark:text-gray-400 hover:underline">{{ __('Clear') }}</a>
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <form method="GET" action="{{ route('admin.login-activity') }}" class="flex gap-2">
+                    <input type="text" name="search" value="{{ $search }}" placeholder="{{ __('Search name, email, business, or IP…') }}"
+                        class="flex-1 max-w-sm text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    <button class="text-sm px-4 py-2 rounded-md border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Search') }}</button>
+                    @if ($search !== '')
+                        <a href="{{ route('admin.login-activity') }}" class="text-sm px-4 py-2 rounded-md text-gray-500 dark:text-gray-400 hover:underline">{{ __('Clear search') }}</a>
+                    @endif
+                </form>
+
+                @if ($logs->total() > 0)
+                    <form method="POST" action="{{ route('admin.login-activity.clear') }}" onsubmit="return confirm('{{ __('Delete every login record? This cannot be undone.') }}')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="text-sm px-4 py-2 rounded-md border border-red-200 dark:border-red-800 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30">{{ __('Clear All') }}</button>
+                    </form>
                 @endif
-            </form>
+            </div>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 @if ($logs->isEmpty())

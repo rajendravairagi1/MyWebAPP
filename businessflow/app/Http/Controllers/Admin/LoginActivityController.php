@@ -4,11 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LoginLog;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class LoginActivityController extends Controller
 {
+    public function clear(): RedirectResponse
+    {
+        LoginLog::query()->delete();
+
+        return redirect()->route('admin.login-activity')->with('status', __('Login activity cleared.'));
+    }
+
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('search'));
