@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Quotation') }} {{ $quotation->number }}</h2>
             <x-status-badge :status="$quotation->status" class="text-sm" />
         </div>
@@ -73,6 +73,7 @@
             </div>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
                 <table class="min-w-full text-sm">
                     <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                         <tr>
@@ -93,6 +94,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
                 <div class="px-5 py-4 flex justify-end">
                     <table class="text-sm w-64">
                         <tr><td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Subtotal') }}</td><td class="py-1 text-right">{{ number_format($quotation->subtotal, 2) }}</td></tr>

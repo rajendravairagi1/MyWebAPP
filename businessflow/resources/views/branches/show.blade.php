@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
             <div>
                 <div class="flex items-center gap-2">
                     <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ $branch->name }}</h2>
@@ -86,6 +86,7 @@
                 </div>
             @else
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                    <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
@@ -118,6 +119,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 </div>
             @endif
         </div>

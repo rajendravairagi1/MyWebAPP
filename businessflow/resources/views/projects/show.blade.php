@@ -15,7 +15,7 @@
 @endphp
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
             <div>
                 <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ $project->name }}</h2>
                 <div class="text-xs text-gray-500 dark:text-gray-400 capitalize">{{ str_replace('_', ' ', $project->type) }} @if($project->location) · {{ $project->location }} @endif</div>
@@ -92,6 +92,7 @@
                     <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-unit')" class="shrink-0 inline-flex items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('+ Add Unit') }}</button>
                 </div>
                 @if ($project->units->isNotEmpty())
+                    <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
@@ -155,6 +156,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @endif
 
             </div>
@@ -338,6 +340,7 @@
                     <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-cost')" class="shrink-0 inline-flex items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('+ Add Payment') }}</button>
                 </div>
                 @if ($project->costs->isNotEmpty())
+                    <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
@@ -398,6 +401,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @endif
 
             </div>

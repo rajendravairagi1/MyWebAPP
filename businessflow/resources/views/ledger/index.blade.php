@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Ledger') }}</h2>
             <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-manual-entry')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
                 {{ __('+ Manual Entry') }}
@@ -58,7 +58,7 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('By Project') }}</div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <table class="min-w-full text-sm">
                         <thead>
                             <tr class="text-left text-xs uppercase text-gray-400 dark:text-gray-500">
                                 <th class="px-5 py-2">{{ __('Project') }}</th>
@@ -93,7 +93,7 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('By Customer & Property') }}</div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <table class="min-w-full text-sm">
                         <thead>
                             <tr class="text-left text-xs uppercase text-gray-400 dark:text-gray-500">
                                 <th class="px-5 py-2">{{ __('Customer') }}</th>
@@ -145,7 +145,7 @@
                         <a href="{{ route('property-deals.index') }}" class="text-xs text-accent-600 hover:underline font-normal">{{ __('Manage →') }}</a>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                        <table class="min-w-full text-sm">
                             <thead>
                                 <tr class="text-left text-xs uppercase text-gray-400 dark:text-gray-500">
                                     <th class="px-5 py-2">{{ __('Property') }}</th>
@@ -194,7 +194,7 @@
 
                 @if ($entries->isNotEmpty())
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                        <table class="min-w-full text-sm">
                             <thead>
                                 <tr class="text-left text-xs uppercase text-gray-400 dark:text-gray-500">
                                     <th class="px-5 py-2">{{ __('Date') }}</th>

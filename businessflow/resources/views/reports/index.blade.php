@@ -57,7 +57,7 @@
                     <div class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ __('No data for this report.') }}</div>
                 @else
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                        <table class="min-w-full text-sm">
                             <thead>
                                 <tr class="text-left text-xs uppercase text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-slate-700/60">
                                     @foreach ($report['columns'] as $col)

@@ -27,6 +27,7 @@
                     @if ($byProject->isEmpty())
                         <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('Nothing outstanding.') }}</div>
                     @else
+                        <div class="overflow-x-auto">
                         <table class="min-w-full text-sm">
                             <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
                                 @foreach ($byProject as $project => $amount)
@@ -37,6 +38,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>
                     @endif
                 </div>
 
@@ -45,6 +47,7 @@
                     @if ($byVendor->isEmpty())
                         <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('Nothing outstanding.') }}</div>
                     @else
+                        <div class="overflow-x-auto">
                         <table class="min-w-full text-sm">
                             <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
                                 @foreach ($byVendor as $vendor => $amount)
@@ -55,6 +58,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+                        </div>
                     @endif
                 </div>
             </div>

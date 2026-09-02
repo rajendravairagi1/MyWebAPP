@@ -1,7 +1,7 @@
 @php $canFinancials = \App\Support\Tenant::canFinancials('property_deals'); @endphp
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Property Deals') }}</h2>
             @if ($canFinancials)
                 <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-deal')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
