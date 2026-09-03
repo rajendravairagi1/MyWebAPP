@@ -23,6 +23,7 @@ class ProjectUnit extends Model
         'contact_name',
         'contact_phone',
         'contact_email',
+        'notes',
         'customer_id',
         'broker_id',
         'commitment_date',

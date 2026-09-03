@@ -39,6 +39,19 @@ $builder = Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // An error page (404/405/500/etc.) must never be replayed by the
+        // browser's back-forward cache — the exception unwinds past
+        // NoCacheForAuthenticatedPages's after-middleware logic before it
+        // ever runs, so a one-off error (a stale link, a route/method
+        // mismatch) could otherwise resurface on the next "Back" press
+        // instead of the browser re-fetching the current page.
+        $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response) {
+            $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            $response->headers->set('Pragma', 'no-cache');
+
+            return $response;
+        });
     });
 
 $app = $builder->create();

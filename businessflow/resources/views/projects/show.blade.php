@@ -112,7 +112,12 @@
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
                             @foreach ($project->units as $unit)
                                 <tr>
-                                    <td class="px-5 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $unit->unit_number }}</td>
+                                    <td class="px-5 py-2 font-medium text-gray-900 dark:text-gray-100">
+                                        {{ $unit->unit_number }}
+                                        @if ($unit->notes)
+                                            <span title="{{ $unit->notes }}" class="inline-block ml-1 text-amber-500 cursor-help">&#128221;</span>
+                                        @endif
+                                    </td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $unit->type }}</td>
                                     <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ $unit->area_sqft ?? '—' }}</td>
                                     @if ($canFinancials)
@@ -210,6 +215,12 @@
                                 <x-text-input id="unit_contact_email" name="contact_email" type="email" class="mt-1 block w-full" />
                             </div>
                         </div>
+                    </div>
+
+                    <div class="border-t border-gray-100 dark:border-slate-700 pt-4">
+                        <x-input-label for="unit_notes" :value="__('Notes (optional)')" />
+                        <p class="text-xs text-gray-400 mb-1">{{ __('For your own reference — e.g. plans to double this unit, or build Ground + 2. Not shown on the shared link.') }}</p>
+                        <textarea id="unit_notes" name="notes" rows="2" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500"></textarea>
                     </div>
 
                     <div class="flex justify-end gap-3 pt-2">

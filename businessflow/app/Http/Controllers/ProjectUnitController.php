@@ -30,6 +30,7 @@ class ProjectUnitController extends Controller
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:30'],
             'contact_email' => ['nullable', 'email', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $project->units()->create($data);
@@ -51,6 +52,7 @@ class ProjectUnitController extends Controller
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:30'],
             'contact_email' => ['nullable', 'email', 'max:255'],
+            'notes' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $unit->update($data);

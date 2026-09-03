@@ -58,6 +58,11 @@
                             {{ __('Contact') }}: {{ collect([$unit->contact_name, $unit->contact_phone, $unit->contact_email])->filter()->implode(' · ') }}
                         </div>
                     @endif
+                    @if ($unit->notes)
+                        <div class="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 rounded px-2 py-1 mt-2 whitespace-pre-line max-w-md">
+                            <span class="font-medium">{{ __('Notes') }}:</span> {{ $unit->notes }}
+                        </div>
+                    @endif
                     <form method="POST" action="{{ route('property-share.generate', $unit) }}" class="mt-3">
                         @csrf
                         <button class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
@@ -134,6 +139,11 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="pt-2 border-t border-gray-100 dark:border-slate-700">
+                        <x-input-label :value="__('Notes (optional)')" />
+                        <p class="text-xs text-gray-400 mb-1">{{ __('For your own reference — e.g. plans to double this unit, or build Ground + 2. Not shown on the shared link.') }}</p>
+                        <textarea name="notes" rows="3" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ $unit->notes }}</textarea>
                     </div>
                     <div class="flex justify-end gap-3 pt-2">
                         <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
