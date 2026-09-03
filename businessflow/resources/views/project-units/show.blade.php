@@ -131,7 +131,7 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <x-input-label :value="__('Contact mobile (optional)')" />
-                                    <x-text-input name="contact_phone" type="text" class="mt-1 block w-full" value="{{ $unit->contact_phone }}" />
+                                    <x-text-input name="contact_phone" type="tel" class="mt-1 block w-full" value="{{ $unit->contact_phone }}" />
                                 </div>
                                 <div>
                                     <x-input-label :value="__('Contact email (optional)')" />

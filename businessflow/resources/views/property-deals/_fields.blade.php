@@ -34,7 +34,7 @@
         </div>
         <div x-show="brokerMode === 'new'" @if ($brokers->isNotEmpty()) x-cloak @endif class="grid grid-cols-2 gap-3">
             <x-text-input name="new_broker_name" type="text" placeholder="{{ __('Broker name') }}" class="mt-1 block w-full" />
-            <x-text-input name="new_broker_phone" type="text" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+            <x-text-input name="new_broker_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
         </div>
         <p class="text-xs text-gray-400">{{ __('So you can record their commission (% or fixed) later, from this deal\'s profit.') }}</p>
     </div>
@@ -47,7 +47,7 @@
     </div>
     <div>
         <x-input-label :value="__('Seller Phone')" />
-        <x-text-input name="seller_phone" type="text" class="mt-1 block w-full" value="{{ old('seller_phone', $deal->seller_phone ?? '') }}" />
+        <x-text-input name="seller_phone" type="tel" class="mt-1 block w-full" value="{{ old('seller_phone', $deal->seller_phone ?? '') }}" />
     </div>
 </div>
 
@@ -73,7 +73,7 @@
         </div>
         <div>
             <x-input-label :value="__('Buyer Phone')" />
-            <x-text-input name="buyer_phone" type="text" class="mt-1 block w-full" value="{{ old('buyer_phone', $deal->buyer_phone ?? '') }}" />
+            <x-text-input name="buyer_phone" type="tel" class="mt-1 block w-full" value="{{ old('buyer_phone', $deal->buyer_phone ?? '') }}" />
         </div>
     </div>
     <div class="mt-4">
@@ -122,7 +122,7 @@
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <x-input-label :value="__('Contact mobile (optional)')" />
-                <x-text-input name="contact_phone" type="text" class="mt-1 block w-full" value="{{ old('contact_phone', $deal->contact_phone ?? '') }}" />
+                <x-text-input name="contact_phone" type="tel" class="mt-1 block w-full" value="{{ old('contact_phone', $deal->contact_phone ?? '') }}" />
             </div>
             <div>
                 <x-input-label :value="__('Contact email (optional)')" />

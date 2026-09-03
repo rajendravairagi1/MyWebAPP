@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Business;
+use App\Rules\Phone;
 use App\Support\ImageCompressor;
 use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +29,7 @@ class BusinessController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'address' => ['nullable', 'string', 'max:1000'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30', new Phone],
             'email' => ['nullable', 'email', 'max:255'],
             'website' => ['nullable', 'string', 'max:255'],
             'invoice_prefix' => ['nullable', 'string', 'max:20'],

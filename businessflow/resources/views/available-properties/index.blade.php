@@ -191,7 +191,7 @@
                     </div>
                     <div>
                         <x-input-label for="contact_phone" :value="__('Contact mobile')" />
-                        <input type="text" id="contact_phone" name="contact_phone" value="{{ old('contact_phone') }}"
+                        <input type="tel" id="contact_phone" name="contact_phone" value="{{ old('contact_phone') }}"
                             class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     </div>
                     <div>

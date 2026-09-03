@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Broker;
 use App\Models\PropertyDeal;
+use App\Rules\Phone;
 use App\Support\BrokerResolver;
 use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
@@ -115,21 +116,21 @@ class PropertyDealController extends Controller
             'property_title' => ['required', 'string', 'max:255'],
             'broker_id' => ['nullable', 'integer'],
             'new_broker_name' => ['nullable', 'string', 'max:255'],
-            'new_broker_phone' => ['nullable', 'string', 'max:30'],
+            'new_broker_phone' => ['nullable', 'string', 'max:30', new Phone],
             'address' => ['nullable', 'string', 'max:1000'],
             'seller_name' => ['nullable', 'string', 'max:255'],
-            'seller_phone' => ['nullable', 'string', 'max:30'],
+            'seller_phone' => ['nullable', 'string', 'max:30', new Phone],
             'purchase_price' => ['required', 'numeric', 'min:0.01'],
             'asking_price' => ['nullable', 'numeric', 'min:0.01'],
             'buyer_name' => ['nullable', 'string', 'max:255'],
-            'buyer_phone' => ['nullable', 'string', 'max:30'],
+            'buyer_phone' => ['nullable', 'string', 'max:30', new Phone],
             'sale_price' => ['nullable', 'numeric', 'min:0.01'],
             'status' => ['required', 'in:open,sold,cancelled'],
             'deal_date' => ['nullable', 'date'],
             'sold_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'contact_name' => ['nullable', 'string', 'max:255'],
-            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'contact_phone' => ['nullable', 'string', 'max:30', new Phone],
             'contact_email' => ['nullable', 'email', 'max:255'],
         ]);
     }

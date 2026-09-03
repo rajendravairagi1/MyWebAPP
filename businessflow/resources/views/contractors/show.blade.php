@@ -129,7 +129,7 @@
             </div>
             <div>
                 <x-input-label for="edit_phone" :value="__('Phone')" />
-                <input type="text" id="edit_phone" name="phone" value="{{ $contractor->phone }}"
+                <input type="tel" id="edit_phone" name="phone" value="{{ $contractor->phone }}"
                     class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
             </div>
             <div>

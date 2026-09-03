@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\Investor;
 use App\Models\InvestorTransaction;
 use App\Models\Project;
+use App\Rules\Phone;
 use App\Support\DocumentQr;
 use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -63,7 +64,7 @@ class InvestorController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30', new Phone],
             'email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);

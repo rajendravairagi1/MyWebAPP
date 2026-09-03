@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Project;
 use App\Models\ProjectUnit;
+use App\Rules\Phone;
 use App\Support\BrokerResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -28,7 +29,7 @@ class ProjectUnitController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'status' => ['required', 'in:available,booked,sold'],
             'contact_name' => ['nullable', 'string', 'max:255'],
-            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'contact_phone' => ['nullable', 'string', 'max:30', new Phone],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
@@ -50,7 +51,7 @@ class ProjectUnitController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'status' => ['required', 'in:available,booked,sold'],
             'contact_name' => ['nullable', 'string', 'max:255'],
-            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'contact_phone' => ['nullable', 'string', 'max:30', new Phone],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ]);
@@ -83,7 +84,7 @@ class ProjectUnitController extends Controller
             'commitment_date' => ['nullable', 'date'],
             'broker_id' => ['nullable', 'integer'],
             'new_broker_name' => ['nullable', 'string', 'max:255'],
-            'new_broker_phone' => ['nullable', 'string', 'max:30'],
+            'new_broker_phone' => ['nullable', 'string', 'max:30', new Phone],
         ]);
 
         $unit = ProjectUnit::findOrFail($data['project_unit_id']);

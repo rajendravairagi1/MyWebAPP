@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Contractor;
 use App\Models\Project;
 use App\Models\ProjectCost;
+use App\Rules\Phone;
 use App\Support\ContractorResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -90,7 +91,7 @@ class ProjectCostController extends Controller
             'new_contractor_name' => ['nullable', 'string', 'max:255'],
             'new_contractor_type' => ['nullable', 'string', 'in:'.implode(',', array_keys(Contractor::TYPES))],
             'new_contractor_type_other' => ['nullable', 'string', 'max:100'],
-            'new_contractor_phone' => ['nullable', 'string', 'max:30'],
+            'new_contractor_phone' => ['nullable', 'string', 'max:30', new Phone],
             'payment_account_id' => ['nullable', 'integer'],
             'is_credit' => ['nullable', 'boolean'],
             'notes' => ['nullable', 'string', 'max:1000'],

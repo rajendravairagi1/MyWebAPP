@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\Contractor;
+use App\Rules\Phone;
 use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
@@ -73,7 +74,7 @@ class ContractorController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'type' => ['required', 'string', 'in:'.implode(',', array_keys(Contractor::TYPES))],
             'type_other' => ['nullable', 'string', 'max:100'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30', new Phone],
             'email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);

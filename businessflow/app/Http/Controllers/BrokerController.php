@@ -7,10 +7,12 @@ use App\Models\BrokerTransaction;
 use App\Models\Business;
 use App\Models\ProjectUnit;
 use App\Models\PropertyDeal;
+use App\Rules\Phone;
 use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class BrokerController extends Controller
@@ -50,7 +52,7 @@ class BrokerController extends Controller
      * payment paid out, with the running balance — so it can be handed
      * over as proof of account instead of reading numbers off screen.
      */
-    public function statement(Broker $broker): \Illuminate\Http\Response
+    public function statement(Broker $broker): Response
     {
         $broker->load('transactions.unit.project', 'transactions.deal');
         $business = Business::find(Tenant::id());
@@ -66,7 +68,7 @@ class BrokerController extends Controller
      * unlike the full Statement which is a record of everything that
      * ever happened (earned and paid) rather than a bill.
      */
-    public function invoice(Broker $broker): \Illuminate\Http\Response
+    public function invoice(Broker $broker): Response
     {
         abort_if($broker->balance() <= 0, 422, 'Nothing is currently owed to this broker.');
 
@@ -96,7 +98,7 @@ class BrokerController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:30'],
+            'phone' => ['nullable', 'string', 'max:30', new Phone],
             'email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);

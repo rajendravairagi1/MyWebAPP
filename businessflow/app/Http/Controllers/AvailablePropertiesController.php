@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\ProjectUnit;
 use App\Models\PropertyDeal;
+use App\Rules\Phone;
 use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,7 +51,7 @@ class AvailablePropertiesController extends Controller
             'area_sqft' => ['nullable', 'numeric', 'min:0'],
             'price' => ['required', 'numeric', 'min:0'],
             'contact_name' => ['nullable', 'string', 'max:255'],
-            'contact_phone' => ['nullable', 'string', 'max:30'],
+            'contact_phone' => ['nullable', 'string', 'max:30', new Phone],
             'contact_email' => ['nullable', 'email', 'max:255'],
         ]);
 

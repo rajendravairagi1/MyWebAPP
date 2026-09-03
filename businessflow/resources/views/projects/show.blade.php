@@ -208,7 +208,7 @@
                             </div>
                             <div>
                                 <x-input-label for="unit_contact_phone" :value="__('Contact mobile')" />
-                                <x-text-input id="unit_contact_phone" name="contact_phone" type="text" class="mt-1 block w-full" />
+                                <x-text-input id="unit_contact_phone" name="contact_phone" type="tel" class="mt-1 block w-full" />
                             </div>
                             <div>
                                 <x-input-label for="unit_contact_email" :value="__('Contact email')" />
@@ -495,7 +495,7 @@
                                     </select>
                                     <input type="text" name="new_contractor_type_other" x-show="newContractorType === 'other'" x-cloak placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="mt-1.5 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 </div>
-                                <x-text-input name="new_contractor_phone" type="text" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+                                <x-text-input name="new_contractor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
                             </div>
                             <p class="mt-1 text-xs text-gray-400">{{ __('Link this payment to a contractor so their full history and statement stay together — see it any time under Contractors / Vendors.') }}</p>
                         </div>
@@ -620,7 +620,7 @@
                                     </select>
                                     <input type="text" name="new_contractor_type_other" x-show="newContractorType === 'other'" x-cloak placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="mt-1.5 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 </div>
-                                <x-text-input name="new_contractor_phone" type="text" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+                                <x-text-input name="new_contractor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
                             </div>
                         </div>
                     @endif

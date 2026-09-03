@@ -7,11 +7,15 @@ use App\Models\Business;
 use App\Models\Customer;
 use App\Models\PaymentAccount;
 use App\Models\Project;
+use App\Rules\Phone;
+use App\Support\DocumentQr;
 use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -39,7 +43,7 @@ class CustomerController extends Controller
         return view('customers.create');
     }
 
-    public function store(Request $request): RedirectResponse|\Illuminate\Http\JsonResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $data = $this->validated($request);
         $data = $this->withUploads($request, $data);
@@ -80,8 +84,8 @@ class CustomerController extends Controller
     {
         $customer->load(['units.project', 'units.payments', 'invoices.payments', 'invoices.project', 'invoices.projectUnit']);
         $business = Business::find(Tenant::id());
-        $verifyQr = \App\Support\DocumentQr::dataUri(
-            \Illuminate\Support\Facades\URL::signedRoute('verify.customer', ['customer' => $customer->id])
+        $verifyQr = DocumentQr::dataUri(
+            URL::signedRoute('verify.customer', ['customer' => $customer->id])
         );
 
         return Pdf::loadView('customers.statement', compact('customer', 'business', 'verifyQr'))
@@ -150,7 +154,7 @@ class CustomerController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'company' => ['nullable', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:50'],
+            'phone' => ['nullable', 'string', 'max:50', new Phone],
             'email' => ['nullable', 'email', 'max:255'],
             'address' => ['nullable', 'string', 'max:2000'],
             'notes' => ['nullable', 'string', 'max:2000'],

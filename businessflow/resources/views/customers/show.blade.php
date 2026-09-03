@@ -382,7 +382,7 @@
                                 </div>
                                 <div x-show="brokerMode === 'new'" @if ($brokers->isNotEmpty()) x-cloak @endif class="grid grid-cols-2 gap-3">
                                     <x-text-input name="new_broker_name" type="text" placeholder="{{ __('Broker name') }}" class="mt-1 block w-full" />
-                                    <x-text-input name="new_broker_phone" type="text" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+                                    <x-text-input name="new_broker_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
                                 </div>
                                 <p class="text-xs text-gray-400">{{ __('So you can record their commission (% or fixed) later, from this sale.') }}</p>
                             </div>

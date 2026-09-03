@@ -90,7 +90,7 @@
 
         <div>
             <x-input-label for="phone" :value="__('Mobile number (optional)')" />
-            <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" :value="old('phone', $user->phone)" autocomplete="tel" />
+            <x-text-input id="phone" name="phone" type="tel" class="mt-1 block w-full" :value="old('phone', $user->phone)" autocomplete="tel" />
             <p class="text-xs text-gray-400 mt-1">{{ __('Shown on your public profile page so customers can call you directly.') }}</p>
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
