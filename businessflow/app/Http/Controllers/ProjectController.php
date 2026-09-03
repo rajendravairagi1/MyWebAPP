@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contractor;
 use App\Models\Customer;
 use App\Models\PaymentAccount;
 use App\Models\Project;
+use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -47,6 +49,7 @@ class ProjectController extends Controller
         $project->load([
             'costs' => fn ($q) => $q->latest('spent_on'),
             'costs.account',
+            'costs.contractor',
             // A unit that's fully paid off or written off is done — it
             // no longer needs managing here, and it's already visible via
             // the customer's History or the Completed Projects page.
@@ -63,7 +66,9 @@ class ProjectController extends Controller
 
         $paymentAccounts = PaymentAccount::orderBy('name')->get();
 
-        return view('projects.show', compact('project', 'costsByCategory', 'customers', 'paymentAccounts'));
+        $contractors = Tenant::can('contractors') ? Contractor::orderBy('name')->get() : collect();
+
+        return view('projects.show', compact('project', 'costsByCategory', 'customers', 'paymentAccounts', 'contractors'));
     }
 
     public function edit(Project $project): View

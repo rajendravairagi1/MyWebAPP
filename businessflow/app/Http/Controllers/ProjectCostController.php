@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contractor;
 use App\Models\Project;
 use App\Models\ProjectCost;
+use App\Support\ContractorResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +19,7 @@ class ProjectCostController extends Controller
 
         $data = $this->applyCategory($data);
         $data = $this->applyCreditRules($request, $data);
+        $data = $this->applyContractor($data);
 
         if ($request->hasFile('bill')) {
             $file = $request->file('bill');
@@ -38,6 +41,7 @@ class ProjectCostController extends Controller
 
         $data = $this->applyCategory($data);
         $data = $this->applyCreditRules($request, $data);
+        $data = $this->applyContractor($data);
 
         if ($request->hasFile('bill')) {
             if ($cost->bill_path) {
@@ -82,11 +86,28 @@ class ProjectCostController extends Controller
             'amount' => ['required', 'numeric', 'min:0.01'],
             'spent_on' => ['required', 'date'],
             'vendor' => ['nullable', 'string', 'max:255'],
+            'contractor_id' => ['nullable', 'integer'],
+            'new_contractor_name' => ['nullable', 'string', 'max:255'],
+            'new_contractor_type' => ['nullable', 'string', 'in:'.implode(',', array_keys(Contractor::TYPES))],
+            'new_contractor_phone' => ['nullable', 'string', 'max:30'],
             'payment_account_id' => ['nullable', 'integer'],
             'is_credit' => ['nullable', 'boolean'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'bill' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,pdf,webp'],
         ];
+    }
+
+    /**
+     * Resolves the "paid to" contractor from either the dropdown or the
+     * inline "+ new" fields, then drops the inline-only inputs so they
+     * never reach ProjectCost::create()/update() as stray attributes.
+     */
+    protected function applyContractor(array $data): array
+    {
+        $data['contractor_id'] = ContractorResolver::resolve($data);
+        unset($data['new_contractor_name'], $data['new_contractor_type'], $data['new_contractor_phone']);
+
+        return $data;
     }
 
     protected function applyCategory(array $data): array

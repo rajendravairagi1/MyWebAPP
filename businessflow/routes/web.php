@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\LoginActivityController;
 use App\Http\Controllers\AvailablePropertiesController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BranchController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\BusinessSwitchController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompletedProjectsController;
+use App\Http\Controllers\ContractorController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CustomerDocumentController;
 use App\Http\Controllers\DashboardController;
@@ -31,14 +33,14 @@ use App\Http\Controllers\PaymentAccountController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PublicProfileController;
-use App\Http\Controllers\PropertyDealController;
-use App\Http\Controllers\PropertyDealMediaController;
-use App\Http\Controllers\PropertyDealShareController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectUnitController;
+use App\Http\Controllers\PropertyDealController;
+use App\Http\Controllers\PropertyDealMediaController;
+use App\Http\Controllers\PropertyDealShareController;
 use App\Http\Controllers\PropertyShareController;
+use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReportController;
@@ -87,8 +89,8 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::post('/companies/{company}/dismiss-renewal', [AdminController::class, 'dismissCompanyRenewal'])->name('companies.dismiss-renewal');
     Route::post('/businesses/{business}/unmark-demo', [AdminController::class, 'unmarkDemo'])->name('businesses.unmark-demo');
     Route::get('/expiring', [AdminController::class, 'expiringSoon'])->name('expiring');
-    Route::get('/login-activity', [\App\Http\Controllers\Admin\LoginActivityController::class, 'index'])->name('login-activity');
-    Route::delete('/login-activity', [\App\Http\Controllers\Admin\LoginActivityController::class, 'clear'])->name('login-activity.clear');
+    Route::get('/login-activity', [LoginActivityController::class, 'index'])->name('login-activity');
+    Route::delete('/login-activity', [LoginActivityController::class, 'clear'])->name('login-activity.clear');
     Route::post('/demo/reset/{business}', [AdminController::class, 'resetDemo'])->name('demo.reset');
     Route::post('/clear-cache', [AdminController::class, 'clearCache'])->name('clear-cache');
 });
@@ -205,6 +207,15 @@ Route::middleware(['auth', 'verified', 'module:brokers'])->group(function () {
     Route::post('/brokers/{broker}/documents', [BrokerDocumentController::class, 'store'])->name('broker-documents.store');
     Route::get('/brokers/{broker}/documents/{document}', [BrokerDocumentController::class, 'download'])->name('broker-documents.download');
     Route::delete('/brokers/{broker}/documents/{document}', [BrokerDocumentController::class, 'destroy'])->name('broker-documents.destroy');
+});
+
+Route::middleware(['auth', 'verified', 'module:contractors'])->group(function () {
+    Route::get('/contractors', [ContractorController::class, 'index'])->name('contractors.index');
+    Route::post('/contractors', [ContractorController::class, 'store'])->name('contractors.store');
+    Route::get('/contractors/{contractor}', [ContractorController::class, 'show'])->name('contractors.show');
+    Route::put('/contractors/{contractor}', [ContractorController::class, 'update'])->name('contractors.update');
+    Route::delete('/contractors/{contractor}', [ContractorController::class, 'destroy'])->name('contractors.destroy');
+    Route::get('/contractors/{contractor}/statement', [ContractorController::class, 'statement'])->name('contractors.statement');
 });
 
 Route::middleware(['auth', 'verified', 'module:property_deals'])->group(function () {

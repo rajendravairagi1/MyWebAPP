@@ -6,6 +6,7 @@ use App\Models\Concerns\BelongsToTenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 class ProjectCost extends Model
 {
@@ -19,6 +20,7 @@ class ProjectCost extends Model
         'amount',
         'spent_on',
         'vendor',
+        'contractor_id',
         'payment_account_id',
         'is_credit',
         'credit_settled_at',
@@ -44,6 +46,11 @@ class ProjectCost extends Model
         return $this->belongsTo(PaymentAccount::class, 'payment_account_id');
     }
 
+    public function contractor(): BelongsTo
+    {
+        return $this->belongsTo(Contractor::class);
+    }
+
     /**
      * Material/labor taken on credit ("udhar") from a vendor, still
      * unpaid — no money has actually left any account for it yet.
@@ -58,7 +65,7 @@ class ProjectCost extends Model
      * date normally, but the settlement date once a credit purchase is
      * paid off (that's when it really left the account).
      */
-    public function moneyMovedOn(): \Illuminate\Support\Carbon
+    public function moneyMovedOn(): Carbon
     {
         return $this->credit_settled_at ?? $this->spent_on;
     }
