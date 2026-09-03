@@ -128,11 +128,27 @@ class Invoice extends Model
         return $payment;
     }
 
+    /**
+     * Based on the highest number ever issued, not how many invoices
+     * currently exist — a plain count() collides the moment any invoice
+     * isn't the very last one ever deleted (e.g. INV-00002 deleted out
+     * of 00001/00002/00003 makes count() 2, so "count()+1" would try to
+     * reissue 00003, which already exists, throwing a raw unique-
+     * constraint 500). This also covers the receipt invoice for a
+     * payment, which deletes itself automatically (cascadeOnDelete) the
+     * moment that payment is removed.
+     */
     public static function nextNumber(int $businessId): string
     {
         $business = Business::findOrFail($businessId);
-        $count = static::withoutGlobalScope('tenant')->where('business_id', $businessId)->count();
+        $prefix = $business->invoice_prefix ?: 'INV';
 
-        return sprintf('%s-%05d', $business->invoice_prefix ?: 'INV', $count + 1);
+        $max = static::withoutGlobalScope('tenant')
+            ->where('business_id', $businessId)
+            ->where('number', 'like', $prefix.'-%')
+            ->get(['number'])
+            ->max(fn ($invoice) => (int) substr($invoice->number, strlen($prefix) + 1));
+
+        return sprintf('%s-%05d', $prefix, ($max ?? 0) + 1);
     }
 }

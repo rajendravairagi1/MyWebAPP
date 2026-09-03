@@ -97,10 +97,20 @@ class Quotation extends Model
         return $invoice;
     }
 
+    /**
+     * Based on the highest number ever issued, not how many quotations
+     * currently exist — see Invoice::nextNumber() for why a plain
+     * count()+1 collides the moment a quotation that isn't the very
+     * last one is ever deleted.
+     */
     public static function nextNumber(int $businessId): string
     {
-        $count = static::withoutGlobalScope('tenant')->where('business_id', $businessId)->count();
+        $max = static::withoutGlobalScope('tenant')
+            ->where('business_id', $businessId)
+            ->where('number', 'like', 'QT-%')
+            ->get(['number'])
+            ->max(fn ($quotation) => (int) substr($quotation->number, 3));
 
-        return sprintf('QT-%05d', $count + 1);
+        return sprintf('QT-%05d', ($max ?? 0) + 1);
     }
 }
