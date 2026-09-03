@@ -15,9 +15,14 @@ class ContractorResolver
     public static function resolve(array $data): ?int
     {
         if (filled($data['new_contractor_name'] ?? null)) {
+            $type = $data['new_contractor_type'] ?? 'other';
+            if ($type === 'other' && filled($data['new_contractor_type_other'] ?? null)) {
+                $type = $data['new_contractor_type_other'];
+            }
+
             $contractor = Contractor::create([
                 'name' => $data['new_contractor_name'],
-                'type' => $data['new_contractor_type'] ?? 'other',
+                'type' => $type,
                 'phone' => $data['new_contractor_phone'] ?? null,
             ]);
 

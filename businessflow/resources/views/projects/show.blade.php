@@ -465,7 +465,7 @@
                     </div>
 
                     @if (\App\Support\Tenant::can('contractors'))
-                        <div x-data="{ contractorMode: 'existing' }">
+                        <div x-data="{ contractorMode: 'existing', newContractorType: 'other' }">
                             <x-input-label :value="__('Paid to (optional)')" />
                             <div class="flex gap-4 text-sm mb-2">
                                 <label class="flex items-center gap-1.5">
@@ -487,11 +487,14 @@
                             </div>
                             <div x-show="contractorMode === 'new'" @if ($contractors->isNotEmpty()) x-cloak @endif class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 <x-text-input name="new_contractor_name" type="text" placeholder="{{ __('Name') }}" class="mt-1 block w-full" />
-                                <select name="new_contractor_type" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                    @foreach (\App\Models\Contractor::TYPES as $key => $label)
-                                        <option value="{{ $key }}">{{ __($label) }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="mt-1">
+                                    <select name="new_contractor_type" x-model="newContractorType" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                        @foreach (\App\Models\Contractor::TYPES as $key => $label)
+                                            <option value="{{ $key }}">{{ __($label) }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input type="text" name="new_contractor_type_other" x-show="newContractorType === 'other'" x-cloak placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="mt-1.5 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                </div>
                                 <x-text-input name="new_contractor_phone" type="text" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
                             </div>
                             <p class="mt-1 text-xs text-gray-400">{{ __('Link this payment to a contractor so their full history and statement stay together — see it any time under Contractors / Vendors.') }}</p>
@@ -587,7 +590,7 @@
                     </div>
 
                     @if (\App\Support\Tenant::can('contractors'))
-                        <div x-data="{ contractorMode: 'existing' }">
+                        <div x-data="{ contractorMode: 'existing', newContractorType: 'other' }">
                             <x-input-label :value="__('Paid to (optional)')" />
                             <div class="flex gap-4 text-sm mb-2">
                                 <label class="flex items-center gap-1.5">
@@ -609,11 +612,14 @@
                             </div>
                             <div x-show="contractorMode === 'new'" @if ($contractors->isNotEmpty()) x-cloak @endif class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                 <x-text-input name="new_contractor_name" type="text" placeholder="{{ __('Name') }}" class="mt-1 block w-full" />
-                                <select name="new_contractor_type" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                    @foreach (\App\Models\Contractor::TYPES as $key => $label)
-                                        <option value="{{ $key }}">{{ __($label) }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="mt-1">
+                                    <select name="new_contractor_type" x-model="newContractorType" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                        @foreach (\App\Models\Contractor::TYPES as $key => $label)
+                                            <option value="{{ $key }}">{{ __($label) }}</option>
+                                        @endforeach
+                                    </select>
+                                    <input type="text" name="new_contractor_type_other" x-show="newContractorType === 'other'" x-cloak placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="mt-1.5 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                </div>
                                 <x-text-input name="new_contractor_phone" type="text" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
                             </div>
                         </div>

@@ -103,8 +103,11 @@
         </div>
     </div>
 
+    @php
+        $contractorTypeIsCustom = ! array_key_exists($contractor->type, \App\Models\Contractor::TYPES);
+    @endphp
     <x-modal name="edit-contractor" max-width="md">
-        <form method="POST" action="{{ route('contractors.update', $contractor) }}" class="p-6 space-y-4">
+        <form method="POST" action="{{ route('contractors.update', $contractor) }}" class="p-6 space-y-4" x-data="{ typeSelect: '{{ $contractorTypeIsCustom ? 'other' : $contractor->type }}' }">
             @csrf
             @method('PUT')
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Contractor') }}</h2>
@@ -115,11 +118,14 @@
             </div>
             <div>
                 <x-input-label for="edit_type" :value="__('Type')" />
-                <select id="edit_type" name="type" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                <select id="edit_type" name="type" x-model="typeSelect" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     @foreach (\App\Models\Contractor::TYPES as $key => $label)
                         <option value="{{ $key }}" @selected($contractor->type === $key)>{{ __($label) }}</option>
                     @endforeach
                 </select>
+                <div x-show="typeSelect === 'other'" x-cloak class="mt-2">
+                    <input type="text" name="type_other" value="{{ $contractorTypeIsCustom ? $contractor->type : '' }}" placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                </div>
             </div>
             <div>
                 <x-input-label for="edit_phone" :value="__('Phone')" />

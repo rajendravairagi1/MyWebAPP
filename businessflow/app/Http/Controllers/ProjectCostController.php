@@ -89,6 +89,7 @@ class ProjectCostController extends Controller
             'contractor_id' => ['nullable', 'integer'],
             'new_contractor_name' => ['nullable', 'string', 'max:255'],
             'new_contractor_type' => ['nullable', 'string', 'in:'.implode(',', array_keys(Contractor::TYPES))],
+            'new_contractor_type_other' => ['nullable', 'string', 'max:100'],
             'new_contractor_phone' => ['nullable', 'string', 'max:30'],
             'payment_account_id' => ['nullable', 'integer'],
             'is_credit' => ['nullable', 'boolean'],
@@ -105,7 +106,7 @@ class ProjectCostController extends Controller
     protected function applyContractor(array $data): array
     {
         $data['contractor_id'] = ContractorResolver::resolve($data);
-        unset($data['new_contractor_name'], $data['new_contractor_type'], $data['new_contractor_phone']);
+        unset($data['new_contractor_name'], $data['new_contractor_type'], $data['new_contractor_type_other'], $data['new_contractor_phone']);
 
         return $data;
     }

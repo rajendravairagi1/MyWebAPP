@@ -25,7 +25,7 @@ class ContractorController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $contractor = Contractor::create($this->validated($request));
+        $contractor = Contractor::create($this->applyType($this->validated($request)));
 
         return redirect()->route('contractors.show', $contractor)->with('status', 'Contractor added.');
     }
@@ -53,7 +53,7 @@ class ContractorController extends Controller
 
     public function update(Request $request, Contractor $contractor): RedirectResponse
     {
-        $contractor->update($this->validated($request));
+        $contractor->update($this->applyType($this->validated($request)));
 
         return back()->with('status', 'Contractor updated.');
     }
@@ -72,9 +72,26 @@ class ContractorController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'type' => ['required', 'string', 'in:'.implode(',', array_keys(Contractor::TYPES))],
+            'type_other' => ['nullable', 'string', 'max:100'],
             'phone' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
+    }
+
+    /**
+     * "Other" is a placeholder choice, not a real type to save — when
+     * picked, the typed-in name becomes the type itself (same pattern as
+     * a project cost's custom category), so it shows as its own label
+     * everywhere instead of a generic "Other".
+     */
+    protected function applyType(array $data): array
+    {
+        if ($data['type'] === 'other' && filled($data['type_other'] ?? null)) {
+            $data['type'] = $data['type_other'];
+        }
+        unset($data['type_other']);
+
+        return $data;
     }
 }

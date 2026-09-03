@@ -57,7 +57,7 @@
     </div>
 
     <x-modal name="add-contractor" max-width="md" :show="$errors->has('name')">
-        <form method="POST" action="{{ route('contractors.store') }}" class="p-6 space-y-4">
+        <form method="POST" action="{{ route('contractors.store') }}" class="p-6 space-y-4" x-data="{ typeSelect: '{{ old('type', 'other') }}' }">
             @csrf
             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add Contractor') }}</h2>
             <div>
@@ -68,11 +68,14 @@
             </div>
             <div>
                 <x-input-label for="type" :value="__('Type')" />
-                <select id="type" name="type" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                <select id="type" name="type" x-model="typeSelect" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     @foreach ($types as $key => $label)
                         <option value="{{ $key }}" @selected(old('type') === $key)>{{ __($label) }}</option>
                     @endforeach
                 </select>
+                <div x-show="typeSelect === 'other'" x-cloak class="mt-2">
+                    <input type="text" name="type_other" value="{{ old('type_other') }}" placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                </div>
             </div>
             <div>
                 <x-input-label for="phone" :value="__('Phone')" />
