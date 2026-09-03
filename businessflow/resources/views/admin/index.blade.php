@@ -102,6 +102,7 @@
                                 <th class="px-5 py-2 text-left">{{ __('Owner') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Plan') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Valid till') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Password') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
@@ -148,6 +149,19 @@
                                             <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
                                         </form>
                                     </td>
+                                    <td class="px-5 py-2">
+                                        @if ($owner)
+                                            <div x-data="{ open: false }">
+                                                <button type="button" x-show="!open" x-on:click="open = true" class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Reset password') }}</button>
+                                                <form x-show="open" x-cloak method="POST" action="{{ route('admin.users.password', $owner) }}" class="flex items-center gap-2">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="text" name="password" placeholder="{{ __('New password') }}" minlength="8" required class="w-32 shrink-0 text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
+                                                    <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -170,6 +184,7 @@
                                 <th class="px-5 py-2 text-left">{{ __('Owner') }}</th>
                                 <th class="px-5 py-2 text-right">{{ __('Branches') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Valid till') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Password') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
@@ -199,6 +214,17 @@
                                             ])>
                                             <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
                                         </form>
+                                    </td>
+                                    <td class="px-5 py-2">
+                                        <div x-data="{ open: false }">
+                                            <button type="button" x-show="!open" x-on:click="open = true" class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Reset password') }}</button>
+                                            <form x-show="open" x-cloak method="POST" action="{{ route('admin.users.password', $company->owner) }}" class="flex items-center gap-2">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="text" name="password" placeholder="{{ __('New password') }}" minlength="8" required class="w-32 shrink-0 text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
+                                                <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

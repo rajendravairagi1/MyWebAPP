@@ -177,6 +177,25 @@ class AdminController extends Controller
             : "\"{$business->name}\" has no expiry set (won't be locked out).");
     }
 
+    /**
+     * Sets a brand new password for a customer's login — there is no
+     * way to recover their old one (it's stored hashed, one-way, same
+     * as everywhere else in this app), so this is how you help someone
+     * who's locked out: pick a new password here and relay it to them
+     * yourself (call/WhatsApp/email) the same way you handed it out
+     * when the account was first created.
+     */
+    public function resetPassword(Request $request, User $user): RedirectResponse
+    {
+        $data = $request->validate([
+            'password' => ['required', 'string', 'min:8'],
+        ]);
+
+        $user->update(['password' => bcrypt($data['password'])]);
+
+        return back()->with('status', "New password set for {$user->email} — tell them the new password directly, it can't be looked up again after this.");
+    }
+
     public function updateCompanyExpiry(Request $request, Company $company): RedirectResponse
     {
         $data = $request->validate([

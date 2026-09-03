@@ -82,6 +82,7 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::put('/businesses/{business}/plan', [AdminController::class, 'updatePlan'])->name('businesses.plan');
     Route::put('/businesses/{business}/expiry', [AdminController::class, 'updateExpiry'])->name('businesses.expiry');
     Route::put('/companies/{company}/expiry', [AdminController::class, 'updateCompanyExpiry'])->name('companies.expiry');
+    Route::put('/users/{user}/password', [AdminController::class, 'resetPassword'])->name('users.password');
     Route::post('/businesses/{business}/dismiss-renewal', [AdminController::class, 'dismissBusinessRenewal'])->name('businesses.dismiss-renewal');
     Route::post('/companies/{company}/dismiss-renewal', [AdminController::class, 'dismissCompanyRenewal'])->name('companies.dismiss-renewal');
     Route::post('/businesses/{business}/unmark-demo', [AdminController::class, 'unmarkDemo'])->name('businesses.unmark-demo');
