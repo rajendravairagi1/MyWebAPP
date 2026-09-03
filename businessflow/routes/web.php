@@ -31,6 +31,7 @@ use App\Http\Controllers\PaymentAccountController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\PropertyDealController;
 use App\Http\Controllers\PropertyDealMediaController;
 use App\Http\Controllers\PropertyDealShareController;
@@ -68,6 +69,11 @@ Route::get('/p/{token}/photos/{media}', [PropertyShareController::class, 'photo'
 Route::get('/pd/{token}', [PropertyDealShareController::class, 'show'])->name('property-deal-share.show');
 Route::get('/pd/{token}/pdf', [PropertyDealShareController::class, 'pdf'])->name('property-deal-share.pdf');
 Route::get('/pd/{token}/photos/{media}', [PropertyDealShareController::class, 'photo'])->name('property-deal-share.photo');
+
+// A builder's own public "business card" page — their photo/about/
+// contact plus every property their business has open for sale.
+Route::get('/u/{token}', [PublicProfileController::class, 'show'])->name('public-profile.show');
+Route::get('/u/{token}/photo', [PublicProfileController::class, 'photo'])->name('public-profile.photo');
 
 Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
@@ -321,6 +327,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/locale', [ProfileController::class, 'updateLocale'])->name('profile.locale');
+    Route::get('/profile/photo', [ProfileController::class, 'photo'])->name('profile.photo');
+    Route::post('/profile/link', [ProfileController::class, 'generateProfileLink'])->name('profile.link');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/profile/two-factor', [TwoFactorController::class, 'show'])->name('two-factor.show');

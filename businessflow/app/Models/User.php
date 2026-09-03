@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'avatar', 'locale'])]
+#[Fillable(['name', 'email', 'password', 'avatar', 'locale', 'photo_path', 'phone', 'about'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
@@ -60,6 +60,32 @@ class User extends Authenticatable
     public function hasEnabledTwoFactor(): bool
     {
         return $this->two_factor_secret !== null && $this->two_factor_confirmed_at !== null;
+    }
+
+    /**
+     * The business this user's public profile page speaks for — the
+     * oldest one they're the actual Owner of (not one they only oversee
+     * as a Company Owner/Branch Manager), matching the common case of a
+     * single builder running one business. Null if they don't own one.
+     */
+    public function primaryBusiness(): ?Business
+    {
+        return $this->businesses()->wherePivot('role', 'owner')->oldest('business_user.created_at')->first();
+    }
+
+    /**
+     * The token used in this user's public, no-login profile link —
+     * generated once on first use and kept stable after that so a link
+     * already handed out never breaks.
+     */
+    public function profileToken(): string
+    {
+        if (! $this->profile_token) {
+            $this->profile_token = \Illuminate\Support\Str::random(32);
+            $this->save();
+        }
+
+        return $this->profile_token;
     }
 
     /**
