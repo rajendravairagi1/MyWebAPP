@@ -7,4 +7,7 @@
 return [
     'en' => 'English',
     'es' => 'Español',
+    'hi' => 'हिन्दी',
+    'gu' => 'ગુજરાતી',
+    'hi-en' => 'Hinglish',
 ];
