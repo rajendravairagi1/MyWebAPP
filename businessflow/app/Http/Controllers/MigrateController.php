@@ -30,6 +30,7 @@ class MigrateController extends Controller
         Artisan::call('config:clear');
         Artisan::call('route:clear');
         Artisan::call('migrate', ['--force' => true]);
+        Artisan::call('payments:backfill-invoices');
 
         // Some shared hosts run with opcache.validate_timestamps off, so a
         // freshly uploaded PHP file can keep executing the old cached

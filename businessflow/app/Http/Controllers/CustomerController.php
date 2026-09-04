@@ -82,7 +82,7 @@ class CustomerController extends Controller
 
     public function statement(Customer $customer)
     {
-        $customer->load(['units.project', 'units.payments', 'invoices.payments', 'invoices.project', 'invoices.projectUnit']);
+        $customer->load(['units.project', 'units.payments.account', 'invoices.payments.account', 'invoices.project', 'invoices.projectUnit']);
         $business = Business::find(Tenant::id());
         $verifyQr = DocumentQr::dataUri(
             URL::signedRoute('verify.customer', ['customer' => $customer->id])

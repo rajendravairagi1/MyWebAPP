@@ -130,6 +130,7 @@
                 <th>Against</th>
                 <th>For</th>
                 <th>Method</th>
+                <th>Received In</th>
                 <th>Reference</th>
                 <th class="text-right">Amount</th>
             </tr>
@@ -141,6 +142,7 @@
                     'against' => $inv->number,
                     'for' => 'Invoice',
                     'method' => $p->method,
+                    'account' => $p->account,
                     'reference' => $p->reference,
                     'amount' => $p->amount,
                 ]));
@@ -149,6 +151,7 @@
                     'against' => $u->unit_number,
                     'for' => $p->purposeLabel().($p->description ? ' — '.$p->description : ''),
                     'method' => $p->method,
+                    'account' => $p->account,
                     'reference' => $p->reference,
                     'amount' => $p->amount,
                 ]));
@@ -160,11 +163,12 @@
                     <td>{{ $payment->against }}</td>
                     <td>{{ $payment->for }}</td>
                     <td>{{ $payment->method ? ucfirst(str_replace('_', ' ', $payment->method)) : '—' }}</td>
+                    <td>{{ $payment->account?->label() ?? '—' }}</td>
                     <td>{{ $payment->reference ?? '—' }}</td>
                     <td class="text-right">{{ $business->currencySymbol() }}{{ number_format($payment->amount, 2) }}</td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="muted">No payments recorded yet.</td></tr>
+                <tr><td colspan="7" class="muted">No payments recorded yet.</td></tr>
             @endforelse
         </tbody>
     </table>

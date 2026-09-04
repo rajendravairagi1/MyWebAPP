@@ -7,6 +7,18 @@
 }
 
 /*
+ * Buttons get disabled the instant their form submits (see app.js) to
+ * stop a double-click/double-tap from creating a duplicate entry — this
+ * is what makes that visible, since most buttons in this app don't set
+ * their own disabled:opacity utility.
+ */
+button:disabled,
+input[type="submit"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/*
  * Browsers default table cells to vertical-align: middle, which misaligns
  * a row the moment one cell wraps to two lines (e.g. a "type your own"
  * input plus a link below it) while its neighbors stay one line — the
