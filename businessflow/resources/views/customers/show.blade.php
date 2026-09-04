@@ -266,12 +266,38 @@
 
                     @if ($canFinancials)
                     <x-modal name="record-payment-{{ $unit->id }}" max-width="md">
-                        <form method="POST" action="{{ route('unit-payments.store', $unit) }}" x-data="{ purpose: 'installment', method: 'cash', paymentAccountId: '' }" class="p-6 space-y-4">
+                        <form method="POST"
+                            :action="paymentSource === 'loan' ? '{{ $unit->loan ? route('loans.disbursements.store', $unit->loan) : '#' }}' : '{{ route('unit-payments.store', $unit) }}'"
+                            x-data="{
+                                paymentSource: 'direct',
+                                purpose: 'installment',
+                                method: 'cash',
+                                paymentAccountId: '',
+                                loanMethods: ['bank_transfer', 'cheque', 'neft', 'rtgs'],
+                            }"
+                            x-effect="if (paymentSource === 'loan' && ! loanMethods.includes(method)) method = 'bank_transfer'"
+                            class="p-6 space-y-4">
                             @csrf
                             <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Record Payment') }}</h2>
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $unit->project->name }} · {{ $unit->unit_number }}</p>
 
-                            <div>
+                            @if ($unit->loan)
+                                <div>
+                                    <x-input-label :value="__('Payment source')" />
+                                    <div class="flex flex-wrap gap-4 text-sm mt-1">
+                                        <label class="flex items-center gap-1.5">
+                                            <input type="radio" x-model="paymentSource" value="direct" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                            {{ __('Direct from customer') }}
+                                        </label>
+                                        <label class="flex items-center gap-1.5">
+                                            <input type="radio" x-model="paymentSource" value="loan" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                            {{ __('Bank Loan Disbursement') }} ({{ $unit->loan->bank_name }})
+                                        </label>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <div x-show="paymentSource === 'direct'">
                                 <x-input-label for="purpose-{{ $unit->id }}" :value="__('Payment for')" />
                                 <select id="purpose-{{ $unit->id }}" name="purpose" x-model="purpose" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                     @foreach (\App\Models\UnitPayment::PURPOSES as $val => $label)
@@ -279,15 +305,16 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div x-show="purpose === 'other'" x-cloak>
+                            <div x-show="paymentSource === 'direct' && purpose === 'other'" x-cloak>
                                 <x-input-label for="purpose_other-{{ $unit->id }}" :value="__('If Other, specify')" />
                                 <x-text-input id="purpose_other-{{ $unit->id }}" name="purpose_other" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. Parking charges') }}" />
                             </div>
 
-                            <div>
+                            <div x-show="paymentSource === 'direct'">
                                 <x-input-label for="description-{{ $unit->id }}" :value="__('Description (optional)')" />
                                 <x-text-input id="description-{{ $unit->id }}" name="description" type="text" class="mt-1 block w-full" placeholder="{{ __('e.g. 2nd installment as per agreement') }}" />
                             </div>
+                            <p x-show="paymentSource === 'loan'" x-cloak class="text-xs text-gray-400">{{ __('Recorded as a bank loan disbursement — description is filled in automatically.') }}</p>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
@@ -301,12 +328,14 @@
                                 <div>
                                     <x-input-label for="method-{{ $unit->id }}" :value="__('Method')" />
                                     <select id="method-{{ $unit->id }}" name="method" x-model="method" x-on:change="paymentAccountId = ''" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                        <option value="cash">{{ __('Cash') }}</option>
-                                        <option value="upi">{{ __('UPI') }}</option>
+                                        <option value="cash" x-bind:hidden="paymentSource === 'loan'">{{ __('Cash') }}</option>
+                                        <option value="upi" x-bind:hidden="paymentSource === 'loan'">{{ __('UPI') }}</option>
                                         <option value="bank_transfer">{{ __('Bank transfer') }}</option>
                                         <option value="cheque">{{ __('Cheque') }}</option>
-                                        <option value="card">{{ __('Card') }}</option>
-                                        <option value="other">{{ __('Other') }}</option>
+                                        <option value="neft" x-bind:hidden="paymentSource === 'direct'">{{ __('NEFT') }}</option>
+                                        <option value="rtgs" x-bind:hidden="paymentSource === 'direct'">{{ __('RTGS') }}</option>
+                                        <option value="card" x-bind:hidden="paymentSource === 'loan'">{{ __('Card') }}</option>
+                                        <option value="other" x-bind:hidden="paymentSource === 'loan'">{{ __('Other') }}</option>
                                     </select>
                                 </div>
                                 <div>
