@@ -62,6 +62,7 @@ class CustomerController extends Controller
         $customer->load([
             'quotations' => fn ($q) => $q->latest()->limit(10),
             'invoices' => fn ($q) => $q->latest()->limit(10),
+            'invoices.payments.account',
             'units.project',
             'units.broker',
             'units.invoices',

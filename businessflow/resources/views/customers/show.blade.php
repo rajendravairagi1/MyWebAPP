@@ -1,12 +1,18 @@
 @php
     $activeUnits = $customer->units->whereNull('archived_at');
     $historyUnits = $customer->units->whereNotNull('archived_at');
+    // Invoices with no property attached at all (e.g. a quotation
+    // converted to an invoice before any unit was assigned) — a unit's
+    // own totalCollected()/totalOutstanding() already includes any
+    // invoice linked to THAT unit, so counting those again here would
+    // double them; only a fully standalone invoice needs adding.
+    $standaloneInvoices = $customer->invoices->whereNull('project_unit_id');
     // Only currently-active properties count toward these — once a
     // property is fully closed (paid off / written off) there's nothing
     // left to collect on it, so it shouldn't inflate the live totals.
-    $totalPaid = $activeUnits->sum(fn ($u) => $u->totalCollected());
-    $totalDue = $activeUnits->sum(fn ($u) => $u->totalOutstanding());
-    $totalValue = $activeUnits->sum(fn ($u) => $u->price);
+    $totalPaid = $activeUnits->sum(fn ($u) => $u->totalCollected()) + $standaloneInvoices->sum('amount_paid');
+    $totalDue = $activeUnits->sum(fn ($u) => $u->totalOutstanding()) + $standaloneInvoices->sum(fn ($i) => max(0, $i->total - $i->amount_paid));
+    $totalValue = $activeUnits->sum(fn ($u) => $u->price) + $standaloneInvoices->sum('total');
     $unitCount = $customer->units->count();
     $activeUnitCount = $activeUnits->count();
     $primaryUnit = $unitCount === 1 ? $customer->units->first() : null;
@@ -566,6 +572,61 @@
                     @endif
                 </div>
             </div>
+
+            {{-- Every payment ever recorded for this customer, merged from
+                 both sources — property installments (recorded straight
+                 against a unit) and invoice payments (recorded against an
+                 invoice, e.g. one converted from a Quotation before any
+                 property was ever assigned). Without this, a customer with
+                 no property yet had no way to see a paid invoice's payment
+                 anywhere except by opening that invoice directly. --}}
+            @if ($canFinancials)
+                @php
+                    $invoicePaymentsList = $customer->invoices->flatMap(fn ($inv) => $inv->payments->map(fn ($p) => (object) [
+                        'paid_at' => $p->paid_at,
+                        'against' => $inv->number,
+                        'for' => __('Invoice'),
+                        'account' => $p->account,
+                        'amount' => $p->amount,
+                        'link' => route('invoices.show', $inv),
+                    ]));
+                    $unitPaymentsList = $customer->units->flatMap(fn ($u) => $u->payments->map(fn ($p) => (object) [
+                        'paid_at' => $p->paid_at,
+                        'against' => $u->project->name.' · '.$u->unit_number,
+                        'for' => $p->purposeLabel(),
+                        'account' => $p->account,
+                        'amount' => $p->amount,
+                        'link' => route('project-units.show', $u),
+                    ]));
+                    $allCustomerPayments = $invoicePaymentsList->concat($unitPaymentsList)->sortByDesc('paid_at')->take(10);
+                @endphp
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+                        <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Payment History') }} ({{ $allCustomerPayments->count() }})</span>
+                        <a href="{{ route('customers.statement', $customer) }}" class="text-xs text-accent-600 hover:underline">{{ __('View full statement') }}</a>
+                    </div>
+                    @if ($allCustomerPayments->isEmpty())
+                        <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No payments recorded yet.') }}</div>
+                    @else
+                        <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
+                            @foreach ($allCustomerPayments as $payment)
+                                <li class="px-5 py-3 flex items-center justify-between gap-3">
+                                    <div class="min-w-0">
+                                        <a href="{{ $payment->link }}" class="text-accent-600 hover:underline">{{ $payment->against }}</a>
+                                        <span class="text-gray-400"> · </span>
+                                        <span class="text-gray-600 dark:text-gray-400">{{ $payment->for }}</span>
+                                        <div class="text-xs text-gray-400 mt-0.5">
+                                            {{ $payment->paid_at->format('d M Y') }}
+                                            @if ($payment->account) · {{ $payment->account->label() }} @endif
+                                        </div>
+                                    </div>
+                                    <div class="text-gray-900 dark:text-gray-100 font-medium shrink-0">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($payment->amount, 0) }}</div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+            @endif
 
             {{-- Follow-ups — reminders to us, e.g. "customer said will pay X by date Y". Not the same thing as a completion/possession commitment (that's a separate, still-being-designed feature). Adding one happens via the header's "Follow-up" button (popup); this section only shows when there's something to list. --}}
             @if ($customer->followups->isNotEmpty())
