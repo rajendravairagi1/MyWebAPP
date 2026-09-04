@@ -9,6 +9,7 @@ use App\Models\Meeting;
 use App\Models\ProjectUnit;
 use App\Support\RenewalAlerts;
 use App\Support\Tenant;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
@@ -31,6 +32,11 @@ class NotificationComposer
         $ownedCompany = $user?->ownedCompany;
 
         $view->with([
+            // Shared so the footer can gate its WhatsApp Support link to
+            // paying customers only — never the public demo account, and
+            // never when there's no active business at all (e.g. the
+            // platform admin's own panel).
+            'activeBusiness' => $activeBusiness,
             // Account-level (not tied to the active business) — drives the
             // "Company"/"My Branch" sidebar link and the "back up" link.
             'ownedCompany' => $ownedCompany,
@@ -116,7 +122,7 @@ class NotificationComposer
     }
 
     /**
-     * @return array{adminRenewalAlerts: \Illuminate\Support\Collection, adminRenewalCount: int}
+     * @return array{adminRenewalAlerts: Collection, adminRenewalCount: int}
      */
     private function adminRenewalAlertsForBell(): array
     {

@@ -3,12 +3,24 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Business;
 use App\Models\Company;
+use App\Models\Customer;
+use App\Models\CustomerDocument;
+use App\Models\Followup;
+use App\Models\Invoice;
+use App\Models\PlatformSetting;
+use App\Models\Product;
+use App\Models\Project;
+use App\Models\Quotation;
 use App\Models\User;
+use App\Support\RenewalAlerts;
 use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 /**
@@ -45,7 +57,7 @@ class AdminController extends Controller
 
     public function index(): View
     {
-        $businesses = \App\Models\Business::whereNull('branch_id')
+        $businesses = Business::whereNull('branch_id')
             ->where('is_demo', false)
             ->with(['users' => fn ($q) => $q->wherePivot('role', 'owner')])
             ->orderBy('created_at')
@@ -60,12 +72,32 @@ class AdminController extends Controller
         // every is_demo=true row here (not just the first) is what
         // surfaces that mistake so it can be undone from the page below,
         // instead of a customer's whole account effectively vanishing.
-        $demoBusinesses = \App\Models\Business::where('is_demo', true)
+        $demoBusinesses = Business::where('is_demo', true)
             ->with(['users' => fn ($q) => $q->wherePivot('role', 'owner')])
             ->orderBy('created_at')
             ->get();
 
-        return view('admin.index', compact('businesses', 'companies', 'demoBusinesses'));
+        $settings = PlatformSetting::current();
+
+        return view('admin.index', compact('businesses', 'companies', 'demoBusinesses', 'settings'));
+    }
+
+    /**
+     * The footer credit line and support WhatsApp number shown across
+     * the whole product — platform-wide, not tied to any one business,
+     * so they live here rather than in a customer's own Business
+     * Settings.
+     */
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'footer_text' => ['nullable', 'string', 'max:255'],
+            'support_whatsapp' => ['nullable', 'string', 'max:20', 'regex:/^[0-9]+$/'],
+        ]);
+
+        PlatformSetting::current()->update($data);
+
+        return back()->with('status', 'Platform settings updated.');
     }
 
     public function create(): View
@@ -101,7 +133,7 @@ class AdminController extends Controller
         // (see index()) since it's excluded the same way the real demo
         // is meant to be excluded. Catching it here means a real
         // customer account never disappears that way again.
-        if ($request->boolean('is_demo') && \App\Models\Business::where('is_demo', true)->exists()) {
+        if ($request->boolean('is_demo') && Business::where('is_demo', true)->exists()) {
             return back()->withErrors(['is_demo' => 'A public demo account already exists. Leave "This is the public demo account" unticked for a real customer.'])->withInput();
         }
 
@@ -139,7 +171,7 @@ class AdminController extends Controller
         return redirect()->route('admin.index')->with('status', "Account \"{$data['account_name']}\" created for {$user->email}.");
     }
 
-    public function updatePlan(Request $request, \App\Models\Business $business): RedirectResponse
+    public function updatePlan(Request $request, Business $business): RedirectResponse
     {
         abort_if($business->branch_id, 422, "This builder's plan is set by its Company, not per-builder.");
 
@@ -157,7 +189,7 @@ class AdminController extends Controller
      * record when a business paid through to — access is cut off the day
      * after (see App\Http\Middleware\EnsureSubscriptionActive).
      */
-    public function updateExpiry(Request $request, \App\Models\Business $business): RedirectResponse
+    public function updateExpiry(Request $request, Business $business): RedirectResponse
     {
         abort_if($business->branch_id, 422, "This builder's billing is set on its Company, not per-builder.");
 
@@ -216,7 +248,7 @@ class AdminController extends Controller
      * "Done" on a renewal nudge — hides it from the bell/Expiring Soon
      * page until subscription_expires_at is changed again (see above).
      */
-    public function dismissBusinessRenewal(\App\Models\Business $business): RedirectResponse
+    public function dismissBusinessRenewal(Business $business): RedirectResponse
     {
         $business->update(['renewal_alert_dismissed_at' => now()]);
 
@@ -237,7 +269,7 @@ class AdminController extends Controller
     public function expiringSoon(): View
     {
         return view('admin.expiring', [
-            'alerts' => \App\Support\RenewalAlerts::all(),
+            'alerts' => RenewalAlerts::all(),
         ]);
     }
 
@@ -251,20 +283,20 @@ class AdminController extends Controller
      * — with more than one is_demo row (see index()), that ambiguity
      * used to risk wiping a real customer's data by mistake.
      */
-    public function resetDemo(\App\Models\Business $business): RedirectResponse
+    public function resetDemo(Business $business): RedirectResponse
     {
         abort_unless($business->is_demo, 404, 'This account is not marked as the demo account.');
 
         Tenant::runAs($business->id, function () {
-            \Illuminate\Support\Facades\DB::transaction(function () {
-                \App\Models\CustomerDocument::each(fn ($d) => \Illuminate\Support\Facades\Storage::disk('local')->delete($d->path));
-                \App\Models\Invoice::query()->delete();
-                \App\Models\Quotation::query()->delete();
-                \App\Models\Followup::query()->delete();
-                \App\Models\CustomerDocument::query()->delete();
-                \App\Models\Customer::query()->delete();
-                \App\Models\Project::query()->delete();
-                \App\Models\Product::query()->delete();
+            DB::transaction(function () {
+                CustomerDocument::each(fn ($d) => Storage::disk('local')->delete($d->path));
+                Invoice::query()->delete();
+                Quotation::query()->delete();
+                Followup::query()->delete();
+                CustomerDocument::query()->delete();
+                Customer::query()->delete();
+                Project::query()->delete();
+                Product::query()->delete();
             });
         });
 
@@ -278,7 +310,7 @@ class AdminController extends Controller
      * normally, and is no longer shared with anyone who clicks the
      * homepage "See Demo" button.
      */
-    public function unmarkDemo(\App\Models\Business $business): RedirectResponse
+    public function unmarkDemo(Business $business): RedirectResponse
     {
         $business->update(['is_demo' => false]);
 

@@ -40,6 +40,10 @@
 
                 {{ $slot }}
             </div>
+
+            <div class="w-full sm:max-w-md mt-4 px-6 text-center">
+                @include('partials.footer')
+            </div>
         </div>
     </body>
 </html>

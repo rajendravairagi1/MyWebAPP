@@ -17,19 +17,6 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Support WhatsApp Number
-    |--------------------------------------------------------------------------
-    |
-    | Digits only, with country code, no "+" or spaces (e.g. 919876543210)
-    | — this is exactly what a wa.me link needs. The WhatsApp Support link
-    | in the footer only renders when this is set.
-    |
-    */
-
-    'support_whatsapp' => env('SUPPORT_WHATSAPP_NUMBER'),
-
-    /*
-    |--------------------------------------------------------------------------
     | Application Environment
     |--------------------------------------------------------------------------
     |

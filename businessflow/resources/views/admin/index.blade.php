@@ -32,6 +32,30 @@
                 <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-md p-3">{{ $errors->first() }}</div>
             @endif
 
+            {{-- Shown across the whole product's footer — every business,
+                 every page. The WhatsApp number here only ever reaches
+                 paying customers (never the demo account); see
+                 resources/views/partials/footer.blade.php. --}}
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                <div class="font-medium text-gray-800 dark:text-gray-100 mb-1">{{ __('Platform Settings') }}</div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('Shown in the footer on every page, for every business.') }}</p>
+                <form method="POST" action="{{ route('admin.settings.update') }}" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @csrf
+                    @method('PUT')
+                    <div>
+                        <x-input-label for="footer_text" :value="__('Footer text')" />
+                        <x-text-input id="footer_text" name="footer_text" type="text" class="mt-1 block w-full text-sm" :value="old('footer_text', $settings->footerText())" />
+                    </div>
+                    <div>
+                        <x-input-label for="support_whatsapp" :value="__('Support WhatsApp number (digits only, with country code)')" />
+                        <x-text-input id="support_whatsapp" name="support_whatsapp" type="text" placeholder="919876543210" class="mt-1 block w-full text-sm" :value="old('support_whatsapp', $settings->support_whatsapp)" />
+                    </div>
+                    <div class="sm:col-span-2">
+                        <x-primary-button>{{ __('Save Settings') }}</x-primary-button>
+                    </div>
+                </form>
+            </div>
+
             {{-- Demo account — normally exactly one row. The oldest one is
                  treated as the real public demo; any others only exist
                  because "is_demo" got ticked by mistake while adding a
