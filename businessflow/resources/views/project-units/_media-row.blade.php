@@ -10,6 +10,7 @@
     <div class="flex items-center gap-3 shrink-0 text-xs text-gray-400">
         <span>{{ $item->humanSize() }}</span>
         <span>{{ $item->created_at->format('d M Y') }}</span>
+        <a href="{{ route('unit-media.download', [$unit, $item]) }}" class="text-accent-600 hover:underline">{{ __('Download') }}</a>
         <form method="POST" action="{{ route('unit-media.destroy', [$unit, $item]) }}" onsubmit="return confirm('{{ __('Delete this file?') }}')">
             @csrf
             @method('DELETE')

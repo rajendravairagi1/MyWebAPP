@@ -170,11 +170,16 @@
                                     <a href="{{ route('unit-media.show', [$unit, $photo]) }}" target="_blank" rel="noopener">
                                         <img src="{{ route('unit-media.show', [$unit, $photo]) }}" alt="{{ $photo->original_name }}" loading="lazy" class="w-full h-32 object-cover rounded-md border border-gray-200 dark:border-slate-700">
                                     </a>
-                                    <form method="POST" action="{{ route('unit-media.destroy', [$unit, $photo]) }}" onsubmit="return confirm('{{ __('Delete this photo?') }}')" class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="bg-white/90 dark:bg-slate-900/90 text-red-600 rounded-full h-6 w-6 flex items-center justify-center text-xs shadow">&times;</button>
-                                    </form>
+                                    <div class="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <a href="{{ route('unit-media.download', [$unit, $photo]) }}" title="{{ __('Download') }}" class="bg-white/90 dark:bg-slate-900/90 text-accent-600 rounded-full h-6 w-6 flex items-center justify-center shadow">
+                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
+                                        </a>
+                                        <form method="POST" action="{{ route('unit-media.destroy', [$unit, $photo]) }}" onsubmit="return confirm('{{ __('Delete this photo?') }}')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button title="{{ __('Delete') }}" class="bg-white/90 dark:bg-slate-900/90 text-red-600 rounded-full h-6 w-6 flex items-center justify-center text-xs shadow">&times;</button>
+                                        </form>
+                                    </div>
                                 </div>
                             @endforeach
                         </div>
