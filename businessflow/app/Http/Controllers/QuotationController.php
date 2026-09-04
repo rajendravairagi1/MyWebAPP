@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Business;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Project;
 use App\Models\ProjectUnit;
 use App\Models\Quotation;
+use App\Support\DocumentQr;
 use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class QuotationController extends Controller
@@ -86,7 +90,11 @@ class QuotationController extends Controller
     {
         $quotation->load(['customer', 'items.product', 'invoices', 'project', 'projectUnit']);
 
-        return view('quotations.show', compact('quotation'));
+        $projects = $quotation->projectUnit
+            ? collect()
+            : Project::with(['units' => fn ($q) => $q->orderBy('unit_number')])->orderBy('name')->get();
+
+        return view('quotations.show', compact('quotation', 'projects'));
     }
 
     public function edit(Quotation $quotation): View
@@ -161,7 +169,7 @@ class QuotationController extends Controller
         $unit = ProjectUnit::find($unitId);
 
         if ($unit && $unit->status !== 'available' && (int) $unit->customer_id !== $customerId) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'project_unit_id' => 'This unit is already assigned to another customer.',
             ]);
         }
@@ -185,8 +193,22 @@ class QuotationController extends Controller
         return back()->with('status', 'Marked as sent.');
     }
 
-    public function convert(Quotation $quotation): RedirectResponse
+    public function convert(Request $request, Quotation $quotation): RedirectResponse
     {
+        $data = $request->validate([
+            'project_id' => ['nullable', 'exists:projects,id'],
+            'project_unit_id' => ['nullable', 'exists:project_units,id'],
+        ]);
+
+        if (! $quotation->project_unit_id && ! empty($data['project_unit_id'])) {
+            $this->assertUnitAvailableFor((int) $data['project_unit_id'], $quotation->customer_id);
+
+            $quotation->update([
+                'project_id' => $data['project_id'] ?? null,
+                'project_unit_id' => $data['project_unit_id'],
+            ]);
+        }
+
         $invoice = $quotation->convertToInvoice();
 
         return redirect()->route('invoices.show', $invoice)->with('status', 'Converted to invoice '.$invoice->number.'.');
@@ -195,9 +217,9 @@ class QuotationController extends Controller
     public function pdf(Quotation $quotation)
     {
         $quotation->load(['customer', 'items']);
-        $business = \App\Models\Business::find(Tenant::id());
-        $verifyQr = \App\Support\DocumentQr::dataUri(
-            \Illuminate\Support\Facades\URL::signedRoute('verify.quotation', ['quotation' => $quotation->id])
+        $business = Business::find(Tenant::id());
+        $verifyQr = DocumentQr::dataUri(
+            URL::signedRoute('verify.quotation', ['quotation' => $quotation->id])
         );
 
         return Pdf::loadView('quotations.pdf', compact('quotation', 'business', 'verifyQr'))

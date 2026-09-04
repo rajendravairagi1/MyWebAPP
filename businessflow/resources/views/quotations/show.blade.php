@@ -37,10 +37,32 @@
                 @endif
 
                 @if ($quotation->invoices->isEmpty())
-                    <form method="POST" action="{{ route('quotations.convert', $quotation) }}">
-                        @csrf
-                        <button class="px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('Convert to Invoice') }}</button>
-                    </form>
+                    @if ($quotation->projectUnit)
+                        <form method="POST" action="{{ route('quotations.convert', $quotation) }}">
+                            @csrf
+                            <button class="px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('Convert to Invoice') }}</button>
+                        </form>
+                    @else
+                        <div x-data="{ open: false, customerId: {{ $quotation->customer_id }} }">
+                            <button type="button" @click="open = true" class="px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('Convert to Invoice') }}</button>
+
+                            <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @keydown.escape.window="open = false">
+                                <div @click.outside="open = false" class="w-full max-w-md bg-white dark:bg-slate-800 rounded-lg shadow-xl p-5">
+                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-1">{{ __('Link a property?') }}</h3>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('Pick the property this invoice is for, so its payments get tracked automatically on the customer\'s page. Leave it blank if this is a product/service invoice.') }}</p>
+
+                                    <form method="POST" action="{{ route('quotations.convert', $quotation) }}">
+                                        @csrf
+                                        <x-project-unit-select :projects="$projects" :show-price="false" />
+                                        <div class="mt-4 flex justify-end gap-2">
+                                            <button type="button" @click="open = false" class="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-200">{{ __('Cancel') }}</button>
+                                            <button type="submit" class="px-3 py-1.5 text-sm rounded-md bg-accent-600 text-white">{{ __('Convert to Invoice') }}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 @else
                     <a href="{{ route('invoices.show', $quotation->invoices->first()) }}" class="px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">
                         {{ __('View Invoice') }} {{ $quotation->invoices->first()->number }}
