@@ -361,12 +361,20 @@ input[type="submit"]:disabled {
     border-right: 1px solid rgb(255 255 255 / 0.06);
 }
 
-.dark[data-accent="nova"] .dark\:bg-slate-800 {
+/*
+ * Scoped to `main` only — NOT header/dropdowns/modals. backdrop-filter
+ * creates a new stacking context on whatever element it's applied to; the
+ * header (which also happens to use dark:bg-slate-800) would otherwise
+ * get trapped in its own low-priority stacking context, making its
+ * profile/notification dropdowns (position:absolute, z-50) render BEHIND
+ * <main>'s own content instead of above it, and unclickable as a result.
+ */
+.dark[data-accent="nova"] main .dark\:bg-slate-800 {
     background-color: rgb(255 255 255 / 0.04);
     backdrop-filter: blur(12px);
 }
 
-.dark[data-accent="nova"] .dark\:border-slate-700 {
+.dark[data-accent="nova"] main .dark\:border-slate-700 {
     border-color: rgb(255 255 255 / 0.08);
 }
 
