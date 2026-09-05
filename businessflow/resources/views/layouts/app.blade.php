@@ -47,6 +47,7 @@
                     { key: 'rose', label: '{{ __('Rose') }}', swatch: '#e11d48' },
                     { key: 'fuchsia', label: '{{ __('Fuchsia') }}', swatch: '#c026d3' },
                     { key: 'violet', label: '{{ __('Violet') }}', swatch: '#7c3aed' },
+                    { key: 'nova', label: '{{ __('Nova') }}', swatch: '#65a30d' },
                 ],
              }"
              x-init="

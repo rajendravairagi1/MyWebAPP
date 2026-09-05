@@ -203,6 +203,22 @@ input[type="submit"]:disabled {
 }
 
 /*
+ * Nova is not just a color — it's a full alternate visual style (near-black
+ * background with a soft glow, translucent glass cards, pill-shaped primary
+ * buttons), unlike the 12 accents above which only recolor accent-* utilities.
+ * The color variables below still follow the same WCAG rule as every other
+ * accent (600 >=4.5:1 with white button text, 500 >=3:1 for borders/rings);
+ * the look itself is applied further down via [data-accent="nova"] overrides.
+ */
+[data-accent="nova"] {
+    --accent-50: 247 254 231;
+    --accent-100: 236 252 203;
+    --accent-500: 101 163 13;
+    --accent-600: 77 124 15;
+    --accent-700: 63 98 18;
+}
+
+/*
  * Dark-mode overrides — see the big comment above. Lighter/brighter than
  * the light-mode value at the same shade number so bg-accent-600 buttons
  * keep white-text contrast >=4.5:1 (page mode doesn't change a button's
@@ -307,6 +323,59 @@ input[type="submit"]:disabled {
     --accent-500: 184 148 245;
     --accent-600: 153 101 241;
     --accent-700: 208 185 248;
+}
+
+.dark[data-accent="nova"] {
+    --accent-50: 26 46 10;
+    --accent-100: 36 64 15;
+    --accent-500: 163 230 53;
+    --accent-600: 101 163 13;
+    --accent-700: 190 242 100;
+}
+
+/*
+ * Nova's full visual style: a near-black page background with a soft green
+ * glow, translucent "glass" cards instead of flat white/slate panels, and
+ * pill-shaped primary buttons — matching the reference design the business
+ * chose this look from. Scoped entirely under [data-accent="nova"] so every
+ * other accent (and the default theme) renders exactly as before.
+ *
+ * These override existing Tailwind utility classes (dark:bg-slate-800,
+ * dark:border-slate-700, rounded-lg, bg-accent-600 + text-white together for
+ * primary buttons) by attribute-scoped selector, rather than editing every
+ * page template individually — safe because the selectors only match while
+ * data-accent="nova" is active, and normal cascade rules (this block comes
+ * later in the file, and its selectors are more specific than a bare
+ * utility class) let it win without needing !important anywhere.
+ */
+.dark[data-accent="nova"] body {
+    background-color: #0a0f0a;
+    background-image:
+        radial-gradient(ellipse 900px 700px at 10% -10%, rgb(101 163 13 / 0.16), transparent 60%),
+        radial-gradient(ellipse 900px 700px at 100% 110%, rgb(101 163 13 / 0.12), transparent 60%);
+    background-attachment: fixed;
+}
+
+[data-accent="nova"] aside.bg-slate-900 {
+    background-color: #0a0f0a;
+    border-right: 1px solid rgb(255 255 255 / 0.06);
+}
+
+.dark[data-accent="nova"] .dark\:bg-slate-800 {
+    background-color: rgb(255 255 255 / 0.04);
+    backdrop-filter: blur(12px);
+}
+
+.dark[data-accent="nova"] .dark\:border-slate-700 {
+    border-color: rgb(255 255 255 / 0.08);
+}
+
+[data-accent="nova"] .rounded-lg {
+    border-radius: 1rem;
+}
+
+[data-accent="nova"] .bg-accent-600.text-white {
+    border-radius: 9999px;
 }
 
 /*
