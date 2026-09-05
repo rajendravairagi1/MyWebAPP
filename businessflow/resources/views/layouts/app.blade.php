@@ -504,10 +504,8 @@
                     </x-dropdown>
                 </header>
 
-                <main class="flex-1 overflow-y-auto flex flex-col">
-                    <div class="flex-1">
-                        {{ $slot }}
-                    </div>
+                <main class="flex-1 overflow-y-auto">
+                    {{ $slot }}
                     @include('partials.footer')
                 </main>
             </div>
