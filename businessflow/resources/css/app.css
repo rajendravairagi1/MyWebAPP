@@ -7,6 +7,46 @@
 }
 
 /*
+ * Thin, theme-matched scrollbars — without this the browser's default
+ * (a wide, bright light-gray/white track) stands out badly against the
+ * dark sidebar/content, especially in dark mode.
+ */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #d1d5db transparent;
+}
+
+.dark * {
+    scrollbar-color: #475569 transparent;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #9ca3af;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+    background-color: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background-color: #64748b;
+}
+
+/*
  * Buttons get disabled the instant their form submits (see app.js) to
  * stop a double-click/double-tap from creating a duplicate entry — this
  * is what makes that visible, since most buttons in this app don't set
