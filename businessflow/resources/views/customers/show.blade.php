@@ -697,7 +697,10 @@
 
                     <div>
                         <x-input-label for="note" :value="__('Note')" />
-                        <x-text-input id="note" name="note" type="text" class="mt-1 block w-full" required placeholder="{{ __('e.g. Said will pay :symbol50,000 by 25th', ['symbol' => \App\Support\Tenant::currencySymbol()]) }}" />
+                        <div class="mt-1 flex items-center gap-2">
+                            <x-text-input id="note" name="note" type="text" class="block w-full" required placeholder="{{ __('e.g. Said will pay :symbol50,000 by 25th', ['symbol' => \App\Support\Tenant::currencySymbol()]) }}" />
+                            <x-voice-mic-button target="note" />
+                        </div>
                     </div>
                     <div>
                         <x-input-label for="due_at" :value="__('Due')" />

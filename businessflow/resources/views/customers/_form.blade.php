@@ -60,6 +60,9 @@
 
 <div>
     <x-input-label for="notes" :value="__('Notes')" />
-    <textarea id="notes" name="notes" rows="3" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('notes', $customer?->notes) }}</textarea>
+    <div class="mt-1 flex items-start gap-2">
+        <textarea id="notes" name="notes" rows="3" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('notes', $customer?->notes) }}</textarea>
+        <x-voice-mic-button target="notes" />
+    </div>
     <x-input-error :messages="$errors->get('notes')" class="mt-2" />
 </div>

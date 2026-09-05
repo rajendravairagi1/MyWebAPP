@@ -50,8 +50,11 @@
 
                     <div>
                         <x-input-label for="note" :value="__('Reminder note')" />
-                        <textarea id="note" name="note" rows="3" required placeholder="{{ __('e.g. Follow up on site visit, ask about payment plan') }}"
-                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('note') }}</textarea>
+                        <div class="mt-1 flex items-start gap-2">
+                            <textarea id="note" name="note" rows="3" required placeholder="{{ __('e.g. Follow up on site visit, ask about payment plan') }}"
+                                class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('note') }}</textarea>
+                            <x-voice-mic-button target="note" />
+                        </div>
                         <x-input-error :messages="$errors->get('note')" class="mt-2" />
                         <p class="mt-1 text-xs text-gray-400">{{ __('This text is also used as the WhatsApp message when you click the WhatsApp button.') }}</p>
                     </div>
