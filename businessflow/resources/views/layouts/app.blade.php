@@ -291,7 +291,7 @@
             </aside>
 
             {{-- Main column --}}
-            <div class="flex-1 flex flex-col min-w-0">
+            <div class="flex-1 flex flex-col min-w-0 min-h-screen">
                 @if ($activeBusinessBranch)
                     <div class="shrink-0 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800 px-4 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2">
                         <div class="flex items-center gap-2 text-sm text-amber-800 dark:text-amber-300 min-w-0">
@@ -504,8 +504,10 @@
                     </x-dropdown>
                 </header>
 
-                <main>
-                    {{ $slot }}
+                <main class="flex-1 flex flex-col">
+                    <div class="flex-1">
+                        {{ $slot }}
+                    </div>
                     @include('partials.footer')
                 </main>
             </div>
