@@ -1,0 +1,47 @@
+export const PRICING_PLANS = [
+  {
+    name: "Solo",
+    description: "For one builder managing their own projects, start to finish.",
+    priceMonthly: 999,
+    priceYearly: 833,
+    currency: "₹",
+    highlighted: false,
+    features: [
+      "Unlimited projects & units",
+      "Customer bookings & payments",
+      "Quotations & invoices",
+      "Property brochure sharing",
+      "Ledger & reports",
+    ],
+  },
+  {
+    name: "Team",
+    description: "For a builder with supervisors, sales staff or site managers.",
+    priceMonthly: 2499,
+    priceYearly: 2083,
+    currency: "₹",
+    highlighted: true,
+    features: [
+      "Everything in Solo",
+      "Team members with role-based access",
+      "Contractor & vendor ledgers",
+      "Broker commission tracking",
+      "Investor accounts",
+      "Loan disbursement tracking",
+    ],
+  },
+  {
+    name: "Company",
+    description: "For a company running multiple branches or cities.",
+    priceMonthly: 4999,
+    priceYearly: 4166,
+    currency: "₹",
+    highlighted: false,
+    features: [
+      "Everything in Team",
+      "Multiple branches under one account",
+      "Combined company-wide dashboard",
+      "Priority support",
+    ],
+  },
+];

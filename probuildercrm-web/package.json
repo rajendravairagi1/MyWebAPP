@@ -1,0 +1,25 @@
+{
+  "name": "probuildercrm-web",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "server": "node server.js",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.11.1",
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10"
+  }
+}
