@@ -151,6 +151,13 @@
                             </x-slot>
                             {{ __('Invoices') }}
                         </x-sidebar-link>
+
+                        <x-sidebar-link :href="route('payment-reminders.index')" :active="request()->routeIs('payment-reminders.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01M9.172 12.172a4 4 0 015.656 0M6.343 8.343a8 8 0 0111.314 0M12 4v.01" />
+                            </x-slot>
+                            {{ __('Payment Reminders') }}
+                        </x-sidebar-link>
                     @endif
 
                     @if (\App\Support\Tenant::can('followups'))

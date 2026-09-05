@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\BelongsToTenant;
 use App\Models\Concerns\HasLineItemTotals;
+use App\Support\Tenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -81,6 +82,38 @@ class Invoice extends Model
     public function balanceDue(): string
     {
         return number_format(max(0, $this->total - $this->amount_paid), 2, '.', '');
+    }
+
+    public function whatsappReminderUrl(): ?string
+    {
+        $phone = $this->customer?->phone;
+
+        if (! $phone) {
+            return null;
+        }
+
+        $digits = preg_replace('/\D+/', '', $phone);
+
+        if (strlen($digits) === 10) {
+            $digits = '91'.$digits; // default to India country code for a bare 10-digit number
+        }
+
+        $amount = Tenant::currencySymbol().$this->balanceDue();
+
+        $message = $this->due_date && $this->due_date->isPast()
+            ? __('Hi :name, this is a reminder that :amount is still due on your invoice :number (was due :date). Please make the payment at your earliest convenience. Thank you!', [
+                'name' => $this->customer->name,
+                'amount' => $amount,
+                'number' => $this->number,
+                'date' => $this->due_date->format('d M Y'),
+            ])
+            : __('Hi :name, this is a reminder that :amount is due on your invoice :number. Please make the payment on time. Thank you!', [
+                'name' => $this->customer->name,
+                'amount' => $amount,
+                'number' => $this->number,
+            ]);
+
+        return 'https://wa.me/'.$digits.'?text='.rawurlencode($message);
     }
 
     public function recordPayment(float $amount, ?string $method, string $paidAt, ?string $reference, ?string $notes, ?int $paymentAccountId = null): Payment

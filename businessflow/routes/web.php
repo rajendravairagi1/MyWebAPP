@@ -31,6 +31,7 @@ use App\Http\Controllers\MigrateController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PaymentAccountController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PaymentReminderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -319,6 +320,8 @@ Route::middleware(['auth', 'verified', 'module:invoices'])->group(function () {
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
     Route::post('/invoices/{invoice}/mark-sent', [InvoiceController::class, 'markSent'])->name('invoices.mark-sent');
     Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+
+    Route::get('/payment-reminders', [PaymentReminderController::class, 'index'])->name('payment-reminders.index');
 
     Route::post('/invoices/{invoice}/payments', [PaymentController::class, 'store'])->name('payments.store');
     Route::put('/invoices/{invoice}/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
