@@ -43,6 +43,75 @@ class DashboardController extends Controller
         $portfolioCost = (float) ProjectCost::sum('amount');
         $portfolioRevenue = (float) Invoice::whereNotNull('project_id')->sum('amount_paid');
 
+        // Revenue trend: sales raised each of the last 6 months (this
+        // month included), oldest first — a quick shape of the business
+        // rather than the single "this month" number shown elsewhere.
+        $revenueTrendLabels = [];
+        $revenueTrendData = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $revenueTrendLabels[] = $month->format('M');
+            $revenueTrendData[] = (float) Invoice::whereMonth('created_at', $month->month)
+                ->whereYear('created_at', $month->year)
+                ->sum('total');
+        }
+
+        // Invoice status breakdown — fixed label order so the chart's
+        // legend/colors stay consistent regardless of which statuses
+        // actually have invoices right now.
+        $invoiceStatusCounts = Invoice::selectRaw('status, count(*) as count')->groupBy('status')->pluck('count', 'status');
+        $invoiceStatusMeta = [
+            'paid' => ['label' => __('Paid'), 'color' => '#22c55e'],
+            'sent' => ['label' => __('Sent'), 'color' => '#3b82f6'],
+            'partially_paid' => ['label' => __('Partially Paid'), 'color' => '#f59e0b'],
+            'overdue' => ['label' => __('Overdue'), 'color' => '#ef4444'],
+            'draft' => ['label' => __('Draft'), 'color' => '#9ca3af'],
+        ];
+        $invoiceStatusLabels = [];
+        $invoiceStatusData = [];
+        $invoiceStatusColors = [];
+        foreach ($invoiceStatusMeta as $key => $meta) {
+            $count = (int) ($invoiceStatusCounts[$key] ?? 0);
+            if ($count > 0) {
+                $invoiceStatusLabels[] = $meta['label'];
+                $invoiceStatusData[] = $count;
+                $invoiceStatusColors[] = $meta['color'];
+            }
+        }
+
+        // Unit booking status across every (non-archived) unit in every
+        // project — a portfolio-wide occupancy snapshot.
+        $unitStatusCounts = ProjectUnit::whereNull('archived_at')
+            ->selectRaw('status, count(*) as count')->groupBy('status')->pluck('count', 'status');
+        $unitStatusMeta = [
+            'available' => ['label' => __('Available'), 'color' => '#3b82f6'],
+            'booked' => ['label' => __('Booked'), 'color' => '#f59e0b'],
+            'sold' => ['label' => __('Sold'), 'color' => '#22c55e'],
+        ];
+        $unitStatusLabels = [];
+        $unitStatusData = [];
+        $unitStatusColors = [];
+        foreach ($unitStatusMeta as $key => $meta) {
+            $count = (int) ($unitStatusCounts[$key] ?? 0);
+            if ($count > 0) {
+                $unitStatusLabels[] = $meta['label'];
+                $unitStatusData[] = $count;
+                $unitStatusColors[] = $meta['color'];
+            }
+        }
+
+        // Top 5 projects by profit (revenue minus cost) — reuses the same
+        // per-project figures already computed for the portfolio chart.
+        $topProjects = $projects->sortByDesc(fn ($p) => $p->profit())->take(5)->values();
+        $topProjectsLabels = $topProjects->pluck('name')->all();
+        $topProjectsData = $topProjects->map(fn ($p) => round($p->profit(), 2))->all();
+        $topProjectsColors = $topProjects->map(fn ($p) => $p->profit() >= 0 ? '#22c55e' : '#ef4444')->all();
+
+        // How much of everything ever invoiced has actually been collected.
+        $totalInvoiced = (float) Invoice::sum('total');
+        $totalCollected = (float) Invoice::sum('amount_paid');
+        $collectionRate = $totalInvoiced > 0 ? round($totalCollected / $totalInvoiced * 100, 1) : 0;
+
         // Only what's actually been paid out to a broker counts against
         // profit — commission accrued but not yet paid isn't money that's
         // left the business, same cash-basis logic used everywhere else
@@ -111,6 +180,20 @@ class DashboardController extends Controller
             'staleBookedUnits' => $staleBookedUnits,
             'staleBookedUnitsCount' => $staleBookedUnitsCount,
             'paymentRemindersEnabled' => $paymentRemindersEnabled,
+            'revenueTrendLabels' => $revenueTrendLabels,
+            'revenueTrendData' => $revenueTrendData,
+            'invoiceStatusLabels' => $invoiceStatusLabels,
+            'invoiceStatusData' => $invoiceStatusData,
+            'invoiceStatusColors' => $invoiceStatusColors,
+            'unitStatusLabels' => $unitStatusLabels,
+            'unitStatusData' => $unitStatusData,
+            'unitStatusColors' => $unitStatusColors,
+            'topProjectsLabels' => $topProjectsLabels,
+            'topProjectsData' => $topProjectsData,
+            'topProjectsColors' => $topProjectsColors,
+            'totalInvoiced' => $totalInvoiced,
+            'totalCollected' => $totalCollected,
+            'collectionRate' => $collectionRate,
         ]);
     }
 }

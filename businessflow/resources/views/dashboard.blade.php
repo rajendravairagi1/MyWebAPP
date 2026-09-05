@@ -130,6 +130,60 @@
                 @endif
             </div>
 
+            {{-- Analytics --}}
+            <div class="space-y-4">
+                <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Analytics') }}</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    @if ($canInvoices && $canInvoicesFinancials)
+                        <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                            <div class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-4">{{ __('Revenue Trend') }}</div>
+                            <x-line-chart :labels="$revenueTrendLabels" :data="$revenueTrendData" color="#6366f1" :label="__('Revenue')" />
+                        </div>
+                    @endif
+
+                    @if ($canInvoices && count($invoiceStatusLabels) > 0)
+                        <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                            <div class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-4">{{ __('Invoice Status') }}</div>
+                            <x-donut-chart :labels="$invoiceStatusLabels" :data="$invoiceStatusData" :colors="$invoiceStatusColors" />
+                        </div>
+                    @endif
+
+                    @if ($canProjects && count($unitStatusLabels) > 0)
+                        <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                            <div class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-4">{{ __('Unit Booking Status') }}</div>
+                            <x-donut-chart :labels="$unitStatusLabels" :data="$unitStatusData" :colors="$unitStatusColors" />
+                        </div>
+                    @endif
+
+                    @if (\App\Support\Tenant::can('property_deals') && ($dealsOpenCount > 0 || $dealsSoldCount > 0))
+                        <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                            <div class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-4">{{ __('Property Deals Pipeline') }}</div>
+                            <x-ranked-bar-chart :labels="[__('Open'), __('Sold')]" :data="[$dealsOpenCount, $dealsSoldCount]" :colors="['#3b82f6', '#22c55e']" :label="__('Deals')" />
+                        </div>
+                    @endif
+
+                    @if ($canProjects && $canProjectsFinancials && count($topProjectsLabels) > 0)
+                        <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                            <div class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-4">{{ __('Top Projects by Profit') }}</div>
+                            <x-ranked-bar-chart :labels="$topProjectsLabels" :data="$topProjectsData" :colors="$topProjectsColors" :label="__('Profit')" />
+                        </div>
+                    @endif
+
+                    @if ($canInvoices && $canInvoicesFinancials && $totalInvoiced > 0)
+                        <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                            <div class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-4">{{ __('Payment Collection Rate') }}</div>
+                            <x-donut-chart
+                                :labels="[__('Collected'), __('Outstanding')]"
+                                :data="[$totalCollected, max($totalInvoiced - $totalCollected, 0)]"
+                                :colors="['#22c55e', '#94a3b8']"
+                                :center-value="$collectionRate . '%'"
+                                :center-label="__('Collected')"
+                            />
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             <div class="flex flex-wrap gap-3">
                 @if ($canProjects)<a href="{{ route('projects.create') }}" class="inline-flex items-center px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('+ Add Project') }}</a>@endif
                 @if ($canCustomers)<a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('+ Add Customer') }}</a>@endif

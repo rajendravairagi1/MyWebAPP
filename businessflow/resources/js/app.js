@@ -1,7 +1,13 @@
 import Alpine from 'alpinejs';
-import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+import {
+    Chart, BarController, BarElement, LineController, LineElement, PointElement,
+    DoughnutController, ArcElement, CategoryScale, LinearScale, Tooltip, Legend, Filler,
+} from 'chart.js';
 
-Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+Chart.register(
+    BarController, BarElement, LineController, LineElement, PointElement,
+    DoughnutController, ArcElement, CategoryScale, LinearScale, Tooltip, Legend, Filler,
+);
 window.Chart = Chart;
 
 window.Alpine = Alpine;
