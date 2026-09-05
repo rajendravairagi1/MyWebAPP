@@ -505,7 +505,9 @@
                 </header>
 
                 <main class="flex-1 overflow-y-auto flex flex-col">
-                    {{ $slot }}
+                    <div class="flex-1">
+                        {{ $slot }}
+                    </div>
                     @include('partials.footer')
                 </main>
             </div>
