@@ -24,6 +24,6 @@ class PlatformSetting extends Model
 
     public function footerText(): string
     {
-        return $this->footer_text ?: '© '.date('Y').' '.config('app.name').'. All rights reserved. Design & Developed by Oneweblink Pvt Ltd';
+        return $this->footer_text ?: '© '.date('Y').' '.config('app.name').'. All rights reserved.';
     }
 }

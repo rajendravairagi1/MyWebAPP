@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Project;
 use App\Models\ProjectUnit;
@@ -171,6 +172,20 @@ class QuotationController extends Controller
         if ($unit && $unit->status !== 'available' && (int) $unit->customer_id !== $customerId) {
             throw ValidationException::withMessages([
                 'project_unit_id' => 'This unit is already assigned to another customer.',
+            ]);
+        }
+
+        // A unit still shows "available" right up until someone actually
+        // pays (see Invoice::recordPayment) — so without this check, two
+        // different customers could each have their own quotation/invoice
+        // silently pointing at the same not-yet-paid unit, and whoever
+        // pays first would win it out from under the other.
+        $claimedByAnotherCustomer = Quotation::where('project_unit_id', $unitId)->where('customer_id', '!=', $customerId)->exists()
+            || Invoice::where('project_unit_id', $unitId)->where('customer_id', '!=', $customerId)->exists();
+
+        if ($claimedByAnotherCustomer) {
+            throw ValidationException::withMessages([
+                'project_unit_id' => 'This unit is already linked to another customer\'s quotation or invoice — release it there first, or wait until it\'s available again.',
             ]);
         }
     }

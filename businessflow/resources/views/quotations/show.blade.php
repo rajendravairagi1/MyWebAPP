@@ -43,7 +43,7 @@
                             <button class="px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('Convert to Invoice') }}</button>
                         </form>
                     @else
-                        <div x-data="{ open: false, customerId: {{ $quotation->customer_id }} }">
+                        <div x-data="{ open: {{ $errors->has('project_unit_id') ? 'true' : 'false' }}, customerId: {{ $quotation->customer_id }} }">
                             <button type="button" @click="open = true" class="px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('Convert to Invoice') }}</button>
 
                             <div x-show="open" x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" @keydown.escape.window="open = false">

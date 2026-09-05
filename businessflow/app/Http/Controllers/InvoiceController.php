@@ -2,15 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Business;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\PaymentAccount;
 use App\Models\Product;
 use App\Models\Project;
 use App\Models\ProjectUnit;
+use App\Models\Quotation;
+use App\Support\DocumentQr;
 use App\Support\Tenant;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class InvoiceController extends Controller
@@ -89,7 +95,7 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice): View
     {
         $invoice->load(['customer', 'items.product', 'payments.account', 'project', 'projectUnit']);
-        $paymentAccounts = \App\Models\PaymentAccount::orderBy('name')->get();
+        $paymentAccounts = PaymentAccount::orderBy('name')->get();
 
         return view('invoices.show', compact('invoice', 'paymentAccounts'));
     }
@@ -168,8 +174,22 @@ class InvoiceController extends Controller
         $unit = ProjectUnit::find($unitId);
 
         if ($unit && $unit->status !== 'available' && (int) $unit->customer_id !== $customerId) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'project_unit_id' => 'This unit is already assigned to another customer.',
+            ]);
+        }
+
+        // A unit still shows "available" right up until someone actually
+        // pays (see Invoice::recordPayment) — so without this check, two
+        // different customers could each have their own quotation/invoice
+        // silently pointing at the same not-yet-paid unit, and whoever
+        // pays first would win it out from under the other.
+        $claimedByAnotherCustomer = Quotation::where('project_unit_id', $unitId)->where('customer_id', '!=', $customerId)->exists()
+            || Invoice::where('project_unit_id', $unitId)->where('customer_id', '!=', $customerId)->exists();
+
+        if ($claimedByAnotherCustomer) {
+            throw ValidationException::withMessages([
+                'project_unit_id' => 'This unit is already linked to another customer\'s quotation or invoice — release it there first, or wait until it\'s available again.',
             ]);
         }
     }
@@ -218,9 +238,9 @@ class InvoiceController extends Controller
     public function pdf(Invoice $invoice)
     {
         $invoice->load(['customer', 'items', 'projectUnit']);
-        $business = \App\Models\Business::find(Tenant::id());
-        $verifyQr = \App\Support\DocumentQr::dataUri(
-            \Illuminate\Support\Facades\URL::signedRoute('verify.invoice', ['invoice' => $invoice->id])
+        $business = Business::find(Tenant::id());
+        $verifyQr = DocumentQr::dataUri(
+            URL::signedRoute('verify.invoice', ['invoice' => $invoice->id])
         );
 
         return Pdf::loadView('invoices.pdf', compact('invoice', 'business', 'verifyQr'))

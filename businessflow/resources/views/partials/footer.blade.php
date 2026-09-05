@@ -6,7 +6,10 @@
     $showWhatsappSupport = $platformSettings->support_whatsapp && isset($activeBusiness) && $activeBusiness && ! $activeBusiness->is_demo;
 @endphp
 <footer class="mt-8 border-t border-gray-100 dark:border-slate-700 px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-gray-400 dark:text-slate-500">
-    <div>{{ $platformSettings->footerText() }}</div>
+    <div>
+        {{ $platformSettings->footerText() }}
+        &middot; {{ __('Design & Developed by') }} <a href="https://oneweblink.com" target="_blank" rel="noopener" class="hover:underline">Oneweblink Pvt Ltd</a>
+    </div>
 
     @if ($showWhatsappSupport)
         <a href="https://wa.me/{{ $platformSettings->support_whatsapp }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-green-600 hover:underline">
