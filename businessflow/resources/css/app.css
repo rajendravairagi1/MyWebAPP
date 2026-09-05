@@ -7,43 +7,48 @@
 }
 
 /*
- * Thin, theme-matched scrollbars — without this the browser's default
- * (a wide, bright light-gray/white track) stands out badly against the
- * dark sidebar/content, especially in dark mode.
+ * Thin, soft, accent-colored scrollbar — without this the browser's
+ * default (a wide, bright light-gray/white track) stands out badly
+ * against the dark sidebar/content. Colored from the same --accent-*
+ * variables as the rest of the UI, so it re-tints automatically with
+ * the user's chosen theme color instead of being a fixed gray.
+ *
+ * Scoped to <main> only (not the whole page) — the sidebar's own nav
+ * list also scrolls independently when it has enough items, and having
+ * two separate visible scrollbar tracks on screen at once read as a
+ * layout glitch rather than two intentionally-independent panes. The
+ * sidebar still scrolls fine on a wheel/trackpad; its track is just not
+ * drawn.
  */
-* {
+main {
     scrollbar-width: thin;
-    scrollbar-color: #d1d5db transparent;
+    scrollbar-color: rgb(var(--accent-500) / 0.6) transparent;
 }
 
-.dark * {
-    scrollbar-color: #475569 transparent;
+main::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
+main::-webkit-scrollbar-track {
     background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
-    background-color: #d1d5db;
+main::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--accent-500) / 0.6);
     border-radius: 9999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background-color: #9ca3af;
+main::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--accent-600) / 0.8);
 }
 
-.dark ::-webkit-scrollbar-thumb {
-    background-color: #475569;
+aside nav {
+    scrollbar-width: none;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
-    background-color: #64748b;
+aside nav::-webkit-scrollbar {
+    display: none;
 }
 
 /*
