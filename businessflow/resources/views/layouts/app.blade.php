@@ -506,7 +506,7 @@
 
                 <main class="flex-1 overflow-y-auto">
                     {{ $slot }}
-                    @include('partials.footer')
+                    {{-- TEMPORARY: footer removed for diagnosis, will restore once the gap issue is understood --}}
                 </main>
             </div>
         </div>
