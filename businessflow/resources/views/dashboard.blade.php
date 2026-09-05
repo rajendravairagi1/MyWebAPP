@@ -157,6 +157,43 @@
                 </div>
             @endif
 
+            @if (($canCustomers && $staleCustomers->isNotEmpty()) || ($canProjects && $staleBookedUnits->isNotEmpty()))
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700">
+                        <span class="font-medium text-gray-800 dark:text-gray-100">{{ __('Needs your attention') }}</span>
+                    </div>
+                    <ul class="divide-y divide-gray-100 dark:divide-slate-700 text-sm">
+                        @if ($canCustomers)
+                            @foreach ($staleCustomers as $customer)
+                                <li class="px-5 py-3 flex items-center justify-between gap-3">
+                                    <div>
+                                        <a href="{{ route('customers.show', $customer) }}#followups" class="text-accent-600 hover:underline">{{ $customer->name }}</a>
+                                        <span class="text-gray-500 dark:text-gray-400">— {{ __('no follow-up planned, no activity in over a week') }}</span>
+                                    </div>
+                                    <a href="{{ route('customers.show', $customer) }}#followups" class="shrink-0 text-xs text-accent-600 hover:underline">{{ __('Schedule follow-up') }}</a>
+                                </li>
+                            @endforeach
+                            @if ($staleCustomersCount > $staleCustomers->count())
+                                <li class="px-5 py-2 text-xs text-gray-400">{{ __(':count more customer(s) with no plan', ['count' => $staleCustomersCount - $staleCustomers->count()]) }}</li>
+                            @endif
+                        @endif
+                        @if ($canProjects)
+                            @foreach ($staleBookedUnits as $unit)
+                                <li class="px-5 py-3 flex items-center justify-between gap-3">
+                                    <div>
+                                        <a href="{{ route('project-units.show', $unit) }}" class="text-accent-600 hover:underline">{{ $unit->project->name }} · {{ $unit->unit_number }}</a>
+                                        <span class="text-gray-500 dark:text-gray-400">— {{ __('booked :days days ago, no payment received yet', ['days' => (int) $unit->updated_at->diffInDays(now())]) }}</span>
+                                    </div>
+                                </li>
+                            @endforeach
+                            @if ($staleBookedUnitsCount > $staleBookedUnits->count())
+                                <li class="px-5 py-2 text-xs text-gray-400">{{ __(':count more booking(s) stalled without payment', ['count' => $staleBookedUnitsCount - $staleBookedUnits->count()]) }}</li>
+                            @endif
+                        @endif
+                    </ul>
+                </div>
+            @endif
+
             @if ($canInvoices)
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                     <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">

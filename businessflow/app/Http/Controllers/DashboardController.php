@@ -8,6 +8,7 @@ use App\Models\Followup;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\ProjectCost;
+use App\Models\ProjectUnit;
 use App\Models\PropertyDeal;
 use Illuminate\View\View;
 
@@ -49,6 +50,31 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Customers nobody has a plan for: no follow-up currently pending,
+        // and no quotation/invoice raised recently either — these are the
+        // leads quietly going cold that a due-date-based reminder alone
+        // would never catch, since no follow-up was ever scheduled for
+        // them in the first place.
+        $staleCustomersQuery = Customer::whereDoesntHave('followups', fn ($q) => $q->where('status', 'pending'))
+            ->whereDoesntHave('quotations', fn ($q) => $q->where('created_at', '>=', now()->subDays(7)))
+            ->whereDoesntHave('invoices', fn ($q) => $q->where('created_at', '>=', now()->subDays(7)))
+            ->where('created_at', '<=', now()->subDays(7));
+        $staleCustomers = (clone $staleCustomersQuery)->latest()->limit(5)->get();
+        $staleCustomersCount = $staleCustomersQuery->count();
+
+        // Units marked "booked" (a customer assigned) but sitting with no
+        // money collected at all — booking a unit doesn't require an
+        // upfront payment, so this is the only way to catch a booking
+        // that's stalled before it ever became a real sale.
+        $staleBookedUnitsQuery = ProjectUnit::with(['project', 'customer'])
+            ->whereNull('archived_at')
+            ->where('status', 'booked')
+            ->where('updated_at', '<=', now()->subDays(14))
+            ->whereDoesntHave('payments')
+            ->whereDoesntHave('invoices', fn ($q) => $q->whereHas('payments'));
+        $staleBookedUnits = (clone $staleBookedUnitsQuery)->oldest('updated_at')->limit(5)->get();
+        $staleBookedUnitsCount = $staleBookedUnitsQuery->count();
+
         return view('dashboard', [
             'customerCount' => Customer::count(),
             'unpaidCount' => $unpaidInvoices->count(),
@@ -67,6 +93,10 @@ class DashboardController extends Controller
             'dealsProfit' => $dealsProfit,
             'brokerCommissionPaid' => $brokerCommissionPaid,
             'dueFollowups' => $dueFollowups,
+            'staleCustomers' => $staleCustomers,
+            'staleCustomersCount' => $staleCustomersCount,
+            'staleBookedUnits' => $staleBookedUnits,
+            'staleBookedUnitsCount' => $staleBookedUnitsCount,
         ]);
     }
 }
