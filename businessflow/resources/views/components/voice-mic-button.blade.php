@@ -7,6 +7,13 @@
 --}}
 @props(['target'])
 
+@php
+    $voiceNotesEnabled = \App\Support\Tenant::check()
+        ? (\App\Models\Business::find(\App\Support\Tenant::id())?->voice_notes_enabled ?? true)
+        : true;
+@endphp
+
+@if ($voiceNotesEnabled)
 <button type="button"
     x-data="{
         listening: false,
@@ -52,3 +59,4 @@
         <path d="M19 11a1 1 0 10-2 0 5 5 0 01-10 0 1 1 0 10-2 0 7 7 0 006 6.93V20H9a1 1 0 100 2h6a1 1 0 100-2h-2v-2.07A7 7 0 0019 11z" />
     </svg>
 </button>
+@endif

@@ -2,9 +2,14 @@
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3 flex-wrap">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Ledger') }}</h2>
-            <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-manual-entry')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
-                {{ __('+ Manual Entry') }}
-            </button>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('ledger.pdf') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                    {{ __('Download PDF') }}
+                </a>
+                <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-manual-entry')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
+                    {{ __('+ Manual Entry') }}
+                </button>
+            </div>
         </div>
     </x-slot>
 

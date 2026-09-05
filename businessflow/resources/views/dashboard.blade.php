@@ -123,7 +123,7 @@
                     <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                         <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Overdue') }}</div>
                         <div class="mt-1 text-2xl font-semibold {{ $overdueCount > 0 ? 'text-red-600' : 'text-gray-900 dark:text-gray-100' }}">{{ $overdueCount }}</div>
-                        @if ($overdueCount > 0)
+                        @if ($overdueCount > 0 && $paymentRemindersEnabled)
                             <a href="{{ route('payment-reminders.index') }}" class="text-xs text-accent-600 hover:underline mt-1 inline-block">{{ __('Send reminders →') }}</a>
                         @endif
                     </div>

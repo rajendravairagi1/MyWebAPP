@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Business;
 use App\Models\Invoice;
+use App\Support\Tenant;
 use Illuminate\View\View;
 
 class PaymentReminderController extends Controller
 {
     public function index(): View
     {
+        abort_unless(Business::find(Tenant::id())?->payment_reminders_enabled ?? true, 404);
+
         $unpaidInvoices = Invoice::with('customer')
             ->whereIn('status', ['sent', 'partially_paid', 'overdue'])
             ->get()

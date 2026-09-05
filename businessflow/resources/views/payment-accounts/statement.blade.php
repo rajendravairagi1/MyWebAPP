@@ -23,6 +23,7 @@
         .info { width: 100%; margin-top: 16px; }
         .info td { border: none; padding: 2px 12px 2px 0; }
         .info .label { color: #718096; width: 140px; }
+        .footer-note { margin-top: 24px; padding-top: 8px; border-top: 1px solid #edf2f7; font-size: 10px; color: #a0aec0; text-align: center; }
     </style>
 </head>
 <body>
@@ -81,5 +82,7 @@
             @endforelse
         </tbody>
     </table>
+
+    <div class="footer-note">This is a computer-generated document and does not require a signature.</div>
 </body>
 </html>

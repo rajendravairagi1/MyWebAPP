@@ -123,6 +123,37 @@
                         <x-input-error :messages="$errors->get('currency')" class="mt-2" />
                     </div>
 
+                    <div class="border-t border-gray-100 dark:border-slate-700 pt-5 space-y-4">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ __('Smart Features') }}</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">{{ __('Turn any of these off if your team doesn\'t want them — they can always be switched back on later.') }}</p>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-sm text-gray-700 dark:text-gray-300">{{ __('Smart Alerts on Dashboard') }}</div>
+                                <div class="text-xs text-gray-400">{{ __('The "Needs your attention" card — cold leads and stalled bookings.') }}</div>
+                            </div>
+                            <x-toggle-switch name="smart_alerts_enabled" :checked="old('smart_alerts_enabled', $business->smart_alerts_enabled)" />
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-sm text-gray-700 dark:text-gray-300">{{ __('Payment Reminders') }}</div>
+                                <div class="text-xs text-gray-400">{{ __('The Payment Reminders page and its one-click WhatsApp button.') }}</div>
+                            </div>
+                            <x-toggle-switch name="payment_reminders_enabled" :checked="old('payment_reminders_enabled', $business->payment_reminders_enabled)" />
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-sm text-gray-700 dark:text-gray-300">{{ __('Voice-to-Text Notes') }}</div>
+                                <div class="text-xs text-gray-400">{{ __('The 🎤 mic button on Customer notes and Follow-up notes.') }}</div>
+                            </div>
+                            <x-toggle-switch name="voice_notes_enabled" :checked="old('voice_notes_enabled', $business->voice_notes_enabled)" />
+                        </div>
+                    </div>
+
                     <div class="flex justify-end">
                         <x-primary-button>{{ __('Save') }}</x-primary-button>
                     </div>

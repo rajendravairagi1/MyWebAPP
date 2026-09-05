@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BrokerTransaction;
+use App\Models\Business;
 use App\Models\Customer;
 use App\Models\Followup;
 use App\Models\Invoice;
@@ -10,12 +11,17 @@ use App\Models\Project;
 use App\Models\ProjectCost;
 use App\Models\ProjectUnit;
 use App\Models\PropertyDeal;
+use App\Support\Tenant;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
     public function index(): View
     {
+        $business = Business::find(Tenant::id());
+        $smartAlertsEnabled = $business?->smart_alerts_enabled ?? true;
+        $paymentRemindersEnabled = $business?->payment_reminders_enabled ?? true;
+
         $unpaidInvoices = Invoice::whereIn('status', ['sent', 'partially_paid', 'overdue'])->get();
         $overdueInvoices = $unpaidInvoices->filter(fn ($invoice) => $invoice->due_date && $invoice->due_date->isPast());
 
@@ -55,25 +61,32 @@ class DashboardController extends Controller
         // leads quietly going cold that a due-date-based reminder alone
         // would never catch, since no follow-up was ever scheduled for
         // them in the first place.
-        $staleCustomersQuery = Customer::whereDoesntHave('followups', fn ($q) => $q->where('status', 'pending'))
-            ->whereDoesntHave('quotations', fn ($q) => $q->where('created_at', '>=', now()->subDays(7)))
-            ->whereDoesntHave('invoices', fn ($q) => $q->where('created_at', '>=', now()->subDays(7)))
-            ->where('created_at', '<=', now()->subDays(7));
-        $staleCustomers = (clone $staleCustomersQuery)->latest()->limit(5)->get();
-        $staleCustomersCount = $staleCustomersQuery->count();
+        if ($smartAlertsEnabled) {
+            $staleCustomersQuery = Customer::whereDoesntHave('followups', fn ($q) => $q->where('status', 'pending'))
+                ->whereDoesntHave('quotations', fn ($q) => $q->where('created_at', '>=', now()->subDays(7)))
+                ->whereDoesntHave('invoices', fn ($q) => $q->where('created_at', '>=', now()->subDays(7)))
+                ->where('created_at', '<=', now()->subDays(7));
+            $staleCustomers = (clone $staleCustomersQuery)->latest()->limit(5)->get();
+            $staleCustomersCount = $staleCustomersQuery->count();
 
-        // Units marked "booked" (a customer assigned) but sitting with no
-        // money collected at all — booking a unit doesn't require an
-        // upfront payment, so this is the only way to catch a booking
-        // that's stalled before it ever became a real sale.
-        $staleBookedUnitsQuery = ProjectUnit::with(['project', 'customer'])
-            ->whereNull('archived_at')
-            ->where('status', 'booked')
-            ->where('updated_at', '<=', now()->subDays(14))
-            ->whereDoesntHave('payments')
-            ->whereDoesntHave('invoices', fn ($q) => $q->whereHas('payments'));
-        $staleBookedUnits = (clone $staleBookedUnitsQuery)->oldest('updated_at')->limit(5)->get();
-        $staleBookedUnitsCount = $staleBookedUnitsQuery->count();
+            // Units marked "booked" (a customer assigned) but sitting with no
+            // money collected at all — booking a unit doesn't require an
+            // upfront payment, so this is the only way to catch a booking
+            // that's stalled before it ever became a real sale.
+            $staleBookedUnitsQuery = ProjectUnit::with(['project', 'customer'])
+                ->whereNull('archived_at')
+                ->where('status', 'booked')
+                ->where('updated_at', '<=', now()->subDays(14))
+                ->whereDoesntHave('payments')
+                ->whereDoesntHave('invoices', fn ($q) => $q->whereHas('payments'));
+            $staleBookedUnits = (clone $staleBookedUnitsQuery)->oldest('updated_at')->limit(5)->get();
+            $staleBookedUnitsCount = $staleBookedUnitsQuery->count();
+        } else {
+            $staleCustomers = collect();
+            $staleCustomersCount = 0;
+            $staleBookedUnits = collect();
+            $staleBookedUnitsCount = 0;
+        }
 
         return view('dashboard', [
             'customerCount' => Customer::count(),
@@ -97,6 +110,7 @@ class DashboardController extends Controller
             'staleCustomersCount' => $staleCustomersCount,
             'staleBookedUnits' => $staleBookedUnits,
             'staleBookedUnitsCount' => $staleBookedUnitsCount,
+            'paymentRemindersEnabled' => $paymentRemindersEnabled,
         ]);
     }
 }

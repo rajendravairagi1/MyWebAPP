@@ -158,6 +158,7 @@ Route::middleware(['auth', 'verified', 'owner'])->group(function () {
 
     Route::get('/payment-accounts', [PaymentAccountController::class, 'index'])->name('payment-accounts.index');
     Route::get('/payment-accounts/{account}', [PaymentAccountController::class, 'show'])->name('payment-accounts.show');
+    Route::get('/payment-accounts/{account}/statement', [PaymentAccountController::class, 'statement'])->name('payment-accounts.statement');
     Route::post('/payment-accounts', [PaymentAccountController::class, 'store'])->name('payment-accounts.store');
     Route::put('/payment-accounts/{account}', [PaymentAccountController::class, 'update'])->name('payment-accounts.update');
     Route::delete('/payment-accounts/{account}', [PaymentAccountController::class, 'destroy'])->name('payment-accounts.destroy');
@@ -174,6 +175,8 @@ Route::middleware(['auth', 'verified', 'owner', 'plan:team'])->group(function ()
 Route::middleware(['auth', 'verified', 'module:customers'])->group(function () {
     Route::get('/customers/trashed', [CustomerController::class, 'trashed'])->name('customers.trashed');
     Route::post('/customers/{id}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
+    Route::get('/customers/export/csv', [CustomerController::class, 'exportCsv'])->name('customers.export.csv');
+    Route::get('/customers/export/pdf', [CustomerController::class, 'exportPdf'])->name('customers.export.pdf');
     Route::resource('customers', CustomerController::class)->withTrashed(['show']);
     Route::get('/customers/{customer}/statement', [CustomerController::class, 'statement'])->name('customers.statement');
     Route::get('/customers/{customer}/photo', [CustomerController::class, 'photo'])->name('customers.photo');
@@ -330,6 +333,7 @@ Route::middleware(['auth', 'verified', 'module:invoices'])->group(function () {
 
 Route::middleware(['auth', 'verified', 'module:ledger'])->group(function () {
     Route::get('/ledger', [LedgerController::class, 'index'])->name('ledger.index');
+    Route::get('/ledger/pdf', [LedgerController::class, 'pdf'])->name('ledger.pdf');
     Route::post('/ledger/entries', [LedgerController::class, 'storeEntry'])->name('ledger.entries.store');
     Route::put('/ledger/entries/{entry}', [LedgerController::class, 'updateEntry'])->name('ledger.entries.update');
     Route::delete('/ledger/entries/{entry}', [LedgerController::class, 'destroyEntry'])->name('ledger.entries.destroy');

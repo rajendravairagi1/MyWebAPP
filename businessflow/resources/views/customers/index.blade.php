@@ -2,7 +2,11 @@
     <x-slot name="header">
         <div class="flex items-center justify-between gap-3 flex-wrap">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Customers') }}</h2>
-            <a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('+ Add Customer') }}</a>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('customers.export.csv') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download Excel') }}</a>
+                <a href="{{ route('customers.export.pdf') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download PDF') }}</a>
+                <a href="{{ route('customers.create') }}" class="inline-flex items-center px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">{{ __('+ Add Customer') }}</a>
+            </div>
         </div>
     </x-slot>
 

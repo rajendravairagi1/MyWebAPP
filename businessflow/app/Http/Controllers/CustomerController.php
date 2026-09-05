@@ -38,6 +38,41 @@ class CustomerController extends Controller
         return view('customers.index', compact('customers'));
     }
 
+    public function exportCsv(): StreamedResponse
+    {
+        $customers = Customer::orderBy('name')->get();
+
+        return response()->streamDownload(function () use ($customers) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Name', 'Company', 'Phone', 'Email', 'Address', 'Source', 'Notes', 'Added On']);
+
+            foreach ($customers as $customer) {
+                fputcsv($out, [
+                    $customer->name,
+                    $customer->company,
+                    $customer->phone,
+                    $customer->email,
+                    $customer->address,
+                    $customer->source,
+                    $customer->notes,
+                    $customer->created_at->format('d M Y'),
+                ]);
+            }
+
+            fclose($out);
+        }, 'Customers - '.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv']);
+    }
+
+    public function exportPdf()
+    {
+        $customers = Customer::orderBy('name')->get();
+        $business = Business::find(Tenant::id());
+
+        return Pdf::loadView('customers.export-pdf', compact('customers', 'business'))
+            ->setPaper('a4', 'landscape')
+            ->download('Customers - '.now()->format('Y-m-d').'.pdf');
+    }
+
     public function create(): View
     {
         return view('customers.create');

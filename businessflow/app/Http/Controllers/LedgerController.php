@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BrokerTransaction;
+use App\Models\Business;
 use App\Models\Customer;
 use App\Models\LedgerEntry;
 use App\Models\PaymentAccount;
@@ -10,13 +11,41 @@ use App\Models\Project;
 use App\Models\ProjectCost;
 use App\Models\ProjectUnit;
 use App\Models\PropertyDeal;
+use App\Support\Tenant;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class LedgerController extends Controller
 {
     public function index(): View
+    {
+        return view('ledger.index', $this->ledgerData() + [
+            'customers' => Customer::orderBy('name')->get(),
+            'allProjects' => Project::orderBy('name')->get(),
+            'paymentAccounts' => PaymentAccount::orderBy('name')->get(),
+        ]);
+    }
+
+    /**
+     * Same figures as index(), handed over as a printable PDF instead of
+     * read off screen — for keeping records or sharing outside the app.
+     */
+    public function pdf()
+    {
+        $business = Business::find(Tenant::id());
+
+        return Pdf::loadView('ledger.pdf', $this->ledgerData() + ['business' => $business])
+            ->setPaper('a4', 'landscape')
+            ->download('Ledger - '.now()->format('Y-m-d').'.pdf');
+    }
+
+    /**
+     * @return array{totalSaleValue: float, totalCollected: float, totalOutstanding: float, totalPurchases: float, netProfit: float, manualIncome: float, manualExpense: float, dealsProfit: float, brokerCommissionPaid: float, deals: Collection, projects: Collection, customerRows: Collection, entries: Collection}
+     */
+    protected function ledgerData(): array
     {
         // Only booked/sold units represent a committed sale — an
         // "available" unit isn't revenue yet. ->withTrashed() on the
@@ -69,17 +98,12 @@ class LedgerController extends Controller
 
         $entries = LedgerEntry::with(['customer' => fn ($q) => $q->withTrashed(), 'project', 'account'])->orderByDesc('entry_date')->orderByDesc('id')->limit(100)->get();
 
-        $customers = Customer::orderBy('name')->get();
-        $allProjects = Project::orderBy('name')->get();
-
         $deals = PropertyDeal::orderByDesc('deal_date')->orderByDesc('id')->get();
 
-        $paymentAccounts = PaymentAccount::orderBy('name')->get();
-
-        return view('ledger.index', compact(
+        return compact(
             'totalSaleValue', 'totalCollected', 'totalOutstanding', 'totalPurchases', 'netProfit',
-            'manualIncome', 'manualExpense', 'dealsProfit', 'brokerCommissionPaid', 'deals', 'projects', 'customerRows', 'entries', 'customers', 'allProjects', 'paymentAccounts'
-        ));
+            'manualIncome', 'manualExpense', 'dealsProfit', 'brokerCommissionPaid', 'deals', 'projects', 'customerRows', 'entries'
+        );
     }
 
     public function storeEntry(Request $request): RedirectResponse

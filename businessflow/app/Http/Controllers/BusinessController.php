@@ -37,6 +37,10 @@ class BusinessController extends Controller
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
+        $data['smart_alerts_enabled'] = $request->boolean('smart_alerts_enabled');
+        $data['payment_reminders_enabled'] = $request->boolean('payment_reminders_enabled');
+        $data['voice_notes_enabled'] = $request->boolean('voice_notes_enabled');
+
         if ($request->hasFile('logo')) {
             if ($business->logo_path) {
                 Storage::disk('local')->delete($business->logo_path);

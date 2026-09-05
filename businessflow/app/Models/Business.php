@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Support\Tenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class Business extends Model
 {
@@ -17,6 +20,9 @@ class Business extends Model
         'subscription_expires_at',
         'renewal_alert_dismissed_at',
         'is_demo',
+        'smart_alerts_enabled',
+        'payment_reminders_enabled',
+        'voice_notes_enabled',
         'name',
         'address',
         'phone',
@@ -36,6 +42,9 @@ class Business extends Model
         'tax_config' => 'array',
         'enabled_modules' => 'array',
         'is_demo' => 'boolean',
+        'smart_alerts_enabled' => 'boolean',
+        'payment_reminders_enabled' => 'boolean',
+        'voice_notes_enabled' => 'boolean',
         'subscription_expires_at' => 'date',
         'renewal_alert_dismissed_at' => 'datetime',
     ];
@@ -56,7 +65,7 @@ class Business extends Model
      * branch has no billing of its own, so it inherits its Company's
      * expiry instead of its own (unset) column.
      */
-    public function effectiveExpiresAt(): ?\Illuminate\Support\Carbon
+    public function effectiveExpiresAt(): ?Carbon
     {
         if ($this->branch_id) {
             return $this->branch?->company?->subscription_expires_at;
@@ -119,16 +128,16 @@ class Business extends Model
      */
     public function statsSummary(): array
     {
-        return \App\Support\Tenant::runAs($this->id, function () {
-            $units = \App\Models\ProjectUnit::whereNull('archived_at')->get();
+        return Tenant::runAs($this->id, function () {
+            $units = ProjectUnit::whereNull('archived_at')->get();
             $collected = (float) $units->sum(fn ($u) => $u->totalCollected());
-            $manualIncome = (float) \App\Models\LedgerEntry::where('type', 'income')->sum('amount');
-            $manualExpense = (float) \App\Models\LedgerEntry::where('type', 'expense')->sum('amount');
-            $cost = (float) \App\Models\ProjectCost::sum('amount') + $manualExpense;
+            $manualIncome = (float) LedgerEntry::where('type', 'income')->sum('amount');
+            $manualExpense = (float) LedgerEntry::where('type', 'expense')->sum('amount');
+            $cost = (float) ProjectCost::sum('amount') + $manualExpense;
 
             return [
-                'projects' => \App\Models\Project::count(),
-                'customers' => \App\Models\Customer::count(),
+                'projects' => Project::count(),
+                'customers' => Customer::count(),
                 'value' => (float) $units->sum('price'),
                 'collected' => $collected,
                 'outstanding' => (float) $units->sum(fn ($u) => $u->totalOutstanding()),
@@ -146,12 +155,12 @@ class Business extends Model
      */
     public function logoDataUri(): ?string
     {
-        if (! $this->logo_path || ! \Illuminate\Support\Facades\Storage::disk('local')->exists($this->logo_path)) {
+        if (! $this->logo_path || ! Storage::disk('local')->exists($this->logo_path)) {
             return null;
         }
 
-        $contents = \Illuminate\Support\Facades\Storage::disk('local')->get($this->logo_path);
-        $mime = \Illuminate\Support\Facades\Storage::disk('local')->mimeType($this->logo_path);
+        $contents = Storage::disk('local')->get($this->logo_path);
+        $mime = Storage::disk('local')->mimeType($this->logo_path);
 
         return 'data:'.$mime.';base64,'.base64_encode($contents);
     }
