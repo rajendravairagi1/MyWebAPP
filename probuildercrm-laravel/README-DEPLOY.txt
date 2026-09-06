@@ -4,8 +4,8 @@ PRO BUILDER CRM — MARKETING WEBSITE (Laravel / PHP version)
 WHAT THIS IS
 -------------------
 This is the ProBuilderCRM.com marketing website, built in Laravel/PHP — the
-same technology as your BusinessFlow CRM app, so it deploys the exact same
-way: upload a zip via cPanel File Manager, no Terminal/SSH needed.
+same technology as your CRM app, so it deploys the exact same way: upload
+a zip via cPanel File Manager, no Terminal/SSH needed.
 
 It replaces the earlier Next.js (Node.js) version, because your hosting
 plan does not support Node.js. Nothing here needs Node — it's plain PHP.
@@ -100,6 +100,10 @@ USING THE ADMIN PANEL (day to day)
 - "Pricing" tab — click "Edit" on any plan to change its monthly price,
   with a live preview showing exactly what visitors will see for all
   three billing cycles before you save.
+- "Theme" tab — the site defaults to a Dark look (modern SaaS style).
+  Pick "Light" here and Save if you'd rather go back to the original
+  clean white design — you can switch back to Dark any time, nothing
+  else on the site is affected either way.
 
 AFTER IT'S LIVE
 -------------------
