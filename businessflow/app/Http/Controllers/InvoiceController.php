@@ -25,8 +25,13 @@ class InvoiceController extends Controller
     {
         $invoices = Invoice::with('customer')
             ->when($request->string('status')->isNotEmpty(), fn ($q) => $q->where('status', $request->string('status')))
+            ->when($request->string('q')->trim()->isNotEmpty(), fn ($q) => $q->where(function ($qq) use ($request) {
+                $term = '%'.$request->string('q')->trim().'%';
+                $qq->where('number', 'like', $term)
+                    ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', $term));
+            }))
             ->latest()
-            ->paginate(20)
+            ->paginate(\App\Support\ListPagination::perPage($request))
             ->withQueryString();
 
         return view('invoices.index', compact('invoices'));

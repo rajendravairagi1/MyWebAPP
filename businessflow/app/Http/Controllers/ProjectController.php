@@ -14,22 +14,33 @@ use Illuminate\View\View;
 
 class ProjectController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         // A project with every unit sold & paid off (or written off) is
         // done — it clutters this active list, and stays reachable via the
         // Completed Projects page or a direct link. Checked off the units
         // themselves (not the project's own status flag), since that flag
         // can go stale on older data.
-        $projects = Project::withCount('units')
-            ->where(function ($query) {
-                $query->doesntHave('units')
-                    ->orWhereHas('units', fn ($q) => $q->whereNull('archived_at'));
+        $query = Project::withCount('units')
+            ->where(function ($q) {
+                $q->doesntHave('units')
+                    ->orWhereHas('units', fn ($qq) => $qq->whereNull('archived_at'));
             })
-            ->latest()
-            ->get();
+            ->when($request->string('q')->trim()->isNotEmpty(), fn ($q) => $q->where('name', 'like', '%'.$request->string('q')->trim().'%'));
 
-        return view('projects.index', compact('projects'));
+        // Portfolio totals must reflect every matching project, not just
+        // the current page — computed here before paginating the list.
+        $allMatching = (clone $query)->get();
+        $ongoingCount = $allMatching->where('status', 'ongoing')->count();
+        $totalCost = $allMatching->sum(fn ($p) => $p->totalCost());
+        $totalRevenue = $allMatching->sum(fn ($p) => $p->totalRevenue());
+        $totalProfit = $totalRevenue - $totalCost;
+
+        $projects = $query->latest()
+            ->paginate(\App\Support\ListPagination::perPage($request))
+            ->withQueryString();
+
+        return view('projects.index', compact('projects', 'ongoingCount', 'totalCost', 'totalRevenue', 'totalProfit'));
     }
 
     public function create(): View

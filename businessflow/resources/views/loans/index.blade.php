@@ -32,6 +32,8 @@
                 </div>
             </div>
 
+            <x-list-toolbar placeholder="{{ __('Search by customer, unit or project...') }}" />
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 @if ($loans->isEmpty())
                     <div class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ __('No bank loans recorded yet — add one from a customer\'s property page.') }}</div>
@@ -84,6 +86,8 @@
                     </div>
                 @endif
             </div>
+
+            {{ $loans->links() }}
         </div>
     </div>
 </x-app-layout>

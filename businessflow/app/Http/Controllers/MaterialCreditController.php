@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\PaymentAccount;
 use App\Models\ProjectCost;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MaterialCreditController extends Controller
@@ -13,10 +14,15 @@ class MaterialCreditController extends Controller
      * paid. This is the one place that answers: how much do we owe in
      * total, per project, and per vendor, right now.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         $entries = ProjectCost::with('project')
             ->where('is_credit', true)
+            ->when($request->string('q')->trim()->isNotEmpty(), fn ($q) => $q->where(function ($qq) use ($request) {
+                $term = '%'.$request->string('q')->trim().'%';
+                $qq->where('vendor', 'like', $term)
+                    ->orWhereHas('project', fn ($p) => $p->where('name', 'like', $term));
+            }))
             ->orderByDesc('spent_on')
             ->get();
 

@@ -1,9 +1,4 @@
 @php
-    $ongoingCount = $projects->where('status', 'ongoing')->count();
-    $totalCost = $projects->sum(fn ($p) => $p->totalCost());
-    $totalRevenue = $projects->sum(fn ($p) => $p->totalRevenue());
-    $totalProfit = $totalRevenue - $totalCost;
-
     $statusStyles = [
         'planning' => 'border-l-gray-400',
         'ongoing' => 'border-l-blue-500',
@@ -30,7 +25,7 @@
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Your Projects') }}</h3>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $projects->count() }} {{ __('total') }} · {{ $ongoingCount }} {{ __('ongoing') }}</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $projects->total() }} {{ __('total') }} · {{ $ongoingCount }} {{ __('ongoing') }}</div>
                     </div>
                 </div>
                 <a href="{{ route('projects.create') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
@@ -61,6 +56,8 @@
                     </div>
                 </div>
             @endif
+
+            <x-list-toolbar placeholder="{{ __('Search projects...') }}" />
 
             {{-- Project cards --}}
             @if ($projects->isEmpty())
@@ -100,6 +97,8 @@
                     @endforeach
                 </div>
             @endif
+
+            {{ $projects->links() }}
         </div>
     </div>
 </x-app-layout>

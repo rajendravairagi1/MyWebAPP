@@ -14,9 +14,16 @@ use Illuminate\View\View;
 
 class ContractorController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $contractors = Contractor::withCount('costs')->orderBy('name')->get();
+        $contractors = Contractor::withCount('costs')
+            ->when($request->string('q')->trim()->isNotEmpty(), fn ($q) => $q->where(function ($qq) use ($request) {
+                $term = '%'.$request->string('q')->trim().'%';
+                $qq->where('name', 'like', $term)->orWhere('phone', 'like', $term);
+            }))
+            ->orderBy('name')
+            ->paginate(\App\Support\ListPagination::perPage($request))
+            ->withQueryString();
 
         return view('contractors.index', [
             'contractors' => $contractors,

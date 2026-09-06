@@ -20,9 +20,17 @@ use Illuminate\View\View;
 
 class QuotationController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $quotations = Quotation::with('customer')->latest()->paginate(20);
+        $quotations = Quotation::with('customer')
+            ->when($request->string('q')->trim()->isNotEmpty(), fn ($q) => $q->where(function ($qq) use ($request) {
+                $term = '%'.$request->string('q')->trim().'%';
+                $qq->where('number', 'like', $term)
+                    ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', $term));
+            }))
+            ->latest()
+            ->paginate(\App\Support\ListPagination::perPage($request))
+            ->withQueryString();
 
         return view('quotations.index', compact('quotations'));
     }

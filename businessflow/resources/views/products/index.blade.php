@@ -12,6 +12,8 @@
                 <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm rounded-md p-3">{{ session('status') }}</div>
             @endif
 
+            <x-list-toolbar placeholder="{{ __('Search products...') }}" />
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 @if ($products->isEmpty())
                     <div class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ __('No products or services yet.') }}</div>

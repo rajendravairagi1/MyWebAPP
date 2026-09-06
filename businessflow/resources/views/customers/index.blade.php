@@ -16,10 +16,7 @@
                 <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm rounded-md p-3">{{ session('status') }}</div>
             @endif
 
-            <form method="GET" class="max-w-sm">
-                <input type="text" name="q" value="{{ request('q') }}" placeholder="{{ __('Search customers...') }}"
-                    class="w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm text-sm focus:border-accent-500 focus:ring-accent-500">
-            </form>
+            <x-list-toolbar placeholder="{{ __('Search customers...') }}" />
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 @if ($customers->isEmpty())

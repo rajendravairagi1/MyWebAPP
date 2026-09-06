@@ -13,11 +13,17 @@ use Illuminate\View\View;
 
 class AvailablePropertiesController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $term = $request->string('q')->trim();
+
         $units = ProjectUnit::with(['project', 'photos'])
             ->where('status', 'available')
             ->whereNull('archived_at')
+            ->when($term->isNotEmpty(), fn ($q) => $q->where(function ($qq) use ($term) {
+                $qq->where('unit_number', 'like', "%{$term}%")
+                    ->orWhereHas('project', fn ($p) => $p->where('name', 'like', "%{$term}%"));
+            }))
             ->get()
             ->sortBy([['project.name', 'asc'], ['unit_number', 'asc']]);
 
@@ -27,6 +33,7 @@ class AvailablePropertiesController extends Controller
         if (Tenant::can('property_deals')) {
             $deals = PropertyDeal::with('photos')
                 ->where('status', 'open')
+                ->when($term->isNotEmpty(), fn ($q) => $q->where('property_title', 'like', "%{$term}%"))
                 ->orderBy('property_title')
                 ->get();
         }

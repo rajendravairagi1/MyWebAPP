@@ -20,18 +20,30 @@ class LoanController extends Controller
      * customer owes/received what from which bank" list that used to
      * only exist buried one property at a time on each customer's page.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $loans = Loan::with(['customer', 'unit.project'])
-            ->orderByDesc('created_at')
-            ->get();
+        $query = Loan::with(['customer', 'unit.project'])
+            ->when($request->string('q')->trim()->isNotEmpty(), function ($q) use ($request) {
+                $term = '%'.$request->string('q')->trim().'%';
+                $q->where(function ($qq) use ($term) {
+                    $qq->whereHas('customer', fn ($c) => $c->where('name', 'like', $term))
+                        ->orWhereHas('unit', fn ($u) => $u->where('unit_number', 'like', $term))
+                        ->orWhereHas('unit.project', fn ($p) => $p->where('name', 'like', $term));
+                });
+            });
 
+        // Totals reflect every matching loan, not just the current page.
+        $allMatching = (clone $query)->get();
         $totals = [
-            'count' => $loans->count(),
-            'sanctioned' => (float) $loans->sum('sanctioned_amount'),
-            'disbursed' => (float) $loans->sum(fn (Loan $l) => $l->totalDisbursed()),
-            'remaining' => (float) $loans->sum(fn (Loan $l) => $l->remainingToDisburse()),
+            'count' => $allMatching->count(),
+            'sanctioned' => (float) $allMatching->sum('sanctioned_amount'),
+            'disbursed' => (float) $allMatching->sum(fn (Loan $l) => $l->totalDisbursed()),
+            'remaining' => (float) $allMatching->sum(fn (Loan $l) => $l->remainingToDisburse()),
         ];
+
+        $loans = $query->orderByDesc('created_at')
+            ->paginate(\App\Support\ListPagination::perPage($request))
+            ->withQueryString();
 
         return view('loans.index', compact('loans', 'totals'));
     }

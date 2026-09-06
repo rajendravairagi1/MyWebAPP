@@ -63,6 +63,8 @@
                 </div>
             </div>
 
+            <x-search-box placeholder="{{ __('Search by vendor or project...') }}" />
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden" x-data="{ paying: null }">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Outstanding — one by one') }} ({{ $outstanding->count() }})</div>
                 @if ($outstanding->isEmpty())

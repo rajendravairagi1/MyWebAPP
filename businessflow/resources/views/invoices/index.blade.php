@@ -14,12 +14,14 @@
 
             <div class="flex gap-2 text-sm">
                 @foreach (['' => 'All', 'sent' => 'Sent', 'partially_paid' => 'Partially paid', 'paid' => 'Paid', 'overdue' => 'Overdue'] as $value => $label)
-                    <a href="{{ route('invoices.index', $value ? ['status' => $value] : []) }}"
+                    <a href="{{ route('invoices.index', array_filter(['status' => $value ?: null, 'q' => request('q')])) }}"
                         class="px-3 py-1 rounded-full border {{ request('status', '') === $value ? 'bg-gray-800 text-white border-gray-800' : 'border-gray-300 dark:border-slate-600 text-gray-600 dark:text-gray-400' }}">
                         {{ $label }}
                     </a>
                 @endforeach
             </div>
+
+            <x-list-toolbar placeholder="{{ __('Search by invoice # or customer...') }}" />
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 @if ($invoices->isEmpty())

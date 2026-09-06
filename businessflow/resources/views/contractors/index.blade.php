@@ -21,6 +21,8 @@
                 {{ __('Labor contractors, vendors, and trades (painter, plumber, tiles, electrician...) that you pay across projects — pick them by name when recording a payment, and their full history is here in one place.') }}
             </p>
 
+            <x-list-toolbar placeholder="{{ __('Search contractors...') }}" />
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 @if ($contractors->isEmpty())
                     <div class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ __('No contractors added yet.') }}</div>
@@ -53,6 +55,8 @@
                     </div>
                 @endif
             </div>
+
+            {{ $contractors->links() }}
         </div>
     </div>
 

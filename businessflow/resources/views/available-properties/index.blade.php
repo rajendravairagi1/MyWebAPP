@@ -19,6 +19,8 @@
                 </button>
             </div>
 
+            <x-search-box placeholder="{{ __('Search by unit number or project...') }}" />
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">
                     {{ __('Available') }} ({{ $units->count() }})

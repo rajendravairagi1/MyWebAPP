@@ -18,6 +18,8 @@
                 {{ __('Commission earned by each broker (fixed amount or % of the sale), what\'s been paid out, and what you still owe them.') }}
             </p>
 
+            <x-list-toolbar placeholder="{{ __('Search brokers...') }}" />
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 @if ($brokers->isEmpty())
                     <div class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ __('No brokers added yet.') }}</div>
@@ -50,6 +52,8 @@
                     </div>
                 @endif
             </div>
+
+            {{ $brokers->links() }}
         </div>
     </div>
 

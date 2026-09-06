@@ -18,9 +18,16 @@ use Illuminate\View\View;
 
 class InvestorController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $investors = Investor::withCount('transactions')->orderBy('name')->get();
+        $investors = Investor::withCount('transactions')
+            ->when($request->string('q')->trim()->isNotEmpty(), fn ($q) => $q->where(function ($qq) use ($request) {
+                $term = '%'.$request->string('q')->trim().'%';
+                $qq->where('name', 'like', $term)->orWhere('phone', 'like', $term);
+            }))
+            ->orderBy('name')
+            ->paginate(\App\Support\ListPagination::perPage($request))
+            ->withQueryString();
 
         return view('investors.index', compact('investors'));
     }

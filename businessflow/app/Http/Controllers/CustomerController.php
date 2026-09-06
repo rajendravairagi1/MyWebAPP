@@ -32,7 +32,7 @@ class CustomerController extends Controller
                     ->orWhere('phone', 'like', $term);
             }))
             ->latest()
-            ->paginate(20)
+            ->paginate(\App\Support\ListPagination::perPage($request))
             ->withQueryString();
 
         return view('customers.index', compact('customers'));

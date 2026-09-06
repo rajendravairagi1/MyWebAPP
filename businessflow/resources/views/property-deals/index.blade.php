@@ -51,6 +51,8 @@
                 </div>
             </div>
 
+            <x-list-toolbar placeholder="{{ __('Search deals...') }}" />
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 @if ($deals->isEmpty())
                     <div class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ __('No deals added yet.') }}</div>
@@ -130,6 +132,8 @@
                     </div>
                 @endif
             </div>
+
+            {{ $deals->links() }}
         </div>
     </div>
 

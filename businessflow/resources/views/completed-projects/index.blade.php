@@ -13,9 +13,11 @@
                 {{ __('Properties where the sale is fully closed — either paid off in full or written off. These can no longer be assigned to a customer. If the same unit is being sold again, create a fresh unit for it.') }}
             </p>
 
+            <x-list-toolbar placeholder="{{ __('Search by unit, project or customer...') }}" />
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">
-                    {{ __('Completed') }} ({{ $units->count() }})
+                    {{ __('Completed') }} ({{ $units->total() }})
                 </div>
 
                 @forelse ($units as $unit)
@@ -65,6 +67,8 @@
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('Nothing completed yet.') }}</div>
                 @endforelse
             </div>
+
+            {{ $units->links() }}
         </div>
     </div>
 </x-app-layout>

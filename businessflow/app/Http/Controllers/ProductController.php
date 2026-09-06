@@ -14,7 +14,7 @@ class ProductController extends Controller
         $products = Product::query()
             ->when($request->string('q')->trim()->isNotEmpty(), fn ($query) => $query->where('name', 'like', '%'.$request->string('q')->trim().'%'))
             ->latest()
-            ->paginate(20)
+            ->paginate(\App\Support\ListPagination::perPage($request))
             ->withQueryString();
 
         return view('products.index', compact('products'));

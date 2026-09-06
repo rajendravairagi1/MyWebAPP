@@ -13,19 +13,32 @@ use Illuminate\View\View;
 
 class PropertyDealController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $deals = PropertyDeal::with('broker')->withCount('photos')->orderByDesc('deal_date')->orderByDesc('id')->get();
+        $query = PropertyDeal::with('broker')->withCount('photos')
+            ->when($request->string('q')->trim()->isNotEmpty(), fn ($q) => $q->where(function ($qq) use ($request) {
+                $term = '%'.$request->string('q')->trim().'%';
+                $qq->where('property_title', 'like', $term)
+                    ->orWhere('address', 'like', $term)
+                    ->orWhere('seller_name', 'like', $term)
+                    ->orWhere('buyer_name', 'like', $term);
+            }));
 
-        $sold = $deals->where('status', 'sold');
+        // Totals must reflect every matching deal, not just the current page.
+        $allMatching = (clone $query)->get();
+        $sold = $allMatching->where('status', 'sold');
 
         $totals = [
-            'count' => $deals->count(),
-            'open' => $deals->where('status', 'open')->count(),
+            'count' => $allMatching->count(),
+            'open' => $allMatching->where('status', 'open')->count(),
             'total_purchase' => (float) $sold->sum('purchase_price'),
             'total_sale' => (float) $sold->sum('sale_price'),
             'total_profit' => (float) $sold->sum(fn (PropertyDeal $d) => $d->profit()),
         ];
+
+        $deals = $query->orderByDesc('deal_date')->orderByDesc('id')
+            ->paginate(\App\Support\ListPagination::perPage($request))
+            ->withQueryString();
 
         $brokers = Broker::orderBy('name')->get();
 
