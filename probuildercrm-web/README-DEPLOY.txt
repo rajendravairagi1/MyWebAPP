@@ -59,9 +59,9 @@ BEFORE YOU GO LIVE
    to change them yourself; otherwise just tell me the new number/email
    and I'll update it.
 
-3. PRICING — the numbers (Solo ₹999, Team ₹2,499, Company ₹4,999 per
-   month) are the same draft numbers from the old static site. Tell me
-   your real prices whenever you're ready and I'll update them.
+3. PRICING — Solo ₹999, Team ₹2,499, Company ₹4,999 per month are set
+   as a starting point. You can change any of these yourself any time
+   from /admin → Pricing (see below) — no need to ask me.
 
 4. ADMIN PASSWORD — make sure you actually set ADMIN_PASSWORD in step 4
    above to something real before going live; without it the /admin
@@ -76,6 +76,18 @@ USING THE BLOG (day to day)
   itself (add Paragraph / Heading / List blocks as needed)
 - "Save Post" — it appears on /blog immediately, no rebuild needed
 - Edit or Delete any post the same way, any time
+
+CHANGING PRICES (day to day)
+-------------------
+- Go to https://probuildercrm.com/admin → click the "Pricing" tab
+- Click "Edit" on any plan and change its "Monthly price" — that's the
+  only number you ever need to touch
+- Everything else on the public /pricing page — the 6-month price
+  (+1 month free), the yearly price (+2 months free), and the
+  permanent "40% OFF" badge with its struck-through price — is worked
+  out automatically from that one monthly price, so it always stays
+  consistent
+- "Save" — the pricing page updates immediately, no rebuild needed
 
 AFTER IT'S LIVE
 -------------------
