@@ -138,13 +138,6 @@
                             </button>
                         @endif
                     </div>
-                    @if (\App\Support\Tenant::isOwner())
-                        <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('{{ __('Delete this customer? Their sale history stays visible in the Ledger, and they can be restored anytime from Customers → Deleted customers.') }}')" class="text-right">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-xs text-red-600 hover:underline">{{ __('Delete customer') }}</button>
-                        </form>
-                    @endif
                 </div>
             </div>
 

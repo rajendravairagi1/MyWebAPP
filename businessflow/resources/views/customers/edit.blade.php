@@ -22,7 +22,7 @@
             </div>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 flex items-center justify-between">
-                <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('Their sale history stays visible in the Ledger, and they can be restored anytime from Customers → Deleted customers.') }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">{{ __('Their sale history stays visible in the Ledger, and they can be restored anytime from') }} <a href="{{ route('customers.trashed') }}" class="text-accent-600 hover:underline">{{ __('Deleted customers') }}</a>.</div>
                 <form method="POST" action="{{ route('customers.destroy', $customer) }}" onsubmit="return confirm('{{ __('Delete this customer? Their sale history stays visible in the Ledger, and they can be restored anytime from Customers → Deleted customers.') }}')">
                     @csrf
                     @method('DELETE')
