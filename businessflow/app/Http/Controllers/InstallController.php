@@ -44,7 +44,7 @@ class InstallController extends Controller
     public function index(Request $request): View|RedirectResponse
     {
         if ($this->alreadyInstalled()) {
-            return redirect('/')->with('status', 'BusinessFlow is already installed.');
+            return redirect('/')->with('status', config('app.name', 'Pro Builder CRM').' is already installed.');
         }
 
         $this->authorizeToken($request);

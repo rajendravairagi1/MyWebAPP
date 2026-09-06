@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Install BusinessFlow</title>
+    <title>Install Pro Builder CRM</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center py-10">
     <div class="w-full max-w-lg bg-white shadow-sm rounded-lg p-8">
-        <h1 class="text-xl font-semibold text-gray-800">Install BusinessFlow</h1>
+        <h1 class="text-xl font-semibold text-gray-800">Install Pro Builder CRM</h1>
         <p class="text-sm text-gray-600 mt-2 mb-6">
             Enter the MySQL database details from your hosting cPanel. This runs once —
             it configures <code>.env</code> and applies the database migrations.
