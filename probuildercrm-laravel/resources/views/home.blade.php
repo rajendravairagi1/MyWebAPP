@@ -131,9 +131,12 @@
 
         <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
             @foreach (config('features.core') as $feature)
-                <div class="card">
-                    <h3 style="margin-bottom: 8px;">{{ $feature['title'] }}</h3>
-                    <p style="color: var(--color-ink-soft);">{{ $feature['description'] }}</p>
+                <div class="card" style="display: flex; gap: 16px;">
+                    <span class="feature-icon">@include('partials.icon', ['name' => $feature['icon']])</span>
+                    <div>
+                        <h3 style="margin-bottom: 8px;">{{ $feature['title'] }}</h3>
+                        <p style="color: var(--color-ink-soft);">{{ $feature['description'] }}</p>
+                    </div>
                 </div>
             @endforeach
         </div>
@@ -149,6 +152,7 @@
         <div class="grid-3">
             @foreach (config('features.team') as $feature)
                 <div class="card">
+                    <span class="feature-icon" style="margin-bottom: 14px;">@include('partials.icon', ['name' => $feature['icon']])</span>
                     <h3 style="font-size: 1.1rem; margin-bottom: 8px;">{{ $feature['title'] }}</h3>
                     <p style="color: var(--color-ink-soft); font-size: 0.95rem;">{{ $feature['description'] }}</p>
                 </div>
