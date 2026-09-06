@@ -1,4 +1,7 @@
 import PricingTable from "@/components/pricing/PricingTable";
+import { listPlans } from "@/lib/repositories/pricing";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Pricing",
@@ -7,6 +10,8 @@ export const metadata = {
 };
 
 export default function PricingPage() {
+  const plans = listPlans();
+
   return (
     <>
       <section style={{ background: "var(--color-bg-inverse)", padding: "var(--space-3xl) 0", textAlign: "center" }}>
@@ -23,7 +28,7 @@ export default function PricingPage() {
 
       <section className="section">
         <div className="container">
-          <PricingTable />
+          <PricingTable plans={plans} />
         </div>
       </section>
     </>

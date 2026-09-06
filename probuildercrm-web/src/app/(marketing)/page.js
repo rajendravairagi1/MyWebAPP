@@ -1,6 +1,9 @@
 import Link from "next/link";
 import Tag from "@/components/ui/Tag";
 import JsonLd from "@/components/seo/JsonLd";
+import HeroCarousel from "@/components/home/HeroCarousel";
+import MobileShowcase from "@/components/home/MobileShowcase";
+import FeatureTabs from "@/components/home/FeatureTabs";
 import { faqSchema } from "@/lib/schema";
 import { CORE_FEATURES, TEAM_FEATURES } from "@/data/features";
 import { FAQS } from "@/data/faq";
@@ -32,7 +35,7 @@ export default function HomePage() {
             Projects, unit bookings, customer payments, loans, invoices, contractors and brokers — Pro Builder CRM keeps every
             number in one place, so you always know exactly where your business stands.
           </p>
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: "var(--space-2xl)" }}>
             <Link href="/contact" className="btn btn-primary btn-lg">
               Book a Free Demo
             </Link>
@@ -40,6 +43,21 @@ export default function HomePage() {
               See Features
             </Link>
           </div>
+        </div>
+
+        <div className="container">
+          <HeroCarousel />
+        </div>
+      </section>
+
+      {/* Tabbed feature showcase */}
+      <section className="section">
+        <div className="container">
+          <div style={{ textAlign: "center", maxWidth: 640, margin: "0 auto var(--space-xl)" }}>
+            <Tag>See it in action</Tag>
+            <h2 style={{ font: "var(--font-h2)", margin: "12px 0 0" }}>A real look inside Pro Builder CRM</h2>
+          </div>
+          <FeatureTabs />
         </div>
       </section>
 
@@ -78,6 +96,23 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Mobile showcase */}
+      <section className="section">
+        <div className="container grid-2" style={{ alignItems: "center" }}>
+          <div>
+            <Tag>Mobile-ready</Tag>
+            <h2 style={{ font: "var(--font-h2)", margin: "12px 0 var(--space-sm)" }}>
+              Check a customer&apos;s balance or record a payment — right from your phone
+            </h2>
+            <p style={{ color: "var(--color-ink-soft)", fontSize: "1.02rem", margin: 0 }}>
+              Pro Builder CRM works fully on mobile, no separate app needed. Whether you&apos;re at a site visit or
+              on the move, every project, customer and payment is one tap away.
+            </p>
+          </div>
+          <MobileShowcase />
         </div>
       </section>
 

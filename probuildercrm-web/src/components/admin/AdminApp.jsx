@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BlockEditor from "./BlockEditor";
+import PricingAdmin from "./PricingAdmin";
 
 function emptyForm() {
   return {
@@ -21,6 +22,7 @@ export default function AdminApp() {
   const router = useRouter();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [section, setSection] = useState("blog"); // blog | pricing
   const [view, setView] = useState("list"); // list | edit
   const [editingSlug, setEditingSlug] = useState(null);
   const [form, setForm] = useState(emptyForm());
@@ -102,22 +104,44 @@ export default function AdminApp() {
   return (
     <div style={{ minHeight: "70vh", background: "var(--color-bg-soft)", padding: "var(--space-xl) 0" }}>
       <div className="container" style={{ maxWidth: 900 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-lg)" }}>
-          <h1 style={{ font: "var(--font-h2)", fontSize: "1.6rem", margin: 0 }}>Blog Admin</h1>
-          <div style={{ display: "flex", gap: 10 }}>
-            {view === "list" ? (
-              <button type="button" onClick={startNew} className="btn btn-primary">
-                + New Post
-              </button>
-            ) : (
-              <button type="button" onClick={() => setView("list")} className="btn btn-secondary">
-                ← Back to list
-              </button>
-            )}
-            <button type="button" onClick={handleLogout} className="btn btn-secondary">
-              Log Out
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-md)" }}>
+          <h1 style={{ font: "var(--font-h2)", fontSize: "1.6rem", margin: 0 }}>Admin</h1>
+          <button type="button" onClick={handleLogout} className="btn btn-secondary">
+            Log Out
+          </button>
+        </div>
+
+        <div style={{ display: "flex", gap: 8, marginBottom: "var(--space-lg)" }}>
+          <button
+            type="button"
+            onClick={() => setSection("blog")}
+            className={section === "blog" ? "btn btn-primary" : "btn btn-secondary"}
+          >
+            Blog Posts
+          </button>
+          <button
+            type="button"
+            onClick={() => setSection("pricing")}
+            className={section === "pricing" ? "btn btn-primary" : "btn btn-secondary"}
+          >
+            Pricing
+          </button>
+        </div>
+
+        {section === "pricing" && <PricingAdmin />}
+
+        {section === "blog" && (
+        <>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "var(--space-md)" }}>
+          {view === "list" ? (
+            <button type="button" onClick={startNew} className="btn btn-primary">
+              + New Post
             </button>
-          </div>
+          ) : (
+            <button type="button" onClick={() => setView("list")} className="btn btn-secondary">
+              ← Back to list
+            </button>
+          )}
         </div>
 
         {view === "list" && (
@@ -195,6 +219,8 @@ export default function AdminApp() {
               </button>
             </div>
           </form>
+        )}
+        </>
         )}
       </div>
     </div>

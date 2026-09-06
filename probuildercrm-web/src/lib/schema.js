@@ -13,7 +13,7 @@ export function organizationSchema() {
   };
 }
 
-export function softwareApplicationSchema() {
+export function softwareApplicationSchema(startingPrice) {
   return {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
@@ -23,7 +23,7 @@ export function softwareApplicationSchema() {
     description: SITE.shortDescription,
     offers: {
       "@type": "Offer",
-      price: "999",
+      price: String(startingPrice),
       priceCurrency: "INR",
       url: `${SITE.url}/pricing`,
     },

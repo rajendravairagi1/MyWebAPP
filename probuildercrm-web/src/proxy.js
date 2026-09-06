@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { COOKIE_NAME, isValidSessionToken } from "@/lib/adminAuth";
 
-export async function middleware(request) {
+export async function proxy(request) {
   const { pathname } = request.nextUrl;
-  const isApi = pathname.startsWith("/api/admin/posts");
+  const isApi = pathname.startsWith("/api/admin/posts") || pathname.startsWith("/api/admin/pricing");
   const isAdminPage = pathname.startsWith("/admin") && pathname !== "/admin/login";
 
   if (!isApi && !isAdminPage) {
@@ -26,5 +26,5 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/posts/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/posts/:path*", "/api/admin/pricing/:path*"],
 };
