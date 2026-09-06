@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\PricingController as AdminPricingController;
+use App\Http\Controllers\Admin\ThemeController as AdminThemeController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\PageController;
@@ -50,5 +51,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/pricing', [AdminPricingController::class, 'index'])->name('pricing.index');
         Route::get('/pricing/{plan}/edit', [AdminPricingController::class, 'edit'])->name('pricing.edit');
         Route::put('/pricing/{plan}', [AdminPricingController::class, 'update'])->name('pricing.update');
+
+        Route::get('/theme', [AdminThemeController::class, 'index'])->name('theme.index');
+        Route::put('/theme', [AdminThemeController::class, 'update'])->name('theme.update');
     });
 });

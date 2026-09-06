@@ -5,7 +5,10 @@
 
 @section('content')
 
-<section class="section-hero">
+<section class="section-hero hero-glow-section">
+    <div class="hero-glow hero-glow-1"></div>
+    <div class="hero-glow hero-glow-2"></div>
+
     <div class="container">
         <p class="eyebrow">Built for Real Estate Builders &amp; Developers</p>
         <h1>Run your entire real estate business from one CRM — not five spreadsheets.</h1>
@@ -20,35 +23,64 @@
     </div>
 
     <div class="container">
-        <div class="hero-carousel"
-             x-data="{
-                slides: [
-                    { src: '{{ asset('screenshots/dashboard.png') }}', alt: 'Pro Builder CRM dashboard showing project revenue, collections and profit charts in the Nova dark theme' },
-                    { src: '{{ asset('screenshots/analytics.png') }}', alt: 'Pro Builder CRM analytics view with unit booking status and payment collection rate charts' },
-                    { src: '{{ asset('screenshots/brokers.png') }}', alt: 'Pro Builder CRM brokers module showing commission tracking and statements' }
-                ],
-                index: 0,
-                init() { setInterval(() => { this.index = (this.index + 1) % this.slides.length }, 3800) }
-             }">
-            <div class="hero-carousel-titlebar">
-                <span class="hero-carousel-dot-red"></span>
-                <span class="hero-carousel-dot-yellow"></span>
-                <span class="hero-carousel-dot-green"></span>
-                <span class="hero-carousel-url">app.probuildercrm.com</span>
+        <div class="hero-composition">
+            <div class="floating-badge floating-badge-1">
+                <span class="floating-badge-icon" style="background: rgba(52,211,153,0.15);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                </span>
+                <span>
+                    <span class="floating-badge-label" style="display:block;">Collected this month</span>
+                    <span class="floating-badge-value">₹6,11,105</span>
+                </span>
             </div>
 
-            <div class="hero-carousel-viewport">
-                <template x-for="(slide, i) in slides" :key="slide.src">
-                    <img :src="slide.src" :alt="slide.alt"
-                         :style="{ opacity: i === index ? 1 : 0, transform: i === index ? 'translateY(0)' : 'translateY(14px)' }">
-                </template>
+            <div class="floating-badge floating-badge-2">
+                <span class="floating-badge-icon" style="background: rgba(99,102,241,0.15);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m-1 4h1m4-4h1m-1 4h1"/></svg>
+                </span>
+                <span>
+                    <span class="floating-badge-label" style="display:block;">Active projects</span>
+                    <span class="floating-badge-value">12 sites</span>
+                </span>
             </div>
 
-            <div class="hero-carousel-nav">
-                <template x-for="(slide, i) in slides" :key="'dot-'+slide.src">
-                    <button type="button" :aria-label="'Show slide ' + (i + 1)" @click="index = i"
-                            :class="{ active: i === index }" :style="{ width: i === index ? '22px' : '8px' }"></button>
-                </template>
+            <div class="hero-carousel"
+                 x-data="{
+                    slides: [
+                        { src: '{{ asset('screenshots/dashboard.png') }}', alt: 'Pro Builder CRM dashboard showing project revenue, collections and profit charts in the Nova dark theme' },
+                        { src: '{{ asset('screenshots/analytics.png') }}', alt: 'Pro Builder CRM analytics view with unit booking status and payment collection rate charts' },
+                        { src: '{{ asset('screenshots/brokers.png') }}', alt: 'Pro Builder CRM brokers module showing commission tracking and statements' }
+                    ],
+                    index: 0,
+                    init() { setInterval(() => { this.index = (this.index + 1) % this.slides.length }, 3800) }
+                 }">
+                <div class="hero-carousel-titlebar">
+                    <span class="hero-carousel-dot-red"></span>
+                    <span class="hero-carousel-dot-yellow"></span>
+                    <span class="hero-carousel-dot-green"></span>
+                    <span class="hero-carousel-url">app.probuildercrm.com</span>
+                </div>
+
+                <div class="hero-carousel-viewport">
+                    <template x-for="(slide, i) in slides" :key="slide.src">
+                        <img :src="slide.src" :alt="slide.alt"
+                             :style="{ opacity: i === index ? 1 : 0, transform: i === index ? 'translateY(0)' : 'translateY(14px)' }">
+                    </template>
+                </div>
+
+                <div class="hero-carousel-nav">
+                    <template x-for="(slide, i) in slides" :key="'dot-'+slide.src">
+                        <button type="button" :aria-label="'Show slide ' + (i + 1)" @click="index = i"
+                                :class="{ active: i === index }" :style="{ width: i === index ? '22px' : '8px' }"></button>
+                    </template>
+                </div>
+            </div>
+
+            <div class="hero-phone-corner">
+                <div class="mobile-showcase">
+                    <div class="mobile-showcase-notch"></div>
+                    <img src="{{ asset('screenshots/mobile-dashboard.png') }}" alt="Pro Builder CRM dashboard on a mobile phone">
+                </div>
             </div>
         </div>
     </div>

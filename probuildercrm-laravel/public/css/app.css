@@ -34,6 +34,22 @@
   --shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.12);
 }
 
+:root[data-theme="dark"] {
+  --color-primary: #6366f1;
+  --color-primary-dark: #818cf8;
+  --color-primary-light: rgba(99, 102, 241, 0.18);
+  --color-ink: #f1f5f9;
+  --color-ink-soft: #94a3b8;
+  --color-bg: #0a0f1c;
+  --color-bg-soft: #0f172a;
+  --color-bg-inverse: #05070d;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --white: #131b2e;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 20px 48px rgba(0, 0, 0, 0.55);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -235,6 +251,14 @@ h3 {
   border-bottom: 1px solid var(--color-border);
 }
 
+[data-theme="dark"] .navbar {
+  background: rgba(10, 15, 28, 0.85);
+}
+
+[data-theme="dark"] .nav-mobile-panel {
+  background: var(--color-bg);
+}
+
 .navbar .container {
   display: flex;
   align-items: center;
@@ -386,6 +410,132 @@ h3 {
   text-decoration: none;
 }
 
+/* Hero glow decorations */
+.hero-glow-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.55;
+}
+
+.hero-glow-1 {
+  width: 480px;
+  height: 480px;
+  top: -160px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.55), transparent 70%);
+}
+
+.hero-glow-2 {
+  width: 420px;
+  height: 420px;
+  bottom: -140px;
+  right: -100px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.35), transparent 70%);
+}
+
+.hero-glow-section > .container {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hero composition: browser mockup + overlapping phone + floating stat badges */
+.hero-composition {
+  position: relative;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.hero-phone-corner {
+  position: absolute;
+  right: -18px;
+  bottom: -46px;
+  width: 130px;
+  z-index: 3;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
+}
+
+.hero-phone-corner .mobile-showcase {
+  width: 100%;
+  border-width: 7px;
+  border-radius: 26px;
+}
+
+.hero-phone-corner .mobile-showcase-notch {
+  width: 46px;
+  height: 12px;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.hero-phone-corner .mobile-showcase img {
+  border-radius: 20px;
+}
+
+@media (max-width: 700px) {
+  .hero-phone-corner {
+    display: none;
+  }
+}
+
+.floating-badge {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  box-shadow: var(--shadow-lg);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.floating-badge .floating-badge-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.floating-badge .floating-badge-label {
+  color: var(--color-ink-soft);
+  font-size: 0.72rem;
+}
+
+.floating-badge .floating-badge-value {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.floating-badge-1 {
+  left: -24px;
+  top: 36px;
+}
+
+.floating-badge-2 {
+  left: 24px;
+  bottom: -22px;
+}
+
+@media (max-width: 860px) {
+  .floating-badge {
+    display: none;
+  }
+}
+
 /* Hero carousel */
 .hero-carousel {
   position: relative;
@@ -476,6 +626,10 @@ h3 {
   transition: all 0.2s ease;
 }
 
+[data-theme="dark"] .feature-tab-btn {
+  background: var(--white);
+}
+
 .feature-tab-btn.active {
   border: 2px solid var(--color-primary);
   background: var(--color-primary-light);
@@ -551,6 +705,10 @@ h3 {
   cursor: pointer;
 }
 
+[data-theme="dark"] .pricing-cycle-btn {
+  background: var(--white);
+}
+
 .pricing-cycle-btn.active {
   border: 2px solid var(--color-primary);
   background: var(--color-primary-light);
@@ -586,6 +744,11 @@ h3 {
   font-weight: 700;
   padding: 4px 12px;
   border-radius: 999px;
+}
+
+[data-theme="dark"] .pricing-badge-off {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
 }
 
 .pricing-badge-off {
@@ -689,6 +852,8 @@ h3 {
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   font: 400 1rem/1.6 var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-ink);
 }
 
 .form-textarea {
