@@ -110,3 +110,47 @@ window.sharePdfFile = async function (url, filename, buttonEl) {
         }
     }
 };
+
+// Hands the actual QR code image (already sitting on the page as a data:
+// URI, so no network fetch/preload is needed) to the phone's native share
+// sheet — WhatsApp, etc. — the same way PhonePe/BHIM share their QR as an
+// image rather than a text link. Falls back to a plain download if the
+// browser can't share files.
+window.shareImageDataUri = async function (dataUri, filename, buttonEl) {
+    const originalLabel = buttonEl ? buttonEl.textContent : null;
+
+    try {
+        if (buttonEl) {
+            buttonEl.disabled = true;
+            buttonEl.textContent = 'Preparing…';
+        }
+
+        const blob = await (await fetch(dataUri)).blob();
+        const file = new File([blob], filename, { type: blob.type || 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file] });
+            return;
+        }
+
+        const link = document.createElement('a');
+        link.href = dataUri;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        window.alert('Your browser can\'t attach images directly. The QR code has been downloaded — open WhatsApp and attach it from your Gallery/Downloads.');
+    } catch (err) {
+        if (err && err.name === 'AbortError') {
+            return; // user closed the share sheet
+        }
+
+        window.alert('Could not share the QR code. Please try "Download QR" instead.');
+    } finally {
+        if (buttonEl) {
+            buttonEl.disabled = false;
+            buttonEl.textContent = originalLabel;
+        }
+    }
+};
