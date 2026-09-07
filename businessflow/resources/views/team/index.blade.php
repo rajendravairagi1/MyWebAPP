@@ -18,8 +18,8 @@
                     agent: { modules: ['available_properties', 'customers', 'quotations'], financials: [] },
                     accountant: { modules: ['ledger', 'investors', 'invoices'], financials: [] },
                     supervisor: { modules: ['projects'], financials: [] },
-                    telecaller: { modules: ['customers', 'followups'], financials: [] },
-                    receptionist: { modules: ['customers'], financials: [] },
+                    telecaller: { modules: ['leads', 'customers', 'followups'], financials: [] },
+                    receptionist: { modules: ['leads', 'customers'], financials: [] },
                     property_manager: { modules: ['available_properties', 'completed_projects', 'projects'], financials: [] },
                 },
                 applyPreset() {

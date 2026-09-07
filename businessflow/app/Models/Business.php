@@ -112,6 +112,22 @@ class Business extends Model
     }
 
     /**
+     * The token used in this business's public, no-login lead-capture form
+     * link (and the QR code that encodes it) — generated once on first use
+     * and kept stable after that so a QR code already printed or shared
+     * never breaks.
+     */
+    public function leadFormToken(): string
+    {
+        if (! $this->lead_token) {
+            $this->lead_token = \Illuminate\Support\Str::random(32);
+            $this->save();
+        }
+
+        return $this->lead_token;
+    }
+
+    /**
      * Combined counts/totals for this business, used by the Branch/Company
      * dashboards to show a builder's numbers without switching into it.
      * totalCollected()/totalOutstanding() pull from invoices/payments,

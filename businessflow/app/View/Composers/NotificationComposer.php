@@ -5,6 +5,7 @@ namespace App\View\Composers;
 use App\Models\Branch;
 use App\Models\Business;
 use App\Models\Followup;
+use App\Models\Lead;
 use App\Models\Meeting;
 use App\Models\ProjectUnit;
 use App\Support\RenewalAlerts;
@@ -78,6 +79,8 @@ class NotificationComposer
             $view->with([
                 'dueFollowupsForBell' => collect(),
                 'dueFollowupsCount' => 0,
+                'pendingLeadsForBell' => collect(),
+                'pendingLeadsCount' => 0,
                 'dueCommitmentsForBell' => collect(),
                 'dueCommitmentsCount' => 0,
                 'dueMeetingsForBell' => collect(),
@@ -87,10 +90,15 @@ class NotificationComposer
             return;
         }
 
-        $due = Followup::with('customer')
+        $due = Followup::with(['customer', 'lead'])
             ->where('status', 'pending')
             ->where('due_at', '<=', now())
             ->orderBy('due_at')
+            ->limit(8)
+            ->get();
+
+        $pendingLeads = Lead::where('status', Lead::STATUS_PENDING)
+            ->latest()
             ->limit(8)
             ->get();
 
@@ -114,6 +122,8 @@ class NotificationComposer
         $view->with([
             'dueFollowupsForBell' => $due,
             'dueFollowupsCount' => Followup::where('status', 'pending')->where('due_at', '<=', now())->count(),
+            'pendingLeadsForBell' => $pendingLeads,
+            'pendingLeadsCount' => Lead::where('status', Lead::STATUS_PENDING)->count(),
             'dueCommitmentsForBell' => $overdueCommitments,
             'dueCommitmentsCount' => ProjectUnit::whereNull('archived_at')->whereNotNull('commitment_date')->where('commitment_date', '<=', now()->toDateString())->count(),
             'dueMeetingsForBell' => $dueMeetings,

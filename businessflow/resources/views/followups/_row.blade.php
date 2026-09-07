@@ -2,7 +2,10 @@
     <div class="min-w-0">
         <div class="flex items-center gap-2 flex-wrap">
             <span class="text-xs px-2 py-0.5 rounded font-medium bg-accent-100 dark:bg-slate-700 text-accent-700">{{ $followup->categoryLabel() }}</span>
-            <a href="{{ route('customers.show', $followup->customer) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:underline">{{ $followup->customer->name }}</a>
+            <a href="{{ $followup->customer_id ? route('customers.show', $followup->customer_id) : route('leads.show', $followup->lead_id) }}" class="font-medium text-gray-900 dark:text-gray-100 hover:underline">{{ $followup->contact()->name }}</a>
+            @if ($followup->lead_id)
+                <span class="text-xs px-2 py-0.5 rounded font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">{{ __('Lead') }}</span>
+            @endif
             @if ($followup->project)
                 <span class="text-xs text-gray-400">· {{ $followup->project->name }}</span>
             @endif

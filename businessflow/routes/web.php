@@ -21,6 +21,7 @@ use App\Http\Controllers\FollowupController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\InvestorController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanDocumentController;
@@ -77,6 +78,13 @@ Route::get('/pd/{token}/photos/{media}', [PropertyDealShareController::class, 'p
 // contact plus every property their business has open for sale.
 Route::get('/u/{token}', [PublicProfileController::class, 'show'])->name('public-profile.show');
 Route::get('/u/{token}/photo', [PublicProfileController::class, 'photo'])->name('public-profile.photo');
+
+// The lead-capture form a QR code (or a direct WhatsApp link) points a
+// prospect at — one token per business, scoped by App\Support\Modules'
+// leads module rather than per-record, since the record doesn't exist
+// yet. Throttled since it's a public POST endpoint with no login.
+Route::get('/l/{token}', [\App\Http\Controllers\Public\LeadFormController::class, 'show'])->name('leads.public.show');
+Route::post('/l/{token}', [\App\Http\Controllers\Public\LeadFormController::class, 'store'])->name('leads.public.store')->middleware('throttle:5,1');
 
 Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
@@ -281,6 +289,14 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'module:followups'])->group(function () {
+    Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
+    Route::get('/leads/{lead}', [LeadController::class, 'show'])->name('leads.show');
+    Route::put('/leads/{lead}', [LeadController::class, 'update'])->name('leads.update');
+    Route::post('/leads/{lead}/approve', [LeadController::class, 'approve'])->name('leads.approve');
+    Route::post('/leads/{lead}/reject', [LeadController::class, 'reject'])->name('leads.reject');
+    Route::post('/leads/{lead}/convert', [LeadController::class, 'convert'])->name('leads.convert');
+    Route::delete('/leads/{lead}', [LeadController::class, 'destroy'])->name('leads.destroy');
+
     Route::get('/followups', [FollowupController::class, 'index'])->name('followups.index');
     Route::get('/followups/create', [FollowupController::class, 'create'])->name('followups.create');
     Route::post('/followups', [FollowupController::class, 'store'])->name('followups.store');

@@ -14,6 +14,7 @@ class Followup extends Model
     protected $fillable = [
         'business_id',
         'customer_id',
+        'lead_id',
         'project_id',
         'note',
         'category',
@@ -45,6 +46,11 @@ class Followup extends Model
         return $this->belongsTo(Customer::class);
     }
 
+    public function lead(): BelongsTo
+    {
+        return $this->belongsTo(Lead::class);
+    }
+
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
@@ -55,9 +61,19 @@ class Followup extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    /**
+     * A follow-up belongs to exactly one of a Customer or a Lead — this
+     * returns whichever one it is, so views don't need to know which.
+     */
+    public function contact(): Customer|Lead|null
+    {
+        return $this->customer ?: $this->lead;
+    }
+
     public function whatsappUrl(): ?string
     {
-        $phone = $this->customer?->phone;
+        $contact = $this->contact();
+        $phone = $contact?->phone;
 
         if (! $phone) {
             return null;
@@ -69,7 +85,7 @@ class Followup extends Model
             $digits = '91'.$digits; // default to India country code for a bare 10-digit number
         }
 
-        $message = "Hi {$this->customer->name}, {$this->note}";
+        $message = "Hi {$contact->name}, {$this->note}";
 
         return 'https://wa.me/'.$digits.'?text='.rawurlencode($message);
     }

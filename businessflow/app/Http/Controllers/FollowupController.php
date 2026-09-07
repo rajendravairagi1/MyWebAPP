@@ -13,7 +13,7 @@ class FollowupController extends Controller
 {
     public function index(): View
     {
-        $followups = Followup::with(['customer', 'project'])
+        $followups = Followup::with(['customer', 'lead', 'project'])
             ->where('status', 'pending')
             ->orderBy('due_at')
             ->get();
@@ -35,7 +35,8 @@ class FollowupController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'customer_id' => ['required', 'exists:customers,id'],
+            'customer_id' => ['required_without:lead_id', 'nullable', 'exists:customers,id'],
+            'lead_id' => ['required_without:customer_id', 'nullable', 'exists:leads,id'],
             'project_id' => ['nullable', 'exists:projects,id'],
             'note' => ['required', 'string', 'max:1000'],
             'category' => ['nullable', 'in:general,installment,registry,site_visit,documentation,other'],
@@ -50,6 +51,10 @@ class FollowupController extends Controller
         unset($data['category_other']);
 
         Followup::create($data + ['owner_id' => auth()->id()]);
+
+        if (! empty($data['lead_id'])) {
+            return redirect()->route('leads.show', $data['lead_id'])->with('status', 'Follow-up scheduled.');
+        }
 
         return redirect()->route('customers.show', $data['customer_id'])->with('status', 'Follow-up scheduled.');
     }

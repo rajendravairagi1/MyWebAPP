@@ -127,6 +127,18 @@
                         </x-sidebar-link>
                     @endif
 
+                    @if (\App\Support\Tenant::can('leads'))
+                        <x-sidebar-link :href="route('leads.index')" :active="request()->routeIs('leads.*')">
+                            <x-slot name="icon">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                            </x-slot>
+                            {{ __('Leads') }}
+                            @if ($pendingLeadsCount > 0)
+                                <span class="inline-flex items-center justify-center h-4 min-w-[1rem] px-1 rounded-full bg-red-600 text-white text-[10px] font-semibold">{{ $pendingLeadsCount }}</span>
+                            @endif
+                        </x-sidebar-link>
+                    @endif
+
                     @if (\App\Support\Tenant::can('customers'))
                         <x-sidebar-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
                             <x-slot name="icon">
@@ -351,7 +363,7 @@
                         <x-slot name="trigger">
                             <button type="button" class="relative text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                                @php $bellCount = $dueFollowupsCount + $dueCommitmentsCount + $dueMeetingsCount + ($subscriptionDaysRemaining !== null ? 1 : 0) + $adminRenewalCount; @endphp
+                                @php $bellCount = $dueFollowupsCount + $pendingLeadsCount + $dueCommitmentsCount + $dueMeetingsCount + ($subscriptionDaysRemaining !== null ? 1 : 0) + $adminRenewalCount; @endphp
                                 @if ($bellCount > 0)
                                     <span class="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full {{ ($subscriptionDaysRemaining !== null || $adminRenewalCount > 0) ? 'bg-amber-500' : 'bg-red-600' }} text-white text-[10px] leading-4 text-center font-semibold">{{ $bellCount }}</span>
                                 @endif
@@ -391,11 +403,25 @@
                             @endif
 
                             <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-slate-700">
+                                {{ __('New leads awaiting approval') }}
+                            </div>
+                            @forelse ($pendingLeadsForBell as $pendingLead)
+                                <a href="{{ route('leads.show', $pendingLead) }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700">
+                                    <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ $pendingLead->name }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $pendingLead->phone }}</div>
+                                    <div class="text-xs text-gray-400">{{ $pendingLead->created_at->diffForHumans() }}</div>
+                                </a>
+                            @empty
+                                <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ __('No new leads right now.') }}</div>
+                            @endforelse
+                            <a href="{{ route('leads.index') }}" class="block px-4 py-2 text-xs text-center text-accent-600 border-t border-gray-100 dark:border-slate-700 hover:underline">{{ __('View all leads') }}</a>
+
+                            <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-t border-b border-gray-100 dark:border-slate-700">
                                 {{ __('Follow-ups due') }}
                             </div>
                             @forelse ($dueFollowupsForBell as $followup)
-                                <a href="{{ route('customers.show', $followup->customer) }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700">
-                                    <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ $followup->customer->name }}</div>
+                                <a href="{{ $followup->customer_id ? route('customers.show', $followup->customer_id) : route('leads.show', $followup->lead_id) }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700">
+                                    <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ $followup->contact()->name }}</div>
                                     <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $followup->note }}</div>
                                     <div class="text-xs {{ $followup->due_at->isPast() ? 'text-red-500' : 'text-gray-400' }}">{{ $followup->due_at->diffForHumans() }}</div>
                                 </a>

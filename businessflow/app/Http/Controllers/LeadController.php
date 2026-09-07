@@ -1,0 +1,101 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Business;
+use App\Models\Customer;
+use App\Models\Lead;
+use App\Support\DocumentQr;
+use App\Support\Tenant;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class LeadController extends Controller
+{
+    public function index(): View
+    {
+        $pending = Lead::where('status', Lead::STATUS_PENDING)->latest()->get();
+
+        $active = Lead::whereNotIn('status', [Lead::STATUS_PENDING, Lead::REJECTED, Lead::LOST])
+            ->whereNull('converted_customer_id')
+            ->latest()
+            ->get();
+
+        $business = Business::find(Tenant::id());
+        $publicUrl = route('leads.public.show', $business->leadFormToken());
+        $qrDataUri = DocumentQr::dataUri($publicUrl, 220);
+
+        return view('leads.index', compact('pending', 'active', 'publicUrl', 'qrDataUri'));
+    }
+
+    public function show(Lead $lead): View
+    {
+        $lead->load(['followups' => fn ($q) => $q->orderByDesc('created_at')]);
+
+        return view('leads.show', compact('lead'));
+    }
+
+    public function update(Request $request, Lead $lead): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'status' => ['required', 'in:'.implode(',', array_merge(array_keys(Lead::STAGES), [Lead::LOST]))],
+            'notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $lead->update($data);
+
+        return back()->with('status', 'Lead updated.');
+    }
+
+    public function approve(Lead $lead): RedirectResponse
+    {
+        if (! $lead->isPending()) {
+            return back();
+        }
+
+        $lead->update(['status' => 'new', 'approved_at' => now()]);
+
+        return back()->with('status', 'Lead approved — it now shows in your Leads list.');
+    }
+
+    public function reject(Lead $lead): RedirectResponse
+    {
+        $lead->update(['status' => Lead::REJECTED]);
+
+        return redirect()->route('leads.index')->with('status', 'Lead rejected.');
+    }
+
+    public function convert(Lead $lead): RedirectResponse
+    {
+        if ($lead->converted_customer_id) {
+            return redirect()->route('customers.show', $lead->converted_customer_id);
+        }
+
+        $customer = Customer::create([
+            'name' => $lead->name,
+            'phone' => $lead->phone,
+            'email' => $lead->email,
+            'notes' => $lead->notes,
+            'source' => 'lead',
+        ]);
+
+        $lead->update([
+            'status' => 'booked',
+            'converted_customer_id' => $customer->id,
+        ]);
+
+        return redirect()->route('customers.show', $customer)
+            ->with('status', 'Lead converted to a customer — add their project/unit below.');
+    }
+
+    public function destroy(Lead $lead): RedirectResponse
+    {
+        $lead->delete();
+
+        return redirect()->route('leads.index')->with('status', 'Lead removed.');
+    }
+}

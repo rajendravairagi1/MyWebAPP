@@ -13,6 +13,7 @@ class Modules
 {
     public const ALL = [
         'projects' => 'Projects',
+        'leads' => 'Leads',
         'customers' => 'Customers',
         'quotations' => 'Quotations',
         'invoices' => 'Invoices',
