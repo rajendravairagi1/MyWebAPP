@@ -12,29 +12,24 @@
                 <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm rounded-md p-3">{{ session('status') }}</div>
             @endif
 
-            {{-- QR + link panel — hand this to a walk-in customer to fill their own details, or send the link directly on WhatsApp. --}}
-            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5" x-data="{ copied: false }">
-                <div class="flex flex-col sm:flex-row items-center gap-5">
-                    @if ($qrDataUri)
-                        <div class="shrink-0 text-center space-y-1.5">
-                            <img src="{{ $qrDataUri }}" alt="{{ __('Lead form QR code') }}" class="h-40 w-40 rounded-lg border border-gray-200 dark:border-slate-700">
-                            <div class="text-[11px] text-gray-400 dark:text-gray-500 break-all max-w-[10rem]">{{ $publicUrl }}</div>
-                        </div>
-                    @endif
+            {{-- QR poster panel — a full branded card (logo, name, QR, link, instructions), like a PhonePe/BHIM QR. --}}
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5" x-data="{ copied: false }" x-init="preloadFile('{{ $posterUrl }}')">
+                <div class="flex flex-col sm:flex-row items-start gap-5">
+                    <img src="{{ $posterUrl }}" alt="{{ __('Lead form QR poster') }}" class="w-full sm:w-56 rounded-lg border border-gray-200 dark:border-slate-700 shrink-0">
                     <div class="min-w-0 flex-1 space-y-3 text-center sm:text-left">
                         <div>
                             <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Your lead-capture QR code') }}</div>
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Show this to a customer, or send them the link — they fill in their own details, and it lands here once you approve it.') }}</p>
                         </div>
                         <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                            <button type="button" x-on:click="shareImageDataUri('{{ $qrDataUri }}', 'lead-qr.png', $el)" class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700">{{ __('Share QR (WhatsApp etc.)') }}</button>
-                            <a href="{{ $qrDataUri }}" download="lead-qr.png" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download QR') }}</a>
+                            <button type="button" x-on:click="shareImageFile('{{ $posterUrl }}', 'lead-qr.png', $el)" class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700">{{ __('Share QR (WhatsApp etc.)') }}</button>
+                            <button type="button" x-on:click="downloadImageFile('{{ $posterUrl }}', 'lead-qr.png', $el)" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download QR') }}</button>
                             <button type="button" x-on:click="navigator.clipboard.writeText('{{ $publicUrl }}'); copied = true; setTimeout(() => copied = false, 2000)" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">
                                 <span x-show="!copied">{{ __('Copy Link') }}</span>
                                 <span x-show="copied" x-cloak>{{ __('Copied!') }}</span>
                             </button>
                         </div>
-                        <p class="text-xs text-gray-400">{{ __('"Share QR" sends the QR code image itself (like PhonePe/BHIM) — the receiver can scan it from the chat. "Copy Link" gives a plain link instead.') }}</p>
+                        <p class="text-xs text-gray-400">{{ __('"Share QR" sends this whole card as one image (like PhonePe/BHIM) — the receiver can scan it from the chat. "Copy Link" gives a plain link instead.') }}</p>
                     </div>
                 </div>
             </div>

@@ -291,6 +291,7 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
 Route::middleware(['auth', 'verified', 'module:leads'])->group(function () {
     Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
     Route::post('/leads', [LeadController::class, 'store'])->name('leads.store');
+    Route::get('/leads/qr-poster.png', [LeadController::class, 'qrPoster'])->name('leads.qr-poster');
     Route::get('/leads/{lead}', [LeadController::class, 'show'])->name('leads.show');
     Route::put('/leads/{lead}', [LeadController::class, 'update'])->name('leads.update');
     Route::post('/leads/{lead}/approve', [LeadController::class, 'approve'])->name('leads.approve');

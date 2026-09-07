@@ -12,8 +12,6 @@ window.Chart = Chart;
 
 window.Alpine = Alpine;
 
-Alpine.start();
-
 // A slow connection or an impatient double-tap on "Record Payment" (or
 // any other submit button) used to fire the same form twice, creating a
 // duplicate entry — the server had no way to tell that apart from two
@@ -111,12 +109,32 @@ window.sharePdfFile = async function (url, filename, buttonEl) {
     }
 };
 
-// Hands the actual QR code image (already sitting on the page as a data:
-// URI, so no network fetch/preload is needed) to the phone's native share
-// sheet — WhatsApp, etc. — the same way PhonePe/BHIM share their QR as an
-// image rather than a text link. Falls back to a plain download if the
-// browser can't share files.
-window.shareImageDataUri = async function (dataUri, filename, buttonEl) {
+// Same preload-then-share pattern as the PDF functions above, generalised
+// to any fetchable file URL (used for the branded QR poster image) — kept
+// as its own small cache/functions rather than reusing pdfPreloadCache so
+// the already-working PDF share path is never touched by this.
+const filePreloadCache = new Map();
+
+function fetchFileBlob(url) {
+    return fetch(url, { credentials: 'same-origin' }).then(function (response) {
+        if (!response.ok) {
+            throw new Error('Failed to fetch file');
+        }
+        return response.blob();
+    });
+}
+
+window.preloadFile = function (url) {
+    if (!filePreloadCache.has(url)) {
+        filePreloadCache.set(url, fetchFileBlob(url));
+    }
+};
+
+// Hands the actual QR poster image to the phone's native share sheet —
+// WhatsApp, etc. — the same way PhonePe/BHIM share their QR as an image
+// rather than a text link. Falls back to a plain download if the browser
+// can't share files.
+window.shareImageFile = async function (url, filename, buttonEl) {
     const originalLabel = buttonEl ? buttonEl.textContent : null;
 
     try {
@@ -125,7 +143,11 @@ window.shareImageDataUri = async function (dataUri, filename, buttonEl) {
             buttonEl.textContent = 'Preparing…';
         }
 
-        const blob = await (await fetch(dataUri)).blob();
+        if (!filePreloadCache.has(url)) {
+            window.preloadFile(url);
+        }
+
+        const blob = await filePreloadCache.get(url);
         const file = new File([blob], filename, { type: blob.type || 'image/png' });
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -133,18 +155,22 @@ window.shareImageDataUri = async function (dataUri, filename, buttonEl) {
             return;
         }
 
+        const objectUrl = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = dataUri;
+        link.href = objectUrl;
         link.download = filename;
         document.body.appendChild(link);
         link.click();
         link.remove();
+        URL.revokeObjectURL(objectUrl);
 
         window.alert('Your browser can\'t attach images directly. The QR code has been downloaded — open WhatsApp and attach it from your Gallery/Downloads.');
     } catch (err) {
         if (err && err.name === 'AbortError') {
             return; // user closed the share sheet
         }
+
+        filePreloadCache.delete(url);
 
         window.alert('Could not share the QR code. Please try "Download QR" instead.');
     } finally {
@@ -154,3 +180,42 @@ window.shareImageDataUri = async function (dataUri, filename, buttonEl) {
         }
     }
 };
+
+window.downloadImageFile = async function (url, filename, buttonEl) {
+    const originalLabel = buttonEl ? buttonEl.textContent : null;
+
+    try {
+        if (buttonEl) {
+            buttonEl.disabled = true;
+            buttonEl.textContent = 'Preparing…';
+        }
+
+        if (!filePreloadCache.has(url)) {
+            window.preloadFile(url);
+        }
+
+        const blob = await filePreloadCache.get(url);
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = objectUrl;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(objectUrl);
+    } catch (err) {
+        filePreloadCache.delete(url);
+        window.alert('Could not download the QR code. Please try again.');
+    } finally {
+        if (buttonEl) {
+            buttonEl.disabled = false;
+            buttonEl.textContent = originalLabel;
+        }
+    }
+};
+
+// Started last, after every window.* helper above is defined — Alpine
+// scans the DOM and runs any x-init handlers synchronously as soon as
+// start() is called, so an x-init referencing e.g. preloadFile() would
+// throw "not defined" if start() ran before that assignment above.
+Alpine.start();

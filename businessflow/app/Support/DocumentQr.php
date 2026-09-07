@@ -31,4 +31,21 @@ class DocumentQr
             return null;
         }
     }
+
+    /**
+     * Raw PNG bytes rather than a data URI — for server-side compositing
+     * (e.g. dropping the QR into a branded poster image via GD) where a
+     * GD image resource is needed rather than an <img src>.
+     */
+    public static function png(string $url, int $size = 130): ?string
+    {
+        try {
+            $qrCode = new QrCode($url, size: $size, margin: 4);
+            $writer = new PngWriter();
+
+            return $writer->write($qrCode)->getString();
+        } catch (\Throwable) {
+            return null;
+        }
+    }
 }

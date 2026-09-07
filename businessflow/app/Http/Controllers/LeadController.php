@@ -6,9 +6,11 @@ use App\Models\Business;
 use App\Models\Customer;
 use App\Models\Lead;
 use App\Support\DocumentQr;
+use App\Support\LeadQrPoster;
 use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 
 class LeadController extends Controller
@@ -24,9 +26,32 @@ class LeadController extends Controller
 
         $business = Business::find(Tenant::id());
         $publicUrl = route('leads.public.show', $business->leadFormToken());
-        $qrDataUri = DocumentQr::dataUri($publicUrl, 220);
+        $posterUrl = route('leads.qr-poster');
 
-        return view('leads.index', compact('pending', 'active', 'publicUrl', 'qrDataUri'));
+        return view('leads.index', compact('pending', 'active', 'publicUrl', 'posterUrl'));
+    }
+
+    /**
+     * The full branded, shareable "poster" image — logo, business name/
+     * contact, the QR itself, app branding, the plain link, and a short
+     * instruction — all composited server-side into one PNG (like a
+     * PhonePe/BHIM QR card) so sharing or downloading it hands over one
+     * complete image rather than a bare QR code.
+     */
+    public function qrPoster(): Response
+    {
+        $business = Business::find(Tenant::id());
+        $publicUrl = route('leads.public.show', $business->leadFormToken());
+
+        $png = LeadQrPoster::build($business, $publicUrl)
+            ?? DocumentQr::png($publicUrl, 460);
+
+        abort_if(! $png, 404);
+
+        return response($png, 200, [
+            'Content-Type' => 'image/png',
+            'Cache-Control' => 'no-store',
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
