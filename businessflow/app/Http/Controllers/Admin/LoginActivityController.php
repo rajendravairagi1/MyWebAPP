@@ -22,6 +22,9 @@ class LoginActivityController extends Controller
         $search = trim((string) $request->query('search'));
 
         $logs = LoginLog::query()
+            // The platform admin's own logins (this account) are noise
+            // here — this page is for watching other people's activity.
+            ->where('user_email', '!=', config('platform.admin_email'))
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('user_name', 'like', "%{$search}%")
