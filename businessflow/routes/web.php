@@ -288,8 +288,9 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::delete('/project-units/{unit}/materials/{entry}', [MaterialEntryController::class, 'destroy'])->name('material-entries.destroy');
 });
 
-Route::middleware(['auth', 'verified', 'module:followups'])->group(function () {
+Route::middleware(['auth', 'verified', 'module:leads'])->group(function () {
     Route::get('/leads', [LeadController::class, 'index'])->name('leads.index');
+    Route::post('/leads', [LeadController::class, 'store'])->name('leads.store');
     Route::get('/leads/{lead}', [LeadController::class, 'show'])->name('leads.show');
     Route::put('/leads/{lead}', [LeadController::class, 'update'])->name('leads.update');
     Route::post('/leads/{lead}/approve', [LeadController::class, 'approve'])->name('leads.approve');

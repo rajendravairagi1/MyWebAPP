@@ -47,10 +47,13 @@
                     <form method="POST" action="{{ route('leads.public.store', $token) }}" class="space-y-4">
                         @csrf
 
-                        {{-- Honeypot — left visually hidden and off the tab order; a genuine visitor never touches it. --}}
-                        <div class="absolute -left-[9999px]" aria-hidden="true">
-                            <label for="website">Website</label>
-                            <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                        {{-- Honeypot — hidden with inline styles (never depends on the CSS build), off the tab
+                             order, and named/id'd away from anything browser autofill recognises (e.g. "website"
+                             or "url" can get silently filled in by saved-address autofill even off-screen). A
+                             genuine visitor never sees or fills this. --}}
+                        <div style="position:absolute; left:-9999px; top:-9999px; width:1px; height:1px; overflow:hidden;" aria-hidden="true">
+                            <label for="hp_check_1">Leave blank</label>
+                            <input type="text" id="hp_check_1" name="hp_check_1" tabindex="-1" autocomplete="off">
                         </div>
 
                         <div>

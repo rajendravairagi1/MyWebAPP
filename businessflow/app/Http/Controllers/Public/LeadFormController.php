@@ -34,7 +34,7 @@ class LeadFormController extends Controller
         // off-screen in the form view); a script filling every field blind
         // will. Silently pretend success rather than telling a bot it
         // tripped a filter.
-        if (filled($request->input('website'))) {
+        if (filled($request->input('hp_check_1'))) {
             return redirect()
                 ->route('leads.public.show', $token)
                 ->with('leadSubmitted', true);

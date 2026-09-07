@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Leads') }}</h2>
+        <div class="flex items-center justify-between gap-4">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Leads') }}</h2>
+            <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-lead')" class="inline-flex items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-medium rounded-md hover:bg-accent-700">{{ __('+ Add Lead') }}</button>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -87,4 +90,34 @@
             </div>
         </div>
     </div>
+
+    <x-modal name="add-lead" :show="$errors->has('name') || $errors->has('phone')">
+        <form method="POST" action="{{ route('leads.store') }}" class="p-6 space-y-4">
+            @csrf
+            <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add Lead') }}</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('For a customer you spoke to directly — this goes straight into your active Leads, no approval needed.') }}</p>
+
+            <div>
+                <x-input-label for="manual_name" :value="__('Name')" />
+                <x-text-input id="manual_name" name="name" type="text" class="mt-1 block w-full" required value="{{ old('name') }}" />
+            </div>
+            <div>
+                <x-input-label for="manual_phone" :value="__('Phone')" />
+                <x-text-input id="manual_phone" name="phone" type="text" class="mt-1 block w-full" required value="{{ old('phone') }}" />
+            </div>
+            <div>
+                <x-input-label for="manual_email" :value="__('Email (optional)')" />
+                <x-text-input id="manual_email" name="email" type="email" class="mt-1 block w-full" value="{{ old('email') }}" />
+            </div>
+            <div>
+                <x-input-label for="manual_message" :value="__('Note (optional)')" />
+                <textarea id="manual_message" name="message" rows="2" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('message') }}</textarea>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
+                <x-primary-button>{{ __('Add Lead') }}</x-primary-button>
+            </div>
+        </form>
+    </x-modal>
 </x-app-layout>

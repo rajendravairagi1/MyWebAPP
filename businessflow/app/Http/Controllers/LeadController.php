@@ -29,6 +29,30 @@ class LeadController extends Controller
         return view('leads.index', compact('pending', 'active', 'publicUrl', 'qrDataUri'));
     }
 
+    public function store(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:30'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'message' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        // Entered directly by staff, so it skips the pending-approval queue
+        // that public QR/link submissions go through.
+        $lead = Lead::create([
+            'name' => $data['name'],
+            'phone' => $data['phone'],
+            'email' => $data['email'] ?? null,
+            'message' => $data['message'] ?? null,
+            'source' => 'manual',
+            'status' => 'new',
+            'approved_at' => now(),
+        ]);
+
+        return redirect()->route('leads.show', $lead)->with('status', 'Lead added.');
+    }
+
     public function show(Lead $lead): View
     {
         $lead->load(['followups' => fn ($q) => $q->orderByDesc('created_at')]);
