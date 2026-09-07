@@ -13,7 +13,7 @@
             @endif
 
             {{-- QR poster panel — a full branded card (logo, name, QR, link, instructions), like a PhonePe/BHIM QR. --}}
-            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5" x-data="{ copied: false }" x-init="preloadFile('{{ $posterUrl }}')">
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5" x-data="{ copied: false }">
                 <div class="flex flex-col sm:flex-row items-start gap-5">
                     <img src="{{ $posterUrl }}" alt="{{ __('Lead form QR poster') }}" class="w-full sm:w-56 rounded-lg border border-gray-200 dark:border-slate-700 shrink-0">
                     <div class="min-w-0 flex-1 space-y-3 text-center sm:text-left">
@@ -22,8 +22,8 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Show this to a customer, or send them the link — they fill in their own details, and it lands here once you approve it.') }}</p>
                         </div>
                         <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                            <button type="button" x-on:click="shareImageFile('{{ $posterUrl }}', 'lead-qr.png', $el)" class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700">{{ __('Share QR (WhatsApp etc.)') }}</button>
-                            <button type="button" x-on:click="downloadImageFile('{{ $posterUrl }}', 'lead-qr.png', $el)" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download QR') }}</button>
+                            <button type="button" id="lead-qr-share-btn" class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700">{{ __('Share QR (WhatsApp etc.)') }}</button>
+                            <button type="button" id="lead-qr-download-btn" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download QR') }}</button>
                             <button type="button" x-on:click="navigator.clipboard.writeText('{{ $publicUrl }}'); copied = true; setTimeout(() => copied = false, 2000)" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">
                                 <span x-show="!copied">{{ __('Copy Link') }}</span>
                                 <span x-show="copied" x-cloak>{{ __('Copied!') }}</span>
@@ -33,6 +33,49 @@
                     </div>
                 </div>
             </div>
+
+            <script>
+                // Deliberately plain DOM wiring (not Alpine's x-on:click) for
+                // these two buttons: if the JS bundle is ever stale (an old
+                // cached tab, a deploy that didn't fully take), Alpine's
+                // click-expression evaluator swallows the resulting
+                // "not defined" error into the console — the button looks
+                // completely dead with nothing on screen to explain why.
+                // This runs after the module script (which defines
+                // shareImageFile/downloadImageFile/preloadFile) has executed,
+                // and falls back to a visible, explicit message instead of
+                // silent failure if those still aren't there.
+                document.addEventListener('DOMContentLoaded', function () {
+                    var posterUrl = @json($posterUrl);
+                    var refreshMsg = @json(__('This page loaded an old version of the app. Please close this tab, reopen the Leads page, and try again.'));
+
+                    if (typeof preloadFile === 'function') {
+                        preloadFile(posterUrl);
+                    }
+
+                    var shareBtn = document.getElementById('lead-qr-share-btn');
+                    if (shareBtn) {
+                        shareBtn.addEventListener('click', function () {
+                            if (typeof shareImageFile === 'function') {
+                                shareImageFile(posterUrl, 'lead-qr.png', shareBtn);
+                            } else {
+                                window.alert(refreshMsg);
+                            }
+                        });
+                    }
+
+                    var downloadBtn = document.getElementById('lead-qr-download-btn');
+                    if (downloadBtn) {
+                        downloadBtn.addEventListener('click', function () {
+                            if (typeof downloadImageFile === 'function') {
+                                downloadImageFile(posterUrl, 'lead-qr.png', downloadBtn);
+                            } else {
+                                window.alert(refreshMsg);
+                            }
+                        });
+                    }
+                });
+            </script>
 
             {{-- Pending approval — came in through the form, not reviewed yet. --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
