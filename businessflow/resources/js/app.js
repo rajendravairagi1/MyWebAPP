@@ -32,6 +32,33 @@ document.addEventListener('submit', function (event) {
     });
 });
 
+// navigator.share() only works during the short "user activation" window
+// right after a tap — on a slow connection, the PDF (dompdf render + QR
+// generation) can take longer than that window to fetch, so by the time
+// the fetch finished the browser no longer treats it as a real user
+// gesture and silently rejects the share, landing in the catch block
+// below ("Could not prepare the PDF"). preloadPdf() kicks the same fetch
+// off in the background as soon as the page with the button loads, so by
+// the time the user actually taps "Send on WhatsApp" the PDF is usually
+// already sitting in memory and the share happens immediately — well
+// inside the activation window — instead of only starting the fetch on tap.
+const pdfPreloadCache = new Map();
+
+function fetchPdfBlob(url) {
+    return fetch(url, { credentials: 'same-origin' }).then(function (response) {
+        if (!response.ok) {
+            throw new Error('Failed to fetch PDF');
+        }
+        return response.blob();
+    });
+}
+
+window.preloadPdf = function (url) {
+    if (!pdfPreloadCache.has(url)) {
+        pdfPreloadCache.set(url, fetchPdfBlob(url));
+    }
+};
+
 // Hands the actual PDF file to the phone's native share sheet (WhatsApp,
 // email, etc. all appear there) instead of sending a link or plain text.
 // Falls back to a normal download if the browser can't share files.
@@ -44,12 +71,11 @@ window.sharePdfFile = async function (url, filename, buttonEl) {
             buttonEl.textContent = 'Preparing PDF…';
         }
 
-        const response = await fetch(url, { credentials: 'same-origin' });
-        if (!response.ok) {
-            throw new Error('Failed to fetch PDF');
+        if (!pdfPreloadCache.has(url)) {
+            window.preloadPdf(url);
         }
 
-        const blob = await response.blob();
+        const blob = await pdfPreloadCache.get(url);
         const file = new File([blob], filename, { type: 'application/pdf' });
 
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -71,6 +97,10 @@ window.sharePdfFile = async function (url, filename, buttonEl) {
         if (err && err.name === 'AbortError') {
             return; // user closed the share sheet
         }
+
+        // The cached fetch (or its failure) is done with — let a retry
+        // attempt a fresh one instead of replaying the same rejection.
+        pdfPreloadCache.delete(url);
 
         window.alert('Could not prepare the PDF. Please try "Download PDF" instead.');
     } finally {
