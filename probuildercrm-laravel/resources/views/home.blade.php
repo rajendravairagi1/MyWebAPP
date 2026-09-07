@@ -86,6 +86,25 @@
     </div>
 </section>
 
+<section class="section-tight">
+    <div class="container">
+        <div class="pill-row">
+            @foreach ([
+                ['label' => 'Project & Unit Tracking', 'color' => '#3b82f6'],
+                ['label' => 'WhatsApp Payment Reminders', 'color' => '#25d366'],
+                ['label' => 'Broker Commissions', 'color' => '#8b5cf6'],
+                ['label' => 'Bank Loan Disbursements', 'color' => '#f97316'],
+                ['label' => 'Auto-Generated Invoices', 'color' => '#10b981'],
+                ['label' => 'Multi-Branch Rollups', 'color' => '#3b82f6'],
+                ['label' => 'Shareable Property Brochures', 'color' => '#8b5cf6'],
+                ['label' => 'Mobile-Ready, No App Needed', 'color' => '#f97316'],
+            ] as $pill)
+                <span class="pill"><span class="pill-dot" style="background: {{ $pill['color'] }};"></span>{{ $pill['label'] }}</span>
+            @endforeach
+        </div>
+    </div>
+</section>
+
 <section class="section">
     <div class="container">
         <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
@@ -130,9 +149,10 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
-            @foreach (config('features.core') as $feature)
+            @php $iconColors = ['feature-icon-blue', 'feature-icon-orange', 'feature-icon-violet', 'feature-icon-green']; @endphp
+            @foreach (config('features.core') as $i => $feature)
                 <div class="card" style="display: flex; gap: 16px;">
-                    <span class="feature-icon">@include('partials.icon', ['name' => $feature['icon']])</span>
+                    <span class="feature-icon {{ $iconColors[$i % 4] }}">@include('partials.icon', ['name' => $feature['icon']])</span>
                     <div>
                         <h3 style="margin-bottom: 8px;">{{ $feature['title'] }}</h3>
                         <p style="color: var(--color-ink-soft);">{{ $feature['description'] }}</p>
@@ -146,13 +166,47 @@
 <section class="section" style="background: var(--color-bg-soft);">
     <div class="container">
         <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
+            <span class="tag">Reach customers instantly</span>
+            <h2 style="margin-top: 12px;">Payment reminders and invoices, sent on WhatsApp automatically</h2>
+            <p class="body-lg" style="margin-top: 12px;">No more chasing customers by phone. Pro Builder CRM sends the message for you — and shares a ready-to-view PDF in one tap.</p>
+        </div>
+
+        <div class="whatsapp-mockup-grid">
+            <div class="whatsapp-mockup-card">
+                <div class="whatsapp-mockup-header">
+                    <span class="whatsapp-mockup-icon">@include('partials.icon', ['name' => 'bell', 'size' => 18])</span>
+                    <strong>Automatic Payment Reminder</strong>
+                </div>
+                <div class="whatsapp-bubble">
+                    Hi Rajesh, this is a reminder that ₹1,50,000 is due for your unit A-102 at Ramnagar Amrapali. Reply here if you have any questions.
+                    <span class="whatsapp-bubble-time">Sent automatically · 10:02 AM ✓✓</span>
+                </div>
+            </div>
+
+            <div class="whatsapp-mockup-card">
+                <div class="whatsapp-mockup-header">
+                    <span class="whatsapp-mockup-icon">@include('partials.icon', ['name' => 'file-text', 'size' => 18])</span>
+                    <strong>Invoice Shared, One Tap</strong>
+                </div>
+                <div class="whatsapp-bubble">
+                    Your payment of ₹40,000 has been received. Here's your receipt — INV-00009.pdf
+                    <span class="whatsapp-bubble-time">Sent from Pro Builder CRM · 6:14 PM ✓✓</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
             <span class="tag">Built for the whole team</span>
             <h2 style="margin-top: 12px;">Not just for the owner</h2>
         </div>
         <div class="grid-3">
-            @foreach (config('features.team') as $feature)
+            @foreach (config('features.team') as $i => $feature)
                 <div class="card">
-                    <span class="feature-icon" style="margin-bottom: 14px;">@include('partials.icon', ['name' => $feature['icon']])</span>
+                    <span class="feature-icon {{ $iconColors[$i % 4] }}" style="margin-bottom: 14px;">@include('partials.icon', ['name' => $feature['icon']])</span>
                     <h3 style="font-size: 1.1rem; margin-bottom: 8px;">{{ $feature['title'] }}</h3>
                     <p style="color: var(--color-ink-soft); font-size: 0.95rem;">{{ $feature['description'] }}</p>
                 </div>
@@ -178,13 +232,109 @@
     </div>
 </section>
 
-<section class="section-tight" style="text-align: center;">
+<section class="section" style="background: var(--color-bg-soft);">
     <div class="container">
-        <p style="color: var(--color-ink-soft); font-weight: 600;">Trusted by builders in</p>
-        <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 12px; font-weight: 700; color: var(--color-ink);">
-            @foreach (config('site.regions') as $region)
-                <span>{{ $region }}</span>
+        <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
+            <span class="tag">Get started</span>
+            <h2 style="margin-top: 12px;">Live with your first project in minutes</h2>
+        </div>
+
+        <div class="grid-2" style="align-items: center;">
+            <div class="steps-list">
+                <div class="step-item">
+                    <span class="step-number">@include('partials.icon', ['name' => 'user-plus', 'size' => 18])</span>
+                    <div>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Create your account</h3>
+                        <p style="color: var(--color-ink-soft); font-size: 0.95rem;">Sign up and set your business name, currency and branding — no lengthy onboarding call required.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">@include('partials.icon', ['name' => 'layout-grid', 'size' => 18])</span>
+                    <div>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Add your first project &amp; units</h3>
+                        <p style="color: var(--color-ink-soft); font-size: 0.95rem;">Bring in your existing projects, units and customer bookings — or start fresh with a new one.</p>
+                    </div>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">@include('partials.icon', ['name' => 'rocket', 'size' => 18])</span>
+                    <div>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Start recording payments</h3>
+                        <p style="color: var(--color-ink-soft); font-size: 0.95rem;">Every installment, receipt and reminder from here on is automatic. Most builders are live the same day.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-carousel-viewport" style="border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg);">
+                <img src="{{ asset('screenshots/dashboard.png') }}" alt="Pro Builder CRM dashboard, ready right after setup" style="width: 100%; display: block;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
+            <span class="tag">Trusted by builders</span>
+            <h2 style="margin-top: 12px;">What builders say</h2>
+        </div>
+
+        <div class="grid-3">
+            @foreach ([
+                ['quote' => 'I used to spend a whole evening every week matching payments to customers in Excel. Now every receipt and reminder is automatic — I check the dashboard for two minutes and I know exactly where every project stands.', 'role' => 'Real Estate Builder', 'city' => 'Indore'],
+                ['quote' => 'Loan disbursements from the bank used to be the most confusing part of our books. Pro Builder CRM keeps it all tied to the right unit and customer, so our accountant isn\'t chasing us for statements anymore.', 'role' => 'Construction Contractor', 'city' => 'Raipur'],
+                ['quote' => 'My brokers can see their own commission and nothing else. My supervisor logs payments from site visits on his phone. Everyone has exactly the access they need, nothing more.', 'role' => 'Property Developer', 'city' => 'Bhopal'],
+            ] as $t)
+                <div class="card testimonial-card">
+                    <div class="testimonial-stars">
+                        @for ($s = 0; $s < 5; $s++)@include('partials.icon', ['name' => 'star', 'size' => 15])@endfor
+                    </div>
+                    <p class="testimonial-quote">&ldquo;{{ $t['quote'] }}&rdquo;</p>
+                    <div class="testimonial-author">
+                        <span class="testimonial-avatar">{{ substr($t['role'], 0, 1) }}</span>
+                        <div>
+                            <div class="testimonial-name">{{ $t['role'] }}</div>
+                            <div class="testimonial-role">{{ $t['city'] }}, India</div>
+                        </div>
+                    </div>
+                </div>
             @endforeach
+        </div>
+
+        <div style="text-align: center; margin-top: var(--space-xl);">
+            <p style="color: var(--color-ink-soft); font-weight: 600; margin-bottom: 12px;">Trusted by builders in</p>
+            <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; font-weight: 700; color: var(--color-ink);">
+                @foreach (config('site.regions') as $region)
+                    <span>{{ $region }}</span>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="background: var(--color-bg-soft);">
+    <div class="container" style="max-width: 760px;">
+        <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
+            <span class="tag">Questions</span>
+            <h2 style="margin-top: 12px;">Frequently asked questions</h2>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;" x-data="{ open: 0 }">
+            @foreach (array_slice(config('faqs'), 0, 4) as $index => $faq)
+                <div class="card faq-item">
+                    <button type="button" class="faq-question" @click="open = open === {{ $index }} ? -1 : {{ $index }}">
+                        {{ $faq['question'] }}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             class="faq-chevron" :class="{ open: open === {{ $index }} }">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div class="faq-answer" x-show="open === {{ $index }}" x-cloak>{{ $faq['answer'] }}</div>
+                </div>
+            @endforeach
+        </div>
+
+        <div style="text-align: center; margin-top: var(--space-lg);">
+            <a href="{{ route('faq') }}" class="btn btn-secondary">See all FAQs</a>
         </div>
     </div>
 </section>

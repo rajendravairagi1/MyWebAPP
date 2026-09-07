@@ -938,3 +938,190 @@ h3 {
   font-size: 0.8rem;
   cursor: pointer;
 }
+
+/* ---- Feature pill strip ---- */
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--white);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.pill-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ---- Colored feature-icon variants (cycled across feature cards) ---- */
+.feature-icon-blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+.feature-icon-orange { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+.feature-icon-violet { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+.feature-icon-green { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+
+/* ---- WhatsApp message mockup cards ---- */
+.whatsapp-mockup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-lg);
+}
+
+@media (max-width: 860px) {
+  .whatsapp-mockup-grid { grid-template-columns: 1fr; }
+}
+
+.whatsapp-mockup-card {
+  background: var(--color-bg-soft);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.whatsapp-mockup-card .whatsapp-mockup-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--space-md);
+}
+
+.whatsapp-mockup-card .whatsapp-mockup-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.whatsapp-bubble {
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  border-top-left-radius: 2px;
+  padding: 14px 16px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--color-ink);
+  box-shadow: var(--shadow-sm);
+}
+
+.whatsapp-bubble + .whatsapp-bubble {
+  margin-top: 10px;
+}
+
+.whatsapp-bubble-time {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  color: var(--color-ink-soft);
+  text-align: right;
+}
+
+/* ---- Numbered steps ---- */
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  position: relative;
+}
+
+.steps-list::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: 40px;
+  bottom: 40px;
+  width: 2px;
+  background: var(--color-border);
+}
+
+.step-item {
+  display: flex;
+  gap: 18px;
+  position: relative;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+/* ---- Testimonials ---- */
+.testimonial-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.testimonial-stars {
+  display: flex;
+  gap: 2px;
+  color: #f59e0b;
+}
+
+.testimonial-stars svg {
+  fill: currentColor;
+}
+
+.testimonial-quote {
+  color: var(--color-ink-soft);
+  font-size: 0.95rem;
+  flex-grow: 1;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.testimonial-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.testimonial-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.testimonial-role {
+  font-size: 0.8rem;
+  color: var(--color-ink-soft);
+}
