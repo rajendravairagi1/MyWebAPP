@@ -60,12 +60,16 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here you may specify the default timezone for your application, which
-    | will be used by the PHP date and date-time functions. The timezone
-    | is set to "UTC" by default as it is suitable for most use cases.
+    | will be used by the PHP date and date-time functions. Every builder
+    | this app serves operates in India, so every timestamp shown anywhere
+    | (login activity, follow-up due dates, invoice dates, "created X ago"
+    | labels, etc.) should read in India Standard Time rather than the
+    | UTC default — this is what now()/created_at/etc. are stored and
+    | displayed in app-wide.
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Kolkata',
 
     /*
     |--------------------------------------------------------------------------
