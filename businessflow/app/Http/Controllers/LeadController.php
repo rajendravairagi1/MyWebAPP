@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\Customer;
+use App\Models\Followup;
 use App\Models\Lead;
 use App\Support\DocumentQr;
 use App\Support\LeadQrPoster;
@@ -28,7 +29,17 @@ class LeadController extends Controller
         $publicUrl = $business->publicLeadUrl();
         $posterUrl = route('leads.qr-poster');
 
-        return view('leads.index', compact('pending', 'active', 'publicUrl', 'posterUrl'));
+        // At-a-glance counts for the stat row — every lead ever created
+        // here, how many still need a follow-up, and how many have gone
+        // all the way to a booked Customer.
+        $totalLeads = Lead::count();
+        $followupsDue = Followup::whereNotNull('lead_id')->where('status', 'pending')->count();
+        $convertedCount = Lead::whereNotNull('converted_customer_id')->count();
+
+        return view('leads.index', compact(
+            'pending', 'active', 'publicUrl', 'posterUrl',
+            'totalLeads', 'followupsDue', 'convertedCount'
+        ));
     }
 
     /**

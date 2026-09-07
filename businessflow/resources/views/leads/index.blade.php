@@ -1,9 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between gap-4">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Leads') }}</h2>
-            <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-lead')" class="inline-flex items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-medium rounded-md hover:bg-accent-700">{{ __('+ Add Lead') }}</button>
-        </div>
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-100 leading-tight">{{ __('Leads') }}</h2>
     </x-slot>
 
     <div class="py-12">
@@ -11,6 +8,29 @@
             @if (session('status'))
                 <div class="mb-6 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm rounded-md p-3">{{ session('status') }}</div>
             @endif
+
+            <div class="flex items-center justify-end mb-4">
+                <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-lead')" class="inline-flex items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-medium rounded-md hover:bg-accent-700">{{ __('+ Add Lead') }}</button>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Total Leads') }}</div>
+                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $totalLeads }}</div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Awaiting Approval') }}</div>
+                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $pending->count() }}</div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Follow-ups Due') }}</div>
+                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $followupsDue }}</div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                    <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ __('Converted to Customer') }}</div>
+                    <div class="mt-1 text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ $convertedCount }}</div>
+                </div>
+            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 <div class="lg:col-span-2 lg:order-1 space-y-6">
