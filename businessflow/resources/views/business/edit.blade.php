@@ -48,6 +48,38 @@
                 {{ __('This is what shows up on your Invoices, Quotations, and Statements — your logo, name, phone, email, address, and website.') }}
             </p>
 
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5 space-y-4" x-data="{ copied: false }">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ __('Public Link') }}</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ __('The link customers use to fill in their own details from your Leads QR code — recognisable and yours, instead of a random code.') }}</p>
+                </div>
+
+                <div class="flex items-center gap-2 text-sm bg-gray-50 dark:bg-slate-900/40 rounded-md px-3 py-2">
+                    <span class="text-gray-500 dark:text-gray-400 truncate">{{ rtrim(url('/'), '/') }}/<span class="font-medium text-gray-900 dark:text-gray-100">{{ $business->leadFormSlug() }}</span>/QRcode</span>
+                    <button type="button" x-on:click="navigator.clipboard.writeText('{{ route('leads.public.show-slug', $business->leadFormSlug()) }}'); copied = true; setTimeout(() => copied = false, 2000)" class="ml-auto text-xs text-accent-600 hover:underline shrink-0">
+                        <span x-show="!copied">{{ __('Copy') }}</span>
+                        <span x-show="copied" x-cloak>{{ __('Copied!') }}</span>
+                    </button>
+                </div>
+
+                <form method="POST" action="{{ route('business.lead-slug') }}" class="flex items-end gap-2">
+                    @csrf
+                    @method('PUT')
+                    <div class="flex-1 min-w-0">
+                        <x-input-label for="lead_slug" :value="__('Change it (if available)')" />
+                        <div class="mt-1 flex items-center gap-1.5 text-sm">
+                            <span class="text-gray-400 dark:text-gray-500 shrink-0 truncate max-w-[35%]">{{ rtrim(url('/'), '/') }}/</span>
+                            <input type="text" id="lead_slug" name="lead_slug" value="{{ old('lead_slug', $business->leadFormSlug()) }}"
+                                class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 text-sm" placeholder="sharma-builders">
+                            <span class="text-gray-400 dark:text-gray-500 shrink-0">/QRcode</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">{{ __('Lowercase letters, numbers, and hyphens only. Saving fails if someone else already has it.') }}</p>
+                        <x-input-error :messages="$errors->get('lead_slug')" class="mt-2" />
+                    </div>
+                    <x-primary-button>{{ __('Save') }}</x-primary-button>
+                </form>
+            </div>
+
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                 <form method="POST" action="{{ route('business.update') }}" enctype="multipart/form-data" class="space-y-4">
                     @csrf

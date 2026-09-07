@@ -25,7 +25,7 @@ class LeadController extends Controller
             ->get();
 
         $business = Business::find(Tenant::id());
-        $publicUrl = route('leads.public.show', $business->leadFormToken());
+        $publicUrl = route('leads.public.show-slug', $business->leadFormSlug());
         $posterUrl = route('leads.qr-poster');
 
         return view('leads.index', compact('pending', 'active', 'publicUrl', 'posterUrl'));
@@ -41,7 +41,7 @@ class LeadController extends Controller
     public function qrPoster(): Response
     {
         $business = Business::find(Tenant::id());
-        $publicUrl = route('leads.public.show', $business->leadFormToken());
+        $publicUrl = route('leads.public.show-slug', $business->leadFormSlug());
 
         $png = LeadQrPoster::build($business, $publicUrl)
             ?? DocumentQr::png($publicUrl, 460);

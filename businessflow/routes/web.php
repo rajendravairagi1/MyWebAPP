@@ -86,6 +86,14 @@ Route::get('/u/{token}/photo', [PublicProfileController::class, 'photo'])->name(
 Route::get('/l/{token}', [\App\Http\Controllers\Public\LeadFormController::class, 'show'])->name('leads.public.show');
 Route::post('/l/{token}', [\App\Http\Controllers\Public\LeadFormController::class, 'store'])->name('leads.public.store')->middleware('throttle:5,1');
 
+// The newer, readable version of the link above — /{slug}/QRcode instead
+// of a random token — so a builder can recognise and hand out their own
+// link (and set it themselves from Business Settings). The old /l/{token}
+// routes above stay live indefinitely so an already-printed/shared link
+// never breaks.
+Route::get('/{slug}/QRcode', [\App\Http\Controllers\Public\LeadFormController::class, 'showBySlug'])->name('leads.public.show-slug')->where('slug', '[a-z0-9\-]+');
+Route::post('/{slug}/QRcode', [\App\Http\Controllers\Public\LeadFormController::class, 'storeBySlug'])->name('leads.public.store-slug')->where('slug', '[a-z0-9\-]+')->middleware('throttle:5,1');
+
 Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
     Route::get('/create', [AdminController::class, 'create'])->name('create');
@@ -379,6 +387,7 @@ Route::middleware(['auth', 'owner'])->group(function () {
     Route::get('/business', [BusinessController::class, 'edit'])->name('business.edit');
     Route::put('/business', [BusinessController::class, 'update'])->name('business.update');
     Route::get('/business/logo', [BusinessController::class, 'logo'])->name('business.logo');
+    Route::put('/business/lead-slug', [BusinessController::class, 'updateLeadSlug'])->name('business.lead-slug');
 });
 
 require __DIR__.'/auth.php';

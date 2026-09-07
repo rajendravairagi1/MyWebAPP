@@ -44,7 +44,7 @@
                         <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-md p-3">{{ $errors->first() }}</div>
                     @endif
 
-                    <form method="POST" action="{{ route('leads.public.store', $token) }}" class="space-y-4">
+                    <form method="POST" action="{{ $formActionUrl }}" class="space-y-4">
                         @csrf
 
                         {{-- Honeypot — hidden with inline styles (never depends on the CSS build), off the tab

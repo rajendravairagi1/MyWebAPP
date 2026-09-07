@@ -9,6 +9,7 @@ use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -65,6 +66,30 @@ class BusinessController extends Controller
         $business->update($data);
 
         return back()->with('status', 'Business details updated.');
+    }
+
+    public function updateLeadSlug(Request $request): RedirectResponse
+    {
+        $business = Business::findOrFail(Tenant::id());
+
+        $data = $request->validate([
+            'lead_slug' => [
+                'required', 'string', 'max:60',
+                'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/',
+                Rule::unique('businesses', 'lead_slug')->ignore($business->id),
+            ],
+        ], [
+            'lead_slug.regex' => 'Lowercase letters, numbers, and hyphens only (e.g. sharma-builders).',
+        ]);
+
+        // Deliberately not mass-assigned via update() — lead_slug isn't in
+        // $fillable (same as lead_token), since it carries its own
+        // uniqueness/format rules above rather than the generic ones any
+        // other update() caller might assume.
+        $business->lead_slug = $data['lead_slug'];
+        $business->save();
+
+        return back()->with('status', 'Public link updated.');
     }
 
     public function logo(): BinaryFileResponse

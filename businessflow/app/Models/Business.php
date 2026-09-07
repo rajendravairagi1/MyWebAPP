@@ -128,6 +128,52 @@ class Business extends Model
     }
 
     /**
+     * The readable slug used in this business's public lead-form link
+     * (e.g. /sharma-builders/QRcode) — a random token works but isn't
+     * something a builder can recognise or hand out with confidence, so
+     * this defaults to a slugified business name (made unique against
+     * every other business) the first time it's needed, and stays stable
+     * after that. A builder can override it from Business Settings via
+     * setLeadFormSlug().
+     */
+    public function leadFormSlug(): string
+    {
+        if (! $this->lead_slug) {
+            $this->lead_slug = self::uniqueLeadSlug($this->name ?: 'builder', $this->id);
+            $this->save();
+        }
+
+        return $this->lead_slug;
+    }
+
+    /**
+     * Generates a unique lead_slug from an arbitrary label, appending
+     * -2, -3, … until it no longer collides with another business (or
+     * this same business's current slug, via $exceptId).
+     */
+    public static function uniqueLeadSlug(string $label, ?int $exceptId = null): string
+    {
+        $base = \Illuminate\Support\Str::slug($label);
+        if ($base === '') {
+            $base = 'builder';
+        }
+
+        $slug = $base;
+        $suffix = 2;
+
+        while (
+            self::where('lead_slug', $slug)
+                ->when($exceptId, fn ($q) => $q->where('id', '!=', $exceptId))
+                ->exists()
+        ) {
+            $slug = $base.'-'.$suffix;
+            $suffix++;
+        }
+
+        return $slug;
+    }
+
+    /**
      * Combined counts/totals for this business, used by the Branch/Company
      * dashboards to show a builder's numbers without switching into it.
      * totalCollected()/totalOutstanding() pull from invoices/payments,
