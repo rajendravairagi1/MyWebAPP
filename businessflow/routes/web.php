@@ -94,6 +94,14 @@ Route::post('/l/{token}', [\App\Http\Controllers\Public\LeadFormController::clas
 Route::get('/{slug}/QRcode', [\App\Http\Controllers\Public\LeadFormController::class, 'showBySlug'])->name('leads.public.show-slug')->where('slug', '[a-z0-9\-]+');
 Route::post('/{slug}/QRcode', [\App\Http\Controllers\Public\LeadFormController::class, 'storeBySlug'])->name('leads.public.store-slug')->where('slug', '[a-z0-9\-]+')->middleware('throttle:5,1');
 
+// A business under a Company gets a 3-segment link instead — /{company-
+// slug}/{business-slug}/QRcode — so the link itself shows which company a
+// branch belongs to. Distinct route from the 2-segment one above purely
+// by segment count, so there's no ambiguity between a solo business's
+// link and a company branch's.
+Route::get('/{companySlug}/{businessSlug}/QRcode', [\App\Http\Controllers\Public\LeadFormController::class, 'showByCompanySlug'])->name('leads.public.show-company-slug')->where(['companySlug' => '[a-z0-9\-]+', 'businessSlug' => '[a-z0-9\-]+']);
+Route::post('/{companySlug}/{businessSlug}/QRcode', [\App\Http\Controllers\Public\LeadFormController::class, 'storeByCompanySlug'])->name('leads.public.store-company-slug')->where(['companySlug' => '[a-z0-9\-]+', 'businessSlug' => '[a-z0-9\-]+'])->middleware('throttle:5,1');
+
 Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('index');
     Route::get('/create', [AdminController::class, 'create'])->name('create');
@@ -143,6 +151,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/company/create', [CompanyController::class, 'create'])->name('company.create');
     Route::post('/company', [CompanyController::class, 'store'])->name('company.store');
     Route::get('/company', [CompanyController::class, 'show'])->name('company.show');
+    Route::put('/company/slug', [CompanyController::class, 'updateSlug'])->name('company.slug');
 
     Route::post('/company/branches', [BranchController::class, 'store'])->name('branches.store');
     Route::get('/branches/{branch}', [BranchController::class, 'show'])->name('branches.show');

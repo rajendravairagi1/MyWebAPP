@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Company;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class CompanyController extends Controller
@@ -73,5 +74,30 @@ class CompanyController extends Controller
         $companyCurrencySymbol = \App\Models\Business::symbolFor($branches->flatMap->businesses->first()?->currency);
 
         return view('company.show', compact('company', 'branches', 'branchStats', 'companyTotals', 'companyCurrencySymbol'));
+    }
+
+    public function updateSlug(Request $request): RedirectResponse
+    {
+        $company = $request->user()->ownedCompany;
+        abort_unless($company, 404);
+
+        $data = $request->validate([
+            'slug' => [
+                'required', 'string', 'max:60',
+                'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/',
+                Rule::unique('companies', 'slug')->ignore($company->id),
+            ],
+        ], [
+            'slug.regex' => 'Lowercase letters, numbers, and hyphens only (e.g. sharma-group).',
+        ]);
+
+        // Not mass-assigned — slug isn't in $fillable (it carries its own
+        // uniqueness/format rules above, not the generic ones any other
+        // update() caller might assume), same reasoning as Business::
+        // lead_slug in BusinessController::updateLeadSlug().
+        $company->slug = $data['slug'];
+        $company->save();
+
+        return back()->with('status', 'Public link updated.');
     }
 }

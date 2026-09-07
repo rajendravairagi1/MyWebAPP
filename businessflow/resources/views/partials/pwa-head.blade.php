@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#4f46e5">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="{{ config('app.name', 'BusinessFlow') }}">
+<meta name="apple-mobile-web-app-title" content="{{ config('app.name', 'Pro Builder CRM') }}">
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js'); });

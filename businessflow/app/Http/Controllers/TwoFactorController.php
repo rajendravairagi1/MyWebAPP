@@ -32,7 +32,7 @@ class TwoFactorController extends Controller
             }
 
             $otpAuthUrl = Totp::getOtpAuthUrl(
-                config('app.name', 'BusinessFlow'),
+                config('app.name', 'Pro Builder CRM'),
                 $user->email,
                 $secret,
             );

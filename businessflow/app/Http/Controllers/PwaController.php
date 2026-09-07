@@ -23,7 +23,7 @@ class PwaController extends Controller
     public function manifest(): JsonResponse
     {
         $business = Tenant::check() ? Business::find(Tenant::id()) : null;
-        $name = $business?->name ?: config('app.name', 'BusinessFlow');
+        $name = $business?->name ?: config('app.name', 'Pro Builder CRM');
 
         $manifest = [
             'name' => $name,

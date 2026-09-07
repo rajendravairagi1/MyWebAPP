@@ -174,6 +174,29 @@ class Business extends Model
     }
 
     /**
+     * The full public lead-form URL to hand out/show as a QR code. A solo
+     * business (no branch/company) gets domain/{slug}/QRcode; a business
+     * under a Company gets domain/{company-slug}/{business-slug}/QRcode,
+     * so the link itself shows which company a branch belongs to — the
+     * company segment is set once at the Company level (Company::
+     * publicSlug()) and shared by every branch under it, while each
+     * business still sets its own trailing segment individually.
+     */
+    public function publicLeadUrl(): string
+    {
+        $company = $this->branch?->company;
+
+        if ($company) {
+            return route('leads.public.show-company-slug', [
+                'companySlug' => $company->publicSlug(),
+                'businessSlug' => $this->leadFormSlug(),
+            ]);
+        }
+
+        return route('leads.public.show-slug', $this->leadFormSlug());
+    }
+
+    /**
      * Combined counts/totals for this business, used by the Branch/Company
      * dashboards to show a builder's numbers without switching into it.
      * totalCollected()/totalOutstanding() pull from invoices/payments,

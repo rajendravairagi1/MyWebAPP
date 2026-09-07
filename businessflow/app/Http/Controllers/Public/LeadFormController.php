@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Business;
+use App\Models\Company;
 use App\Models\Lead;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,6 +51,29 @@ class LeadFormController extends Controller
         $business = Business::where('lead_slug', $slug)->firstOrFail();
 
         return $this->handleSubmission($request, $business, route('leads.public.show-slug', $slug));
+    }
+
+    public function showByCompanySlug(string $companySlug, string $businessSlug): View
+    {
+        $business = $this->resolveCompanyBusiness($companySlug, $businessSlug);
+
+        return $this->renderForm($business, route('leads.public.store-company-slug', [$companySlug, $businessSlug]));
+    }
+
+    public function storeByCompanySlug(Request $request, string $companySlug, string $businessSlug): RedirectResponse
+    {
+        $business = $this->resolveCompanyBusiness($companySlug, $businessSlug);
+
+        return $this->handleSubmission($request, $business, route('leads.public.show-company-slug', [$companySlug, $businessSlug]));
+    }
+
+    private function resolveCompanyBusiness(string $companySlug, string $businessSlug): Business
+    {
+        $company = Company::where('slug', $companySlug)->firstOrFail();
+
+        return Business::where('lead_slug', $businessSlug)
+            ->whereHas('branch', fn ($q) => $q->where('company_id', $company->id))
+            ->firstOrFail();
     }
 
     private function renderForm(Business $business, string $formActionUrl): View

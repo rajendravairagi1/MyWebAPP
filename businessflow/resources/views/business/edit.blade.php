@@ -55,8 +55,10 @@
                 </div>
 
                 <div class="flex items-center gap-2 text-sm bg-gray-50 dark:bg-slate-900/40 rounded-md px-3 py-2">
-                    <span class="text-gray-500 dark:text-gray-400 truncate">{{ rtrim(url('/'), '/') }}/<span class="font-medium text-gray-900 dark:text-gray-100">{{ $business->leadFormSlug() }}</span>/QRcode</span>
-                    <button type="button" x-on:click="navigator.clipboard.writeText('{{ route('leads.public.show-slug', $business->leadFormSlug()) }}'); copied = true; setTimeout(() => copied = false, 2000)" class="ml-auto text-xs text-accent-600 hover:underline shrink-0">
+                    <span class="text-gray-500 dark:text-gray-400 truncate">
+                        {{ rtrim(url('/'), '/') }}/@if ($company)<span class="font-medium text-gray-900 dark:text-gray-100">{{ $company->publicSlug() }}</span>/@endif<span class="font-medium text-gray-900 dark:text-gray-100">{{ $business->leadFormSlug() }}</span>/QRcode
+                    </span>
+                    <button type="button" x-on:click="navigator.clipboard.writeText('{{ $business->publicLeadUrl() }}'); copied = true; setTimeout(() => copied = false, 2000)" class="ml-auto text-xs text-accent-600 hover:underline shrink-0">
                         <span x-show="!copied">{{ __('Copy') }}</span>
                         <span x-show="copied" x-cloak>{{ __('Copied!') }}</span>
                     </button>
@@ -68,12 +70,18 @@
                     <div class="flex-1 min-w-0">
                         <x-input-label for="lead_slug" :value="__('Change it (if available)')" />
                         <div class="mt-1 flex items-center gap-1.5 text-sm">
-                            <span class="text-gray-400 dark:text-gray-500 shrink-0 truncate max-w-[35%]">{{ rtrim(url('/'), '/') }}/</span>
+                            <span class="text-gray-400 dark:text-gray-500 shrink-0 truncate max-w-[40%]">{{ rtrim(url('/'), '/') }}/@if ($company){{ $company->publicSlug() }}/@endif</span>
                             <input type="text" id="lead_slug" name="lead_slug" value="{{ old('lead_slug', $business->leadFormSlug()) }}"
                                 class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 text-sm" placeholder="sharma-builders">
                             <span class="text-gray-400 dark:text-gray-500 shrink-0">/QRcode</span>
                         </div>
-                        <p class="text-xs text-gray-400 mt-1">{{ __('Lowercase letters, numbers, and hyphens only. Saving fails if someone else already has it.') }}</p>
+                        <p class="text-xs text-gray-400 mt-1">
+                            @if ($company)
+                                {{ __('Lowercase letters, numbers, and hyphens only. The ":company" part is set once for the whole company — change it from Company settings.', ['company' => $company->publicSlug()]) }}
+                            @else
+                                {{ __('Lowercase letters, numbers, and hyphens only. Saving fails if someone else already has it.') }}
+                            @endif
+                        </p>
                         <x-input-error :messages="$errors->get('lead_slug')" class="mt-2" />
                     </div>
                     <x-primary-button>{{ __('Save') }}</x-primary-button>

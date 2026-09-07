@@ -25,6 +25,31 @@
                 {{ __('Each branch can have its own manager and any number of builders — each builder runs fully independently, with its own projects, customers and team.') }}
             </p>
 
+            {{-- The shared first segment of every branch's public lead-form link. --}}
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5 space-y-3">
+                <div>
+                    <h3 class="text-sm font-medium text-gray-800 dark:text-gray-100">{{ __('Public Link') }}</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ __('The first part of the link every branch/builder\'s Leads QR code uses — e.g. domain/:slug/builder-name/QRcode. Each builder still sets their own name in Business Settings.', ['slug' => $company->publicSlug()]) }}</p>
+                </div>
+
+                <form method="POST" action="{{ route('company.slug') }}" class="flex items-end gap-2">
+                    @csrf
+                    @method('PUT')
+                    <div class="flex-1 min-w-0">
+                        <x-input-label for="company_slug" :value="__('Company name in the link')" />
+                        <div class="mt-1 flex items-center gap-1.5 text-sm">
+                            <span class="text-gray-400 dark:text-gray-500 shrink-0">{{ rtrim(url('/'), '/') }}/</span>
+                            <input type="text" id="company_slug" name="slug" value="{{ old('slug', $company->publicSlug()) }}"
+                                class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 text-sm" placeholder="sharma-group">
+                            <span class="text-gray-400 dark:text-gray-500 shrink-0">/builder-name/QRcode</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">{{ __('Lowercase letters, numbers, and hyphens only. Saving fails if someone else already has it.') }}</p>
+                        <x-input-error :messages="$errors->get('slug')" class="mt-2" />
+                    </div>
+                    <x-primary-button>{{ __('Save') }}</x-primary-button>
+                </form>
+            </div>
+
             {{-- Company-wide P&L across every branch --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                 <div class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-4">{{ __('Company-wide — all branches') }}</div>

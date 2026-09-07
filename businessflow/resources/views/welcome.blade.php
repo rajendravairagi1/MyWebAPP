@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>{{ config('app.name', 'BusinessFlow') }} — Real Estate Builder CRM</title>
+        <title>{{ config('app.name', 'Pro Builder CRM') }} — Real Estate Builder CRM</title>
 
         @include('partials.pwa-head')
 
@@ -28,7 +28,7 @@
             <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <x-application-logo class="h-7 w-7 fill-current text-accent-600" />
-                    <span class="font-semibold tracking-tight">{{ config('app.name', 'BusinessFlow') }}</span>
+                    <span class="font-semibold tracking-tight">{{ config('app.name', 'Pro Builder CRM') }}</span>
                 </div>
                 <div class="flex items-center gap-3">
                     @auth
@@ -143,7 +143,7 @@
         </section>
 
         <footer class="py-10 text-center text-xs text-gray-400">
-            {{ __('© :year :name — Built for real estate builders in India.', ['year' => date('Y'), 'name' => config('app.name', 'BusinessFlow')]) }}
+            {{ __('© :year :name — Built for real estate builders in India.', ['year' => date('Y'), 'name' => config('app.name', 'Pro Builder CRM')]) }}
         </footer>
     </body>
 </html>

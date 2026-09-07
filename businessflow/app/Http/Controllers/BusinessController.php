@@ -19,8 +19,9 @@ class BusinessController extends Controller
     {
         $business = Business::findOrFail(Tenant::id());
         $currencies = config('business.currencies');
+        $company = $business->branch?->company;
 
-        return view('business.edit', compact('business', 'currencies'));
+        return view('business.edit', compact('business', 'currencies', 'company'));
     }
 
     public function update(Request $request): RedirectResponse

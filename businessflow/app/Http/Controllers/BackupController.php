@@ -78,7 +78,7 @@ class BackupController extends Controller
         $mediaPaths = $this->collectMediaPaths($tables);
 
         $payload = [
-            'app' => 'BusinessFlow',
+            'app' => 'Pro Builder CRM',
             'backup_version' => 1,
             'exported_at' => now()->toIso8601String(),
             'business_id' => $business->id,
@@ -117,7 +117,7 @@ class BackupController extends Controller
         $tmpUpload = $request->file('backup')->getRealPath();
 
         if ($zip->open($tmpUpload) !== true) {
-            return back()->withErrors(['backup' => 'Could not read that file — make sure it\'s the .zip a BusinessFlow backup produced.']);
+            return back()->withErrors(['backup' => 'Could not read that file — make sure it\'s the .zip a Pro Builder CRM backup produced.']);
         }
 
         $json = $zip->getFromName('data.json');
@@ -125,15 +125,18 @@ class BackupController extends Controller
         if (! $json) {
             $zip->close();
 
-            return back()->withErrors(['backup' => 'This doesn\'t look like a BusinessFlow backup — data.json is missing from the zip.']);
+            return back()->withErrors(['backup' => 'This doesn\'t look like a Pro Builder CRM backup — data.json is missing from the zip.']);
         }
 
         $payload = json_decode($json, true);
 
-        if (! is_array($payload) || ($payload['app'] ?? null) !== 'BusinessFlow' || ! isset($payload['tables'])) {
+        // Accepts both tags: older backups were exported before the app's
+        // rename from BusinessFlow to Pro Builder CRM and still carry the
+        // old identifier — they're the same file format either way.
+        if (! is_array($payload) || ! in_array($payload['app'] ?? null, ['Pro Builder CRM', 'BusinessFlow'], true) || ! isset($payload['tables'])) {
             $zip->close();
 
-            return back()->withErrors(['backup' => 'This doesn\'t look like a valid BusinessFlow backup file.']);
+            return back()->withErrors(['backup' => 'This doesn\'t look like a valid Pro Builder CRM backup file.']);
         }
 
         try {
