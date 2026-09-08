@@ -14,7 +14,7 @@ class SocialController extends Controller
 {
     public const PLATFORMS = ['facebook', 'instagram', 'linkedin', 'twitter', 'whatsapp'];
 
-    public const DEFAULT_FOOTER_DESCRIPTION = 'Pro Builder CRM is the all-in-one platform built for real estate builders and developers. Track every project, unit and customer payment in one place. Manage loans, invoices, contractors, brokers and investors without spreadsheets or scattered WhatsApp chats - built to stay organized as your business grows.';
+    public const DEFAULT_FOOTER_DESCRIPTION = 'Pro Builder CRM brings every project, unit and customer payment into one place - built for real estate builders and developers, without spreadsheets or scattered WhatsApp chats.';
 
     public function index()
     {
