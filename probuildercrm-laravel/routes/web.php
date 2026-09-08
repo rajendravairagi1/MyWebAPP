@@ -60,6 +60,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/branding', [AdminBrandingController::class, 'index'])->name('branding.index');
         Route::post('/branding', [AdminBrandingController::class, 'update'])->name('branding.update');
         Route::delete('/branding', [AdminBrandingController::class, 'destroy'])->name('branding.destroy');
+        Route::put('/branding/size', [AdminBrandingController::class, 'updateSize'])->name('branding.size');
 
         Route::get('/integrations', [AdminIntegrationsController::class, 'index'])->name('integrations.index');
         Route::put('/integrations', [AdminIntegrationsController::class, 'update'])->name('integrations.update');

@@ -17,14 +17,32 @@
             a wide/rectangular logo with a transparent background works best.
         </p>
 
-        <div class="card" style="margin-bottom: var(--space-lg);">
-            <strong style="display: block; margin-bottom: 12px;">Current logo</strong>
+        <div class="card" style="margin-bottom: var(--space-lg); background: var(--color-bg-inverse);">
+            <strong style="display: block; margin-bottom: 12px; color: #fff;">Current logo (as shown in the navbar)</strong>
             @if ($logoPath)
-                <img src="{{ asset($logoPath) }}?v={{ time() }}" alt="Current logo" style="max-height: 60px; max-width: 100%;">
+                <img src="{{ asset($logoPath) }}?v={{ time() }}" alt="Current logo" style="height: {{ \App\Http\Controllers\Admin\BrandingController::pixelsFor($logoSize) }}px; width: auto; display: block;">
             @else
                 <span style="color: var(--color-ink-soft); font-size: 0.9rem;">No logo uploaded yet — the text logo ("Pro Builder CRM") is shown.</span>
             @endif
         </div>
+
+        @if ($logoPath)
+            <form method="POST" action="{{ route('admin.branding.size') }}" class="card" style="display: flex; align-items: flex-end; gap: var(--space-md); margin-bottom: var(--space-lg); flex-wrap: wrap;">
+                @csrf
+                @method('PUT')
+                <div class="form-field" style="margin: 0;">
+                    <label for="logo_size">Logo size</label>
+                    <select id="logo_size" name="logo_size" class="form-select">
+                        @foreach ($sizes as $key => $px)
+                            <option value="{{ $key }}" {{ $logoSize === $key ? 'selected' : '' }}>
+                                {{ ['xs' => 'Extra Small', 'sm' => 'Small', 'md' => 'Medium (default)', 'lg' => 'Large', 'xl' => 'Extra Large'][$key] }} — {{ $px }}px
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Size</button>
+            </form>
+        @endif
 
         <form method="POST" action="{{ route('admin.branding.update') }}" enctype="multipart/form-data" class="card" style="display: flex; flex-direction: column; gap: var(--space-md); margin-bottom: var(--space-lg);">
             @csrf

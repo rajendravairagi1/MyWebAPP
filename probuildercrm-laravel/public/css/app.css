@@ -310,7 +310,7 @@ h3 {
 }
 
 .logo-image {
-  max-height: 34px;
+  /* height set inline per-instance from the admin-chosen size */
   width: auto;
   display: block;
 }

@@ -3,7 +3,7 @@
     <div class="container">
         <a href="{{ url('/') }}" class="logo">
             @if ($logoPath = \App\Models\SiteSetting::get('logo_path'))
-                <img src="{{ asset($logoPath) }}" alt="Pro Builder CRM" class="logo-image">
+                <img src="{{ asset($logoPath) }}" alt="Pro Builder CRM" class="logo-image" style="height: {{ \App\Http\Controllers\Admin\BrandingController::pixelsFor(\App\Models\SiteSetting::get('logo_size')) }}px;">
             @else
                 <span class="logo-mark">P</span>
                 Pro Builder <span class="logo-accent">CRM</span>
