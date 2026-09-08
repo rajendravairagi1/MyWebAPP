@@ -545,24 +545,24 @@ body.has-sticky-cta {
 
 .hero-phone-corner {
   position: absolute;
-  right: -18px;
-  bottom: -46px;
-  width: 130px;
+  right: -28px;
+  bottom: -58px;
+  width: 175px;
   z-index: 3;
   filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
 }
 
 .hero-phone-corner .mobile-showcase {
   width: 100%;
-  border-width: 7px;
-  border-radius: 26px;
+  border-width: 8px;
+  border-radius: 30px;
 }
 
 .hero-phone-corner .mobile-showcase-notch {
-  width: 46px;
-  height: 12px;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
+  width: 56px;
+  height: 14px;
+  border-bottom-left-radius: 9px;
+  border-bottom-right-radius: 9px;
 }
 
 .hero-phone-corner .mobile-showcase img {
@@ -1298,30 +1298,24 @@ body.has-sticky-cta {
   box-shadow: 0 0 0 8px rgba(37, 211, 102, 0.25);
 }
 
-/* Screenshot "pan" on hover: image sits slightly zoomed in and slides
-   partway across on hover, like slowly panning a camera — never a full
-   sweep, just far enough to feel alive. */
+/* Screenshot zoom on hover: the whole screenshot frame grows as one
+   piece (never an inner crop/pan) so the full image always stays
+   visible — it just grows a little to feel alive. */
 .shot-pan {
-  overflow: hidden;
-}
-
-.shot-pan img {
-  transform: scale(1) translateX(0%);
-  transition: transform 2.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform;
 }
 
-.shot-pan:hover img {
-  transform: scale(1.08) translateX(-5%);
+.shot-pan:hover {
+  transform: scale(1.045);
 }
 
-.mobile-showcase img {
-  transform: scale(1) translateX(0%);
-  transition: transform 2.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+.mobile-showcase {
+  transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-.mobile-showcase:hover img {
-  transform: scale(1.06) translateX(-4%);
+.mobile-showcase:hover {
+  transform: scale(1.05);
 }
 
 .hero-carousel {
@@ -1333,8 +1327,8 @@ body.has-sticky-cta {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shot-pan img,
-  .mobile-showcase img,
+  .shot-pan,
+  .mobile-showcase,
   .hero-carousel {
     transition: none !important;
   }
