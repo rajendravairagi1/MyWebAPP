@@ -70,6 +70,46 @@
                 <button type="submit" class="btn btn-secondary">Remove Logo</button>
             </form>
         @endif
+
+        <hr style="border: none; border-top: 1px solid var(--color-border); margin: var(--space-2xl) 0;">
+
+        <p style="color: var(--color-ink-soft); margin-bottom: var(--space-lg);">
+            The favicon shown in the browser tab. PNG, JPG, WEBP or SVG, up to 1MB — a simple square icon works best
+            (it gets auto-cropped to a square and resized to every size a browser needs).
+        </p>
+
+        <div class="card" style="margin-bottom: var(--space-lg); background: var(--color-bg-inverse); display: flex; align-items: center; gap: 14px;">
+            <img src="{{ $favicons['png32'] }}?v={{ time() }}" alt="Current favicon" width="32" height="32" style="display: block; border-radius: 6px;">
+            <strong style="color: #fff;">
+                {{ $hasCustomFavicon ? 'Your custom favicon' : 'Default favicon' }}
+            </strong>
+        </div>
+
+        <form method="POST" action="{{ route('admin.branding.favicon.update') }}" enctype="multipart/form-data" data-upload-progress class="card" style="display: flex; flex-direction: column; gap: var(--space-md); margin-bottom: var(--space-lg);">
+            @csrf
+            <div class="form-field">
+                <label for="favicon">Upload new favicon</label>
+                <input type="file" id="favicon" name="favicon" accept=".png,.jpg,.jpeg,.svg,.webp" required>
+
+                <div data-upload-progress-wrap hidden>
+                    <div class="upload-progress-track">
+                        <div data-upload-progress-bar class="upload-progress-bar"></div>
+                    </div>
+                    <span data-upload-progress-label class="upload-progress-label">Uploading… 0%</span>
+                </div>
+            </div>
+            <div>
+                <button type="submit" class="btn btn-primary">Upload &amp; Use This Favicon</button>
+            </div>
+        </form>
+
+        @if ($hasCustomFavicon)
+            <form method="POST" action="{{ route('admin.branding.favicon.destroy') }}" onsubmit="return confirm('Reset to the default favicon?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="btn btn-secondary">Reset to Default Favicon</button>
+            </form>
+        @endif
     </div>
 </div>
 @endsection

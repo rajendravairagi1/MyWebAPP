@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pro Builder CRM — Admin</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="32x32">
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    @include('partials.favicon-links')
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 </head>
 <body>
