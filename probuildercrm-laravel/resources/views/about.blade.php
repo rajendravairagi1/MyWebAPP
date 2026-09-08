@@ -32,13 +32,13 @@
     </div>
 </section>
 
-@include('partials.screenshot-showcase', [
+@include('partials.product-showcase', [
     'tag' => 'Built for real work',
     'heading' => 'The same CRM, wherever the work happens',
     'description' => 'Run it from a desktop at the office, or from your phone standing at the site - every screen adapts.',
 ])
 
-@include('partials.trust-badges')
+@include('partials.dashboard-tabs-showcase')
 
 @include('partials.blog-preview')
 

@@ -27,33 +27,13 @@
     </div>
 </section>
 
-<section class="section" style="background: var(--color-bg-soft);">
-    <div class="container">
-        <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
-            <span class="tag">Built for the whole team</span>
-            <h2 style="margin-top: 12px;">Not just for you</h2>
-        </div>
-        <div class="grid-3">
-            @foreach (config('features.team') as $feature)
-                <div class="card">
-                    <span class="feature-icon" style="margin-bottom: 14px;">@include('partials.icon', ['name' => $feature['icon']])</span>
-                    <h3 style="margin-bottom: 8px;">{{ $feature['title'] }}</h3>
-                    <p style="color: var(--color-ink-soft); font-size: 0.95rem;">{{ $feature['description'] }}</p>
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
+@include('partials.team-grid', ['heading' => 'Not just for you'])
 
-@include('partials.screenshot-showcase', [
-    'tag' => 'See it in action',
-    'heading' => 'A real look inside Pro Builder CRM',
-    'description' => 'The same dashboard, on your desktop at the office and your phone at the site.',
-])
+@include('partials.product-showcase')
 
 @include('partials.testimonials')
 
-@include('partials.trust-badges')
+@include('partials.dashboard-tabs-showcase')
 
 <section class="section-tight" style="text-align: center;">
     <div class="container">

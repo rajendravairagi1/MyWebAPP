@@ -41,7 +41,7 @@
     </div>
 </section>
 
-@include('partials.trust-badges')
+@include('partials.dashboard-tabs-showcase')
 
 @include('partials.blog-preview')
 

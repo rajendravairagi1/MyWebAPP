@@ -87,12 +87,21 @@
     </div>
 </section>
 
-@include('partials.screenshot-showcase', [
-    'tag' => 'See it in action',
-    'heading' => 'A real look inside Pro Builder CRM',
-    'description' => 'The same dashboard, on your desktop at the office and your phone at the site.',
-])
+@include('partials.product-showcase')
 
 @include('partials.testimonials')
+
+@include('partials.dashboard-tabs-showcase')
+
+@include('partials.team-grid')
+
+@include('partials.onboarding-steps')
+
+<section class="section-tight" style="text-align: center;">
+    <div class="container">
+        <h2 style="margin-bottom: var(--space-md);">Let's set it up around your actual projects</h2>
+        <a href="{{ route('contact') }}" class="btn btn-primary btn-lg">Book a Free Demo</a>
+    </div>
+</section>
 
 @endsection

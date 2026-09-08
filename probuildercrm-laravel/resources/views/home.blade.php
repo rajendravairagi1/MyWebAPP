@@ -105,41 +105,7 @@
     </div>
 </section>
 
-<section class="section">
-    <div class="container">
-        <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
-            <span class="tag">See it in action</span>
-            <h2 style="margin-top: 12px;">A real look inside Pro Builder CRM</h2>
-        </div>
-
-        <div x-data="{
-                tabs: [
-                    { key: 'dashboard', label: 'Dashboard & Analytics', title: 'See exactly where your business stands, today', description: 'Revenue trends, invoice status, unit booking status, deal pipeline, top projects by profit and payment collection rate - all in one dashboard, updated the moment a payment is recorded.', image: '{{ asset('screenshots/dashboard.png') }}', alt: 'Pro Builder CRM dashboard with revenue trend, invoice status and payment collection charts' },
-                    { key: 'analytics', label: 'Projects & Units', title: 'Every project, every unit, always up to date', description: 'Track unit status, pricing and booking pipeline across every project - with the numbers that matter surfaced automatically, not buried in a spreadsheet.', image: '{{ asset('screenshots/analytics.png') }}', alt: 'Pro Builder CRM analytics view showing unit booking status and deal pipeline' },
-                    { key: 'brokers', label: 'Brokers & Team', title: 'Commissions and access, handled properly', description: 'Track every broker\'s commission earned, paid and owed, and give your team exactly the access they need - without exposing prices or profit if you\'d rather they didn\'t see it.', image: '{{ asset('screenshots/brokers.png') }}', alt: 'Pro Builder CRM brokers module with commission tracking' },
-                    { key: 'settings', label: 'Business Settings', title: 'Set it up the way your business actually runs', description: 'Currency, branding, multi-branch/company rollups, language - configure Pro Builder CRM around your business, not the other way around.', image: '{{ asset('screenshots/settings.png') }}', alt: 'Pro Builder CRM business settings screen' }
-                ],
-                active: 'dashboard',
-                get activeTab() { return this.tabs.find(t => t.key === this.active) }
-             }">
-            <div class="feature-tabs-buttons">
-                <template x-for="tab in tabs" :key="tab.key">
-                    <button type="button" class="feature-tab-btn" :class="{ active: active === tab.key }" @click="active = tab.key" x-text="tab.label"></button>
-                </template>
-            </div>
-
-            <div class="feature-tabs-grid">
-                <div>
-                    <h3 style="font-size: 1.5rem; margin-bottom: 12px;" x-text="activeTab.title"></h3>
-                    <p style="color: var(--color-ink-soft); font-size: 1.02rem;" x-text="activeTab.description"></p>
-                </div>
-                <div class="feature-tabs-image shot-pan">
-                    <img :src="activeTab.image" :alt="activeTab.alt">
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+@include('partials.dashboard-tabs-showcase')
 
 <section class="section">
     <div class="container">
@@ -197,23 +163,7 @@
     </div>
 </section>
 
-<section class="section">
-    <div class="container">
-        <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
-            <span class="tag">Built for the whole team</span>
-            <h2 style="margin-top: 12px;">Not just for the owner</h2>
-        </div>
-        <div class="grid-3">
-            @foreach (config('features.team') as $i => $feature)
-                <div class="card">
-                    <span class="feature-icon {{ $iconColors[$i % 4] }}" style="margin-bottom: 14px;">@include('partials.icon', ['name' => $feature['icon'] ?? null])</span>
-                    <h3 style="font-size: 1.1rem; margin-bottom: 8px;">{{ $feature['title'] }}</h3>
-                    <p style="color: var(--color-ink-soft); font-size: 0.95rem;">{{ $feature['description'] }}</p>
-                </div>
-            @endforeach
-        </div>
-    </div>
-</section>
+@include('partials.team-grid')
 
 <section class="section">
     <div class="container grid-2" style="align-items: center;">
@@ -232,44 +182,7 @@
     </div>
 </section>
 
-<section class="section" style="background: var(--color-bg-soft);">
-    <div class="container">
-        <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
-            <span class="tag">Get started</span>
-            <h2 style="margin-top: 12px;">Live with your first project in minutes</h2>
-        </div>
-
-        <div class="grid-2" style="align-items: center;">
-            <div class="steps-list">
-                <div class="step-item">
-                    <span class="step-number">@include('partials.icon', ['name' => 'user-plus', 'size' => 18])</span>
-                    <div>
-                        <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Create your account</h3>
-                        <p style="color: var(--color-ink-soft); font-size: 0.95rem;">Sign up and set your business name, currency and branding - no lengthy onboarding call required.</p>
-                    </div>
-                </div>
-                <div class="step-item">
-                    <span class="step-number">@include('partials.icon', ['name' => 'layout-grid', 'size' => 18])</span>
-                    <div>
-                        <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Add your first project &amp; units</h3>
-                        <p style="color: var(--color-ink-soft); font-size: 0.95rem;">Bring in your existing projects, units and customer bookings - or start fresh with a new one.</p>
-                    </div>
-                </div>
-                <div class="step-item">
-                    <span class="step-number">@include('partials.icon', ['name' => 'rocket', 'size' => 18])</span>
-                    <div>
-                        <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Start recording payments</h3>
-                        <p style="color: var(--color-ink-soft); font-size: 0.95rem;">Every installment, receipt and reminder from here on is automatic. Most builders are live the same day.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="hero-carousel-viewport shot-pan" style="border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg);">
-                <img src="{{ asset('screenshots/dashboard.png') }}" alt="Pro Builder CRM dashboard, ready right after setup" style="width: 100%; display: block;">
-            </div>
-        </div>
-    </div>
-</section>
+@include('partials.onboarding-steps')
 
 @include('partials.testimonials')
 
