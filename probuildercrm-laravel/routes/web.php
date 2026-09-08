@@ -3,10 +3,13 @@
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\BrandingController as AdminBrandingController;
+use App\Http\Controllers\Admin\FaqsController as AdminFaqsController;
 use App\Http\Controllers\Admin\IntegrationsController as AdminIntegrationsController;
 use App\Http\Controllers\Admin\LeadsController as AdminLeadsController;
 use App\Http\Controllers\Admin\MaintenanceController as AdminMaintenanceController;
 use App\Http\Controllers\Admin\PricingController as AdminPricingController;
+use App\Http\Controllers\Admin\SocialController as AdminSocialController;
+use App\Http\Controllers\Admin\TestimonialsController as AdminTestimonialsController;
 use App\Http\Controllers\Admin\ThemeController as AdminThemeController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ContactController;
@@ -72,6 +75,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/leads', [AdminLeadsController::class, 'index'])->name('leads.index');
         Route::delete('/leads/{lead}', [AdminLeadsController::class, 'destroy'])->name('leads.destroy');
+
+        Route::get('/testimonials', [AdminTestimonialsController::class, 'index'])->name('testimonials.index');
+        Route::get('/testimonials/create', [AdminTestimonialsController::class, 'create'])->name('testimonials.create');
+        Route::post('/testimonials', [AdminTestimonialsController::class, 'store'])->name('testimonials.store');
+        Route::get('/testimonials/{testimonial}/edit', [AdminTestimonialsController::class, 'edit'])->name('testimonials.edit');
+        Route::put('/testimonials/{testimonial}', [AdminTestimonialsController::class, 'update'])->name('testimonials.update');
+        Route::delete('/testimonials/{testimonial}', [AdminTestimonialsController::class, 'destroy'])->name('testimonials.destroy');
+
+        Route::get('/faqs', [AdminFaqsController::class, 'index'])->name('faqs.index');
+        Route::get('/faqs/create', [AdminFaqsController::class, 'create'])->name('faqs.create');
+        Route::post('/faqs', [AdminFaqsController::class, 'store'])->name('faqs.store');
+        Route::get('/faqs/{faq}/edit', [AdminFaqsController::class, 'edit'])->name('faqs.edit');
+        Route::put('/faqs/{faq}', [AdminFaqsController::class, 'update'])->name('faqs.update');
+        Route::delete('/faqs/{faq}', [AdminFaqsController::class, 'destroy'])->name('faqs.destroy');
+
+        Route::get('/social', [AdminSocialController::class, 'index'])->name('social.index');
+        Route::put('/social', [AdminSocialController::class, 'update'])->name('social.update');
 
         Route::get('/maintenance', [AdminMaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance/clear-cache', [AdminMaintenanceController::class, 'clearCache'])->name('maintenance.clear-cache');

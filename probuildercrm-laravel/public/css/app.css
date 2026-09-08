@@ -257,6 +257,44 @@ h3 {
   margin: 0 0 12px;
 }
 
+/* Navbar top bar: phone + social links, above the main nav row */
+.navbar-topbar {
+  background: var(--color-bg-inverse);
+}
+
+.navbar-topbar-inner {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 0;
+}
+
+.navbar-phone {
+  color: var(--gray-300);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.navbar-topbar .social-link {
+  width: 26px;
+  height: 26px;
+  color: var(--gray-300);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.navbar-topbar .social-link:hover {
+  color: #fff;
+  background: var(--color-primary);
+}
+
+@media (max-width: 700px) {
+  .navbar-topbar-inner {
+    justify-content: center;
+  }
+}
+
 /* Navbar */
 .navbar {
   position: sticky;
@@ -1431,4 +1469,72 @@ body.has-sticky-cta {
   .testimonial-track .testimonial-card {
     width: 300px;
   }
+}
+
+/* ---- Social links (header + footer) ---- */
+.social-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--color-ink-soft);
+  background: var(--color-bg-soft);
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.social-link:hover {
+  color: #fff;
+  background: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.social-links-footer .social-link {
+  color: var(--gray-300);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.social-links-footer .social-link:hover {
+  color: #fff;
+  background: var(--color-primary);
+}
+
+/* ---- Screenshot showcase (desktop + mobile side by side) ---- */
+.screenshot-showcase {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-xl);
+  align-items: center;
+}
+
+@media (max-width: 860px) {
+  .screenshot-showcase {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+}
+
+/* Trust-badge pill icons blink/pulse continuously, same idea as the
+   colored feature-icon circles elsewhere on the site. */
+.pill-icon-blink {
+  display: inline-flex;
+  color: var(--color-primary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pill-icon-blink {
+    animation: pill-icon-pulse 2.2s ease-in-out infinite;
+  }
+}
+
+@keyframes pill-icon-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }

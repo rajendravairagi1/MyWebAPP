@@ -102,13 +102,18 @@ class BrandingController extends Controller
     }
 
     /**
-     * The default favicon files shipped in the repo live at the public/
-     * root (favicon.ico, favicon-32.png, ...). A custom upload generates
-     * the same set of filenames under public/branding/ instead — so
-     * switching between "custom" and "default" is just a matter of which
-     * directory the <link> tags point at, tracked by one SiteSetting flag.
+     * The served favicon files always live at the public/ root
+     * (favicon.ico, favicon-32.png, ...) — not just for <link> tags, but
+     * because browsers request /favicon.ico directly (their built-in
+     * fallback) for ANY page, including plain-text/XML responses like
+     * /sitemap.xml and /robots.txt that have no <head> to put a <link> in.
+     * A true backup of the bundled defaults lives at
+     * public/favicon-defaults/, untouched by uploads, so "reset to
+     * default" has something to restore from.
      */
     private const FAVICON_FILES = ['favicon.ico', 'favicon-32.png', 'favicon-16.png', 'apple-touch-icon.png', 'favicon.svg'];
+
+    private const FAVICON_DEFAULTS_DIR = 'favicon-defaults';
 
     public function updateFavicon(Request $request)
     {
@@ -128,9 +133,14 @@ class BrandingController extends Controller
 
     public function destroyFavicon()
     {
-        $dir = public_path(self::DIR);
+        $defaultsDir = public_path(self::FAVICON_DEFAULTS_DIR);
         foreach (self::FAVICON_FILES as $filename) {
-            @unlink($dir.'/'.$filename);
+            $default = $defaultsDir.'/'.$filename;
+            if (file_exists($default)) {
+                copy($default, public_path($filename));
+            } else {
+                @unlink(public_path($filename));
+            }
         }
         SiteSetting::set('custom_favicon', '');
 
@@ -138,30 +148,25 @@ class BrandingController extends Controller
     }
 
     /**
-     * Returns the <link>-ready URLs for whichever favicon set is active
-     * (custom upload if one exists, otherwise the bundled default) — used
-     * by both the marketing and admin layouts and by the branding admin
-     * page's preview.
+     * Returns the <link>-ready URLs for the currently active favicon set —
+     * used by both the marketing and admin layouts and by the branding
+     * admin page's preview. Always the public/ root, since that's what's
+     * actually served now (see the FAVICON_FILES doc comment above).
      */
     public static function faviconLinks(): array
     {
-        $custom = (bool) SiteSetting::get('custom_favicon');
-        $prefix = $custom ? self::DIR.'/' : '';
-        $svgPath = $prefix.'favicon.svg';
-
         return [
-            'ico' => asset($prefix.'favicon.ico'),
-            'png32' => asset($prefix.'favicon-32.png'),
-            'png16' => asset($prefix.'favicon-16.png'),
-            'apple' => asset($prefix.'apple-touch-icon.png'),
-            'svg' => file_exists(public_path($svgPath)) ? asset($svgPath) : null,
+            'ico' => asset('favicon.ico'),
+            'png32' => asset('favicon-32.png'),
+            'png16' => asset('favicon-16.png'),
+            'apple' => asset('apple-touch-icon.png'),
+            'svg' => file_exists(public_path('favicon.svg')) ? asset('favicon.svg') : null,
         ];
     }
 
     private function generateFavicons(UploadedFile $file): void
     {
-        $dir = public_path(self::DIR);
-        File::ensureDirectoryExists($dir);
+        $dir = public_path();
 
         foreach (self::FAVICON_FILES as $filename) {
             @unlink($dir.'/'.$filename);

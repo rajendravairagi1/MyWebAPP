@@ -11,8 +11,18 @@
                     @endif
                 </span>
                 <p style="margin-top: 12px; max-width: 320px; color: var(--gray-300); font-size: 0.9rem;">
-                    The all-in-one CRM built for real estate builders and developers.
+                    Pro Builder CRM is the all-in-one platform built for real estate builders and developers.
+                    Track every project, unit and customer payment in one place. Manage loans, invoices,
+                    contractors, brokers and investors without spreadsheets or scattered WhatsApp chats -
+                    built to stay organized as your business grows.
                 </p>
+                @php $__footerPhone = \App\Models\SiteSetting::get('phone_number'); @endphp
+                @if ($__footerPhone)
+                    <a href="tel:{{ preg_replace('/[^0-9+]/', '', $__footerPhone) }}" style="display: block; margin-top: 12px; color: var(--gray-300); font-size: 0.9rem; text-decoration: none;">{{ $__footerPhone }}</a>
+                @endif
+                <div style="margin-top: 12px;">
+                    @include('partials.social-links', ['location' => 'footer'])
+                </div>
             </div>
 
             @foreach (config('site.footer_columns') as $column)

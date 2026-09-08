@@ -1,4 +1,18 @@
-@php $currentPath = request()->getPathInfo(); @endphp
+@php
+    $currentPath = request()->getPathInfo();
+    $__navPhone = \App\Models\SiteSetting::get('phone_number');
+    $__navShowSocial = \App\Models\SiteSetting::get('social_show_header');
+@endphp
+@if ($__navPhone || $__navShowSocial)
+    <div class="navbar-topbar">
+        <div class="container navbar-topbar-inner">
+            @if ($__navPhone)
+                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $__navPhone) }}" class="navbar-phone">{{ $__navPhone }}</a>
+            @endif
+            @include('partials.social-links', ['location' => 'header'])
+        </div>
+    </div>
+@endif
 <header class="navbar" x-data="{ open: false }">
     <div class="container">
         <a href="{{ url('/') }}" class="logo">

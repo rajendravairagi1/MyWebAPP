@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlogPost;
+use App\Models\Faq;
 use Illuminate\Support\Facades\Response;
 
 class SeoController extends Controller
@@ -57,7 +58,7 @@ class SeoController extends Controller
     {
         $siteUrl = rtrim(config('site.url'), '/');
         $site = config('site');
-        $faqs = config('faqs');
+        $faqs = Faq::orderBy('sort_order')->get();
         $posts = BlogPost::orderByDesc('date')->limit(20)->get();
 
         $lines = [

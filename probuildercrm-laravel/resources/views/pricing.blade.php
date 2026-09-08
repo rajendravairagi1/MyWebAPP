@@ -29,6 +29,11 @@
                 return { price, originalPrice };
             }
          }">
+        <div style="text-align: center; max-width: 560px; margin: 0 auto var(--space-lg);">
+            <span class="tag">Plans</span>
+            <h2 style="margin-top: 12px;">Straightforward pricing, built to grow with you</h2>
+        </div>
+
         <div class="pricing-cycle-toggle">
             <template x-for="c in cycles" :key="c.key">
                 <button type="button" class="pricing-cycle-btn" :class="{ active: cycleKey === c.key }" @click="cycleKey = c.key">
@@ -81,5 +86,13 @@
         </div>
     </div>
 </section>
+
+@include('partials.screenshot-showcase', [
+    'tag' => 'See it in action',
+    'heading' => 'A real look inside Pro Builder CRM',
+    'description' => 'The same dashboard, on your desktop at the office and your phone at the site.',
+])
+
+@include('partials.testimonials')
 
 @endsection

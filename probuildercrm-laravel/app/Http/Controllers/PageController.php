@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Faq;
+
 class PageController extends Controller
 {
     public function home()
@@ -21,7 +23,9 @@ class PageController extends Controller
 
     public function faq()
     {
-        return view('faq');
+        $faqs = Faq::orderBy('sort_order')->get();
+
+        return view('faq', compact('faqs'));
     }
 
     public function privacyPolicy()

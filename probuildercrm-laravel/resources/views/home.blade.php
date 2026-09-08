@@ -271,58 +271,9 @@
     </div>
 </section>
 
-<section class="section">
-    <div class="container">
-        <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
-            <span class="tag">Trusted by builders</span>
-            <h2 style="margin-top: 12px;">What builders say</h2>
-        </div>
+@include('partials.testimonials')
 
-        @php
-            $testimonials = [
-                ['quote' => 'I used to spend a whole evening every week matching payments to customers in Excel. Now every receipt and reminder is automatic - I check the dashboard for two minutes and I know exactly where every project stands.', 'role' => 'Real Estate Builder', 'city' => 'Indore'],
-                ['quote' => 'Loan disbursements from the bank used to be the most confusing part of our books. Pro Builder CRM keeps it all tied to the right unit and customer, so our accountant isn\'t chasing us for statements anymore.', 'role' => 'Construction Contractor', 'city' => 'Raipur'],
-                ['quote' => 'My brokers can see their own commission and nothing else. My supervisor logs payments from site visits on his phone. Everyone has exactly the access they need, nothing more.', 'role' => 'Property Developer', 'city' => 'Bhopal'],
-            ];
-        @endphp
-
-        <div class="testimonial-marquee">
-            <div class="testimonial-track">
-                @foreach (array_merge($testimonials, $testimonials) as $t)
-                    <div class="card testimonial-card">
-                        <div class="testimonial-stars">
-                            @for ($s = 0; $s < 5; $s++)@include('partials.icon', ['name' => 'star', 'size' => 15])@endfor
-                        </div>
-                        <p class="testimonial-quote">&ldquo;{{ $t['quote'] }}&rdquo;</p>
-                        <div class="testimonial-author">
-                            <span class="testimonial-avatar">{{ substr($t['role'], 0, 1) }}</span>
-                            <div>
-                                <div class="testimonial-name">{{ $t['role'] }}</div>
-                                <div class="testimonial-role">{{ $t['city'] }}, India</div>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: var(--space-xl);">
-            <div class="pill-row">
-                @foreach ([
-                    ['icon' => 'shield-check', 'label' => 'Bank-grade data security'],
-                    ['icon' => 'database', 'label' => 'Automatic daily backups'],
-                    ['icon' => 'rocket', 'label' => 'Live in minutes, no setup calls'],
-                    ['icon' => 'smartphone', 'label' => 'Works on mobile, no app needed'],
-                ] as $badge)
-                    <span class="pill">
-                        <span style="display: inline-flex; color: var(--color-primary);">@include('partials.icon', ['name' => $badge['icon'], 'size' => 15])</span>
-                        {{ $badge['label'] }}
-                    </span>
-                @endforeach
-            </div>
-        </div>
-    </div>
-</section>
+@include('partials.trust-badges')
 
 <section class="section" style="background: var(--color-bg-soft);">
     <div class="container" style="max-width: 760px;">
@@ -332,16 +283,16 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px;" x-data="{ open: 0 }">
-            @foreach (array_slice(config('faqs'), 0, 4) as $index => $faq)
+            @foreach (\App\Models\Faq::orderBy('sort_order')->take(4)->get() as $index => $faq)
                 <div class="card faq-item">
                     <button type="button" class="faq-question" @click="open = open === {{ $index }} ? -1 : {{ $index }}">
-                        {{ $faq['question'] }}
+                        {{ $faq->question }}
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                              class="faq-chevron" :class="{ open: open === {{ $index }} }">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
-                    <div class="faq-answer" x-show="open === {{ $index }}" x-cloak>{{ $faq['answer'] }}</div>
+                    <div class="faq-answer" x-show="open === {{ $index }}" x-cloak>{{ $faq->answer }}</div>
                 </div>
             @endforeach
         </div>

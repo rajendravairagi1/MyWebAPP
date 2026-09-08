@@ -8,7 +8,8 @@ class BlogController extends Controller
 {
     public function index()
     {
-        $posts = BlogPost::orderByDesc('date')->get();
+        // 2 per row, 4 rows before pagination kicks in.
+        $posts = BlogPost::orderByDesc('date')->paginate(8);
 
         return view('blog.index', compact('posts'));
     }

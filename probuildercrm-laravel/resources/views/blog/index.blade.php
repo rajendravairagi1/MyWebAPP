@@ -35,8 +35,14 @@
                     </a>
                 @endforeach
             </div>
+
+            <div style="margin-top: var(--space-xl);">
+                {{ $posts->links() }}
+            </div>
         @endif
     </div>
 </section>
+
+@include('partials.testimonials')
 
 @endsection

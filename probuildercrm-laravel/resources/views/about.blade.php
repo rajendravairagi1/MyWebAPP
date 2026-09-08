@@ -32,6 +32,18 @@
     </div>
 </section>
 
+@include('partials.screenshot-showcase', [
+    'tag' => 'Built for real work',
+    'heading' => 'The same CRM, wherever the work happens',
+    'description' => 'Run it from a desktop at the office, or from your phone standing at the site - every screen adapts.',
+])
+
+@include('partials.trust-badges')
+
+@include('partials.blog-preview')
+
+@include('partials.testimonials')
+
 <section class="section" style="background: var(--color-primary); color: #fff; text-align: center;">
     <div class="container" style="max-width: 620px;">
         <h2 style="color: #fff; margin-bottom: var(--space-sm);">Let's talk about your business</h2>

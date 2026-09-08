@@ -25,7 +25,9 @@
 
     @yield('content')
 
-    @include('partials.blog-preview')
+    @unless (request()->routeIs('blog.index') || request()->routeIs('faq') || request()->routeIs('about'))
+        @include('partials.blog-preview')
+    @endunless
 
     @include('partials.footer')
 
