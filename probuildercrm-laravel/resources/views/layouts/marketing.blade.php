@@ -10,7 +10,7 @@
     <meta name="description" content="@yield('description', config('site.short_description'))">
     <link rel="canonical" href="{{ config('site.url').request()->getPathInfo() }}">
     @include('partials.favicon-links')
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) ?: '1' }}">
     @php
         $__startingPrice = (int) (\App\Models\PricingPlan::min('monthly_price') ?? 999);
     @endphp
@@ -43,9 +43,9 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19V5M5 12l7-7 7 7"/></svg>
     </button>
 
-    <script src="{{ asset('js/alpine.min.js') }}" defer></script>
-    <script src="{{ asset('js/reveal.js') }}" defer></script>
-    <script src="{{ asset('js/scroll-top.js') }}" defer></script>
+    <script src="{{ asset('js/alpine.min.js') }}?v={{ @filemtime(public_path('js/alpine.min.js')) ?: '1' }}" defer></script>
+    <script src="{{ asset('js/reveal.js') }}?v={{ @filemtime(public_path('js/reveal.js')) ?: '1' }}" defer></script>
+    <script src="{{ asset('js/scroll-top.js') }}?v={{ @filemtime(public_path('js/scroll-top.js')) ?: '1' }}" defer></script>
     @stack('scripts')
 </body>
 </html>

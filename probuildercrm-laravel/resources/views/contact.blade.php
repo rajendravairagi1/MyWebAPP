@@ -14,7 +14,7 @@
 </section>
 
 <section class="section">
-    <div class="container" style="max-width: 960px; display: grid; grid-template-columns: 1fr 1.2fr; gap: var(--space-xl);">
+    <div class="container grid-2" style="max-width: 960px; gap: var(--space-xl);">
         <div style="display: flex; flex-direction: column; gap: 16px;">
             <a href="{{ config('site.whatsapp') }}" target="_blank" rel="noopener noreferrer" class="card" style="text-decoration: none;">
                 <h3 style="margin-bottom: 4px;">WhatsApp</h3>

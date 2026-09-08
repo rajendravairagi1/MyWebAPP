@@ -6,7 +6,7 @@
     <title>ProBuilderCRM - Admin</title>
     <meta name="robots" content="noindex, nofollow">
     @include('partials.favicon-links')
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) ?: '1' }}">
 </head>
 <body class="admin-body">
     @php
@@ -63,8 +63,8 @@
         @yield('content')
     </main>
 
-    <script src="{{ asset('js/alpine.min.js') }}" defer></script>
-    <script src="{{ asset('js/upload-progress.js') }}" defer></script>
+    <script src="{{ asset('js/alpine.min.js') }}?v={{ @filemtime(public_path('js/alpine.min.js')) ?: '1' }}" defer></script>
+    <script src="{{ asset('js/upload-progress.js') }}?v={{ @filemtime(public_path('js/upload-progress.js')) ?: '1' }}" defer></script>
     @stack('scripts')
 </body>
 </html>
