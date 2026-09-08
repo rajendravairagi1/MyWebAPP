@@ -11,10 +11,7 @@
                     @endif
                 </span>
                 <p style="margin-top: 12px; max-width: 480px; color: var(--gray-300); font-size: 0.9rem;">
-                    Pro Builder CRM is the all-in-one platform built for real estate builders and developers.
-                    Track every project, unit and customer payment in one place. Manage loans, invoices,
-                    contractors, brokers and investors without spreadsheets or scattered WhatsApp chats -
-                    built to stay organized as your business grows.
+                    {{ \App\Models\SiteSetting::get('footer_description', \App\Http\Controllers\Admin\SocialController::DEFAULT_FOOTER_DESCRIPTION) }}
                 </p>
                 @php $__footerPhone = \App\Models\SiteSetting::get('phone_number'); @endphp
                 @if ($__footerPhone)

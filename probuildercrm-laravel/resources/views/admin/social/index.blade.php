@@ -17,6 +17,17 @@
             @method('PUT')
 
             <div class="card" style="margin-bottom: var(--space-lg);">
+                <strong style="display: block; margin-bottom: 8px;">Footer description</strong>
+                <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin-bottom: var(--space-md);">
+                    Shown under the logo in the site footer. Keep it short - 2 to 4 sentences reads best.
+                </p>
+                <div class="form-field">
+                    <label for="footer_description">Description</label>
+                    <textarea id="footer_description" name="footer_description" rows="4" maxlength="500" class="form-textarea">{{ old('footer_description', $footerDescription) }}</textarea>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: var(--space-lg);">
                 <strong style="display: block; margin-bottom: 8px;">Contact phone number</strong>
                 <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin-bottom: var(--space-md);">
                     Shown in the header and footer across the site. Leave blank to hide it.

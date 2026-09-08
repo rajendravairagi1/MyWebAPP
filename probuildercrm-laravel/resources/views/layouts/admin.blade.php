@@ -31,8 +31,8 @@
                 <img src="{{ asset($__adminLogoPath) }}" alt="ProBuilderCRM" class="admin-sidebar-logo-image">
             @else
                 <span class="logo-mark">P</span>
+                <span>ProBuilder<span class="logo-accent">CRM</span></span>
             @endif
-            <span>ProBuilder<span class="logo-accent">CRM</span></span>
         </a>
 
         <nav class="admin-nav">
