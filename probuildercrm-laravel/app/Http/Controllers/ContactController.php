@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\ContactSubmission;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class ContactController extends Controller
 {
     public function show()
     {
-        return view('contact');
+        return view('contact', [
+            'recaptchaSiteKey' => SiteSetting::get('recaptcha_site_key'),
+        ]);
     }
 
     public function store(Request $request)
@@ -21,8 +25,45 @@ class ContactController extends Controller
             'message' => 'required|string|max:5000',
         ]);
 
+        $secretKey = SiteSetting::get('recaptcha_secret_key');
+
+        if ($secretKey && ! $this->recaptchaPassed($request, $secretKey)) {
+            return back()
+                ->withInput()
+                ->withErrors(['recaptcha' => "Please tick the \"I'm not a robot\" checkbox."]);
+        }
+
         ContactSubmission::create($validated);
 
         return back()->with('status', 'sent');
+    }
+
+    /**
+     * Verifies the widget's response token server-side with Google —
+     * the checkbox alone is client-side and trivially spoofable without
+     * this, since a bot can just POST the form directly.
+     */
+    private function recaptchaPassed(Request $request, string $secretKey): bool
+    {
+        $token = (string) $request->input('g-recaptcha-response');
+
+        if ($token === '') {
+            return false;
+        }
+
+        try {
+            $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret' => $secretKey,
+                'response' => $token,
+                'remoteip' => $request->ip(),
+            ]);
+
+            return (bool) ($response->json('success') ?? false);
+        } catch (\Throwable) {
+            // Google's verification endpoint being unreachable shouldn't
+            // be the reason a genuine customer's demo request is lost —
+            // fail open rather than blocking every submission.
+            return true;
+        }
     }
 }

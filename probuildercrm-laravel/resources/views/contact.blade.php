@@ -55,6 +55,10 @@
                     <textarea id="message" name="message" required rows="4" class="form-textarea">{{ old('message') }}</textarea>
                 </div>
 
+                @if ($recaptchaSiteKey ?? null)
+                    <div class="g-recaptcha" data-sitekey="{{ $recaptchaSiteKey }}"></div>
+                @endif
+
                 @if ($errors->any())
                     <p class="form-error">{{ $errors->first() }}</p>
                 @endif
@@ -64,5 +68,11 @@
         @endif
     </div>
 </section>
+
+@if ($recaptchaSiteKey ?? null)
+    @push('scripts')
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    @endpush
+@endif
 
 @endsection
