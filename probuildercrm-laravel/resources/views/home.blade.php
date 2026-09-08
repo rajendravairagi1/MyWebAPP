@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container container-wide">
         <div class="hero-composition">
             <div class="floating-badge floating-badge-1">
                 <span class="floating-badge-icon" style="background: rgba(52,211,153,0.15);">
