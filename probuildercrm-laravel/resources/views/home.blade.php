@@ -307,10 +307,17 @@
         </div>
 
         <div style="text-align: center; margin-top: var(--space-xl);">
-            <p style="color: var(--color-ink-soft); font-weight: 600; margin-bottom: 12px;">Trusted by builders in</p>
-            <div style="display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; font-weight: 700; color: var(--color-ink);">
-                @foreach (config('site.regions') as $region)
-                    <span>{{ $region }}</span>
+            <div class="pill-row">
+                @foreach ([
+                    ['icon' => 'shield-check', 'label' => 'Bank-grade data security'],
+                    ['icon' => 'database', 'label' => 'Automatic daily backups'],
+                    ['icon' => 'rocket', 'label' => 'Live in minutes, no setup calls'],
+                    ['icon' => 'smartphone', 'label' => 'Works on mobile, no app needed'],
+                ] as $badge)
+                    <span class="pill">
+                        <span style="display: inline-flex; color: var(--color-primary);">@include('partials.icon', ['name' => $badge['icon'], 'size' => 15])</span>
+                        {{ $badge['label'] }}
+                    </span>
                 @endforeach
             </div>
         </div>
