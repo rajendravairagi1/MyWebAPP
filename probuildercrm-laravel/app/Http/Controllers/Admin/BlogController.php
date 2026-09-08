@@ -57,7 +57,7 @@ class BlogController extends Controller
     public function update(Request $request, BlogPost $post)
     {
         $data = $this->validated($request);
-        $data['slug'] = BlogPost::uniqueSlugFrom($data['slug'] ?: $data['title'], $post->id);
+        $data['slug'] = BlogPost::uniqueSlugFrom(($data['slug'] ?? null) ?: $data['title'], $post->id);
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $this->storeImage($request->file('featured_image'), $data['slug']);
