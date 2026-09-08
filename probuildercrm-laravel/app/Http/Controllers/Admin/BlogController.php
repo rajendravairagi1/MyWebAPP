@@ -69,7 +69,7 @@ class BlogController extends Controller
         BlogPost::create($data);
         SitemapPing::ping();
 
-        return redirect()->route('admin.posts.index')->with('status', 'Post created — sitemap submitted to search engines.');
+        return redirect()->route('admin.posts.index')->with('status', 'Post created - sitemap submitted to search engines.');
     }
 
     public function update(Request $request, BlogPost $post)
@@ -84,7 +84,7 @@ class BlogController extends Controller
         $post->update($data);
         SitemapPing::ping();
 
-        return redirect()->route('admin.posts.index')->with('status', 'Post updated — sitemap submitted to search engines.');
+        return redirect()->route('admin.posts.index')->with('status', 'Post updated - sitemap submitted to search engines.');
     }
 
     public function destroy(BlogPost $post)

@@ -9,7 +9,7 @@
     <div class="container" style="max-width: 720px;">
         <p class="eyebrow">Contact</p>
         <h1>Let's talk about your business</h1>
-        <p class="body-lg">Tell us a bit about your projects and we'll set up a walkthrough built around them — not a generic demo.</p>
+        <p class="body-lg">Tell us a bit about your projects and we'll set up a walkthrough built around them - not a generic demo.</p>
     </div>
 </section>
 
@@ -18,7 +18,7 @@
         <div style="display: flex; flex-direction: column; gap: 16px;">
             <a href="{{ config('site.whatsapp') }}" target="_blank" rel="noopener noreferrer" class="card" style="text-decoration: none;">
                 <h3 style="margin-bottom: 4px;">WhatsApp</h3>
-                <p style="color: var(--color-ink-soft);">Fastest way to reach us — message us directly.</p>
+                <p style="color: var(--color-ink-soft);">Fastest way to reach us - message us directly.</p>
             </a>
             <a href="mailto:{{ config('site.email') }}" class="card" style="text-decoration: none;">
                 <h3 style="margin-bottom: 4px;">Email</h3>
@@ -32,7 +32,7 @@
 
         @if (session('status') === 'sent')
             <div class="card" style="text-align: center;">
-                <h3>Thanks — we'll be in touch shortly.</h3>
+                <h3>Thanks - we'll be in touch shortly.</h3>
                 <p style="color: var(--color-ink-soft);">We usually reply within one business day.</p>
             </div>
         @else

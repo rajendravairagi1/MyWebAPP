@@ -1,7 +1,7 @@
 @extends('layouts.marketing')
 
 @section('title', 'Pricing')
-@section('description', 'Simple, transparent pricing for Pro Builder CRM — plans for solo builders, teams, and multi-branch companies.')
+@section('description', 'Simple, transparent pricing for Pro Builder CRM - plans for solo builders, teams, and multi-branch companies.')
 
 @section('content')
 
@@ -9,7 +9,7 @@
     <div class="container" style="max-width: 720px;">
         <p class="eyebrow">Pricing</p>
         <h1>Simple pricing, no surprises</h1>
-        <p class="body-lg">Pick the plan that matches how your business runs today — upgrade any time as your team grows.</p>
+        <p class="body-lg">Pick the plan that matches how your business runs today - upgrade any time as your team grows.</p>
     </div>
 </section>
 
@@ -57,7 +57,7 @@
                             <span class="pricing-real" x-text="'₹' + pricing({{ $plan->monthly_price }}).price.toLocaleString('en-IN')"></span>
                         </div>
                         <div class="pricing-cycle-note">
-                            <span x-show="cycle.bonusMonths > 0" x-text="'for ' + cycle.months + ' months — ' + (cycle.months + cycle.bonusMonths) + ' months of service'"></span>
+                            <span x-show="cycle.bonusMonths > 0" x-text="'for ' + cycle.months + ' months - ' + (cycle.months + cycle.bonusMonths) + ' months of service'"></span>
                             <span x-show="cycle.bonusMonths === 0">per month</span>
                         </div>
                     </div>

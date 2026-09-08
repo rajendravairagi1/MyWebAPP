@@ -3,7 +3,7 @@
 return [
     [
         'question' => 'What is Pro Builder CRM?',
-        'answer' => "Pro Builder CRM is a CRM built specifically for real estate builders and developers. It manages projects, unit inventory, customer bookings and payments, bank loan disbursements, invoices and quotations, contractor and broker ledgers, and investor accounts — all in one system, instead of scattered spreadsheets and WhatsApp chats.",
+        'answer' => "Pro Builder CRM is a CRM built specifically for real estate builders and developers. It manages projects, unit inventory, customer bookings and payments, bank loan disbursements, invoices and quotations, contractor and broker ledgers, and investor accounts - all in one system, instead of scattered spreadsheets and WhatsApp chats.",
     ],
     [
         'question' => 'Who is Pro Builder CRM built for?',
@@ -15,7 +15,7 @@ return [
     ],
     [
         'question' => 'How long does it take to set up?',
-        'answer' => "Most builders are recording real payments within a day. Add your projects and units, bring in your existing customers and bookings, and you're live — no lengthy implementation project required.",
+        'answer' => "Most builders are recording real payments within a day. Add your projects and units, bring in your existing customers and bookings, and you're live - no lengthy implementation project required.",
     ],
     [
         'question' => 'Is my business data secure?',
@@ -23,11 +23,11 @@ return [
     ],
     [
         'question' => 'Can my team use it, or is it only for the owner?',
-        'answer' => "Both. On the Team and Company plans, you can add supervisors and staff with role-based access — grant someone access to a module like Customers or Projects, and separately choose whether they can see sensitive financial details like price and profit.",
+        'answer' => "Both. On the Team and Company plans, you can add supervisors and staff with role-based access - grant someone access to a module like Customers or Projects, and separately choose whether they can see sensitive financial details like price and profit.",
     ],
     [
         'question' => 'Does it work on mobile?',
-        'answer' => "Yes. The entire app is mobile-responsive — record a payment, check a customer's balance, or share a property link right from your phone at the site, not just from a desktop in the office.",
+        'answer' => "Yes. The entire app is mobile-responsive - record a payment, check a customer's balance, or share a property link right from your phone at the site, not just from a desktop in the office.",
     ],
     [
         'question' => 'Can I manage multiple branches or cities from one account?',

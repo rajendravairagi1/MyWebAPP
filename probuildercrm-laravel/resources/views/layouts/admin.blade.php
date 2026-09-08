@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Builder CRM — Admin</title>
+    <title>Pro Builder CRM - Admin</title>
     <meta name="robots" content="noindex, nofollow">
     @include('partials.favicon-links')
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
@@ -11,7 +11,7 @@
 <body>
     <header style="border-bottom: 1px solid var(--color-border); background: #fff;">
         <div class="container" style="display: flex; align-items: center; justify-content: space-between; height: 64px;">
-            <strong>Pro Builder CRM — Admin</strong>
+            <strong>Pro Builder CRM - Admin</strong>
             <a href="{{ url('/') }}" style="text-decoration: none; color: var(--color-ink-soft); font-size: 0.9rem;">&larr; Back to site</a>
         </div>
     </header>

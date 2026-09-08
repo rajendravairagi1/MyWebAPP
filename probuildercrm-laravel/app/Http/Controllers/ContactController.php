@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewDemoRequest;
 use App\Models\ContactSubmission;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ContactController extends Controller
 {
@@ -33,9 +36,33 @@ class ContactController extends Controller
                 ->withErrors(['recaptcha' => "Please tick the \"I'm not a robot\" checkbox."]);
         }
 
-        ContactSubmission::create($validated);
+        $submission = ContactSubmission::create($validated);
+        $this->notifyTeam($submission);
 
         return back()->with('status', 'sent');
+    }
+
+    /**
+     * Emails whoever's configured under Admin > Integrations. Never blocks
+     * the submission itself — a genuine demo request is still saved (and
+     * visible under Admin > Demo Requests) even if mail delivery fails.
+     */
+    private function notifyTeam(ContactSubmission $submission): void
+    {
+        $emails = collect(explode(',', (string) SiteSetting::get('notification_emails')))
+            ->map(fn ($email) => trim($email))
+            ->filter()
+            ->all();
+
+        if (empty($emails)) {
+            return;
+        }
+
+        try {
+            Mail::to($emails)->send(new NewDemoRequest($submission));
+        } catch (\Throwable $e) {
+            Log::warning('Failed to send demo request notification email: '.$e->getMessage());
+        }
     }
 
     /**

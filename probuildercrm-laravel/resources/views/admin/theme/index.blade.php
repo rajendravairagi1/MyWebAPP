@@ -10,7 +10,7 @@
         @endif
 
         <p style="color: var(--color-ink-soft); margin-bottom: var(--space-lg);">
-            Choose which look visitors see on the public website. You can switch back any time —
+            Choose which look visitors see on the public website. You can switch back any time -
             nothing else (content, pricing, blog posts) changes when you switch.
         </p>
 
@@ -27,7 +27,7 @@
                         <div style="height: 6px; width: 70%; background: rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 6px;"></div>
                         <div style="height: 6px; width: 55%; background: rgba(255,255,255,0.12); border-radius: 4px;"></div>
                     </div>
-                    <span style="color: var(--color-ink-soft); font-size: 0.85rem;">Dark background, bright accent buttons — modern SaaS look.</span>
+                    <span style="color: var(--color-ink-soft); font-size: 0.85rem;">Dark background, bright accent buttons - modern SaaS look.</span>
                 </label>
 
                 <label class="card" style="cursor: pointer; display: flex; flex-direction: column; gap: 10px; {{ $activeTheme === 'light' ? 'border-color: var(--color-primary); border-width: 2px;' : '' }}">
@@ -38,7 +38,7 @@
                         <div style="height: 6px; width: 70%; background: #e2e8f0; border-radius: 4px; margin-bottom: 6px;"></div>
                         <div style="height: 6px; width: 55%; background: #f1f5f9; border-radius: 4px;"></div>
                     </div>
-                    <span style="color: var(--color-ink-soft); font-size: 0.85rem;">Clean white background — original look.</span>
+                    <span style="color: var(--color-ink-soft); font-size: 0.85rem;">Clean white background - original look.</span>
                 </label>
             </div>
 

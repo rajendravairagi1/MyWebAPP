@@ -10,9 +10,9 @@
         @endif
 
         <p style="color: var(--color-ink-soft); margin-bottom: var(--space-lg);">
-            Set each plan's real monthly price here — the pricing page works it out from there: the 6-month price is 6&times; that
+            Set each plan's real monthly price here - the pricing page works it out from there: the 6-month price is 6&times; that
             (with 1 month free added to the service), the yearly price is 12&times; that (with 2 months free added). The permanent
-            "40% OFF" badge and struck-through price shown to visitors are calculated automatically too — you only ever edit the
+            "40% OFF" badge and struck-through price shown to visitors are calculated automatically too - you only ever edit the
             one real monthly number per plan.
         </p>
 

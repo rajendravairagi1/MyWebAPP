@@ -4,7 +4,7 @@ return [
     'name' => 'Pro Builder CRM',
     'legal_name' => 'Oneweblink Pvt Ltd',
     'tagline' => 'The all-in-one CRM for real estate builders & developers',
-    'short_description' => 'Pro Builder CRM helps real estate builders and developers manage projects, unit bookings, customer payments, loans, invoices, contractors and brokers — all in one place.',
+    'short_description' => 'Pro Builder CRM helps real estate builders and developers manage projects, unit bookings, customer payments, loans, invoices, contractors and brokers - all in one place.',
     'email' => 'support@probuildercrm.com',
     'phone' => '+91 78980 02496',
     'phone_href' => '+917898002496',

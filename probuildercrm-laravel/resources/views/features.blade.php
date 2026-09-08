@@ -1,7 +1,7 @@
 @extends('layouts.marketing')
 
 @section('title', 'Features')
-@section('description', "See everything Pro Builder CRM handles — project & unit management, customer payments, loan disbursements, invoices, contractors, brokers, investors and more.")
+@section('description', "See everything Pro Builder CRM handles - project & unit management, customer payments, loan disbursements, invoices, contractors, brokers, investors and more.")
 
 @section('content')
 
@@ -9,7 +9,7 @@
     <div class="container" style="max-width: 720px;">
         <p class="eyebrow">Features</p>
         <h1>Every project, every unit, always up to date</h1>
-        <p class="body-lg">One system for the whole real estate business — not a spreadsheet for each piece of it.</p>
+        <p class="body-lg">One system for the whole real estate business - not a spreadsheet for each piece of it.</p>
     </div>
 </section>
 

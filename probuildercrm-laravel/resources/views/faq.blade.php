@@ -1,7 +1,7 @@
 @extends('layouts.marketing')
 
 @section('title', 'Frequently Asked Questions')
-@section('description', 'Answers to common questions about Pro Builder CRM — setup, security, team access, pricing and more.')
+@section('description', 'Answers to common questions about Pro Builder CRM - setup, security, team access, pricing and more.')
 
 @push('head')
 @include('partials.json-ld', ['schemas' => [\App\Support\Seo::faqSchema(config('faqs'))]])

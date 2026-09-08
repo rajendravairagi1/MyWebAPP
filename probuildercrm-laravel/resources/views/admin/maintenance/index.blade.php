@@ -10,14 +10,14 @@
         @endif
 
         <p style="color: var(--color-ink-soft); margin-bottom: var(--space-lg);">
-            After uploading new code via cPanel, use these instead of visiting the <code>/migrate?token=...</code> link by hand —
+            After uploading new code via cPanel, use these instead of visiting the <code>/migrate?token=...</code> link by hand -
             handy if you forget the token or the exact URL.
         </p>
 
         <div class="card" style="margin-bottom: var(--space-lg); display: flex; flex-direction: column; gap: 10px;">
             <strong>Run migrations &amp; seed pricing</strong>
             <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin: 0;">
-                Applies any new database changes from the latest deploy, seeds default pricing plans (only what's missing —
+                Applies any new database changes from the latest deploy, seeds default pricing plans (only what's missing -
                 never overwrites prices you've already changed), and clears caches. Run this after every code upload.
             </p>
             <form method="POST" action="{{ route('admin.maintenance.migrate') }}">
@@ -29,7 +29,7 @@
         <div class="card" style="margin-bottom: var(--space-lg); display: flex; flex-direction: column; gap: 10px;">
             <strong>Clear caches</strong>
             <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin: 0;">
-                Clears view, config and route caches — use this if a page still shows old content after a deploy.
+                Clears view, config and route caches - use this if a page still shows old content after a deploy.
             </p>
             <form method="POST" action="{{ route('admin.maintenance.clear-cache') }}">
                 @csrf

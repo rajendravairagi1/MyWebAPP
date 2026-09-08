@@ -91,7 +91,7 @@ class BrandingController extends Controller
         $this->deleteExistingLogo();
         SiteSetting::set('logo_path', '');
 
-        return redirect()->route('admin.branding.index')->with('status', 'Logo removed — back to the text logo.');
+        return redirect()->route('admin.branding.index')->with('status', 'Logo removed - back to the text logo.');
     }
 
     private function deleteExistingLogo(): void

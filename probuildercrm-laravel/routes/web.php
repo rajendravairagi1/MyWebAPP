@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
 use App\Http\Controllers\Admin\BrandingController as AdminBrandingController;
 use App\Http\Controllers\Admin\IntegrationsController as AdminIntegrationsController;
+use App\Http\Controllers\Admin\LeadsController as AdminLeadsController;
 use App\Http\Controllers\Admin\MaintenanceController as AdminMaintenanceController;
 use App\Http\Controllers\Admin\PricingController as AdminPricingController;
 use App\Http\Controllers\Admin\ThemeController as AdminThemeController;
@@ -68,6 +69,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/integrations', [AdminIntegrationsController::class, 'index'])->name('integrations.index');
         Route::put('/integrations', [AdminIntegrationsController::class, 'update'])->name('integrations.update');
         Route::post('/integrations/ping-sitemap', [AdminIntegrationsController::class, 'pingSitemap'])->name('integrations.ping-sitemap');
+
+        Route::get('/leads', [AdminLeadsController::class, 'index'])->name('leads.index');
+        Route::delete('/leads/{lead}', [AdminLeadsController::class, 'destroy'])->name('leads.destroy');
 
         Route::get('/maintenance', [AdminMaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance/clear-cache', [AdminMaintenanceController::class, 'clearCache'])->name('maintenance.clear-cache');

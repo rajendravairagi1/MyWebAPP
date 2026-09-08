@@ -13,7 +13,7 @@
         @endif
 
         <p style="color: var(--color-ink-soft); margin-bottom: var(--space-lg);">
-            The logo shown in the navbar across the whole site. PNG, JPG, SVG or WEBP, up to 2MB —
+            The logo shown in the navbar across the whole site. PNG, JPG, SVG or WEBP, up to 2MB -
             a wide/rectangular logo with a transparent background works best.
         </p>
 
@@ -22,7 +22,7 @@
             @if ($logoPath)
                 <img src="{{ asset($logoPath) }}?v={{ time() }}" alt="Current logo" style="height: {{ \App\Http\Controllers\Admin\BrandingController::pixelsFor($logoSize) }}px; width: auto; display: block;">
             @else
-                <span style="color: var(--color-ink-soft); font-size: 0.9rem;">No logo uploaded yet — the text logo ("Pro Builder CRM") is shown.</span>
+                <span style="color: var(--color-ink-soft); font-size: 0.9rem;">No logo uploaded yet - the text logo ("Pro Builder CRM") is shown.</span>
             @endif
         </div>
 
@@ -35,7 +35,7 @@
                     <select id="logo_size" name="logo_size" class="form-select">
                         @foreach ($sizes as $key => $px)
                             <option value="{{ $key }}" {{ $logoSize === $key ? 'selected' : '' }}>
-                                {{ ['xs' => 'Extra Small', 'sm' => 'Small', 'md' => 'Medium (default)', 'lg' => 'Large', 'xl' => 'Extra Large'][$key] }} — {{ $px }}px
+                                {{ ['xs' => 'Extra Small', 'sm' => 'Small', 'md' => 'Medium (default)', 'lg' => 'Large', 'xl' => 'Extra Large'][$key] }} - {{ $px }}px
                             </option>
                         @endforeach
                     </select>
@@ -74,7 +74,7 @@
         <hr style="border: none; border-top: 1px solid var(--color-border); margin: var(--space-2xl) 0;">
 
         <p style="color: var(--color-ink-soft); margin-bottom: var(--space-lg);">
-            The favicon shown in the browser tab. PNG, JPG, WEBP or SVG, up to 1MB — a simple square icon works best
+            The favicon shown in the browser tab. PNG, JPG, WEBP or SVG, up to 1MB - a simple square icon works best
             (it gets auto-cropped to a square and resized to every size a browser needs).
         </p>
 

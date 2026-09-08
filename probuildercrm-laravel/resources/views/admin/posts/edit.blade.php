@@ -34,7 +34,7 @@
                 <label for="slug">URL slug</label>
                 <input id="slug" name="slug" value="{{ old('slug', $post->slug) }}" class="form-input" placeholder="Leave as-is to keep the current URL">
                 <p style="font-size: 0.82rem; color: var(--color-ink-soft); margin-top: 4px;">
-                    Shown at /blog/{{ old('slug', $post->slug) ?: '...' }} — only change this if you actually want the page URL to change.
+                    Shown at /blog/{{ old('slug', $post->slug) ?: '...' }} - only change this if you actually want the page URL to change.
                 </p>
             </div>
 

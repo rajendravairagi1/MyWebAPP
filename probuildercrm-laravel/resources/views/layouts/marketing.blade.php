@@ -6,7 +6,7 @@
     @if ($__gaScript = \App\Models\SiteSetting::get('analytics_script'))
         {!! $__gaScript !!}
     @endif
-    <title>@yield('title', config('site.name').' — Real Estate & Construction CRM Software for Builders')</title>
+    <title>@yield('title', config('site.name').' - Real Estate & Construction CRM Software for Builders')</title>
     <meta name="description" content="@yield('description', config('site.short_description'))">
     <link rel="canonical" href="{{ config('site.url').request()->getPathInfo() }}">
     @include('partials.favicon-links')

@@ -30,7 +30,7 @@
                     </div>
                 </div>
             @empty
-                <p style="padding: 20px; color: var(--color-ink-soft);">No posts yet — click "+ New Post" to add one.</p>
+                <p style="padding: 20px; color: var(--color-ink-soft);">No posts yet - click "+ New Post" to add one.</p>
             @endforelse
         </div>
     </div>

@@ -418,7 +418,7 @@ h3 {
 /* Floating WhatsApp — sits above the sticky CTA bar */
 .floating-whatsapp {
   position: fixed;
-  bottom: 90px;
+  bottom: 158px;
   right: 24px;
   z-index: 50;
   width: 56px;
@@ -448,13 +448,14 @@ h3 {
   50% { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 0 10px rgba(37, 211, 102, 0); }
 }
 
-/* Back-to-top button — sits above the WhatsApp bubble in the same
-   corner stack (below it would sit inside the sticky CTA bar's area
-   on most pages), only appears once the visitor has scrolled down. */
+/* Back-to-top button — sits below the WhatsApp bubble (WhatsApp moved
+   up to bottom:158px to make room), so neither one sits inside the
+   sticky CTA bar's area on most pages. Only appears once the visitor
+   has scrolled down. */
 .scroll-top-btn {
   position: fixed;
   right: 28px;
-  bottom: 158px;
+  bottom: 90px;
   z-index: 50;
   width: 44px;
   height: 44px;

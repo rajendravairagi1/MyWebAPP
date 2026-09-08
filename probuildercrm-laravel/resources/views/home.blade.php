@@ -11,9 +11,9 @@
 
     <div class="container">
         <p class="eyebrow">Built for Real Estate Builders &amp; Developers</p>
-        <h1>Run your entire real estate business from one CRM — not five spreadsheets.</h1>
+        <h1>Run your entire real estate business from one CRM - not five spreadsheets.</h1>
         <p class="body-lg">
-            Projects, unit bookings, customer payments, loans, invoices, contractors and brokers — Pro Builder CRM keeps every
+            Projects, unit bookings, customer payments, loans, invoices, contractors and brokers - Pro Builder CRM keeps every
             number in one place, so you always know exactly where your business stands.
         </p>
         <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: var(--space-2xl);">
@@ -114,10 +114,10 @@
 
         <div x-data="{
                 tabs: [
-                    { key: 'dashboard', label: 'Dashboard & Analytics', title: 'See exactly where your business stands, today', description: 'Revenue trends, invoice status, unit booking status, deal pipeline, top projects by profit and payment collection rate — all in one dashboard, updated the moment a payment is recorded.', image: '{{ asset('screenshots/dashboard.png') }}', alt: 'Pro Builder CRM dashboard with revenue trend, invoice status and payment collection charts' },
-                    { key: 'analytics', label: 'Projects & Units', title: 'Every project, every unit, always up to date', description: 'Track unit status, pricing and booking pipeline across every project — with the numbers that matter surfaced automatically, not buried in a spreadsheet.', image: '{{ asset('screenshots/analytics.png') }}', alt: 'Pro Builder CRM analytics view showing unit booking status and deal pipeline' },
-                    { key: 'brokers', label: 'Brokers & Team', title: 'Commissions and access, handled properly', description: 'Track every broker\'s commission earned, paid and owed, and give your team exactly the access they need — without exposing prices or profit if you\'d rather they didn\'t see it.', image: '{{ asset('screenshots/brokers.png') }}', alt: 'Pro Builder CRM brokers module with commission tracking' },
-                    { key: 'settings', label: 'Business Settings', title: 'Set it up the way your business actually runs', description: 'Currency, branding, multi-branch/company rollups, language — configure Pro Builder CRM around your business, not the other way around.', image: '{{ asset('screenshots/settings.png') }}', alt: 'Pro Builder CRM business settings screen' }
+                    { key: 'dashboard', label: 'Dashboard & Analytics', title: 'See exactly where your business stands, today', description: 'Revenue trends, invoice status, unit booking status, deal pipeline, top projects by profit and payment collection rate - all in one dashboard, updated the moment a payment is recorded.', image: '{{ asset('screenshots/dashboard.png') }}', alt: 'Pro Builder CRM dashboard with revenue trend, invoice status and payment collection charts' },
+                    { key: 'analytics', label: 'Projects & Units', title: 'Every project, every unit, always up to date', description: 'Track unit status, pricing and booking pipeline across every project - with the numbers that matter surfaced automatically, not buried in a spreadsheet.', image: '{{ asset('screenshots/analytics.png') }}', alt: 'Pro Builder CRM analytics view showing unit booking status and deal pipeline' },
+                    { key: 'brokers', label: 'Brokers & Team', title: 'Commissions and access, handled properly', description: 'Track every broker\'s commission earned, paid and owed, and give your team exactly the access they need - without exposing prices or profit if you\'d rather they didn\'t see it.', image: '{{ asset('screenshots/brokers.png') }}', alt: 'Pro Builder CRM brokers module with commission tracking' },
+                    { key: 'settings', label: 'Business Settings', title: 'Set it up the way your business actually runs', description: 'Currency, branding, multi-branch/company rollups, language - configure Pro Builder CRM around your business, not the other way around.', image: '{{ asset('screenshots/settings.png') }}', alt: 'Pro Builder CRM business settings screen' }
                 ],
                 active: 'dashboard',
                 get activeTab() { return this.tabs.find(t => t.key === this.active) }
@@ -168,7 +168,7 @@
         <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
             <span class="tag">Reach customers instantly</span>
             <h2 style="margin-top: 12px;">Payment reminders and invoices, sent on WhatsApp automatically</h2>
-            <p class="body-lg" style="margin-top: 12px;">No more chasing customers by phone. Pro Builder CRM sends the message for you — and shares a ready-to-view PDF in one tap.</p>
+            <p class="body-lg" style="margin-top: 12px;">No more chasing customers by phone. Pro Builder CRM sends the message for you - and shares a ready-to-view PDF in one tap.</p>
         </div>
 
         <div class="whatsapp-mockup-grid">
@@ -189,7 +189,7 @@
                     <strong>Invoice Shared, One Tap</strong>
                 </div>
                 <div class="whatsapp-bubble">
-                    Your payment of ₹40,000 has been received. Here's your receipt — INV-00009.pdf
+                    Your payment of ₹40,000 has been received. Here's your receipt - INV-00009.pdf
                     <span class="whatsapp-bubble-time">Sent from Pro Builder CRM · 6:14 PM ✓✓</span>
                 </div>
             </div>
@@ -219,7 +219,7 @@
     <div class="container grid-2" style="align-items: center;">
         <div>
             <span class="tag">Mobile-ready</span>
-            <h2 style="margin: 12px 0 var(--space-sm);">Check a customer's balance or record a payment — right from your phone</h2>
+            <h2 style="margin: 12px 0 var(--space-sm);">Check a customer's balance or record a payment - right from your phone</h2>
             <p style="color: var(--color-ink-soft); font-size: 1.02rem;">
                 Pro Builder CRM works fully on mobile, no separate app needed. Whether you're at a site visit or
                 on the move, every project, customer and payment is one tap away.
@@ -245,14 +245,14 @@
                     <span class="step-number">@include('partials.icon', ['name' => 'user-plus', 'size' => 18])</span>
                     <div>
                         <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Create your account</h3>
-                        <p style="color: var(--color-ink-soft); font-size: 0.95rem;">Sign up and set your business name, currency and branding — no lengthy onboarding call required.</p>
+                        <p style="color: var(--color-ink-soft); font-size: 0.95rem;">Sign up and set your business name, currency and branding - no lengthy onboarding call required.</p>
                     </div>
                 </div>
                 <div class="step-item">
                     <span class="step-number">@include('partials.icon', ['name' => 'layout-grid', 'size' => 18])</span>
                     <div>
                         <h3 style="font-size: 1.1rem; margin-bottom: 4px;">Add your first project &amp; units</h3>
-                        <p style="color: var(--color-ink-soft); font-size: 0.95rem;">Bring in your existing projects, units and customer bookings — or start fresh with a new one.</p>
+                        <p style="color: var(--color-ink-soft); font-size: 0.95rem;">Bring in your existing projects, units and customer bookings - or start fresh with a new one.</p>
                     </div>
                 </div>
                 <div class="step-item">
@@ -280,7 +280,7 @@
 
         @php
             $testimonials = [
-                ['quote' => 'I used to spend a whole evening every week matching payments to customers in Excel. Now every receipt and reminder is automatic — I check the dashboard for two minutes and I know exactly where every project stands.', 'role' => 'Real Estate Builder', 'city' => 'Indore'],
+                ['quote' => 'I used to spend a whole evening every week matching payments to customers in Excel. Now every receipt and reminder is automatic - I check the dashboard for two minutes and I know exactly where every project stands.', 'role' => 'Real Estate Builder', 'city' => 'Indore'],
                 ['quote' => 'Loan disbursements from the bank used to be the most confusing part of our books. Pro Builder CRM keeps it all tied to the right unit and customer, so our accountant isn\'t chasing us for statements anymore.', 'role' => 'Construction Contractor', 'city' => 'Raipur'],
                 ['quote' => 'My brokers can see their own commission and nothing else. My supervisor logs payments from site visits on his phone. Everyone has exactly the access they need, nothing more.', 'role' => 'Property Developer', 'city' => 'Bhopal'],
             ];
