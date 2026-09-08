@@ -12,6 +12,7 @@
         <form method="POST"
               action="{{ $post->exists ? route('admin.posts.update', $post) : route('admin.posts.store') }}"
               class="card"
+              enctype="multipart/form-data"
               style="display: flex; flex-direction: column; gap: 16px;"
               x-data="{
                 blocks: {{ json_encode($post->content ?: [['type' => 'paragraph', 'text' => '']]) }},
@@ -50,6 +51,15 @@
             <div class="form-field">
                 <label for="excerpt">Excerpt (shown on the blog list page)</label>
                 <textarea id="excerpt" name="excerpt" required rows="2" class="form-textarea">{{ old('excerpt', $post->excerpt) }}</textarea>
+            </div>
+
+            <div class="form-field">
+                <label for="featured_image">Featured image</label>
+                @if ($post->featured_image)
+                    <img src="{{ asset($post->featured_image) }}" alt="" style="width: 220px; height: 130px; object-fit: cover; border-radius: 10px; margin-bottom: 8px; display: block;">
+                @endif
+                <input id="featured_image" name="featured_image" type="file" accept="image/*" class="form-input">
+                <p style="font-size: 0.82rem; color: var(--color-ink-soft); margin-top: 4px;">PNG, JPG or WEBP, up to 4MB. Leave empty to keep the current image.</p>
             </div>
 
             <div class="form-field">

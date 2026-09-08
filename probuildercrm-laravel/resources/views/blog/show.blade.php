@@ -27,6 +27,12 @@
         </div>
     </section>
 
+    @if ($post->featured_image)
+        <div class="container" style="max-width: 900px; margin-top: -40px;">
+            <img src="{{ asset($post->featured_image) }}" alt="{{ $post->title }}" style="width: 100%; max-height: 420px; object-fit: cover; border-radius: var(--radius-lg); display: block;">
+        </div>
+    @endif
+
     <section class="section">
         <div class="container" style="max-width: 720px; display: flex; flex-direction: column; gap: var(--space-md);">
             @foreach ($post->content as $block)

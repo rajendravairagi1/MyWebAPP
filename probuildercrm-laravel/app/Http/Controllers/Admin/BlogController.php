@@ -5,9 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\BlogPost;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 
 class BlogController extends Controller
 {
+    /**
+     * Featured images live under public/blog-images/ as plain files (same
+     * pattern as the site logo) — no storage:link symlink to remember
+     * after a zip-extract deploy on shared hosting.
+     */
+    private const IMAGE_DIR = 'blog-images';
+
     public function index()
     {
         $posts = BlogPost::orderByDesc('date')->get();
@@ -36,6 +45,10 @@ class BlogController extends Controller
         $data = $this->validated($request);
         $data['slug'] = BlogPost::uniqueSlugFrom(($data['slug'] ?? null) ?: $data['title']);
 
+        if ($request->hasFile('featured_image')) {
+            $data['featured_image'] = $this->storeImage($request->file('featured_image'), $data['slug']);
+        }
+
         BlogPost::create($data);
 
         return redirect()->route('admin.posts.index')->with('status', 'Post created.');
@@ -45,6 +58,10 @@ class BlogController extends Controller
     {
         $data = $this->validated($request);
         $data['slug'] = BlogPost::uniqueSlugFrom($data['slug'] ?: $data['title'], $post->id);
+
+        if ($request->hasFile('featured_image')) {
+            $data['featured_image'] = $this->storeImage($request->file('featured_image'), $data['slug']);
+        }
 
         $post->update($data);
 
@@ -69,6 +86,7 @@ class BlogController extends Controller
             'date' => 'required|date',
             'read_time' => 'required|string|max:50',
             'content' => 'required|string',
+            'featured_image' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:4096',
         ]);
 
         $content = json_decode($validated['content'], true);
@@ -76,7 +94,19 @@ class BlogController extends Controller
             $content = [];
         }
         $validated['content'] = $content;
+        unset($validated['featured_image']);
 
         return $validated;
+    }
+
+    private function storeImage(UploadedFile $file, string $slug): string
+    {
+        $dir = public_path(self::IMAGE_DIR);
+        File::ensureDirectoryExists($dir);
+
+        $filename = $slug.'-'.time().'.'.$file->getClientOriginalExtension();
+        $file->move($dir, $filename);
+
+        return self::IMAGE_DIR.'/'.$filename;
     }
 }

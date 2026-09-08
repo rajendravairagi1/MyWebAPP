@@ -28,7 +28,7 @@
         </div>
 
         <div class="footer-bottom">
-            &copy; {{ now()->year }} {{ config('site.legal_name') }}. All rights reserved.
+            &copy; 2022 &ndash; {{ now()->year }} {{ config('site.legal_name') }}. All rights reserved.
         </div>
     </div>
 </footer>
