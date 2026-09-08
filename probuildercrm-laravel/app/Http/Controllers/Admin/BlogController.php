@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BlogPost;
+use App\Support\ImageOptimizer;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
@@ -16,6 +17,20 @@ class BlogController extends Controller
      * after a zip-extract deploy on shared hosting.
      */
     private const IMAGE_DIR = 'blog-images';
+
+    /**
+     * Display heights (px) for the banner image on the full post page —
+     * lets the admin pick how prominent a given post's image looks
+     * without needing to touch code.
+     */
+    public const SIZES = [
+        'sm' => 220,
+        'md' => 320,
+        'lg' => 420,
+        'xl' => 520,
+    ];
+
+    public const DEFAULT_SIZE = 'lg';
 
     public function index()
     {
@@ -30,14 +45,15 @@ class BlogController extends Controller
             'date' => now()->format('Y-m-d'),
             'read_time' => '5 min read',
             'content' => [['type' => 'paragraph', 'text' => '']],
+            'featured_image_size' => self::DEFAULT_SIZE,
         ]);
 
-        return view('admin.posts.edit', compact('post'));
+        return view('admin.posts.edit', ['post' => $post, 'sizes' => self::SIZES]);
     }
 
     public function edit(BlogPost $post)
     {
-        return view('admin.posts.edit', compact('post'));
+        return view('admin.posts.edit', ['post' => $post, 'sizes' => self::SIZES]);
     }
 
     public function store(Request $request)
@@ -75,6 +91,11 @@ class BlogController extends Controller
         return redirect()->route('admin.posts.index')->with('status', 'Post deleted.');
     }
 
+    public static function pixelsFor(?string $size): int
+    {
+        return self::SIZES[$size] ?? self::SIZES[self::DEFAULT_SIZE];
+    }
+
     private function validated(Request $request): array
     {
         $validated = $request->validate([
@@ -87,6 +108,9 @@ class BlogController extends Controller
             'read_time' => 'required|string|max:50',
             'content' => 'required|string',
             'featured_image' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:4096',
+            'featured_image_alt' => 'nullable|string|max:255',
+            'featured_image_caption' => 'nullable|string|max:255',
+            'featured_image_size' => 'nullable|in:'.implode(',', array_keys(self::SIZES)),
         ]);
 
         $content = json_decode($validated['content'], true);
@@ -94,6 +118,7 @@ class BlogController extends Controller
             $content = [];
         }
         $validated['content'] = $content;
+        $validated['featured_image_size'] = $validated['featured_image_size'] ?? self::DEFAULT_SIZE;
         unset($validated['featured_image']);
 
         return $validated;
@@ -105,7 +130,7 @@ class BlogController extends Controller
         File::ensureDirectoryExists($dir);
 
         $filename = $slug.'-'.time().'.'.$file->getClientOriginalExtension();
-        $file->move($dir, $filename);
+        ImageOptimizer::optimizeAndSave($file, $dir.'/'.$filename);
 
         return self::IMAGE_DIR.'/'.$filename;
     }

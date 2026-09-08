@@ -12,4 +12,5 @@
     <a href="{{ route('admin.theme.index') }}" class="btn {{ $active === 'theme' ? 'btn-primary' : 'btn-secondary' }}">Theme</a>
     <a href="{{ route('admin.branding.index') }}" class="btn {{ $active === 'branding' ? 'btn-primary' : 'btn-secondary' }}">Branding</a>
     <a href="{{ route('admin.integrations.index') }}" class="btn {{ $active === 'integrations' ? 'btn-primary' : 'btn-secondary' }}">Integrations</a>
+    <a href="{{ route('admin.maintenance.index') }}" class="btn {{ $active === 'maintenance' ? 'btn-primary' : 'btn-secondary' }}">Maintenance</a>
 </div>

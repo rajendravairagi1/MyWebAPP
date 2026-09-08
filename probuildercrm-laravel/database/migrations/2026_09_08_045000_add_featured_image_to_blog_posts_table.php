@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasColumn('blog_posts', 'featured_image')) {
+            return;
+        }
+
         Schema::table('blog_posts', function (Blueprint $table) {
             $table->string('featured_image')->nullable()->after('content');
         });

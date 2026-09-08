@@ -44,11 +44,19 @@
             </form>
         @endif
 
-        <form method="POST" action="{{ route('admin.branding.update') }}" enctype="multipart/form-data" class="card" style="display: flex; flex-direction: column; gap: var(--space-md); margin-bottom: var(--space-lg);">
+        <form method="POST" action="{{ route('admin.branding.update') }}" enctype="multipart/form-data" data-upload-progress class="card" style="display: flex; flex-direction: column; gap: var(--space-md); margin-bottom: var(--space-lg);">
             @csrf
             <div class="form-field">
                 <label for="logo">Upload new logo</label>
                 <input type="file" id="logo" name="logo" accept=".png,.jpg,.jpeg,.svg,.webp" required>
+                <p style="font-size: 0.82rem; color: var(--color-ink-soft); margin-top: 4px;">Automatically resized &amp; compressed on upload (SVG uploads are kept as-is).</p>
+
+                <div data-upload-progress-wrap hidden>
+                    <div class="upload-progress-track">
+                        <div data-upload-progress-bar class="upload-progress-bar"></div>
+                    </div>
+                    <span data-upload-progress-label class="upload-progress-label">Uploading… 0%</span>
+                </div>
             </div>
             <div>
                 <button type="submit" class="btn btn-primary">Upload &amp; Use This Logo</button>

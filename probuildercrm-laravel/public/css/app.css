@@ -952,6 +952,31 @@ body.has-sticky-cta {
   margin: 0;
 }
 
+.upload-progress-wrap {
+  margin-top: 10px;
+}
+
+.upload-progress-track {
+  background: var(--color-border);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.upload-progress-bar {
+  background: var(--color-primary);
+  height: 100%;
+  width: 0%;
+  transition: width 0.15s ease;
+}
+
+.upload-progress-label {
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+  margin-top: 6px;
+  display: block;
+}
+
 /* Admin */
 .admin-shell {
   min-height: 70vh;

@@ -10,7 +10,10 @@ class BlogPost extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['slug', 'title', 'excerpt', 'category', 'date', 'read_time', 'author', 'content', 'featured_image'];
+    protected $fillable = [
+        'slug', 'title', 'excerpt', 'category', 'date', 'read_time', 'author', 'content',
+        'featured_image', 'featured_image_alt', 'featured_image_caption', 'featured_image_size',
+    ];
 
     protected $casts = [
         'date' => 'date',

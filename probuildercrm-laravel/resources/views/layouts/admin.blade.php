@@ -18,6 +18,7 @@
     @yield('content')
 
     <script src="{{ asset('js/alpine.min.js') }}" defer></script>
+    <script src="{{ asset('js/upload-progress.js') }}" defer></script>
     @stack('scripts')
 </body>
 </html>

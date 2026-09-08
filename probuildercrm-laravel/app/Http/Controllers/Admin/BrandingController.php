@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SiteSetting;
+use App\Support\ImageOptimizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 
@@ -70,7 +71,7 @@ class BrandingController extends Controller
 
         $file = $request->file('logo');
         $filename = 'logo.'.$file->getClientOriginalExtension();
-        $file->move($dir, $filename);
+        ImageOptimizer::optimizeAndSave($file, $dir.'/'.$filename, maxWidth: 800, quality: 90);
 
         SiteSetting::set('logo_path', self::DIR.'/'.$filename);
 

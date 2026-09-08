@@ -22,7 +22,7 @@
                 @foreach ($posts as $post)
                     <a href="{{ route('blog.show', $post->slug) }}" class="card" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 10px; padding: 0; overflow: hidden;">
                         @if ($post->featured_image)
-                            <img src="{{ asset($post->featured_image) }}" alt="{{ $post->title }}" style="width: 100%; height: 190px; object-fit: cover;">
+                            <img src="{{ asset($post->featured_image) }}" alt="{{ $post->featured_image_alt ?: $post->title }}" style="width: 100%; height: 190px; object-fit: cover;">
                         @endif
                         <div style="padding: {{ $post->featured_image ? '16px var(--space-lg) var(--space-lg)' : 'var(--space-lg)' }}; display: flex; flex-direction: column; gap: 10px;">
                             <span class="tag">{{ $post->category }}</span>

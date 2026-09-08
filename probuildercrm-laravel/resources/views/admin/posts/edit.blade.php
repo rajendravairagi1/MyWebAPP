@@ -13,6 +13,7 @@
               action="{{ $post->exists ? route('admin.posts.update', $post) : route('admin.posts.store') }}"
               class="card"
               enctype="multipart/form-data"
+              data-upload-progress
               style="display: flex; flex-direction: column; gap: 16px;"
               x-data="{
                 blocks: {{ json_encode($post->content ?: [['type' => 'paragraph', 'text' => '']]) }},
@@ -27,6 +28,14 @@
             <div class="form-field">
                 <label for="title">Title</label>
                 <input id="title" name="title" required value="{{ old('title', $post->title) }}" class="form-input">
+            </div>
+
+            <div class="form-field">
+                <label for="slug">URL slug</label>
+                <input id="slug" name="slug" value="{{ old('slug', $post->slug) }}" class="form-input" placeholder="Leave as-is to keep the current URL">
+                <p style="font-size: 0.82rem; color: var(--color-ink-soft); margin-top: 4px;">
+                    Shown at /blog/{{ old('slug', $post->slug) ?: '...' }} — only change this if you actually want the page URL to change.
+                </p>
             </div>
 
             <div class="grid-2">
@@ -59,7 +68,36 @@
                     <img src="{{ asset($post->featured_image) }}" alt="" style="width: 220px; height: 130px; object-fit: cover; border-radius: 10px; margin-bottom: 8px; display: block;">
                 @endif
                 <input id="featured_image" name="featured_image" type="file" accept="image/*" class="form-input">
-                <p style="font-size: 0.82rem; color: var(--color-ink-soft); margin-top: 4px;">PNG, JPG or WEBP, up to 4MB. Leave empty to keep the current image.</p>
+                <p style="font-size: 0.82rem; color: var(--color-ink-soft); margin-top: 4px;">PNG, JPG or WEBP, up to 4MB. Leave empty to keep the current image. Images are automatically resized &amp; compressed on upload.</p>
+
+                <div data-upload-progress-wrap hidden>
+                    <div class="upload-progress-track">
+                        <div data-upload-progress-bar class="upload-progress-bar"></div>
+                    </div>
+                    <span data-upload-progress-label class="upload-progress-label">Uploading… 0%</span>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-field">
+                    <label for="featured_image_alt">Image alt text (for SEO &amp; accessibility)</label>
+                    <input id="featured_image_alt" name="featured_image_alt" value="{{ old('featured_image_alt', $post->featured_image_alt) }}" class="form-input" placeholder="e.g. Pro Builder CRM broker commission dashboard">
+                </div>
+                <div class="form-field">
+                    <label for="featured_image_size">Image display size</label>
+                    <select id="featured_image_size" name="featured_image_size" class="form-input">
+                        @foreach ($sizes as $key => $px)
+                            <option value="{{ $key }}" @selected(old('featured_image_size', $post->featured_image_size ?: 'lg') === $key)>
+                                {{ ucfirst($key) }} ({{ $px }}px tall)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label for="featured_image_caption">Image caption (optional, shown under the image)</label>
+                <input id="featured_image_caption" name="featured_image_caption" value="{{ old('featured_image_caption', $post->featured_image_caption) }}" class="form-input">
             </div>
 
             <div class="form-field">

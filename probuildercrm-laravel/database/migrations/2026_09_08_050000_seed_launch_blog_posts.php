@@ -29,6 +29,7 @@ return new class extends Migration
                 'read_time' => '4 min read',
                 'author' => 'Pro Builder CRM Team',
                 'featured_image' => 'screenshots/dashboard.png',
+                'featured_image_alt' => 'Pro Builder CRM project dashboard showing live unit booking status',
                 'content' => [
                     ['type' => 'paragraph', 'text' => "A couple of years ago, before any of this existed, I ran bookings for a 40-unit project out of one Excel file on Google Drive. Two sales guys, one sheet, colour-coded rows — green for booked, yellow for token received, that sort of thing. It worked fine for the first fifteen units."],
                     ['type' => 'paragraph', 'text' => "Then one Saturday, both of them were showing the same flat to two different families at the same time. Neither knew. One had opened the sheet on his phone that morning before it synced, marked the unit as \"hold,\" and gone to meet his client. The other opened it twenty minutes later on his laptop, saw it as available, took a token of ₹51,000 in cash, and marked it booked. By evening we had two \"booked\" families for A-402, and only one flat."],
@@ -54,6 +55,7 @@ return new class extends Migration
                 'read_time' => '5 min read',
                 'author' => 'Pro Builder CRM Team',
                 'featured_image' => 'screenshots/analytics.png',
+                'featured_image_alt' => 'Pro Builder CRM collections and payment reminder analytics',
                 'content' => [
                     ['type' => 'paragraph', 'text' => "Ask any builder what the worst part of the job is and a good number will say the same thing: asking your own customer for money. It's a strange discomfort — you've delivered on your side, the payment schedule was agreed and signed, and yet picking up the phone to say \"your installment is 12 days late\" still feels awkward, especially with someone you've had a good relationship with through the whole buying process."],
                     ['type' => 'paragraph', 'text' => "What I've seen builders do wrong falls into two camps. One camp goes quiet — they let it slide a week, then two, telling themselves the customer will remember on their own. They usually don't, or they assume since nobody called, it isn't urgent. The other camp overcorrects — a stern call on day one, sometimes routed through a site manager who doesn't have the full relationship context, and it comes across as aggressive over something that was, half the time, a genuine oversight."],
@@ -78,6 +80,7 @@ return new class extends Migration
                 'read_time' => '4 min read',
                 'author' => 'Pro Builder CRM Team',
                 'featured_image' => 'screenshots/brokers.png',
+                'featured_image_alt' => 'Pro Builder CRM broker commission tracking screen',
                 'content' => [
                     ['type' => 'paragraph', 'text' => "A broker brings you a buyer, the deal closes, everyone shakes hands — and three months later there's an argument over whether the commission was 1.5% or 2%, and whether it was on the agreement value or the total sale value including the parking spot that got added later. I've sat through versions of this conversation more times than I can count, on both sides of the table, and it's almost never a bad-faith thing. It's a memory thing."],
                     ['type' => 'heading', 'text' => "The commission is agreed once, verbally, and never again"],
@@ -102,6 +105,7 @@ return new class extends Migration
                 'read_time' => '5 min read',
                 'author' => 'Pro Builder CRM Team',
                 'featured_image' => 'screenshots/mobile-dashboard.png',
+                'featured_image_alt' => 'Pro Builder CRM mobile dashboard used to manage a project on the go',
                 'content' => [
                     ['type' => 'paragraph', 'text' => "Before any of the CRM existed, we spent about two months just sitting with builders — some running one project, one running four at once, one who'd been in the business for over twenty years and still kept his books in a physical register alongside a laptop he didn't fully trust. We asked all of them the same open question: what actually goes wrong on a normal week? Not what software they wanted, just what breaks."],
                     ['type' => 'paragraph', 'text' => "We expected a dozen different answers. We got the same five problems, over and over, just in a different order depending on how big the project was."],
