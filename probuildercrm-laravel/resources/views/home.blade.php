@@ -152,7 +152,7 @@
             @php $iconColors = ['feature-icon-blue', 'feature-icon-orange', 'feature-icon-violet', 'feature-icon-green']; @endphp
             @foreach (config('features.core') as $i => $feature)
                 <div class="card" style="display: flex; gap: 16px;">
-                    <span class="feature-icon {{ $iconColors[$i % 4] }}">@include('partials.icon', ['name' => $feature['icon']])</span>
+                    <span class="feature-icon {{ $iconColors[$i % 4] }}">@include('partials.icon', ['name' => $feature['icon'] ?? null])</span>
                     <div>
                         <h3 style="margin-bottom: 8px;">{{ $feature['title'] }}</h3>
                         <p style="color: var(--color-ink-soft);">{{ $feature['description'] }}</p>
@@ -206,7 +206,7 @@
         <div class="grid-3">
             @foreach (config('features.team') as $i => $feature)
                 <div class="card">
-                    <span class="feature-icon {{ $iconColors[$i % 4] }}" style="margin-bottom: 14px;">@include('partials.icon', ['name' => $feature['icon']])</span>
+                    <span class="feature-icon {{ $iconColors[$i % 4] }}" style="margin-bottom: 14px;">@include('partials.icon', ['name' => $feature['icon'] ?? null])</span>
                     <h3 style="font-size: 1.1rem; margin-bottom: 8px;">{{ $feature['title'] }}</h3>
                     <p style="color: var(--color-ink-soft); font-size: 0.95rem;">{{ $feature['description'] }}</p>
                 </div>
