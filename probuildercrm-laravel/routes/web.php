@@ -67,6 +67,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/integrations', [AdminIntegrationsController::class, 'index'])->name('integrations.index');
         Route::put('/integrations', [AdminIntegrationsController::class, 'update'])->name('integrations.update');
+        Route::post('/integrations/ping-sitemap', [AdminIntegrationsController::class, 'pingSitemap'])->name('integrations.ping-sitemap');
 
         Route::get('/maintenance', [AdminMaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance/clear-cache', [AdminMaintenanceController::class, 'clearCache'])->name('maintenance.clear-cache');

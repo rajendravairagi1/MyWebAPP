@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\BlogPost;
 use App\Support\ImageOptimizer;
+use App\Support\SitemapPing;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
@@ -66,8 +67,9 @@ class BlogController extends Controller
         }
 
         BlogPost::create($data);
+        SitemapPing::ping();
 
-        return redirect()->route('admin.posts.index')->with('status', 'Post created.');
+        return redirect()->route('admin.posts.index')->with('status', 'Post created — sitemap submitted to search engines.');
     }
 
     public function update(Request $request, BlogPost $post)
@@ -80,8 +82,9 @@ class BlogController extends Controller
         }
 
         $post->update($data);
+        SitemapPing::ping();
 
-        return redirect()->route('admin.posts.index')->with('status', 'Post updated.');
+        return redirect()->route('admin.posts.index')->with('status', 'Post updated — sitemap submitted to search engines.');
     }
 
     public function destroy(BlogPost $post)
