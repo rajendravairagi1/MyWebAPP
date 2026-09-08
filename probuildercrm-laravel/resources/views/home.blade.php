@@ -133,7 +133,7 @@
                     <h3 style="font-size: 1.5rem; margin-bottom: 12px;" x-text="activeTab.title"></h3>
                     <p style="color: var(--color-ink-soft); font-size: 1.02rem;" x-text="activeTab.description"></p>
                 </div>
-                <div class="feature-tabs-image">
+                <div class="feature-tabs-image shot-pan">
                     <img :src="activeTab.image" :alt="activeTab.alt">
                 </div>
             </div>
@@ -264,7 +264,7 @@
                 </div>
             </div>
 
-            <div class="hero-carousel-viewport" style="border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg);">
+            <div class="hero-carousel-viewport shot-pan" style="border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg);">
                 <img src="{{ asset('screenshots/dashboard.png') }}" alt="Pro Builder CRM dashboard, ready right after setup" style="width: 100%; display: block;">
             </div>
         </div>
@@ -278,26 +278,32 @@
             <h2 style="margin-top: 12px;">What builders say</h2>
         </div>
 
-        <div class="grid-3">
-            @foreach ([
+        @php
+            $testimonials = [
                 ['quote' => 'I used to spend a whole evening every week matching payments to customers in Excel. Now every receipt and reminder is automatic — I check the dashboard for two minutes and I know exactly where every project stands.', 'role' => 'Real Estate Builder', 'city' => 'Indore'],
                 ['quote' => 'Loan disbursements from the bank used to be the most confusing part of our books. Pro Builder CRM keeps it all tied to the right unit and customer, so our accountant isn\'t chasing us for statements anymore.', 'role' => 'Construction Contractor', 'city' => 'Raipur'],
                 ['quote' => 'My brokers can see their own commission and nothing else. My supervisor logs payments from site visits on his phone. Everyone has exactly the access they need, nothing more.', 'role' => 'Property Developer', 'city' => 'Bhopal'],
-            ] as $t)
-                <div class="card testimonial-card">
-                    <div class="testimonial-stars">
-                        @for ($s = 0; $s < 5; $s++)@include('partials.icon', ['name' => 'star', 'size' => 15])@endfor
-                    </div>
-                    <p class="testimonial-quote">&ldquo;{{ $t['quote'] }}&rdquo;</p>
-                    <div class="testimonial-author">
-                        <span class="testimonial-avatar">{{ substr($t['role'], 0, 1) }}</span>
-                        <div>
-                            <div class="testimonial-name">{{ $t['role'] }}</div>
-                            <div class="testimonial-role">{{ $t['city'] }}, India</div>
+            ];
+        @endphp
+
+        <div class="testimonial-marquee">
+            <div class="testimonial-track">
+                @foreach (array_merge($testimonials, $testimonials) as $t)
+                    <div class="card testimonial-card">
+                        <div class="testimonial-stars">
+                            @for ($s = 0; $s < 5; $s++)@include('partials.icon', ['name' => 'star', 'size' => 15])@endfor
+                        </div>
+                        <p class="testimonial-quote">&ldquo;{{ $t['quote'] }}&rdquo;</p>
+                        <div class="testimonial-author">
+                            <span class="testimonial-avatar">{{ substr($t['role'], 0, 1) }}</span>
+                            <div>
+                                <div class="testimonial-name">{{ $t['role'] }}</div>
+                                <div class="testimonial-role">{{ $t['city'] }}, India</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
         </div>
 
         <div style="text-align: center; margin-top: var(--space-xl);">

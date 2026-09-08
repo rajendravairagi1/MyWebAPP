@@ -1224,3 +1224,162 @@ body.has-sticky-cta {
   font-size: 0.8rem;
   color: var(--color-ink-soft);
 }
+
+/* ---- Interaction polish: hover glow, screenshot pan, testimonial marquee ---- */
+
+/* Scoped to marketing-page sections only — admin panel also reuses .card
+   for plain forms, which shouldn't lift on hover while someone is typing. */
+.section .card,
+.section-tight .card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.section .card:hover,
+.section-tight .card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Feature icons: gentle continuous glow, plus a stronger zoom+highlight on hover */
+.feature-icon {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-icon:hover {
+  transform: scale(1.14);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .feature-icon-blue { animation: icon-glow-blue 2.6s ease-in-out infinite; }
+  .feature-icon-orange { animation: icon-glow-orange 2.6s ease-in-out infinite; }
+  .feature-icon-violet { animation: icon-glow-violet 2.6s ease-in-out infinite; }
+  .feature-icon-green { animation: icon-glow-green 2.6s ease-in-out infinite; }
+}
+
+.feature-icon-blue:hover { box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.22); }
+.feature-icon-orange:hover { box-shadow: 0 0 0 8px rgba(249, 115, 22, 0.22); }
+.feature-icon-violet:hover { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0.22); }
+.feature-icon-green:hover { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.22); }
+
+@keyframes icon-glow-blue {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  50% { box-shadow: 0 0 12px 3px rgba(59, 130, 246, 0.35); }
+}
+@keyframes icon-glow-orange {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(249, 115, 22, 0); }
+  50% { box-shadow: 0 0 12px 3px rgba(249, 115, 22, 0.35); }
+}
+@keyframes icon-glow-violet {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+  50% { box-shadow: 0 0 12px 3px rgba(139, 92, 246, 0.35); }
+}
+@keyframes icon-glow-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  50% { box-shadow: 0 0 12px 3px rgba(16, 185, 129, 0.35); }
+}
+
+/* Small round accent icons (steps, WhatsApp mockups) get a matching hover pop */
+.step-number,
+.whatsapp-mockup-icon {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step-number:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 8px rgba(79, 70, 229, 0.18);
+}
+
+.whatsapp-mockup-icon:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 8px rgba(37, 211, 102, 0.25);
+}
+
+/* Screenshot "pan" on hover: image sits slightly zoomed in and slides
+   partway across on hover, like slowly panning a camera — never a full
+   sweep, just far enough to feel alive. */
+.shot-pan {
+  overflow: hidden;
+}
+
+.shot-pan img {
+  transform: scale(1.1) translateX(0%);
+  transition: transform 2.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+
+.shot-pan:hover img {
+  transform: scale(1.1) translateX(-5%);
+}
+
+.mobile-showcase img {
+  transform: scale(1.08) translateX(0%);
+  transition: transform 2.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.mobile-showcase:hover img {
+  transform: scale(1.08) translateX(-4%);
+}
+
+.hero-carousel {
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.hero-carousel:hover {
+  transform: scale(1.012);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shot-pan img,
+  .mobile-showcase img,
+  .hero-carousel {
+    transition: none !important;
+  }
+}
+
+/* Testimonials: continuous right-to-left marquee that pauses (and the
+   hovered card zooms + highlights) the moment the cursor lands on it. */
+.testimonial-marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+}
+
+.testimonial-track {
+  display: flex;
+  gap: var(--space-lg);
+  width: max-content;
+  animation: testimonial-scroll 38s linear infinite;
+}
+
+.testimonial-track:hover {
+  animation-play-state: paused;
+}
+
+.testimonial-track .testimonial-card {
+  width: 360px;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.testimonial-track .testimonial-card:hover {
+  transform: scale(1.045) translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  z-index: 2;
+}
+
+@keyframes testimonial-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .testimonial-track {
+    animation: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .testimonial-track .testimonial-card {
+    width: 300px;
+  }
+}

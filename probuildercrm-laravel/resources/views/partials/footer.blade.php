@@ -28,7 +28,8 @@
         </div>
 
         <div class="footer-bottom">
-            &copy; 2022 &ndash; {{ now()->year }} {{ config('site.legal_name') }}. All rights reserved.
+            &copy; 2022 &ndash; {{ now()->year }} {{ config('site.name') }}. All rights reserved.
+            &middot; Designed &amp; Developed by {{ config('site.legal_name') }}
         </div>
     </div>
 </footer>
