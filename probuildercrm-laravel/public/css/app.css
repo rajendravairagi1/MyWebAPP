@@ -309,6 +309,12 @@ h3 {
   color: #fff;
 }
 
+.logo-image {
+  max-height: 34px;
+  width: auto;
+  display: block;
+}
+
 .nav-desktop {
   display: flex;
   align-items: center;
@@ -405,10 +411,10 @@ h3 {
   }
 }
 
-/* Floating WhatsApp */
+/* Floating WhatsApp — sits above the sticky CTA bar */
 .floating-whatsapp {
   position: fixed;
-  bottom: 24px;
+  bottom: 90px;
   right: 24px;
   z-index: 50;
   width: 56px;
@@ -420,6 +426,74 @@ h3 {
   justify-content: center;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   text-decoration: none;
+}
+
+/* ---- Persistent sticky bottom CTA bar ---- */
+body.has-sticky-cta {
+  padding-bottom: 76px;
+}
+
+.sticky-cta-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  background: var(--color-bg-inverse);
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+  padding: 12px 0;
+}
+
+.sticky-cta-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sticky-cta-text strong {
+  display: block;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.sticky-cta-text span {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.82rem;
+}
+
+.sticky-cta-actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .sticky-cta-text span {
+    display: none;
+  }
+}
+
+/* ---- Scroll-reveal: sections fade + slide up into place as they scroll into view ---- */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-init {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
 
 /* Hero glow decorations */

@@ -3,8 +3,12 @@
         <div class="footer-grid">
             <div>
                 <span class="logo logo-light">
-                    <span class="logo-mark">P</span>
-                    Pro Builder <span class="logo-accent">CRM</span>
+                    @if ($logoPath = \App\Models\SiteSetting::get('logo_path'))
+                        <img src="{{ asset($logoPath) }}" alt="Pro Builder CRM" class="logo-image">
+                    @else
+                        <span class="logo-mark">P</span>
+                        Pro Builder <span class="logo-accent">CRM</span>
+                    @endif
                 </span>
                 <p style="margin-top: 12px; max-width: 320px; color: var(--gray-300); font-size: 0.9rem;">
                     The all-in-one CRM built for real estate builders and developers.

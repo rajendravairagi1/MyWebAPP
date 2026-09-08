@@ -2,8 +2,12 @@
 <header class="navbar" x-data="{ open: false }">
     <div class="container">
         <a href="{{ url('/') }}" class="logo">
-            <span class="logo-mark">P</span>
-            Pro Builder <span class="logo-accent">CRM</span>
+            @if ($logoPath = \App\Models\SiteSetting::get('logo_path'))
+                <img src="{{ asset($logoPath) }}" alt="Pro Builder CRM" class="logo-image">
+            @else
+                <span class="logo-mark">P</span>
+                Pro Builder <span class="logo-accent">CRM</span>
+            @endif
         </a>
 
         <nav class="nav-desktop">

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BlogController as AdminBlogController;
+use App\Http\Controllers\Admin\BrandingController as AdminBrandingController;
 use App\Http\Controllers\Admin\PricingController as AdminPricingController;
 use App\Http\Controllers\Admin\ThemeController as AdminThemeController;
 use App\Http\Controllers\BlogController;
@@ -54,5 +55,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/theme', [AdminThemeController::class, 'index'])->name('theme.index');
         Route::put('/theme', [AdminThemeController::class, 'update'])->name('theme.update');
+
+        Route::get('/branding', [AdminBrandingController::class, 'index'])->name('branding.index');
+        Route::post('/branding', [AdminBrandingController::class, 'update'])->name('branding.update');
+        Route::delete('/branding', [AdminBrandingController::class, 'destroy'])->name('branding.destroy');
     });
 });
