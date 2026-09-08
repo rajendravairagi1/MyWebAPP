@@ -23,6 +23,9 @@
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
                             <div>
                                 <strong>{{ $lead->name }}</strong>
+                                @if ($lead->plan)
+                                    <span class="tag" style="margin-left: 8px;">{{ $lead->plan }}</span>
+                                @endif
                                 <div style="font-size: 0.88rem; color: var(--color-ink-soft); margin-top: 2px;">
                                     <a href="mailto:{{ $lead->email }}">{{ $lead->email }}</a>
                                     @if ($lead->phone)

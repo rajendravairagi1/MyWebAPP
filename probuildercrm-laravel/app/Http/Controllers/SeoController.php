@@ -25,7 +25,21 @@ class SeoController extends Controller
 
         $all = $urls->merge($blogUrls);
 
-        $xml = view('seo.sitemap', ['urls' => $all])->render();
+        // Built as a plain string rather than a Blade view: the leading XML
+        // declaration was being parsed as a PHP open tag on hosts with
+        // short_open_tag enabled, and depending on a compiled Blade view
+        // here also meant a stale cached copy in storage/framework/views
+        // could keep serving the broken version after a fix was deployed.
+        // This has no compiled-view step at all.
+        $xml = '<' . '?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        foreach ($all as $url) {
+            $xml .= '    <url>' . "\n";
+            $xml .= '        <loc>' . e($url['loc']) . '</loc>' . "\n";
+            $xml .= '        <lastmod>' . e($url['lastmod']) . '</lastmod>' . "\n";
+            $xml .= '    </url>' . "\n";
+        }
+        $xml .= '</urlset>';
 
         return Response::make($xml, 200, ['Content-Type' => 'application/xml']);
     }

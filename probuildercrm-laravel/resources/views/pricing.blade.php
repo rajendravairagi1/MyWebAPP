@@ -17,11 +17,11 @@
     <div class="container"
          x-data="{
             cycles: [
-                { key: 'monthly', label: 'Monthly', months: 1, bonusMonths: 0 },
+                { key: 'yearly', label: 'Yearly', months: 12, bonusMonths: 2 },
                 { key: 'half_yearly', label: '6 Months', months: 6, bonusMonths: 1 },
-                { key: 'yearly', label: 'Yearly', months: 12, bonusMonths: 2 }
+                { key: 'monthly', label: 'Monthly', months: 1, bonusMonths: 0 }
             ],
-            cycleKey: 'monthly',
+            cycleKey: 'yearly',
             get cycle() { return this.cycles.find(c => c.key === this.cycleKey) },
             pricing(monthlyPrice) {
                 const price = monthlyPrice * this.cycle.months;

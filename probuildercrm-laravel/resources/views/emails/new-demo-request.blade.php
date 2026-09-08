@@ -4,6 +4,7 @@
     <tr><td><strong>Name</strong></td><td>{{ $submission->name }}</td></tr>
     <tr><td><strong>Email</strong></td><td>{{ $submission->email }}</td></tr>
     <tr><td><strong>Phone</strong></td><td>{{ $submission->phone ?: '-' }}</td></tr>
+    <tr><td><strong>Plan</strong></td><td>{{ $submission->plan ?: '-' }}</td></tr>
     <tr><td><strong>Submitted</strong></td><td>{{ $submission->created_at->format('F j, Y g:i A') }}</td></tr>
 </table>
 

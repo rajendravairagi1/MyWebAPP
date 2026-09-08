@@ -51,6 +51,14 @@
                     <input id="phone" name="phone" value="{{ old('phone') }}" class="form-input">
                 </div>
                 <div class="form-field">
+                    <label for="plan">Which plan are you interested in?</label>
+                    <select id="plan" name="plan" class="form-input">
+                        @foreach ($plans as $planOption)
+                            <option value="{{ $planOption->name }}" @selected(old('plan', 'Builder Team') === $planOption->name)>{{ $planOption->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-field">
                     <label for="message">Tell us about your business</label>
                     <textarea id="message" name="message" required rows="4" class="form-textarea">{{ old('message') }}</textarea>
                 </div>

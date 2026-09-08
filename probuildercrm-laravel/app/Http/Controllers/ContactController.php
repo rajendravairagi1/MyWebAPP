@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\NewDemoRequest;
 use App\Models\ContactSubmission;
+use App\Models\PricingPlan;
 use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -16,6 +17,7 @@ class ContactController extends Controller
     {
         return view('contact', [
             'recaptchaSiteKey' => SiteSetting::get('recaptcha_site_key'),
+            'plans' => PricingPlan::orderBy('sort_order')->get(),
         ]);
     }
 
@@ -25,6 +27,7 @@ class ContactController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'nullable|string|max:50',
+            'plan' => 'nullable|string|max:100',
             'message' => 'required|string|max:5000',
         ]);
 

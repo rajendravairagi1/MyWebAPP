@@ -22,6 +22,7 @@ class MaintenanceController extends Controller
         Artisan::call('view:clear');
         Artisan::call('config:clear');
         Artisan::call('route:clear');
+        $this->clearCompiledViews();
 
         if (function_exists('opcache_reset')) {
             opcache_reset();
@@ -35,6 +36,7 @@ class MaintenanceController extends Controller
         Artisan::call('view:clear');
         Artisan::call('config:clear');
         Artisan::call('route:clear');
+        $this->clearCompiledViews();
 
         Artisan::call('migrate', ['--force' => true]);
         $output = Artisan::output();
@@ -49,5 +51,17 @@ class MaintenanceController extends Controller
         return redirect()->route('admin.maintenance.index')
             ->with('status', 'Migrations run successfully.')
             ->with('output', $output);
+    }
+
+    /**
+     * Belt-and-suspenders on top of `view:clear` — a host where that
+     * command silently no-ops would otherwise keep serving stale
+     * compiled templates indefinitely.
+     */
+    private function clearCompiledViews(): void
+    {
+        foreach (glob(storage_path('framework/views/*.php')) ?: [] as $compiled) {
+            @unlink($compiled);
+        }
     }
 }

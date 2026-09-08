@@ -27,6 +27,14 @@ class MigrateController extends Controller
         Artisan::call('view:clear');
         Artisan::call('config:clear');
         Artisan::call('route:clear');
+
+        // Belt-and-suspenders on top of view:clear — a host where that
+        // command silently no-ops would otherwise keep serving stale
+        // compiled templates indefinitely.
+        foreach (glob(storage_path('framework/views/*.php')) ?: [] as $compiled) {
+            @unlink($compiled);
+        }
+
         Artisan::call('migrate', ['--force' => true]);
         Artisan::call('db:seed', ['--class' => 'PricingPlanSeeder', '--force' => true]);
 
