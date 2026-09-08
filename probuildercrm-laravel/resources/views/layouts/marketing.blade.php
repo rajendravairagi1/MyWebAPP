@@ -21,6 +21,8 @@
 
     @yield('content')
 
+    @include('partials.blog-preview')
+
     @include('partials.footer')
 
     @unless (request()->routeIs('contact'))

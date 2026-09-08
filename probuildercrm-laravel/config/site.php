@@ -13,6 +13,7 @@ return [
     'regions' => ['India', 'USA', 'UK', 'Australia', 'Canada'],
 
     'nav_items' => [
+        ['label' => 'Home', 'href' => '/'],
         ['label' => 'Features', 'href' => '/features'],
         ['label' => 'Pricing', 'href' => '/pricing'],
         ['label' => 'Blog', 'href' => '/blog'],
