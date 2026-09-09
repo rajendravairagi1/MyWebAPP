@@ -47,7 +47,6 @@ use App\Http\Controllers\PwaController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResetDataController;
-use App\Http\Controllers\ResetLinkDebugController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TeamController;
@@ -128,7 +127,6 @@ Route::get('/pwa-icon/{size}', [PwaController::class, 'icon'])->name('pwa.icon')
 Route::get('/install', [InstallController::class, 'index'])->name('install.index');
 Route::post('/install', [InstallController::class, 'store'])->name('install.store');
 Route::get('/migrate', MigrateController::class)->name('migrate');
-Route::get('/reset-link-debug', ResetLinkDebugController::class)->name('reset-link-debug');
 
 // Public, signed verification pages linked from the QR code printed on
 // Quotation/Invoice/Statement PDFs — confirms a document is genuine
