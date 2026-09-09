@@ -25,7 +25,6 @@ use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LedgerController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\LoanDocumentController;
-use App\Http\Controllers\MailDebugController;
 use App\Http\Controllers\MaterialCreditController;
 use App\Http\Controllers\MaterialEntryController;
 use App\Http\Controllers\MeetingController;
@@ -128,7 +127,6 @@ Route::get('/pwa-icon/{size}', [PwaController::class, 'icon'])->name('pwa.icon')
 Route::get('/install', [InstallController::class, 'index'])->name('install.index');
 Route::post('/install', [InstallController::class, 'store'])->name('install.store');
 Route::get('/migrate', MigrateController::class)->name('migrate');
-Route::get('/mail-debug', MailDebugController::class)->name('mail-debug');
 
 // Public, signed verification pages linked from the QR code printed on
 // Quotation/Invoice/Statement PDFs — confirms a document is genuine
