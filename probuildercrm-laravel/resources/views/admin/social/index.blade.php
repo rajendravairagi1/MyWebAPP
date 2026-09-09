@@ -67,6 +67,12 @@
                     </div>
                 </div>
 
+                @if ($hasLinksButHidden)
+                    <p style="background: #fef3c7; color: #92400e; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 0.88rem; margin-top: var(--space-md);">
+                        You've added a link above, but "Show in header" and "Show in footer" are both off below - so nothing is showing on the site yet. Check at least one and Save.
+                    </p>
+                @endif
+
                 <div style="display: flex; gap: var(--space-lg); margin-top: var(--space-md); flex-wrap: wrap;">
                     <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
                         <input type="checkbox" name="social_show_header" value="1" @checked(old('social_show_header', $showHeader))>
@@ -77,6 +83,9 @@
                         Show in footer
                     </label>
                 </div>
+                <p style="color: var(--color-ink-soft); font-size: 0.82rem; margin-top: 8px;">
+                    A link above only appears on the site once you check "Show in header" and/or "Show in footer" here.
+                </p>
             </div>
 
             <div>

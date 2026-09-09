@@ -376,6 +376,7 @@ h3 {
   border: none;
   padding: 8px;
   cursor: pointer;
+  color: var(--color-ink);
 }
 
 .nav-mobile-panel {

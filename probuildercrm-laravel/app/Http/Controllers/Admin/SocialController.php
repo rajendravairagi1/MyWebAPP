@@ -23,10 +23,14 @@ class SocialController extends Controller
             $links[$platform] = SiteSetting::get('social_'.$platform);
         }
 
+        $showHeader = (bool) SiteSetting::get('social_show_header');
+        $showFooter = (bool) SiteSetting::get('social_show_footer');
+
         return view('admin.social.index', [
             'links' => $links,
-            'showHeader' => (bool) SiteSetting::get('social_show_header'),
-            'showFooter' => (bool) SiteSetting::get('social_show_footer'),
+            'showHeader' => $showHeader,
+            'showFooter' => $showFooter,
+            'hasLinksButHidden' => collect($links)->filter()->isNotEmpty() && ! $showHeader && ! $showFooter,
             'phoneNumber' => SiteSetting::get('phone_number'),
             'footerDescription' => SiteSetting::get('footer_description', self::DEFAULT_FOOTER_DESCRIPTION),
         ]);
