@@ -38,6 +38,10 @@
         @else
             <form method="POST" action="{{ route('contact.store') }}" class="card" style="display: flex; flex-direction: column; gap: 16px;">
                 @csrf
+                <div style="position: absolute; left: -9999px; opacity: 0;" aria-hidden="true">
+                    <label for="company_website">Leave this field blank</label>
+                    <input id="company_website" name="company_website" type="text" tabindex="-1" autocomplete="off">
+                </div>
                 <div class="form-field">
                     <label for="name">Name</label>
                     <input id="name" name="name" required value="{{ old('name') }}" class="form-input">

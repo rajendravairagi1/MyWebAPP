@@ -20,6 +20,7 @@
             ['route' => 'admin.branding.index', 'match' => 'admin.branding.*', 'label' => 'Branding', 'icon' => 'image'],
             ['route' => 'admin.social.index', 'match' => 'admin.social.*', 'label' => 'Social & Contact', 'icon' => 'share-2'],
             ['route' => 'admin.integrations.index', 'match' => 'admin.integrations.*', 'label' => 'Integrations', 'icon' => 'plug'],
+            ['route' => 'admin.security.index', 'match' => 'admin.security.*', 'label' => 'Security', 'icon' => 'shield-check'],
             ['route' => 'admin.maintenance.index', 'match' => 'admin.maintenance.*', 'label' => 'Maintenance', 'icon' => 'wrench'],
         ];
         $__adminLogoPath = \App\Models\SiteSetting::get('logo_path');

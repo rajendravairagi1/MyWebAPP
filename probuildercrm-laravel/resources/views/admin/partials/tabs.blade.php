@@ -9,6 +9,7 @@
         'branding' => 'Branding',
         'social' => 'Social & Contact',
         'integrations' => 'Integrations',
+        'security' => 'Security',
         'maintenance' => 'Maintenance',
     ];
 @endphp

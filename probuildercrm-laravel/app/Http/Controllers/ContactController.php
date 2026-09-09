@@ -23,6 +23,13 @@ class ContactController extends Controller
 
     public function store(Request $request)
     {
+        // Honeypot: a field real visitors never see or fill (hidden off-screen),
+        // that spam bots filling every field on the page trip over. Pretend the
+        // submission worked rather than telling the bot what caught it.
+        if (filled($request->input('company_website'))) {
+            return back()->with('status', 'sent');
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',

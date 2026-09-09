@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\IntegrationsController as AdminIntegrationsContro
 use App\Http\Controllers\Admin\LeadsController as AdminLeadsController;
 use App\Http\Controllers\Admin\MaintenanceController as AdminMaintenanceController;
 use App\Http\Controllers\Admin\PricingController as AdminPricingController;
+use App\Http\Controllers\Admin\SecurityController as AdminSecurityController;
 use App\Http\Controllers\Admin\SocialController as AdminSocialController;
 use App\Http\Controllers\Admin\TestimonialsController as AdminTestimonialsController;
 use App\Http\Controllers\Admin\ThemeController as AdminThemeController;
@@ -32,7 +33,7 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store')->middleware('throttle:5,1');
 
 Route::get('/migrate', MigrateController::class)->name('migrate');
 
@@ -42,11 +43,20 @@ Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
+    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit')->middleware('throttle:5,1');
+    Route::get('/login/verify', [AdminAuthController::class, 'showVerify'])->name('login.verify');
+    Route::post('/login/verify', [AdminAuthController::class, 'verify'])->name('login.verify.submit')->middleware('throttle:10,1');
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
     Route::middleware('admin.auth')->group(function () {
         Route::redirect('/', '/admin/posts')->name('dashboard');
+
+        Route::get('/security', [AdminSecurityController::class, 'index'])->name('security.index');
+        Route::post('/security/start', [AdminSecurityController::class, 'start'])->name('security.start');
+        Route::post('/security/confirm', [AdminSecurityController::class, 'confirm'])->name('security.confirm');
+        Route::post('/security/cancel', [AdminSecurityController::class, 'cancel'])->name('security.cancel');
+        Route::post('/security/disable', [AdminSecurityController::class, 'disable'])->name('security.disable');
+        Route::post('/security/backup-codes', [AdminSecurityController::class, 'regenerateBackupCodes'])->name('security.backup-codes');
 
         Route::get('/posts', [AdminBlogController::class, 'index'])->name('posts.index');
         Route::get('/posts/create', [AdminBlogController::class, 'create'])->name('posts.create');
