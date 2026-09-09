@@ -13,8 +13,8 @@
               x-data="{
                 monthlyPrice: {{ old('monthly_price', $plan->monthly_price) }},
                 cyclePricing(months) {
-                    const price = this.monthlyPrice * months;
-                    return { price, original: Math.round(price / 0.6) };
+                    const original = this.monthlyPrice * months;
+                    return { price: Math.round(original * (1 - {{ $discountPercent }} / 100)), original };
                 }
               }">
             @csrf
@@ -26,7 +26,7 @@
                     <input id="name" name="name" required value="{{ old('name', $plan->name) }}" class="form-input">
                 </div>
                 <div class="form-field">
-                    <label for="monthly_price">Monthly price (&#8377;)</label>
+                    <label for="monthly_price">Full price / MRP (&#8377;) - before discount</label>
                     <input id="monthly_price" name="monthly_price" type="number" min="0" required
                            value="{{ old('monthly_price', $plan->monthly_price) }}" class="form-input" x-model.number="monthlyPrice">
                 </div>
@@ -43,7 +43,7 @@
             </div>
 
             <div class="admin-preview">
-                <strong>Live preview at &#8377;<span x-text="monthlyPrice"></span>/month:</strong>
+                <strong>Live preview - MRP &#8377;<span x-text="monthlyPrice"></span>/month, {{ $discountPercent }}% off:</strong>
                 <ul style="margin: 8px 0 0; padding-left: 18px;">
                     <li>monthly: <s x-text="'₹' + cyclePricing(1).original"></s> ₹<span x-text="cyclePricing(1).price"></span></li>
                     <li>half_yearly: <s x-text="'₹' + cyclePricing(6).original"></s> ₹<span x-text="cyclePricing(6).price"></span> (6 months paid, 7 months of service)</li>

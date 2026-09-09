@@ -23,9 +23,9 @@
             ],
             cycleKey: 'yearly',
             get cycle() { return this.cycles.find(c => c.key === this.cycleKey) },
-            pricing(monthlyPrice) {
-                const price = monthlyPrice * this.cycle.months;
-                const originalPrice = Math.round(price / (1 - {{ $discountPercent }} / 100));
+            pricing(monthlyMrp) {
+                const originalPrice = monthlyMrp * this.cycle.months;
+                const price = Math.round(originalPrice * (1 - {{ $discountPercent }} / 100));
                 return { price, originalPrice };
             }
          }">

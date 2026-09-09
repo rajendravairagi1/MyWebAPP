@@ -14,7 +14,7 @@ class PricingPlanSeeder extends Seeder
                 'slug' => 'solo',
                 'name' => 'Solo',
                 'description' => 'For one builder managing their own projects, start to finish.',
-                'monthly_price' => 999,
+                'monthly_price' => 1665,
                 'highlighted' => false,
                 'sort_order' => 1,
                 'features' => [
@@ -29,7 +29,7 @@ class PricingPlanSeeder extends Seeder
                 'slug' => 'team',
                 'name' => 'Builder Team',
                 'description' => 'For a builder with supervisors, sales staff or site managers.',
-                'monthly_price' => 2499,
+                'monthly_price' => 4165,
                 'highlighted' => true,
                 'sort_order' => 2,
                 'features' => [
@@ -45,7 +45,7 @@ class PricingPlanSeeder extends Seeder
                 'slug' => 'company',
                 'name' => 'Company',
                 'description' => 'For a company running multiple branches or cities.',
-                'monthly_price' => 4999,
+                'monthly_price' => 8332,
                 'highlighted' => false,
                 'sort_order' => 3,
                 'features' => [

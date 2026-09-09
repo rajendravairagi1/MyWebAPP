@@ -11,6 +11,9 @@
     ];
     $__mobileShots = [
         ['src' => asset('screenshots/mobile-dashboard.png'), 'alt' => 'Pro Builder CRM dashboard open on a mobile phone'],
+        ['src' => asset('screenshots/mobile-projects.png'), 'alt' => 'Pro Builder CRM projects and unit booking status on a mobile phone'],
+        ['src' => asset('screenshots/mobile-brokers.png'), 'alt' => 'Pro Builder CRM broker commission tracking on a mobile phone'],
+        ['src' => asset('screenshots/mobile-settings.png'), 'alt' => 'Pro Builder CRM business settings on a mobile phone'],
     ];
 @endphp
 <section class="section">
@@ -73,11 +76,11 @@
         </div>
 
         <div x-show="view === 'mobile'" x-cloak>
-            <div class="mobile-showcase shot-pan">
+            <div class="mobile-showcase mobile-showcase-slides shot-pan">
                 <div class="mobile-showcase-notch"></div>
                 @foreach ($__mobileShots as $i => $shot)
                     <img src="{{ $shot['src'] }}" alt="{{ $shot['alt'] }}"
-                         x-show="mIndex === {{ $i }}">
+                         :style="{ opacity: mIndex === {{ $i }} ? 1 : 0, transform: mIndex === {{ $i }} ? 'translateY(0)' : 'translateY(14px)' }">
                 @endforeach
             </div>
             @if (count($__mobileShots) > 1)

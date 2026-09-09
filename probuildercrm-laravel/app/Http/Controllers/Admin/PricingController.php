@@ -30,7 +30,9 @@ class PricingController extends Controller
 
     public function edit(PricingPlan $plan)
     {
-        return view('admin.pricing.edit', compact('plan'));
+        $discountPercent = (int) SiteSetting::get('pricing_discount_percent', '40');
+
+        return view('admin.pricing.edit', compact('plan', 'discountPercent'));
     }
 
     public function update(Request $request, PricingPlan $plan)

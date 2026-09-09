@@ -10,10 +10,10 @@
         @endif
 
         <p style="color: var(--color-ink-soft); margin-bottom: var(--space-lg);">
-            Set each plan's real monthly price here - the pricing page works it out from there: the 6-month price is 6&times; that
-            (with 1 month free added to the service), the yearly price is 12&times; that (with 2 months free added). The "OFF"
-            badge and struck-through price shown to visitors are calculated automatically from the offer below - you only ever
-            edit the one real monthly number per plan.
+            Set each plan's full price (MRP, before any discount) here - the pricing page works everything else out from there:
+            the 6-month price is 6&times; that (with 1 month free added to the service), the yearly price is 12&times; that
+            (with 2 months free added). The offer below decides what customers actually pay - raise or lower it any time and
+            every plan's real price updates immediately, without touching the MRP.
         </p>
 
         <div class="card" style="margin-bottom: var(--space-lg);">
@@ -42,7 +42,13 @@
                 <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
                         <h3 style="margin-bottom: 4px;">{{ $plan->name }}</h3>
-                        <p style="color: var(--color-ink-soft); font-size: 0.9rem;">&#8377;{{ $plan->monthly_price }}/month &middot; {{ count($plan->features) }} features</p>
+                        <p style="color: var(--color-ink-soft); font-size: 0.9rem;">
+                            MRP &#8377;{{ $plan->monthly_price }}/month
+                            @if ($discountPercent > 0)
+                                &middot; now &#8377;{{ (int) round($plan->monthly_price * (1 - $discountPercent / 100)) }}/month at {{ $discountPercent }}% off
+                            @endif
+                            &middot; {{ count($plan->features) }} features
+                        </p>
                     </div>
                     <a href="{{ route('admin.pricing.edit', $plan) }}" class="btn btn-secondary">Edit</a>
                 </div>

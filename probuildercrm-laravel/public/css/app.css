@@ -865,6 +865,20 @@ body.has-sticky-cta {
   border-radius: 26px;
 }
 
+.mobile-showcase-slides {
+  aspect-ratio: 390 / 844;
+}
+
+.mobile-showcase-slides img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
 /* Pricing */
 .pricing-cycle-toggle {
   display: flex;
@@ -1106,8 +1120,9 @@ body.has-sticky-cta {
 }
 
 .admin-sidebar-logo-image {
-  height: 30px;
+  height: 44px;
   width: auto;
+  max-width: 100%;
 }
 
 .admin-nav {
