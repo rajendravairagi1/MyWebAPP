@@ -107,5 +107,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/maintenance', [AdminMaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance/clear-cache', [AdminMaintenanceController::class, 'clearCache'])->name('maintenance.clear-cache');
         Route::post('/maintenance/migrate', [AdminMaintenanceController::class, 'runMigrations'])->name('maintenance.migrate');
+        Route::get('/maintenance/backup/database', [AdminMaintenanceController::class, 'downloadDatabase'])->name('maintenance.backup.database');
+        Route::get('/maintenance/backup/full', [AdminMaintenanceController::class, 'downloadFullBackup'])->name('maintenance.backup.full');
     });
 });

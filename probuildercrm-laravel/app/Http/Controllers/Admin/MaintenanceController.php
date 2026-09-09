@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Artisan;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use ZipArchive;
 
 /**
  * Same actions as the public /migrate?token=... URL, but reachable from
@@ -12,9 +14,101 @@ use Illuminate\Support\Facades\Artisan;
  */
 class MaintenanceController extends Controller
 {
+    /**
+     * Folders/files a full backup skips - either regenerable (vendor,
+     * caches, logs) or irrelevant to restoring the site (.git). Everything
+     * else, including anything uploaded through /admin (logo, favicon,
+     * blog images) that never lived in git, is included.
+     */
+    private const BACKUP_EXCLUDE_PATHS = [
+        'vendor',
+        'node_modules',
+        '.git',
+        'storage/framework/cache',
+        'storage/framework/sessions',
+        'storage/framework/views',
+        'storage/framework/testing',
+        'storage/logs',
+        'storage/pail',
+        'bootstrap/cache',
+    ];
+
     public function index()
     {
         return view('admin.maintenance.index');
+    }
+
+    /**
+     * The entire database as one file - safe to download directly since
+     * this app runs on SQLite (one file = the whole database), rather than
+     * needing a mysqldump-style export step.
+     */
+    public function downloadDatabase(): BinaryFileResponse
+    {
+        $path = database_path('database.sqlite');
+
+        abort_unless(is_file($path), 404, 'No database file found.');
+
+        return response()->download($path, 'probuildercrm-database-'.now()->format('Y-m-d_His').'.sqlite');
+    }
+
+    /**
+     * Everything needed to restore the site onto a fresh install of the
+     * vendor/ dependencies: application code, config, the live database,
+     * and every file ever uploaded through /admin (logo, favicon, blog
+     * images) - none of which live in the code zips generated from git.
+     */
+    public function downloadFullBackup()
+    {
+        set_time_limit(300);
+
+        // Built outside base_path() entirely - anywhere under it (even
+        // storage/app) would have the half-written zip walk into its own
+        // directory listing as the RecursiveDirectoryIterator below reaches it.
+        $zipPath = sys_get_temp_dir().'/probuildercrm-backup-'.now()->format('Y-m-d_His').'-'.bin2hex(random_bytes(4)).'.zip';
+        $base = base_path();
+
+        $zip = new ZipArchive;
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            abort(500, 'Could not create the backup archive.');
+        }
+
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($base, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+
+        foreach ($iterator as $file) {
+            $relative = substr($file->getPathname(), strlen($base) + 1);
+
+            if ($this->isExcludedFromBackup($relative)) {
+                continue;
+            }
+
+            if ($file->isDir()) {
+                $zip->addEmptyDir($relative);
+            } else {
+                $zip->addFile($file->getPathname(), $relative);
+            }
+        }
+
+        $zip->close();
+
+        return response()->download($zipPath, 'probuildercrm-full-backup-'.now()->format('Y-m-d_His').'.zip')
+            ->deleteFileAfterSend(true);
+    }
+
+    private function isExcludedFromBackup(string $relativePath): bool
+    {
+        $relativePath = str_replace('\\', '/', $relativePath);
+
+        foreach (self::BACKUP_EXCLUDE_PATHS as $excluded) {
+            if ($relativePath === $excluded || str_starts_with($relativePath, $excluded.'/')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function clearCache()

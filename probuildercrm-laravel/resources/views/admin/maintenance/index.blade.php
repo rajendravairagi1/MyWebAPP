@@ -38,11 +38,34 @@
         </div>
 
         @if (session('output'))
-            <div class="card">
+            <div class="card" style="margin-bottom: var(--space-lg);">
                 <strong style="display: block; margin-bottom: 8px;">Last migration output</strong>
                 <pre style="white-space: pre-wrap; font-size: 0.82rem; color: var(--color-ink-soft); margin: 0;">{{ session('output') }}</pre>
             </div>
         @endif
+
+        <div class="card" style="margin-bottom: var(--space-lg); display: flex; flex-direction: column; gap: 10px;">
+            <strong>Download database backup</strong>
+            <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin: 0;">
+                The entire live database as one file - every blog post, testimonial, FAQ, pricing plan, demo request and
+                setting currently on the site. Takes a few seconds. Keep a recent copy somewhere safe.
+            </p>
+            <a href="{{ route('admin.maintenance.backup.database') }}" class="btn btn-secondary" style="align-self: flex-start;">Download Database (.sqlite)</a>
+        </div>
+
+        <div class="card" style="display: flex; flex-direction: column; gap: 10px;">
+            <strong>Download full site backup</strong>
+            <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin: 0;">
+                Everything needed to rebuild the site from scratch: all the application code, the live database, and every
+                file ever uploaded from Admin - logo, favicon, blog post images. This can take a minute or two and the
+                file can be sizeable, depending on how many images have been uploaded.
+            </p>
+            <p style="color: var(--color-ink-soft); font-size: 0.85rem; margin: 0;">
+                Doesn't include the <code>vendor</code> folder (third-party libraries the site depends on, not your
+                content) - if this site is ever rebuilt from zero, that needs a separate one-time setup.
+            </p>
+            <a href="{{ route('admin.maintenance.backup.full') }}" class="btn btn-secondary" style="align-self: flex-start;">Download Full Backup (.zip)</a>
+        </div>
     </div>
 </div>
 @endsection
