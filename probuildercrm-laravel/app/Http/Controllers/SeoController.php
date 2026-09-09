@@ -49,9 +49,41 @@ class SeoController extends Controller
     {
         $siteUrl = rtrim(config('site.url'), '/');
 
-        $content = "User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: {$siteUrl}/sitemap.xml\n";
+        // Every crawler defaults to allowed via the wildcard block below,
+        // so none of these named entries change access — they're listed
+        // explicitly because several AI/answer-engine crawlers (and the
+        // audits some of them publish) specifically check for their own
+        // name rather than trusting the wildcard, and because it makes the
+        // "yes, this is intentionally open to AI" reachable to a human
+        // skimming the file too.
+        $aiCrawlers = [
+            'GPTBot', 'ChatGPT-User', 'OAI-SearchBot',        // OpenAI / ChatGPT
+            'ClaudeBot', 'Claude-Web', 'anthropic-ai',        // Anthropic / Claude
+            'Google-Extended', 'GoogleOther',                 // Google AI (Gemini/AI Overviews)
+            'PerplexityBot', 'Perplexity-User',               // Perplexity
+            'Meta-ExternalAgent', 'FacebookBot',              // Meta AI
+            'Bytespider',                                     // ByteDance / TikTok
+            'Amazonbot',                                      // Amazon
+            'Applebot', 'Applebot-Extended',                  // Apple Intelligence / Siri
+            'YouBot',                                         // You.com
+            'cohere-ai',                                      // Cohere
+            'Diffbot',                                        // Diffbot
+            'DuckAssistBot',                                  // DuckDuckGo AI
+            'CCBot',                                          // Common Crawl (feeds many LLMs' training data)
+        ];
 
-        return Response::make($content, 200, ['Content-Type' => 'text/plain']);
+        $lines = ['User-agent: *', 'Allow: /', 'Disallow: /admin', ''];
+
+        foreach ($aiCrawlers as $bot) {
+            $lines[] = "User-agent: {$bot}";
+            $lines[] = 'Allow: /';
+            $lines[] = 'Disallow: /admin';
+            $lines[] = '';
+        }
+
+        $lines[] = "Sitemap: {$siteUrl}/sitemap.xml";
+
+        return Response::make(implode("\n", $lines), 200, ['Content-Type' => 'text/plain']);
     }
 
     public function llms()
