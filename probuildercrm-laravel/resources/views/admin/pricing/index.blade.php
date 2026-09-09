@@ -11,10 +11,31 @@
 
         <p style="color: var(--color-ink-soft); margin-bottom: var(--space-lg);">
             Set each plan's real monthly price here - the pricing page works it out from there: the 6-month price is 6&times; that
-            (with 1 month free added to the service), the yearly price is 12&times; that (with 2 months free added). The permanent
-            "40% OFF" badge and struck-through price shown to visitors are calculated automatically too - you only ever edit the
-            one real monthly number per plan.
+            (with 1 month free added to the service), the yearly price is 12&times; that (with 2 months free added). The "OFF"
+            badge and struck-through price shown to visitors are calculated automatically from the offer below - you only ever
+            edit the one real monthly number per plan.
         </p>
+
+        <div class="card" style="margin-bottom: var(--space-lg);">
+            <strong style="display: block; margin-bottom: 8px;">Offer</strong>
+            <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin-bottom: var(--space-md);">
+                The discount badge and struck-through original price shown on every plan, on the Pricing page. Change it here
+                and it updates everywhere at once. Set to 0 to run no offer - the badge and struck-through price both disappear.
+            </p>
+            <form method="POST" action="{{ route('admin.pricing.discount') }}" style="display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap;">
+                @csrf
+                @method('PUT')
+                <div class="form-field" style="max-width: 160px;">
+                    <label for="discount_percent">Discount %</label>
+                    <input id="discount_percent" name="discount_percent" type="number" min="0" max="90" required
+                           value="{{ old('discount_percent', $discountPercent) }}" class="form-input">
+                </div>
+                <button type="submit" class="btn btn-primary">Save Offer</button>
+            </form>
+            @error('discount_percent')
+                <p class="form-error" style="margin-top: 8px;">{{ $message }}</p>
+            @enderror
+        </div>
 
         <div style="display: flex; flex-direction: column; gap: 16px;">
             @foreach ($plans as $plan)

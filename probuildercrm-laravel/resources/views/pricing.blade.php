@@ -25,7 +25,7 @@
             get cycle() { return this.cycles.find(c => c.key === this.cycleKey) },
             pricing(monthlyPrice) {
                 const price = monthlyPrice * this.cycle.months;
-                const originalPrice = Math.round(price / 0.6);
+                const originalPrice = Math.round(price / (1 - {{ $discountPercent }} / 100));
                 return { price, originalPrice };
             }
          }">
@@ -49,7 +49,9 @@
                     @if ($plan->highlighted)
                         <span class="pricing-badge-popular">Most Popular</span>
                     @endif
-                    <span class="pricing-badge-off">40% OFF</span>
+                    @if ($discountPercent > 0)
+                        <span class="pricing-badge-off">{{ $discountPercent }}% OFF</span>
+                    @endif
 
                     <div>
                         <h3 style="font-size: 1.3rem; margin-bottom: 4px;">{{ $plan->name }}</h3>
@@ -58,7 +60,9 @@
 
                     <div>
                         <div style="display: flex; align-items: baseline; gap: 8px;">
-                            <span class="pricing-original" x-text="'₹' + pricing({{ $plan->monthly_price }}).originalPrice.toLocaleString('en-IN')"></span>
+                            @if ($discountPercent > 0)
+                                <span class="pricing-original" x-text="'₹' + pricing({{ $plan->monthly_price }}).originalPrice.toLocaleString('en-IN')"></span>
+                            @endif
                             <span class="pricing-real" x-text="'₹' + pricing({{ $plan->monthly_price }}).price.toLocaleString('en-IN')"></span>
                         </div>
                         <div class="pricing-cycle-note">

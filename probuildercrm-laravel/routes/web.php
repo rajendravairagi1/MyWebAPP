@@ -56,6 +56,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/posts/{post}', [AdminBlogController::class, 'destroy'])->name('posts.destroy');
 
         Route::get('/pricing', [AdminPricingController::class, 'index'])->name('pricing.index');
+        Route::put('/pricing-discount', [AdminPricingController::class, 'updateDiscount'])->name('pricing.discount');
         Route::get('/pricing/{plan}/edit', [AdminPricingController::class, 'edit'])->name('pricing.edit');
         Route::put('/pricing/{plan}', [AdminPricingController::class, 'update'])->name('pricing.update');
 

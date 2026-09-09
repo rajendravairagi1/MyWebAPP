@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PricingPlan;
+use App\Models\SiteSetting;
 use Illuminate\Http\Request;
 
 class PricingController extends Controller
@@ -11,8 +12,20 @@ class PricingController extends Controller
     public function index()
     {
         $plans = PricingPlan::orderBy('sort_order')->get();
+        $discountPercent = (int) SiteSetting::get('pricing_discount_percent', '40');
 
-        return view('admin.pricing.index', compact('plans'));
+        return view('admin.pricing.index', compact('plans', 'discountPercent'));
+    }
+
+    public function updateDiscount(Request $request)
+    {
+        $validated = $request->validate([
+            'discount_percent' => 'required|integer|min:0|max:90',
+        ]);
+
+        SiteSetting::set('pricing_discount_percent', (string) $validated['discount_percent']);
+
+        return redirect()->route('admin.pricing.index')->with('status', 'Offer updated - it now shows everywhere pricing is displayed.');
     }
 
     public function edit(PricingPlan $plan)
