@@ -10,6 +10,7 @@ return [
     'phone_href' => '+917898002496',
     'whatsapp' => 'https://wa.me/' . env('WHATSAPP_NUMBER', '917898002496'),
     'url' => env('APP_URL', 'https://probuildercrm.com'),
+    'app_login_url' => env('APP_LOGIN_URL', 'https://app.probuildercrm.com/login'),
     'regions' => ['India', 'USA', 'UK', 'Australia', 'Canada'],
 
     'nav_items' => [

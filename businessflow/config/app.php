@@ -116,6 +116,18 @@ return [
 
     'install_token' => env('INSTALL_TOKEN'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Marketing Site URL
+    |--------------------------------------------------------------------------
+    |
+    | Where a logged-out visitor is sent after logout, since the marketing
+    | site (not this app's own welcome page) is the public-facing home.
+    |
+    */
+
+    'marketing_url' => env('MARKETING_SITE_URL', 'https://probuildercrm.com'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

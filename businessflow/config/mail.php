@@ -108,6 +108,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Markdown Mail Settings
+    |--------------------------------------------------------------------------
+    |
+    | Points the markdown mail renderer (used by MailMessage / notification
+    | mail like the password reset email) at our branded copy of the theme
+    | published to resources/views/vendor/mail, instead of the framework's
+    | unbranded defaults.
+    |
+    */
+
+    'markdown' => [
+        'theme' => 'default',
+        'paths' => [
+            resource_path('views/vendor/mail'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Global "From" Address
     |--------------------------------------------------------------------------
     |

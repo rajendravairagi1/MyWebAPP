@@ -28,6 +28,7 @@
             @foreach (config('site.nav_items') as $item)
                 <a href="{{ url($item['href']) }}" class="nav-link">{{ $item['label'] }}</a>
             @endforeach
+            <a href="{{ config('site.app_login_url') }}" class="nav-link">Login</a>
             <a href="{{ route('contact') }}" class="btn btn-primary">Book a Free Demo</a>
         </nav>
 
@@ -43,6 +44,7 @@
             @foreach (config('site.nav_items') as $item)
                 <a href="{{ url($item['href']) }}" @click="open = false">{{ $item['label'] }}</a>
             @endforeach
+            <a href="{{ config('site.app_login_url') }}" @click="open = false">Login</a>
             <a href="{{ route('contact') }}" @click="open = false" class="btn btn-primary" style="margin-top: 8px; width: 100%;">Book a Free Demo</a>
         </div>
     </div>
