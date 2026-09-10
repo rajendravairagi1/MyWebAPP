@@ -259,6 +259,23 @@ class AdminController extends Controller
     }
 
     /**
+     * A Company has no self-service settings page of its own yet (unlike
+     * a Business, which sets its own phone in Business Settings) — this
+     * is the only place a contact number gets recorded for one, same as
+     * how plan/expiry/password are already admin-managed here.
+     */
+    public function updateCompanyPhone(Request $request, Company $company): RedirectResponse
+    {
+        $data = $request->validate([
+            'phone' => ['nullable', 'string', 'max:20'],
+        ]);
+
+        $company->update(['phone' => $data['phone'] ?? null]);
+
+        return back()->with('status', "\"{$company->name}\" phone number updated.");
+    }
+
+    /**
      * "Done" on a renewal nudge — hides it from the bell/Expiring Soon
      * page until subscription_expires_at is changed again (see above).
      */

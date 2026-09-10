@@ -11,7 +11,7 @@ class Company extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['owner_user_id', 'name', 'subscription_expires_at', 'renewal_alert_dismissed_at', 'status'];
+    protected $fillable = ['owner_user_id', 'name', 'phone', 'subscription_expires_at', 'renewal_alert_dismissed_at', 'status'];
 
     protected $casts = [
         'subscription_expires_at' => 'date',

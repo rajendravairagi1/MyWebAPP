@@ -24,7 +24,12 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        {{-- Wider than the app's usual max-w-6xl — this page's tables
+             (Business/Owner/Phone/Plan/Valid till/Status/Actions) need
+             more room than that to lay out without every row's actions
+             getting clipped. overflow-x-auto below still catches any
+             viewport narrower than this. --}}
+        <div class="max-w-screen-2xl mx-auto sm:px-6 lg:px-8 space-y-6">
             @if (session('status'))
                 <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm rounded-md p-3">{{ session('status') }}</div>
             @endif
@@ -251,6 +256,7 @@
                             <tr>
                                 <th class="px-5 py-2 text-left">{{ __('Company') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Owner') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Phone') }}</th>
                                 <th class="px-5 py-2 text-right">{{ __('Branches') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Valid till') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Status') }}</th>
@@ -262,6 +268,24 @@
                                 <tr>
                                     <td class="px-5 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $company->name }}</td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $company->owner->name }} <span class="text-gray-400">({{ $company->owner->email }})</span></td>
+                                    <td class="px-5 py-2">
+                                        {{-- A Company has no self-service settings page of its own
+                                             (unlike a Business, which sets phone itself) — so this is
+                                             directly editable here, same pattern as Reset password below. --}}
+                                        <div x-data="{ open: false }">
+                                            <button type="button" x-show="!open" x-on:click="open = true" @class([
+                                                'text-xs whitespace-nowrap',
+                                                'text-gray-600 dark:text-gray-400' => $company->phone,
+                                                'text-accent-600 hover:underline' => ! $company->phone,
+                                            ])>{{ $company->phone ?: __('Add phone') }}</button>
+                                            <form x-show="open" x-cloak method="POST" action="{{ route('admin.companies.phone', $company) }}" class="flex items-center gap-2">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="text" name="phone" value="{{ $company->phone }}" placeholder="{{ __('Phone number') }}" class="w-32 shrink-0 text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
+                                                <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                            </form>
+                                        </div>
+                                    </td>
                                     <td class="px-5 py-2 text-right text-gray-600 dark:text-gray-400">{{ $company->branches_count }}</td>
                                     <td class="px-5 py-2">
                                         @php
@@ -371,7 +395,7 @@
                                 <tr>
                                     <td class="px-5 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $company->name }} <span class="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 ml-1">{{ __('company') }}</span></td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $company->owner->name }} <span class="text-gray-400">({{ $company->owner->email }})</span></td>
-                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400">—</td>
+                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $company->phone ?: '—' }}</td>
                                     <td class="px-5 py-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $company->deleted_at->format('d M Y') }}</td>
                                     <td class="px-5 py-2">
                                         <form method="POST" action="{{ route('admin.companies.restore', $company->id) }}">
