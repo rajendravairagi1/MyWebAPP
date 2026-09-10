@@ -102,6 +102,20 @@ class BrandingController extends Controller
         return redirect(asset($logoPath));
     }
 
+    /**
+     * Companion to showLogo() above - lets other apps scale their own
+     * logo placements in proportion to the size chosen here, without
+     * hardcoding pixel values that go stale. Cached client-side for 5
+     * minutes so a repeat page view doesn't even make the request.
+     */
+    public function logoSize()
+    {
+        return response()
+            ->json(['height' => self::pixelsFor(SiteSetting::get('logo_size', self::DEFAULT_SIZE))])
+            ->header('Cache-Control', 'public, max-age=300')
+            ->header('Access-Control-Allow-Origin', '*');
+    }
+
     public function destroy()
     {
         $this->deleteExistingLogo();

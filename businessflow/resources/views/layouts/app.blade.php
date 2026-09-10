@@ -8,6 +8,7 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         @include('partials.pwa-head')
+        @include('partials.brand-logo-sync')
 
         {{-- Set theme + accent color before first paint to avoid a flash --}}
         <script>
@@ -65,7 +66,7 @@
                 :class="mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                 class="fixed lg:sticky lg:top-0 lg:self-start lg:h-screen inset-y-0 left-0 z-40 w-64 shrink-0 bg-slate-900 text-slate-200 flex flex-col transition-transform duration-200 ease-in-out">
                 <div class="h-16 flex items-center gap-2 px-5 border-b border-slate-800">
-                    <x-application-logo class="h-11 fill-current text-accent-500" />
+                    <x-application-logo base-height="2.75rem" class="fill-current text-accent-500" />
                 </div>
 
                 <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">

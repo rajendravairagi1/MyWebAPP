@@ -143,6 +143,15 @@ return [
 
     'brand_logo_url' => env('BRAND_LOGO_URL', 'https://probuildercrm.com/branding/logo'),
 
+    /*
+    | Companion to brand_logo_url above - lets the logo's size stay in
+    | sync with the "Logo size" choice on the marketing site's Admin >
+    | Branding page too, not just the image file itself. See
+    | resources/views/partials/brand-logo-sync.blade.php.
+    */
+
+    'brand_logo_size_url' => env('BRAND_LOGO_SIZE_URL', 'https://probuildercrm.com/branding/logo-size'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

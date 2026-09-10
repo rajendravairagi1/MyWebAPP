@@ -8,6 +8,7 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         @include('partials.pwa-head')
+        @include('partials.brand-logo-sync')
 
         <script>
             (function () {
@@ -31,7 +32,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-slate-900">
             <div>
                 <a href="/">
-                    <x-application-logo class="h-16 fill-current text-accent-500" />
+                    <x-application-logo base-height="4rem" class="fill-current text-accent-500" />
                 </a>
             </div>
 
