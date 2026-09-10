@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class Business extends Model
 {
     use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'branch_id',
@@ -20,6 +22,7 @@ class Business extends Model
         'subscription_expires_at',
         'renewal_alert_dismissed_at',
         'is_demo',
+        'status',
         'smart_alerts_enabled',
         'payment_reminders_enabled',
         'voice_notes_enabled',
@@ -96,6 +99,25 @@ class Business extends Model
         // first day it's cut off — so "expires 31 Aug" still works all day
         // on the 31st and only locks out starting the 1st.
         return $expires !== null && $expires->copy()->endOfDay()->isPast();
+    }
+
+    /**
+     * The active/inactive status that actually gates access — same
+     * inheritance rule as effectiveExpiresAt(): a business inside a branch
+     * has no admin toggle of its own, so it follows its Company's status.
+     */
+    public function effectiveStatus(): string
+    {
+        if ($this->branch_id) {
+            return $this->branch?->company?->status ?? 'active';
+        }
+
+        return $this->status;
+    }
+
+    public function isActive(): bool
+    {
+        return $this->effectiveStatus() !== 'inactive';
     }
 
     public function users(): BelongsToMany

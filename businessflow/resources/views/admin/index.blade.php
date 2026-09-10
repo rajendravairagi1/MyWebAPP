@@ -124,9 +124,11 @@
                             <tr>
                                 <th class="px-5 py-2 text-left">{{ __('Business') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Owner') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Phone') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Plan') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Valid till') }}</th>
-                                <th class="px-5 py-2 text-left">{{ __('Password') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Status') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
@@ -140,6 +142,7 @@
                                         @endif
                                     </td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $owner?->name }} <span class="text-gray-400">({{ $owner?->email }})</span></td>
+                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $business->phone ?: '—' }}</td>
                                     <td class="px-5 py-2">
                                         <form method="POST" action="{{ route('admin.businesses.plan', $business) }}" class="inline-flex items-center gap-2">
                                             @csrf
@@ -174,17 +177,59 @@
                                         </form>
                                     </td>
                                     <td class="px-5 py-2">
-                                        @if ($owner)
-                                            <div x-data="{ open: false }">
-                                                <button type="button" x-show="!open" x-on:click="open = true" class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Reset password') }}</button>
-                                                <form x-show="open" x-cloak method="POST" action="{{ route('admin.users.password', $owner) }}" class="flex items-center gap-2">
+                                        @if ($business->branch_id)
+                                            <span class="text-xs text-gray-400">{{ __('via Company') }}</span>
+                                        @else
+                                            {{-- Two separate forms, not one form with two submit buttons: the
+                                                 app-wide double-submit guard (resources/js/app.js) disables the
+                                                 clicked button the instant the form submits, and a disabled
+                                                 control's name/value is dropped from what actually gets sent —
+                                                 so a shared form would silently submit no "status" at all. Each
+                                                 form's own hidden input isn't touched by that guard. --}}
+                                            <div class="inline-flex rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden text-xs">
+                                                <form method="POST" action="{{ route('admin.businesses.status', $business) }}">
                                                     @csrf
                                                     @method('PUT')
-                                                    <input type="text" name="password" placeholder="{{ __('New password') }}" minlength="8" required class="w-32 shrink-0 text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
-                                                    <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                                    <input type="hidden" name="status" value="active">
+                                                    <button type="submit" @class([
+                                                        'px-2.5 py-1 transition',
+                                                        'bg-green-600 text-white' => $business->status !== 'inactive',
+                                                        'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700' => $business->status === 'inactive',
+                                                    ])>{{ __('Active') }}</button>
+                                                </form>
+                                                <form method="POST" action="{{ route('admin.businesses.status', $business) }}">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="status" value="inactive">
+                                                    <button type="submit" @class([
+                                                        'px-2.5 py-1 border-l border-gray-200 dark:border-slate-600 transition',
+                                                        'bg-gray-500 text-white' => $business->status === 'inactive',
+                                                        'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700' => $business->status !== 'inactive',
+                                                    ])>{{ __('Inactive') }}</button>
                                                 </form>
                                             </div>
                                         @endif
+                                    </td>
+                                    <td class="px-5 py-2">
+                                        <div class="flex flex-col items-start gap-1">
+                                            @if ($owner)
+                                                <div x-data="{ open: false }">
+                                                    <button type="button" x-show="!open" x-on:click="open = true" class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Reset password') }}</button>
+                                                    <form x-show="open" x-cloak method="POST" action="{{ route('admin.users.password', $owner) }}" class="flex items-center gap-2">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="text" name="password" placeholder="{{ __('New password') }}" minlength="8" required class="w-32 shrink-0 text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
+                                                        <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                                    </form>
+                                                </div>
+                                            @endif
+                                            @unless ($business->branch_id)
+                                                <form method="POST" action="{{ route('admin.businesses.archive', $business) }}" onsubmit="return confirm('{{ __('Remove this account? It will be archived, not deleted — you can restore it any time from Archived Accounts.') }}')">
+                                                    @csrf
+                                                    <button class="text-xs text-red-600 hover:underline whitespace-nowrap">{{ __('Remove') }}</button>
+                                                </form>
+                                            @endunless
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -208,7 +253,8 @@
                                 <th class="px-5 py-2 text-left">{{ __('Owner') }}</th>
                                 <th class="px-5 py-2 text-right">{{ __('Branches') }}</th>
                                 <th class="px-5 py-2 text-left">{{ __('Valid till') }}</th>
-                                <th class="px-5 py-2 text-left">{{ __('Password') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Status') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
@@ -240,13 +286,43 @@
                                         </form>
                                     </td>
                                     <td class="px-5 py-2">
-                                        <div x-data="{ open: false }">
-                                            <button type="button" x-show="!open" x-on:click="open = true" class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Reset password') }}</button>
-                                            <form x-show="open" x-cloak method="POST" action="{{ route('admin.users.password', $company->owner) }}" class="flex items-center gap-2">
+                                        <div class="inline-flex rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden text-xs">
+                                            <form method="POST" action="{{ route('admin.companies.status', $company) }}">
                                                 @csrf
                                                 @method('PUT')
-                                                <input type="text" name="password" placeholder="{{ __('New password') }}" minlength="8" required class="w-32 shrink-0 text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
-                                                <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                                <input type="hidden" name="status" value="active">
+                                                <button type="submit" @class([
+                                                    'px-2.5 py-1 transition',
+                                                    'bg-green-600 text-white' => $company->status !== 'inactive',
+                                                    'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700' => $company->status === 'inactive',
+                                                ])>{{ __('Active') }}</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('admin.companies.status', $company) }}">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="inactive">
+                                                <button type="submit" @class([
+                                                    'px-2.5 py-1 border-l border-gray-200 dark:border-slate-600 transition',
+                                                    'bg-gray-500 text-white' => $company->status === 'inactive',
+                                                    'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700' => $company->status !== 'inactive',
+                                                ])>{{ __('Inactive') }}</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                    <td class="px-5 py-2">
+                                        <div class="flex flex-col items-start gap-1">
+                                            <div x-data="{ open: false }">
+                                                <button type="button" x-show="!open" x-on:click="open = true" class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Reset password') }}</button>
+                                                <form x-show="open" x-cloak method="POST" action="{{ route('admin.users.password', $company->owner) }}" class="flex items-center gap-2">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="text" name="password" placeholder="{{ __('New password') }}" minlength="8" required class="w-32 shrink-0 text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
+                                                    <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                                </form>
+                                            </div>
+                                            <form method="POST" action="{{ route('admin.companies.archive', $company) }}" onsubmit="return confirm('{{ __('Remove this account? It will be archived, not deleted — you can restore it any time from Archived Accounts.') }}')">
+                                                @csrf
+                                                <button class="text-xs text-red-600 hover:underline whitespace-nowrap">{{ __('Remove') }}</button>
                                             </form>
                                         </div>
                                     </td>
@@ -257,6 +333,59 @@
                     </div>
                 @endif
             </div>
+
+            {{-- Archived accounts — "Remove" above never deletes, it moves
+                 an account here instead, so it can be restored whenever
+                 it's needed again. --}}
+            @if ($archivedBusinesses->isNotEmpty() || $archivedCompanies->isNotEmpty())
+                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                    <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Archived Accounts') }}</div>
+                    <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
+                            <tr>
+                                <th class="px-5 py-2 text-left">{{ __('Account') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Owner') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Phone') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Removed on') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
+                            @foreach ($archivedBusinesses as $business)
+                                @php $owner = $business->users->first(); @endphp
+                                <tr>
+                                    <td class="px-5 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $business->name }} <span class="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 ml-1">{{ __('business') }}</span></td>
+                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $owner?->name }} <span class="text-gray-400">({{ $owner?->email }})</span></td>
+                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $business->phone ?: '—' }}</td>
+                                    <td class="px-5 py-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $business->deleted_at->format('d M Y') }}</td>
+                                    <td class="px-5 py-2">
+                                        <form method="POST" action="{{ route('admin.businesses.restore', $business->id) }}">
+                                            @csrf
+                                            <button class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Restore') }}</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            @foreach ($archivedCompanies as $company)
+                                <tr>
+                                    <td class="px-5 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $company->name }} <span class="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 ml-1">{{ __('company') }}</span></td>
+                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $company->owner->name }} <span class="text-gray-400">({{ $company->owner->email }})</span></td>
+                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400">—</td>
+                                    <td class="px-5 py-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $company->deleted_at->format('d M Y') }}</td>
+                                    <td class="px-5 py-2">
+                                        <form method="POST" action="{{ route('admin.companies.restore', $company->id) }}">
+                                            @csrf
+                                            <button class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Restore') }}</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

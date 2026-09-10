@@ -12,9 +12,11 @@ use Symfony\Component\HttpFoundation\Response;
  * Payment is collected manually outside the app (see Admin\AdminController)
  * — this is what actually enforces it, redirecting to a "renew" page once
  * the active business (or, for a builder under a branch, its Company) is
- * past its subscription_expires_at. Runs right after IdentifyTenant, so
- * Tenant::id() is already resolved for this request. The platform admin
- * is never blocked, since they're the one who'd need to fix it.
+ * past its subscription_expires_at, OR has been switched to "inactive"
+ * from the Platform Admin panel (see Business::effectiveStatus()). Runs
+ * right after IdentifyTenant, so Tenant::id() is already resolved for
+ * this request. The platform admin is never blocked, since they're the
+ * one who'd need to fix it.
  */
 class EnsureSubscriptionActive
 {
@@ -35,6 +37,10 @@ class EnsureSubscriptionActive
         }
 
         $business = Business::find(Tenant::id());
+
+        if ($business && ! $business->isActive()) {
+            return redirect()->route('subscription.expired', ['reason' => 'paused']);
+        }
 
         if ($business && $business->isSubscriptionExpired()) {
             return redirect()->route('subscription.expired');

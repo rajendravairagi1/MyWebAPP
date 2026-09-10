@@ -65,6 +65,20 @@ class AdminController extends Controller
 
         $companies = Company::with('owner')->withCount('branches')->orderBy('created_at')->get();
 
+        // "Remove" never deletes — it archives (soft delete), so these
+        // stay recoverable via Restore below whenever the account is
+        // needed again.
+        $archivedBusinesses = Business::onlyTrashed()
+            ->whereNull('branch_id')
+            ->with(['users' => fn ($q) => $q->wherePivot('role', 'owner')])
+            ->orderByDesc('deleted_at')
+            ->get();
+
+        $archivedCompanies = Company::onlyTrashed()
+            ->with('owner')
+            ->orderByDesc('deleted_at')
+            ->get();
+
         // Normally exactly one row — but if "is_demo" ever gets ticked by
         // mistake on a real customer account, that account silently
         // disappears from $businesses above (and from every other admin
@@ -79,7 +93,7 @@ class AdminController extends Controller
 
         $settings = PlatformSetting::current();
 
-        return view('admin.index', compact('businesses', 'companies', 'demoBusinesses', 'settings'));
+        return view('admin.index', compact('businesses', 'companies', 'demoBusinesses', 'archivedBusinesses', 'archivedCompanies', 'settings'));
     }
 
     /**
@@ -315,5 +329,72 @@ class AdminController extends Controller
         $business->update(['is_demo' => false]);
 
         return back()->with('status', "\"{$business->name}\" is now a normal customer account again.");
+    }
+
+    /**
+     * Sets a business to active or inactive — an inactive account is
+     * blocked from logging in (see EnsureSubscriptionActive) without
+     * touching its plan, expiry, or any of its data, so it can be
+     * switched back on just as instantly. Takes the target state
+     * explicitly (rather than blindly flipping whatever it currently is)
+     * so both the Active and Inactive buttons in admin.index are plain,
+     * idempotent submits.
+     */
+    public function setBusinessStatus(Request $request, Business $business): RedirectResponse
+    {
+        abort_if($business->branch_id, 422, "This builder's status is set by its Company, not per-builder.");
+
+        $data = $request->validate(['status' => ['required', 'in:active,inactive']]);
+
+        $business->update($data);
+
+        return back()->with('status', "\"{$business->name}\" is now {$data['status']}.");
+    }
+
+    public function setCompanyStatus(Request $request, Company $company): RedirectResponse
+    {
+        $data = $request->validate(['status' => ['required', 'in:active,inactive']]);
+
+        $company->update($data);
+
+        return back()->with('status', "\"{$company->name}\" is now {$data['status']}.");
+    }
+
+    /**
+     * "Remove" — archives the account (soft delete) instead of destroying
+     * it. Everything about it (data, users, history) stays exactly as it
+     * was; it just drops out of the main lists above until Restore brings
+     * it back from the Archived Accounts section.
+     */
+    public function archiveBusiness(Business $business): RedirectResponse
+    {
+        abort_if($business->branch_id, 422, "This builder is part of a Company — archive the Company instead.");
+
+        $business->delete();
+
+        return back()->with('status', "\"{$business->name}\" has been archived — restore it any time from Archived Accounts below.");
+    }
+
+    public function restoreBusiness(int $id): RedirectResponse
+    {
+        $business = Business::onlyTrashed()->findOrFail($id);
+        $business->restore();
+
+        return back()->with('status', "\"{$business->name}\" has been restored.");
+    }
+
+    public function archiveCompany(Company $company): RedirectResponse
+    {
+        $company->delete();
+
+        return back()->with('status', "\"{$company->name}\" has been archived — restore it any time from Archived Accounts below.");
+    }
+
+    public function restoreCompany(int $id): RedirectResponse
+    {
+        $company = Company::onlyTrashed()->findOrFail($id);
+        $company->restore();
+
+        return back()->with('status', "\"{$company->name}\" has been restored.");
     }
 }

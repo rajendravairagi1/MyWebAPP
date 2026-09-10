@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Company extends Model
 {
-    protected $fillable = ['owner_user_id', 'name', 'subscription_expires_at', 'renewal_alert_dismissed_at'];
+    use SoftDeletes;
+
+    protected $fillable = ['owner_user_id', 'name', 'subscription_expires_at', 'renewal_alert_dismissed_at', 'status'];
 
     protected $casts = [
         'subscription_expires_at' => 'date',
@@ -23,6 +26,11 @@ class Company extends Model
     public function branches(): HasMany
     {
         return $this->hasMany(Branch::class);
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status !== 'inactive';
     }
 
     /**

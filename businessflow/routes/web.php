@@ -113,6 +113,12 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::post('/businesses/{business}/dismiss-renewal', [AdminController::class, 'dismissBusinessRenewal'])->name('businesses.dismiss-renewal');
     Route::post('/companies/{company}/dismiss-renewal', [AdminController::class, 'dismissCompanyRenewal'])->name('companies.dismiss-renewal');
     Route::post('/businesses/{business}/unmark-demo', [AdminController::class, 'unmarkDemo'])->name('businesses.unmark-demo');
+    Route::put('/businesses/{business}/status', [AdminController::class, 'setBusinessStatus'])->name('businesses.status');
+    Route::post('/businesses/{business}/archive', [AdminController::class, 'archiveBusiness'])->name('businesses.archive');
+    Route::post('/businesses/{id}/restore', [AdminController::class, 'restoreBusiness'])->name('businesses.restore');
+    Route::put('/companies/{company}/status', [AdminController::class, 'setCompanyStatus'])->name('companies.status');
+    Route::post('/companies/{company}/archive', [AdminController::class, 'archiveCompany'])->name('companies.archive');
+    Route::post('/companies/{id}/restore', [AdminController::class, 'restoreCompany'])->name('companies.restore');
     Route::get('/expiring', [AdminController::class, 'expiringSoon'])->name('expiring');
     Route::get('/login-activity', [LoginActivityController::class, 'index'])->name('login-activity');
     Route::delete('/login-activity', [LoginActivityController::class, 'clear'])->name('login-activity.clear');
