@@ -120,6 +120,7 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::put('/companies/{company}/status', [AdminController::class, 'setCompanyStatus'])->name('companies.status');
     Route::post('/companies/{company}/archive', [AdminController::class, 'archiveCompany'])->name('companies.archive');
     Route::post('/companies/{id}/restore', [AdminController::class, 'restoreCompany'])->name('companies.restore');
+    Route::get('/archived', [AdminController::class, 'archived'])->name('archived');
     Route::get('/expiring', [AdminController::class, 'expiringSoon'])->name('expiring');
     Route::get('/login-activity', [LoginActivityController::class, 'index'])->name('login-activity');
     Route::delete('/login-activity', [LoginActivityController::class, 'clear'])->name('login-activity.clear');

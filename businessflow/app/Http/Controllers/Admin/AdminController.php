@@ -65,19 +65,12 @@ class AdminController extends Controller
 
         $companies = Company::with('owner')->withCount('branches')->orderBy('created_at')->get();
 
-        // "Remove" never deletes — it archives (soft delete), so these
-        // stay recoverable via Restore below whenever the account is
-        // needed again.
-        $archivedBusinesses = Business::onlyTrashed()
-            ->whereNull('branch_id')
-            ->with(['users' => fn ($q) => $q->wherePivot('role', 'owner')])
-            ->orderByDesc('deleted_at')
-            ->get();
-
-        $archivedCompanies = Company::onlyTrashed()
-            ->with('owner')
-            ->orderByDesc('deleted_at')
-            ->get();
+        // "Remove" never deletes — it archives (soft delete). The
+        // archived list itself lives on its own page (see archived()
+        // below) since it can grow large — this is just the count for
+        // the header button/badge.
+        $archivedCount = Business::onlyTrashed()->whereNull('branch_id')->count()
+            + Company::onlyTrashed()->count();
 
         // Normally exactly one row — but if "is_demo" ever gets ticked by
         // mistake on a real customer account, that account silently
@@ -93,7 +86,67 @@ class AdminController extends Controller
 
         $settings = PlatformSetting::current();
 
-        return view('admin.index', compact('businesses', 'companies', 'demoBusinesses', 'archivedBusinesses', 'archivedCompanies', 'settings'));
+        return view('admin.index', compact('businesses', 'companies', 'demoBusinesses', 'archivedCount', 'settings'));
+    }
+
+    /**
+     * Archived (soft-deleted) accounts, on their own page since "Remove"
+     * accumulates over time and doesn't belong inline on the main list.
+     * Businesses and Companies are two different models, so they're
+     * merged into one plain collection here and paginated manually
+     * (LengthAwarePaginator over an in-memory slice) rather than via a
+     * SQL UNION, which would need to reconcile two very different
+     * column sets (and, for Business, the branch_id-scoped exclusion).
+     * Fine at the scale an admin-only archive list actually reaches.
+     */
+    public function archived(Request $request): View
+    {
+        $perPage = \App\Support\ListPagination::perPage($request);
+        $search = $request->string('q')->trim()->toString();
+
+        $businesses = Business::onlyTrashed()
+            ->whereNull('branch_id')
+            ->with(['users' => fn ($q) => $q->wherePivot('role', 'owner')])
+            ->when($search, fn ($q) => $q->where('name', 'like', '%'.$search.'%'))
+            ->get()
+            ->map(fn (Business $business) => (object) [
+                'type' => 'business',
+                'id' => $business->id,
+                'name' => $business->name,
+                'owner_name' => $business->users->first()?->name,
+                'owner_email' => $business->users->first()?->email,
+                'phone' => $business->phone,
+                'deleted_at' => $business->deleted_at,
+            ]);
+
+        $companies = Company::onlyTrashed()
+            ->with('owner')
+            ->when($search, fn ($q) => $q->where('name', 'like', '%'.$search.'%'))
+            ->get()
+            ->map(fn (Company $company) => (object) [
+                'type' => 'company',
+                'id' => $company->id,
+                'name' => $company->name,
+                'owner_name' => $company->owner->name,
+                'owner_email' => $company->owner->email,
+                'phone' => $company->phone,
+                'deleted_at' => $company->deleted_at,
+            ]);
+
+        $merged = $businesses->concat($companies)->sortByDesc('deleted_at')->values();
+
+        $page = (int) $request->query('page', 1);
+        $items = $merged->forPage($page, $perPage)->values();
+
+        $archived = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $merged->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('admin.archived', ['archived' => $archived]);
     }
 
     /**

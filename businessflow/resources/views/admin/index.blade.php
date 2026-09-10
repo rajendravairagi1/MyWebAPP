@@ -16,6 +16,12 @@
                 <a href="{{ route('admin.expiring') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap border border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20">
                     {{ __('Expiring Soon') }}
                 </a>
+                <a href="{{ route('admin.archived') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                    {{ __('Archived Accounts') }}
+                    @if ($archivedCount > 0)
+                        <span class="text-xs px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200">{{ $archivedCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('admin.create') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
                     {{ __('+ Add Customer Account') }}
                 </a>
@@ -358,58 +364,6 @@
                 @endif
             </div>
 
-            {{-- Archived accounts — "Remove" above never deletes, it moves
-                 an account here instead, so it can be restored whenever
-                 it's needed again. --}}
-            @if ($archivedBusinesses->isNotEmpty() || $archivedCompanies->isNotEmpty())
-                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
-                    <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Archived Accounts') }}</div>
-                    <div class="overflow-x-auto">
-                    <table class="min-w-full text-sm">
-                        <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
-                            <tr>
-                                <th class="px-5 py-2 text-left">{{ __('Account') }}</th>
-                                <th class="px-5 py-2 text-left">{{ __('Owner') }}</th>
-                                <th class="px-5 py-2 text-left">{{ __('Phone') }}</th>
-                                <th class="px-5 py-2 text-left">{{ __('Removed on') }}</th>
-                                <th class="px-5 py-2 text-left">{{ __('Actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
-                            @foreach ($archivedBusinesses as $business)
-                                @php $owner = $business->users->first(); @endphp
-                                <tr>
-                                    <td class="px-5 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $business->name }} <span class="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 ml-1">{{ __('business') }}</span></td>
-                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $owner?->name }} <span class="text-gray-400">({{ $owner?->email }})</span></td>
-                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $business->phone ?: '—' }}</td>
-                                    <td class="px-5 py-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $business->deleted_at->format('d M Y') }}</td>
-                                    <td class="px-5 py-2">
-                                        <form method="POST" action="{{ route('admin.businesses.restore', $business->id) }}">
-                                            @csrf
-                                            <button class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Restore') }}</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                            @foreach ($archivedCompanies as $company)
-                                <tr>
-                                    <td class="px-5 py-2 font-medium text-gray-900 dark:text-gray-100">{{ $company->name }} <span class="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-gray-400 ml-1">{{ __('company') }}</span></td>
-                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $company->owner->name }} <span class="text-gray-400">({{ $company->owner->email }})</span></td>
-                                    <td class="px-5 py-2 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $company->phone ?: '—' }}</td>
-                                    <td class="px-5 py-2 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ $company->deleted_at->format('d M Y') }}</td>
-                                    <td class="px-5 py-2">
-                                        <form method="POST" action="{{ route('admin.companies.restore', $company->id) }}">
-                                            @csrf
-                                            <button class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Restore') }}</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                    </div>
-                </div>
-            @endif
         </div>
     </div>
 </x-app-layout>

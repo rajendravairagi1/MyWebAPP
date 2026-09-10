@@ -17,6 +17,7 @@
             <p>Subscription fees are billed in advance on the plan you choose, and are non-refundable except where required by law.</p>
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">Your data</h2>
             <p>You own the business data you enter into Pro Builder CRM. We do not sell it or share it with third parties.</p>
+            <p>Pro Builder CRM provides you tools — including an in-app backup/export feature — to make managing your data easier, but keeping your own copies of critical business data is your responsibility, not ours. We recommend downloading and safely storing a backup regularly, and always before a major change.</p>
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">Contact</h2>
             <p>Questions about these terms? Email us at <a href="mailto:{{ config('site.email') }}">{{ config('site.email') }}</a>.</p>
         </div>

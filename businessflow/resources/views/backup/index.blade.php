@@ -20,6 +20,10 @@
                 {{ __('This backs up everything for') }} <span class="font-medium text-gray-800 dark:text-gray-100">{{ $business->name }}</span> — {{ __('every project, customer, quotation, invoice, payment and uploaded file — into one .zip you can download and, if you ever need to, upload right back to fully restore it.') }}
             </p>
 
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-sm rounded-md p-3">
+                {{ __('Please keep your own copy of this backup file safe (your computer, Google Drive, etc.), for your own protection. Pro Builder CRM is a service that makes your day-to-day work easier — keeping your own backups is your responsibility, not ours.') }}
+            </div>
+
             {{-- Download --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 space-y-3">
                 <h3 class="font-medium text-gray-800 dark:text-gray-100">{{ __('Download a backup') }}</h3>
