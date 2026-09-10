@@ -65,8 +65,7 @@
                 :class="mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
                 class="fixed lg:sticky lg:top-0 lg:self-start lg:h-screen inset-y-0 left-0 z-40 w-64 shrink-0 bg-slate-900 text-slate-200 flex flex-col transition-transform duration-200 ease-in-out">
                 <div class="h-16 flex items-center gap-2 px-5 border-b border-slate-800">
-                    <x-application-logo class="h-7 w-7 fill-current text-accent-500" />
-                    <span class="font-semibold text-white tracking-tight">{{ config('app.name', 'Pro Builder CRM') }}</span>
+                    <x-application-logo class="h-9 w-9 fill-current text-accent-500" />
                 </div>
 
                 <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
