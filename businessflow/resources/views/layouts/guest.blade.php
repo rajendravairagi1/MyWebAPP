@@ -8,6 +8,7 @@
         <title>{{ config('app.name', 'Laravel') }}</title>
 
         @include('partials.pwa-head')
+        @include('partials.brand-favicon-links')
         @include('partials.brand-logo-sync')
 
         <script>

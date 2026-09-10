@@ -6,6 +6,7 @@
         <title>{{ config('app.name', 'Pro Builder CRM') }} — Real Estate Builder CRM</title>
 
         @include('partials.pwa-head')
+        @include('partials.brand-favicon-links')
 
         <script>
             (function () {

@@ -152,6 +152,19 @@ return [
 
     'brand_logo_size_url' => env('BRAND_LOGO_SIZE_URL', 'https://probuildercrm.com/branding/logo-size'),
 
+    /*
+    | The browser-tab favicon, shared from the marketing site the same
+    | way as the logo above. Separate from the per-business PWA "Add to
+    | Home Screen" icon (see PwaController/pwa-head.blade.php), which
+    | stays tenant-specific on purpose - this is only the platform-level
+    | tab icon.
+    */
+
+    'brand_favicon_ico_url' => env('BRAND_FAVICON_ICO_URL', 'https://probuildercrm.com/favicon.ico'),
+    'brand_favicon_32_url' => env('BRAND_FAVICON_32_URL', 'https://probuildercrm.com/favicon-32.png'),
+    'brand_favicon_16_url' => env('BRAND_FAVICON_16_URL', 'https://probuildercrm.com/favicon-16.png'),
+    'brand_favicon_svg_url' => env('BRAND_FAVICON_SVG_URL', 'https://probuildercrm.com/favicon.svg'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
