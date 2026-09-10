@@ -86,6 +86,22 @@ class BrandingController extends Controller
         return self::SIZES[$size] ?? self::SIZES[self::DEFAULT_SIZE];
     }
 
+    /**
+     * A stable, extension-agnostic logo URL other apps (businessflow's
+     * app.probuildercrm.com) can hardcode permanently - the uploaded
+     * file's actual extension can change on every re-upload, but this
+     * URL never does. Redirects to whatever the current file is, or 404s
+     * if no logo is uploaded so the caller's own fallback can kick in.
+     */
+    public function showLogo()
+    {
+        $logoPath = SiteSetting::get('logo_path');
+
+        abort_unless($logoPath, 404);
+
+        return redirect(asset($logoPath));
+    }
+
     public function destroy()
     {
         $this->deleteExistingLogo();

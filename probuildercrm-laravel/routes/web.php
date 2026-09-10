@@ -37,6 +37,10 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 
 Route::get('/migrate', MigrateController::class)->name('migrate');
 
+// Stable logo URL other apps (businessflow) hardcode, independent of the
+// uploaded file's actual extension - see BrandingController::showLogo().
+Route::get('/branding/logo', [AdminBrandingController::class, 'showLogo'])->name('branding.logo');
+
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('/llms.txt', [SeoController::class, 'llms'])->name('llms');

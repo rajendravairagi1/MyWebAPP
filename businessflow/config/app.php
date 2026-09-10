@@ -128,6 +128,21 @@ return [
 
     'marketing_url' => env('MARKETING_SITE_URL', 'https://probuildercrm.com'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Brand Logo URL
+    |--------------------------------------------------------------------------
+    |
+    | The logo lives on the marketing site (uploaded via its Admin >
+    | Branding page) so it only has to be updated in one place - this app
+    | just loads it from there instead of keeping its own copy. Falls
+    | back to a built-in "P" mark automatically if this fails to load
+    | (see resources/views/components/application-logo.blade.php).
+    |
+    */
+
+    'brand_logo_url' => env('BRAND_LOGO_URL', 'https://probuildercrm.com/branding/logo'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
