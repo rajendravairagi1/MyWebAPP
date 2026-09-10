@@ -154,16 +154,19 @@ return [
 
     /*
     | The browser-tab favicon, shared from the marketing site the same
-    | way as the logo above. Separate from the per-business PWA "Add to
-    | Home Screen" icon (see PwaController/pwa-head.blade.php), which
-    | stays tenant-specific on purpose - this is only the platform-level
-    | tab icon.
+    | way as the logo above. The per-business PWA "Add to Home Screen"
+    | icon (see PwaController/pwa-head.blade.php) still uses a business's
+    | own uploaded logo once one exists - but before that (e.g. installing
+    | from the login page, with no business yet) it falls back to this
+    | same favicon via brand_favicon_apple_url, so the icon that lands on
+    | the home screen matches the tab icon instead of a generic initial.
     */
 
     'brand_favicon_ico_url' => env('BRAND_FAVICON_ICO_URL', 'https://probuildercrm.com/favicon.ico'),
     'brand_favicon_32_url' => env('BRAND_FAVICON_32_URL', 'https://probuildercrm.com/favicon-32.png'),
     'brand_favicon_16_url' => env('BRAND_FAVICON_16_URL', 'https://probuildercrm.com/favicon-16.png'),
     'brand_favicon_svg_url' => env('BRAND_FAVICON_SVG_URL', 'https://probuildercrm.com/favicon.svg'),
+    'brand_favicon_apple_url' => env('BRAND_FAVICON_APPLE_URL', 'https://probuildercrm.com/apple-touch-icon.png'),
 
     'previous_keys' => [
         ...array_filter(

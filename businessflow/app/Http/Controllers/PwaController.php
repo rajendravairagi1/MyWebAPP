@@ -7,6 +7,8 @@ use App\Support\Tenant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -14,9 +16,11 @@ use Illuminate\Support\Facades\Storage;
  * are both generated per request rather than static files, so whichever
  * logo a business has uploaded for its branding (Business Settings) is
  * exactly what shows up as its mobile home-screen icon too. Falls back
- * to a plain initial-letter icon for a business with no logo uploaded
- * yet, and to the app's own name/icon when no business is active at all
- * (not logged in, or mid-onboarding).
+ * to the shared brand favicon (see config('app.brand_favicon_apple_url'))
+ * for a business with no logo uploaded yet, or when no business is
+ * active at all (not logged in, or mid-onboarding) — e.g. installing
+ * straight from the login page — and only drops to a plain
+ * initial-letter icon if even that favicon fetch fails.
  */
 class PwaController extends Controller
 {
@@ -69,7 +73,69 @@ class PwaController extends Controller
             report($e);
         }
 
+        // Not logged into a business yet (e.g. installing straight from
+        // the login page) — use the shared brand favicon instead of a
+        // generic initial-letter icon, so "Install App" puts the same
+        // icon on the home screen that's already in the browser tab.
+        try {
+            return $this->renderFromFavicon($size);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+
         return $this->renderInitial($business, $size);
+    }
+
+    /**
+     * Fetches the marketing site's apple-touch-icon (a 180x180 PNG
+     * generated from whatever favicon is uploaded in Admin > Branding —
+     * see BrandingController::generateFavicons()) and fits it onto a
+     * square canvas the same way a business logo would be. Cached for
+     * 10 minutes so this never adds a live cross-app request to every
+     * icon load, and a short timeout means a slow/down marketing site
+     * just falls through to the initial-letter icon instead of hanging.
+     */
+    private function renderFromFavicon(int $size): string
+    {
+        $bytes = Cache::remember('brand_favicon_icon_bytes', now()->addMinutes(10), function () {
+            $response = Http::timeout(2)->get(config('app.brand_favicon_apple_url'));
+
+            return $response->ok() ? $response->body() : null;
+        });
+
+        if (! $bytes) {
+            throw new \RuntimeException('Brand favicon unavailable.');
+        }
+
+        $source = @imagecreatefromstring($bytes);
+
+        if (! $source) {
+            throw new \RuntimeException('Brand favicon could not be decoded.');
+        }
+
+        $srcW = imagesx($source);
+        $srcH = imagesy($source);
+        $scale = min($size / $srcW, $size / $srcH);
+        $dstW = max(1, (int) round($srcW * $scale));
+        $dstH = max(1, (int) round($srcH * $scale));
+        $offsetX = (int) (($size - $dstW) / 2);
+        $offsetY = (int) (($size - $dstH) / 2);
+
+        $canvas = imagecreatetruecolor($size, $size);
+        $white = imagecolorallocate($canvas, 255, 255, 255);
+        imagefill($canvas, 0, 0, $white);
+        imagealphablending($canvas, true);
+        imagesavealpha($canvas, true);
+
+        imagecopyresampled($canvas, $source, $offsetX, $offsetY, 0, 0, $dstW, $dstH, $srcW, $srcH);
+        imagedestroy($source);
+
+        ob_start();
+        imagepng($canvas);
+        $png = ob_get_clean();
+        imagedestroy($canvas);
+
+        return $png;
     }
 
     /**
