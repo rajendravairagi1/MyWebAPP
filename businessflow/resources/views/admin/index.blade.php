@@ -305,6 +305,31 @@
                 </div>
                 @if ($demoBusiness)
                     <div class="flex items-center gap-3 shrink-0">
+                        {{-- Two separate forms — see the note on the same pattern in the
+                             Businesses table above (the double-submit guard drops a
+                             disabled button's value, so a shared form can't work). --}}
+                        <div class="inline-flex rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden text-xs">
+                            <form method="POST" action="{{ route('admin.businesses.status', $demoBusiness) }}">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="status" value="active">
+                                <button type="submit" @class([
+                                    'px-2.5 py-1 transition',
+                                    'bg-green-600 text-white' => $demoBusiness->status !== 'inactive',
+                                    'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700' => $demoBusiness->status === 'inactive',
+                                ])>{{ __('Active') }}</button>
+                            </form>
+                            <form method="POST" action="{{ route('admin.businesses.status', $demoBusiness) }}">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="status" value="inactive">
+                                <button type="submit" @class([
+                                    'px-2.5 py-1 border-l border-gray-200 dark:border-slate-600 transition',
+                                    'bg-gray-500 text-white' => $demoBusiness->status === 'inactive',
+                                    'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700' => $demoBusiness->status !== 'inactive',
+                                ])>{{ __('Inactive') }}</button>
+                            </form>
+                        </div>
                         <form method="POST" action="{{ route('admin.businesses.plan', $demoBusiness) }}" class="inline-flex items-center gap-2">
                             @csrf
                             @method('PUT')
