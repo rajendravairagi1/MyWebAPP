@@ -38,25 +38,40 @@ class ContractorController extends Controller
         return redirect()->route('contractors.show', $contractor)->with('status', 'Contractor added.');
     }
 
-    public function show(Contractor $contractor): View
+    public function show(Request $request, Contractor $contractor): View
     {
-        $contractor->load('costs.project', 'costs.account');
+        $projects = $contractor->projectsWorkedOn();
+        $selectedProject = $projects->firstWhere('id', $request->integer('project_id')) ?: null;
 
-        return view('contractors.show', compact('contractor'));
+        $contractor->load(['costs' => function ($query) use ($selectedProject) {
+            $query->when($selectedProject, fn ($q) => $q->where('project_id', $selectedProject->id))
+                ->with('project', 'account');
+        }]);
+
+        return view('contractors.show', compact('contractor', 'projects', 'selectedProject'));
     }
 
     /**
-     * Every payment ever recorded against this contractor, across every
-     * project — a record you can hand or send them showing exactly what
-     * they were paid and when.
+     * Every payment ever recorded against this contractor — across every
+     * project, or just one when ?project_id= is given — a record you can
+     * hand or send them showing exactly what they were paid and when.
      */
-    public function statement(Contractor $contractor): Response
+    public function statement(Request $request, Contractor $contractor): Response
     {
-        $contractor->load('costs.project', 'costs.account');
+        $projects = $contractor->projectsWorkedOn();
+        $selectedProject = $projects->firstWhere('id', $request->integer('project_id')) ?: null;
+
+        $contractor->load(['costs' => function ($query) use ($selectedProject) {
+            $query->when($selectedProject, fn ($q) => $q->where('project_id', $selectedProject->id))
+                ->with('project', 'account');
+        }]);
+
         $business = Business::find(Tenant::id());
 
-        return Pdf::loadView('contractors.statement', compact('contractor', 'business'))
-            ->download('Statement - '.$contractor->name.'.pdf');
+        $filename = 'Statement - '.$contractor->name.($selectedProject ? ' - '.$selectedProject->name : '').'.pdf';
+
+        return Pdf::loadView('contractors.statement', compact('contractor', 'business', 'selectedProject'))
+            ->download($filename);
     }
 
     public function update(Request $request, Contractor $contractor): RedirectResponse

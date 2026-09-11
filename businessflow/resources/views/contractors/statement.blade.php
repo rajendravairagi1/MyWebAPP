@@ -46,13 +46,14 @@
         @if ($contractor->email)
             <tr><td class="label">Email</td><td>{{ $contractor->email }}</td></tr>
         @endif
+        <tr><td class="label">Project</td><td>{{ $selectedProject?->name ?? 'All Projects' }}</td></tr>
     </table>
 
     <table class="summary">
         <tr>
-            <td><div class="label">Total Paid</div><div class="value">{{ $business->currencySymbol() }}{{ number_format($contractor->totalPaid(), 2) }}</div></td>
-            <td><div class="label">Outstanding Credit</div><div class="value {{ $contractor->totalOutstanding() > 0 ? 'balance-pos' : 'balance-zero' }}">{{ $business->currencySymbol() }}{{ number_format($contractor->totalOutstanding(), 2) }}</div></td>
-            <td><div class="label">Grand Total</div><div class="value">{{ $business->currencySymbol() }}{{ number_format($contractor->grandTotal(), 2) }}</div></td>
+            <td><div class="label">Total Paid</div><div class="value">{{ $business->currencySymbol() }}{{ number_format($contractor->totalPaid($selectedProject?->id), 2) }}</div></td>
+            <td><div class="label">Outstanding Credit</div><div class="value {{ $contractor->totalOutstanding($selectedProject?->id) > 0 ? 'balance-pos' : 'balance-zero' }}">{{ $business->currencySymbol() }}{{ number_format($contractor->totalOutstanding($selectedProject?->id), 2) }}</div></td>
+            <td><div class="label">{{ $selectedProject ? 'Total (this project)' : 'Grand Total' }}</div><div class="value">{{ $business->currencySymbol() }}{{ number_format($contractor->grandTotal($selectedProject?->id), 2) }}</div></td>
         </tr>
     </table>
 

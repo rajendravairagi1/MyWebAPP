@@ -31,9 +31,6 @@
                     <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-contractor')" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
                         {{ __('Edit') }}
                     </button>
-                    <a href="{{ route('contractors.statement', $contractor) }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
-                        {{ __('Download Statement (PDF)') }}
-                    </a>
                     <form method="POST" action="{{ route('contractors.destroy', $contractor) }}" onsubmit="return confirm('{{ __('Delete this contractor? This only works if they have no payments recorded.') }}')">
                         @csrf
                         @method('DELETE')
@@ -46,22 +43,39 @@
                 <div class="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-4">
                     <div class="bg-gray-50 dark:bg-slate-700/40 rounded-md p-4">
                         <div class="text-xs text-gray-400">{{ __('Total Paid') }}</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($contractor->totalPaid(), 2) }}</div>
+                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($contractor->totalPaid($selectedProject?->id), 2) }}</div>
                     </div>
                     <div class="bg-gray-50 dark:bg-slate-700/40 rounded-md p-4">
                         <div class="text-xs text-gray-400">{{ __('Outstanding Credit') }}</div>
-                        <div class="text-lg font-semibold {{ $contractor->totalOutstanding() > 0 ? 'text-amber-600' : 'text-gray-900 dark:text-gray-100' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($contractor->totalOutstanding(), 2) }}</div>
+                        <div class="text-lg font-semibold {{ $contractor->totalOutstanding($selectedProject?->id) > 0 ? 'text-amber-600' : 'text-gray-900 dark:text-gray-100' }}">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($contractor->totalOutstanding($selectedProject?->id), 2) }}</div>
                     </div>
                     <div class="bg-gray-50 dark:bg-slate-700/40 rounded-md p-4">
-                        <div class="text-xs text-gray-400">{{ __('Grand Total (all work/material)') }}</div>
-                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($contractor->grandTotal(), 2) }}</div>
+                        <div class="text-xs text-gray-400">{{ $selectedProject ? __('Total (this project)') : __('Grand Total (all work/material)') }}</div>
+                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($contractor->grandTotal($selectedProject?->id), 2) }}</div>
                     </div>
                 </div>
             </div>
 
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
-                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">
-                    {{ __('Payments') }} ({{ $contractor->costs->count() }})
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3">
+                    <div class="font-medium text-gray-800 dark:text-gray-100">
+                        {{ __('Payments') }} ({{ $contractor->costs->count() }})
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if ($projects->isNotEmpty())
+                            <form method="GET" action="{{ route('contractors.show', $contractor) }}">
+                                <select name="project_id" onchange="this.form.submit()" class="text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                    <option value="">{{ __('All Projects') }}</option>
+                                    @foreach ($projects as $project)
+                                        <option value="{{ $project->id }}" @selected($selectedProject?->id === $project->id)>{{ $project->name }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
+                        @endif
+                        <a href="{{ route('contractors.statement', array_filter(['contractor' => $contractor, 'project_id' => $selectedProject?->id])) }}" class="inline-flex items-center justify-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            {{ $selectedProject ? __('Download Statement — this project (PDF)') : __('Download Statement (PDF)') }}
+                        </a>
+                    </div>
                 </div>
                 @if ($contractor->costs->isEmpty())
                     <div class="p-6 text-sm text-gray-500 dark:text-gray-400">{{ __('No payments recorded for this contractor yet — add one from a Project\'s Payments section and pick this name.') }}</div>

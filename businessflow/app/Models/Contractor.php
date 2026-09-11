@@ -54,10 +54,13 @@ class Contractor extends Model
      * Money that has actually left an account for this contractor —
      * paid immediately, or credit that's since been settled. Excludes
      * outstanding "udhar" (see ProjectCost::isOutstandingCredit()).
+     * Pass a $projectId to total just that project's payments instead
+     * of every project this contractor has ever worked on.
      */
-    public function totalPaid(): float
+    public function totalPaid(?int $projectId = null): float
     {
         return (float) $this->costs()
+            ->when($projectId, fn ($q) => $q->where('project_id', $projectId))
             ->where(function ($q) {
                 $q->where('is_credit', false)->orWhereNotNull('credit_settled_at');
             })
@@ -67,9 +70,10 @@ class Contractor extends Model
     /**
      * Material/labor taken on credit from this contractor, not yet paid.
      */
-    public function totalOutstanding(): float
+    public function totalOutstanding(?int $projectId = null): float
     {
         return (float) $this->costs()
+            ->when($projectId, fn ($q) => $q->where('project_id', $projectId))
             ->where('is_credit', true)
             ->whereNull('credit_settled_at')
             ->sum('amount');
@@ -77,10 +81,25 @@ class Contractor extends Model
 
     /**
      * Everything ever recorded against this contractor, paid or not —
-     * the total value of work/material they've provided across projects.
+     * the total value of work/material they've provided across projects
+     * (or just one project, when $projectId is given).
      */
-    public function grandTotal(): float
+    public function grandTotal(?int $projectId = null): float
     {
-        return (float) $this->costs()->sum('amount');
+        return (float) $this->costs()
+            ->when($projectId, fn ($q) => $q->where('project_id', $projectId))
+            ->sum('amount');
+    }
+
+    /**
+     * Every project this contractor has at least one payment recorded
+     * against — used to populate the "view by project" filter, so it
+     * only ever lists projects actually relevant to this contractor.
+     */
+    public function projectsWorkedOn(): \Illuminate\Support\Collection
+    {
+        return Project::whereIn('id', $this->costs()->distinct()->pluck('project_id'))
+            ->orderBy('name')
+            ->get();
     }
 }
