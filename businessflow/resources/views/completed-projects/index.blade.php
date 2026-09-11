@@ -60,6 +60,11 @@
                                     @csrf
                                     <button class="px-3 py-1.5 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-xs font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Recover') }}</button>
                                 </form>
+                                <form method="POST" action="{{ route('project-units.destroy-archived', $unit) }}" onsubmit="return confirm('{{ __('Permanently delete this property? Its payment history, photos and documents will be deleted too. This cannot be undone.') }}')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="px-3 py-1.5 border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 text-xs font-medium rounded-md hover:bg-red-50 dark:hover:bg-red-900/20">{{ __('Delete permanently') }}</button>
+                                </form>
                             </div>
                         </div>
                     </div>

@@ -144,4 +144,28 @@ class ProjectUnitController extends Controller
 
         return back()->with('status', 'Property moved back to active.');
     }
+
+    /**
+     * Permanently deletes a unit from the Completed Projects list — unlike
+     * destroy() above, this doesn't refuse when payments are recorded
+     * against it, since a completed/written-off unit almost always has
+     * some (that's how it got here). Scoped to already-archived units
+     * only, so this permissive path can't be used to delete an active
+     * unit's payment history by mistake. Payments, material entries, unit
+     * media and any linked loan cascade-delete with it at the DB level
+     * (see their migrations); quotations/invoices/brokers just lose the
+     * reference and are otherwise untouched.
+     */
+    public function destroyArchived(ProjectUnit $unit): RedirectResponse
+    {
+        abort_unless($unit->archived_at, 422, 'This property is still active — use the regular delete instead.');
+
+        $project = $unit->project;
+        $label = $unit->unit_number;
+
+        $unit->delete();
+        $project?->syncCompletionStatus();
+
+        return back()->with('status', "\"{$label}\" permanently deleted.");
+    }
 }

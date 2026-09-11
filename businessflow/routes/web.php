@@ -287,6 +287,7 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::post('/project-units/assign', [ProjectUnitController::class, 'assign'])->name('project-units.assign');
     Route::post('/project-units/{unit}/write-off', [ProjectUnitController::class, 'writeOff'])->name('project-units.write-off');
     Route::post('/project-units/{unit}/recover', [ProjectUnitController::class, 'recover'])->name('project-units.recover');
+    Route::delete('/project-units/{unit}/permanent', [ProjectUnitController::class, 'destroyArchived'])->name('project-units.destroy-archived');
     Route::post('/project-units/{unit}/commitment', [ProjectUnitController::class, 'updateCommitment'])->name('project-units.commitment');
     Route::get('/project-units/{unit}', [ProjectUnitController::class, 'show'])->name('project-units.show');
     Route::post('/project-units/{unit}/share', [PropertyShareController::class, 'generate'])->name('property-share.generate');
