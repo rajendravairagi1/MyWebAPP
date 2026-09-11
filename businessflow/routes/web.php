@@ -56,9 +56,8 @@ use App\Http\Controllers\UnitPaymentController;
 use App\Http\Controllers\VerifyController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// No public landing page here — the marketing site is probuildercrm.com.
+Route::get('/', fn () => redirect()->away('https://probuildercrm.com', 301));
 
 Route::get('/demo', DemoLoginController::class)->name('demo.login');
 
