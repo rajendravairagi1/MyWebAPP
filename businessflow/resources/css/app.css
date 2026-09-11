@@ -368,14 +368,41 @@ input[type="submit"]:disabled {
  * get trapped in its own low-priority stacking context, making its
  * profile/notification dropdowns (position:absolute, z-50) render BEHIND
  * <main>'s own content instead of above it, and unclickable as a result.
+ *
+ * :not(.modal-panel) is the other half of that exclusion — an x-modal's
+ * card also happens to sit inside <main> in the DOM (it's declared
+ * wherever the page puts it, not appended to <body>), so without this it
+ * was picking up the same near-transparent + 12px-blur glass treatment.
+ * That works for a card sitting in the page's own near-black background,
+ * but a modal sits on top of a separate dimmed backdrop instead — at 4%
+ * opacity there's nowhere near enough contrast against that backdrop, so
+ * every modal read as a washed-out, illegible haze. Modals get their own
+ * solid nova styling below instead.
  */
-.dark[data-accent="nova"] main .dark\:bg-slate-800 {
+.dark[data-accent="nova"] main .dark\:bg-slate-800:not(.modal-panel) {
     background-color: rgb(255 255 255 / 0.04);
     backdrop-filter: blur(12px);
 }
 
 .dark[data-accent="nova"] main .dark\:border-slate-700 {
     border-color: rgb(255 255 255 / 0.08);
+}
+
+/*
+ * Modals: solid, not glass — see the comment above. Near-black with a
+ * faint green-tinted border (not pure slate-800, to stay on-palette with
+ * nova) and a much darker backdrop than the plain bg-gray-500 every other
+ * theme uses, since nova's own page background is near-black rather than
+ * white — a mid-gray dimmer reads as a washed-out flash against it.
+ */
+.dark[data-accent="nova"] .modal-panel {
+    background-color: #10160d;
+    border: 1px solid rgb(255 255 255 / 0.08);
+}
+
+.dark[data-accent="nova"] .modal-backdrop {
+    background-color: #000;
+    opacity: 0.75;
 }
 
 [data-accent="nova"] .rounded-lg {

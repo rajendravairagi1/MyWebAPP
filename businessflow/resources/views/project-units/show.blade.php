@@ -89,7 +89,7 @@
             </div>
 
             <x-modal name="edit-unit" max-width="md">
-                <form method="POST" action="{{ route('project-units.update', [$unit->project, $unit]) }}" class="p-6 space-y-4">
+                <form method="POST" action="{{ route('project-units.update', [$unit->project, $unit]) }}" class="p-6 space-y-4" x-data="{ status: '{{ $unit->status }}' }">
                     @csrf
                     @method('PUT')
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Property') }}</h2>
@@ -114,14 +114,18 @@
                         </div>
                         <div>
                             <x-input-label :value="__('Status')" />
-                            <select name="status" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            <select name="status" x-model="status" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 <option value="available" @selected($unit->status === 'available')>{{ __('Available') }}</option>
                                 <option value="booked" @selected($unit->status === 'booked')>{{ __('Booked') }}</option>
                                 <option value="sold" @selected($unit->status === 'sold')>{{ __('Sold') }}</option>
                             </select>
                         </div>
                     </div>
-                    <div class="pt-2 border-t border-gray-100 dark:border-slate-700">
+                    {{-- Only an available unit is still for sale, so only it needs a
+                         contact for prospective buyers — hidden (not just left blank)
+                         once it's booked/sold so it can't be mistaken for still-open
+                         inventory on the shared link/PDF. --}}
+                    <div class="pt-2 border-t border-gray-100 dark:border-slate-700" x-show="status === 'available'" x-cloak>
                         <p class="text-xs text-gray-400 mb-3">{{ __('Who a customer should contact about this property — shown on the shareable link and PDF, separate from your business\'s own contact details.') }}</p>
                         <div class="space-y-4">
                             <div>

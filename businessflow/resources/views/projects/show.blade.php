@@ -167,7 +167,7 @@
             </div>
 
             <x-modal name="add-unit" :show="$errors->has('unit_number') || $errors->has('price')">
-                <form method="POST" action="{{ route('project-units.store', $project) }}" class="p-6 space-y-4">
+                <form method="POST" action="{{ route('project-units.store', $project) }}" class="p-6 space-y-4" x-data="{ status: 'available' }">
                     @csrf
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add a Unit / Property') }}</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('This is a flat, plot or house you will sell — not a payment. "Selling Price" is the amount you will charge whoever buys it.') }}</p>
@@ -191,7 +191,7 @@
                         </div>
                         <div class="sm:col-span-2">
                             <x-input-label for="status" :value="__('Status')" />
-                            <select id="status" name="status" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            <select id="status" name="status" x-model="status" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 <option value="available">{{ __('Available — not sold yet') }}</option>
                                 <option value="booked">{{ __('Booked — customer assigned') }}</option>
                                 <option value="sold">{{ __('Sold — fully paid') }}</option>
@@ -199,7 +199,11 @@
                         </div>
                     </div>
 
-                    <div class="border-t border-gray-100 dark:border-slate-700 pt-4">
+                    {{-- Only an available unit is still for sale, so only it needs a
+                         contact for prospective buyers — hidden (not just left blank)
+                         once it's booked/sold so it can't be mistaken for still-open
+                         inventory on the shared link/PDF. --}}
+                    <div class="border-t border-gray-100 dark:border-slate-700 pt-4" x-show="status === 'available'" x-cloak>
                         <p class="text-xs text-gray-400 mb-3">{{ __('Who a customer should contact about this property (optional — shown on the shareable link and PDF).') }}</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div class="sm:col-span-2">
