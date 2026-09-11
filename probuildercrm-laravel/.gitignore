@@ -18,6 +18,17 @@
 /public/fonts-manifest.dev.json
 /public/hot
 /public/storage
+
+# These start out as copies of public/favicon-defaults/* (which stays
+# tracked) but Admin > Branding overwrites them in place on the live
+# server when someone uploads a custom favicon. Never track them again —
+# a future deploy zip must not ship stale files that clobber a live
+# upload back to the default.
+/public/favicon.ico
+/public/favicon-32.png
+/public/favicon-16.png
+/public/favicon.svg
+/public/apple-touch-icon.png
 /storage/*.key
 /storage/pail
 /storage/app/geoip
