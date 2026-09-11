@@ -16,7 +16,7 @@
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">How we use it</h2>
             <p>We use this information to respond to your enquiries, provide the CRM service, and improve our product. We do not sell your information to third parties.</p>
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">Data security</h2>
-            <p>Every business's data on Pro Builder CRM is isolated from every other business, and passwords are stored using one-way industry-standard hashing.</p>
+            <p>Every business's data on Pro Builder CRM is isolated from every other business, and passwords are stored using one-way industry-standard hashing. For plain-language answers to common questions — do we sell your data, share it, or look at it — see our <a href="{{ route('data-security') }}">Data Security</a> page.</p>
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">Contact</h2>
             <p>Questions about this policy? Email us at <a href="mailto:{{ config('site.email') }}">{{ config('site.email') }}</a>.</p>
         </div>

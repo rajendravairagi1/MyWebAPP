@@ -37,4 +37,9 @@ class PageController extends Controller
     {
         return view('terms-of-service');
     }
+
+    public function dataSecurity()
+    {
+        return view('data-security');
+    }
 }

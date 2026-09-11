@@ -42,6 +42,7 @@ return [
         [
             'heading' => 'Legal',
             'links' => [
+                ['label' => 'Data Security', 'href' => '/security'],
                 ['label' => 'Privacy Policy', 'href' => '/privacy-policy'],
                 ['label' => 'Terms of Service', 'href' => '/terms-of-service'],
             ],
