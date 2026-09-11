@@ -11,7 +11,14 @@ class LeadsController extends Controller
     {
         $leads = ContactSubmission::orderByDesc('created_at')->paginate(25);
 
-        return view('admin.leads.index', compact('leads'));
+        // Snapshot which of these were unread before this visit clears
+        // the sidebar badge, so the page can still show a "New" tag on
+        // them this one time.
+        $unreadIds = $leads->getCollection()->whereNull('read_at')->pluck('id');
+
+        ContactSubmission::whereNull('read_at')->update(['read_at' => now()]);
+
+        return view('admin.leads.index', compact('leads', 'unreadIds'));
     }
 
     public function destroy(ContactSubmission $lead)

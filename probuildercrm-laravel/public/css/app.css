@@ -1158,6 +1158,17 @@ body.has-sticky-cta {
   color: #fff;
 }
 
+.admin-nav-badge {
+  margin-left: auto;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+
 .admin-nav-link.active {
   background: var(--color-primary);
   color: #fff;

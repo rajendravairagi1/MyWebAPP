@@ -23,6 +23,9 @@
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
                             <div>
                                 <strong>{{ $lead->name }}</strong>
+                                @if ($unreadIds->contains($lead->id))
+                                    <span class="tag" style="margin-left: 8px; background: #dc2626; color: #fff;">New</span>
+                                @endif
                                 @if ($lead->plan)
                                     <span class="tag" style="margin-left: 8px;">{{ $lead->plan }}</span>
                                 @endif

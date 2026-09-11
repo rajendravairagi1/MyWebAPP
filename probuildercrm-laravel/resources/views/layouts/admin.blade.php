@@ -24,6 +24,7 @@
             ['route' => 'admin.maintenance.index', 'match' => 'admin.maintenance.*', 'label' => 'Maintenance', 'icon' => 'wrench'],
         ];
         $__adminLogoPath = \App\Models\SiteSetting::get('logo_path');
+        $__leadsBadge = \App\Models\ContactSubmission::unreadBadge();
     @endphp
 
     <aside class="admin-sidebar">
@@ -41,6 +42,9 @@
                 <a href="{{ route($item['route']) }}" class="admin-nav-link {{ request()->routeIs($item['match']) ? 'active' : '' }}">
                     @include('partials.icon', ['name' => $item['icon'], 'size' => 18])
                     <span>{{ $item['label'] }}</span>
+                    @if ($item['route'] === 'admin.leads.index' && $__leadsBadge)
+                        <span class="admin-nav-badge">{{ $__leadsBadge }}</span>
+                    @endif
                 </a>
             @endforeach
         </nav>
