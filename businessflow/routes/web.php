@@ -37,6 +37,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectCostController;
+use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\ProjectUnitController;
 use App\Http\Controllers\PropertyDealController;
 use App\Http\Controllers\PropertyDealMediaController;
@@ -280,6 +281,10 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::delete('/projects/{project}/costs/{cost}', [ProjectCostController::class, 'destroy'])->name('project-costs.destroy');
     Route::get('/projects/{project}/costs/{cost}/bill', [ProjectCostController::class, 'bill'])->name('project-costs.bill');
     Route::post('/projects/{project}/costs/{cost}/settle', [ProjectCostController::class, 'settle'])->name('project-costs.settle');
+
+    Route::post('/projects/{project}/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
+    Route::put('/projects/{project}/work-orders/{workOrder}', [WorkOrderController::class, 'update'])->name('work-orders.update');
+    Route::delete('/projects/{project}/work-orders/{workOrder}', [WorkOrderController::class, 'destroy'])->name('work-orders.destroy');
     Route::post('/projects/{project}/units', [ProjectUnitController::class, 'store'])->name('project-units.store');
     Route::put('/projects/{project}/units/{unit}', [ProjectUnitController::class, 'update'])->name('project-units.update');
     Route::delete('/projects/{project}/units/{unit}', [ProjectUnitController::class, 'destroy'])->name('project-units.destroy');

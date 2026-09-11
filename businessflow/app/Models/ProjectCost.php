@@ -21,6 +21,7 @@ class ProjectCost extends Model
         'spent_on',
         'vendor',
         'contractor_id',
+        'work_order_id',
         'payment_account_id',
         'is_credit',
         'credit_settled_at',
@@ -49,6 +50,11 @@ class ProjectCost extends Model
     public function contractor(): BelongsTo
     {
         return $this->belongsTo(Contractor::class);
+    }
+
+    public function workOrder(): BelongsTo
+    {
+        return $this->belongsTo(WorkOrder::class);
     }
 
     /**

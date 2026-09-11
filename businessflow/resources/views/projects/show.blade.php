@@ -331,11 +331,191 @@
                 </x-modal>
             @endforeach
 
+            {{-- Work Orders --}}
+            @if ($canFinancials && \App\Support\Tenant::can('contractors'))
+            <div x-data="{
+                    editingWorkOrder: { id: null, contractor_id: '', description: '', area_sqft: '', rate_per_sqft: '', total_amount: '', notes: '' },
+                    openEditWorkOrder(wo) {
+                        this.editingWorkOrder = { ...wo };
+                        $dispatch('open-modal', 'edit-work-order');
+                    },
+                 }">
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-4">
+                    <div>
+                        <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Work Orders / Contracts') }} ({{ $project->workOrders->count() }})</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('A rate-based or flat contract given to a contractor — track what you agreed vs. what\'s been paid so far.') }}</div>
+                    </div>
+                    <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'add-work-order')" class="shrink-0 inline-flex items-center px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('+ Add Work Order') }}</button>
+                </div>
+                @if ($project->workOrders->isNotEmpty())
+                    <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
+                            <tr>
+                                <th class="px-5 py-2 text-left">{{ __('Contractor') }}</th>
+                                <th class="px-5 py-2 text-left">{{ __('Scope') }}</th>
+                                <th class="px-5 py-2 text-right">{{ __('Contract Amount') }}</th>
+                                <th class="px-5 py-2 text-right">{{ __('Paid') }}</th>
+                                <th class="px-5 py-2 text-right">{{ __('Balance') }}</th>
+                                <th class="px-5 py-2"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
+                            @foreach ($project->workOrders as $wo)
+                                @php $balance = $wo->balance(); @endphp
+                                <tr>
+                                    <td class="px-5 py-2">
+                                        <a href="{{ route('contractors.show', $wo->contractor) }}" class="text-accent-600 hover:underline">{{ $wo->contractor->name }}</a>
+                                    </td>
+                                    <td class="px-5 py-2 text-gray-900 dark:text-gray-100">
+                                        {{ $wo->description }}
+                                        @if ($wo->area_sqft && $wo->rate_per_sqft)
+                                            <div class="text-xs text-gray-400">{{ rtrim(rtrim(number_format($wo->area_sqft, 2), '0'), '.') }} sqft × {{ number_format($wo->rate_per_sqft, 2) }}/sqft</div>
+                                        @endif
+                                    </td>
+                                    <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">{{ number_format($wo->total_amount, 2) }}</td>
+                                    <td class="px-5 py-2 text-right text-green-600">{{ number_format($wo->totalPaid(), 2) }}</td>
+                                    <td class="px-5 py-2 text-right {{ $balance > 0 ? 'text-amber-600' : ($balance < 0 ? 'text-red-600' : 'text-gray-400') }}">{{ number_format($balance, 2) }}</td>
+                                    <td class="px-5 py-2 text-right whitespace-nowrap">
+                                        <button type="button" @click="openEditWorkOrder(@js([
+                                            'id' => $wo->id,
+                                            'contractor_id' => $wo->contractor_id,
+                                            'description' => $wo->description,
+                                            'area_sqft' => $wo->area_sqft,
+                                            'rate_per_sqft' => $wo->rate_per_sqft,
+                                            'total_amount' => (float) $wo->total_amount,
+                                            'notes' => $wo->notes,
+                                        ]))" class="text-xs text-accent-600 hover:underline mr-3">{{ __('Edit') }}</button>
+                                        <form method="POST" action="{{ route('work-orders.destroy', [$project, $wo]) }}" onsubmit="return confirm('{{ __('Remove this work order? Only possible if nothing has been paid against it yet.') }}')" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="text-xs text-red-600 hover:underline">{{ __('Remove') }}</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    </div>
+                @endif
+            </div>
+
+            <x-modal name="add-work-order">
+                <form method="POST" action="{{ route('work-orders.store', $project) }}" class="p-6 space-y-4"
+                      x-data="{ area: '', rate: '', total: '', recalc() { const a = parseFloat(this.area), r = parseFloat(this.rate); if (!isNaN(a) && !isNaN(r)) { this.total = (a * r).toFixed(2); } } }">
+                    @csrf
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add a Work Order') }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('A contract you\'ve given a contractor for a specific scope of work.') }}</p>
+
+                    <div>
+                        <x-input-label :value="__('Contractor')" />
+                        <select name="contractor_id" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            <option value="">{{ __('— Select —') }}</option>
+                            @foreach ($contractors as $c)
+                                <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->typeLabel() }})</option>
+                            @endforeach
+                        </select>
+                        @if ($contractors->isEmpty())
+                            <p class="mt-1 text-xs text-amber-600">{{ __('No contractors yet — add one first from the Contractors / Vendors page.') }}</p>
+                        @endif
+                    </div>
+
+                    <div>
+                        <x-input-label :value="__('Scope of work')" />
+                        <x-text-input name="description" type="text" placeholder="{{ __('e.g. Plastering — Ground Floor') }}" class="mt-1 block w-full" required />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label :value="__('Area in sqft (optional)')" />
+                            <x-text-input name="area_sqft" type="number" step="0.01" min="0" x-model="area" x-on:input="recalc()" class="mt-1 block w-full" />
+                        </div>
+                        <div>
+                            <x-input-label :value="__('Rate per sqft (optional)')" />
+                            <x-text-input name="rate_per_sqft" type="number" step="0.01" min="0" x-model="rate" x-on:input="recalc()" class="mt-1 block w-full" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <x-input-label :value="__('Total Contract Amount')" />
+                        <x-text-input name="total_amount" type="number" step="0.01" min="0.01" x-model="total" class="mt-1 block w-full" required />
+                        <p class="mt-1 text-xs text-gray-400">{{ __('Auto-filled from Area × Rate above — or type it directly if this isn\'t a per-sqft contract.') }}</p>
+                    </div>
+
+                    <div>
+                        <x-input-label :value="__('Notes (optional)')" />
+                        <textarea name="notes" rows="2" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
+                        <x-primary-button>{{ __('+ Add Work Order') }}</x-primary-button>
+                    </div>
+                </form>
+            </x-modal>
+
+            <x-modal name="edit-work-order">
+                <form method="POST" :action="'{{ route('work-orders.update', [$project, '__ID__']) }}'.replace('__ID__', editingWorkOrder.id)" class="p-6 space-y-4"
+                      x-data="{ recalc() { const a = parseFloat(editingWorkOrder.area_sqft), r = parseFloat(editingWorkOrder.rate_per_sqft); if (!isNaN(a) && !isNaN(r)) { editingWorkOrder.total_amount = (a * r).toFixed(2); } } }">
+                    @csrf
+                    @method('PUT')
+                    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Work Order') }}</h2>
+
+                    <div>
+                        <x-input-label :value="__('Contractor')" />
+                        <select name="contractor_id" x-model="editingWorkOrder.contractor_id" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            @foreach ($contractors as $c)
+                                <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->typeLabel() }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <x-input-label :value="__('Scope of work')" />
+                        <input type="text" name="description" x-model="editingWorkOrder.description" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <x-input-label :value="__('Area in sqft (optional)')" />
+                            <input type="number" step="0.01" min="0" name="area_sqft" x-model="editingWorkOrder.area_sqft" x-on:input="recalc()" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        </div>
+                        <div>
+                            <x-input-label :value="__('Rate per sqft (optional)')" />
+                            <input type="number" step="0.01" min="0" name="rate_per_sqft" x-model="editingWorkOrder.rate_per_sqft" x-on:input="recalc()" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <x-input-label :value="__('Total Contract Amount')" />
+                        <input type="number" step="0.01" min="0.01" name="total_amount" x-model="editingWorkOrder.total_amount" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    </div>
+
+                    <div>
+                        <x-input-label :value="__('Notes (optional)')" />
+                        <textarea name="notes" rows="2" x-model="editingWorkOrder.notes" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500"></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <x-secondary-button type="button" x-on:click="$dispatch('close')">{{ __('Cancel') }}</x-secondary-button>
+                        <x-primary-button>{{ __('Save Changes') }}</x-primary-button>
+                    </div>
+                </form>
+            </x-modal>
+            </div>
+            @endif
+
             {{-- Costs --}}
             @if ($canFinancials)
             <div x-data="{
                     fixedCategories: ['land', 'construction', 'material', 'labor', 'approval', 'marketing'],
-                    editingCost: { id: null, categorySelect: 'land', categoryOther: '', description: '', amount: '', spent_on: '', vendor: '', contractor_id: '', payment_account_id: '', is_credit: false, notes: '', bill_name: null },
+                    editingCost: { id: null, categorySelect: 'land', categoryOther: '', description: '', amount: '', spent_on: '', vendor: '', contractor_id: '', work_order_id: '', payment_account_id: '', is_credit: false, notes: '', bill_name: null },
+                    workOrders: {!! \Illuminate\Support\Js::from($project->workOrders->map(fn ($wo) => [
+                        'id' => $wo->id,
+                        'contractor_id' => $wo->contractor_id,
+                        'label' => $wo->description.' — '.number_format($wo->balance(), 0).' due',
+                    ])->values()) !!},
                     openEdit(cost) {
                         const isFixed = this.fixedCategories.includes(cost.category);
                         this.editingCost = {
@@ -381,6 +561,9 @@
                                         @else
                                             {{ $entry->vendor }}
                                         @endif
+                                        @if ($entry->workOrder)
+                                            <div class="text-xs text-gray-400">{{ $entry->workOrder->description }}</div>
+                                        @endif
                                     </td>
                                     <td class="px-5 py-2 text-gray-600 dark:text-gray-400">
                                         @if ($entry->isOutstandingCredit())
@@ -408,6 +591,7 @@
                                             'spent_on' => $entry->spent_on->format('Y-m-d'),
                                             'vendor' => $entry->vendor,
                                             'contractor_id' => $entry->contractor_id ?? '',
+                                            'work_order_id' => $entry->work_order_id ?? '',
                                             'payment_account_id' => $entry->payment_account_id,
                                             'is_credit' => $entry->is_credit && ! $entry->credit_settled_at,
                                             'notes' => $entry->notes,
@@ -469,7 +653,7 @@
                     </div>
 
                     @if (\App\Support\Tenant::can('contractors'))
-                        <div x-data="{ contractorMode: 'existing', newContractorType: 'other' }">
+                        <div x-data="{ contractorMode: 'existing', newContractorType: 'other', selectedContractorId: '' }">
                             <x-input-label :value="__('Paid to (optional)')" />
                             <div class="flex gap-4 text-sm mb-2">
                                 <label class="flex items-center gap-1.5">
@@ -482,7 +666,7 @@
                                 </label>
                             </div>
                             <div x-show="contractorMode === 'existing'" @if ($contractors->isEmpty()) x-cloak @endif>
-                                <select name="contractor_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <select name="contractor_id" x-model="selectedContractorId" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                     <option value="">{{ __('— Not linked to a contractor —') }}</option>
                                     @foreach ($contractors as $c)
                                         <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->typeLabel() }})</option>
@@ -502,6 +686,17 @@
                                 <x-text-input name="new_contractor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
                             </div>
                             <p class="mt-1 text-xs text-gray-400">{{ __('Link this payment to a contractor so their full history and statement stay together — see it any time under Contractors / Vendors.') }}</p>
+
+                            <div x-show="contractorMode === 'existing' && workOrders.filter(w => String(w.contractor_id) === String(selectedContractorId)).length > 0" x-cloak class="mt-3">
+                                <x-input-label :value="__('Link to Work Order (optional)')" />
+                                <select name="work_order_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                    <option value="">{{ __('— Not linked to a work order —') }}</option>
+                                    <template x-for="wo in workOrders.filter(w => String(w.contractor_id) === String(selectedContractorId))" :key="wo.id">
+                                        <option :value="wo.id" x-text="wo.label"></option>
+                                    </template>
+                                </select>
+                                <p class="mt-1 text-xs text-gray-400">{{ __('Counts this payment against that work order\'s balance.') }}</p>
+                            </div>
                         </div>
                     @endif
 
@@ -625,6 +820,17 @@
                                     <input type="text" name="new_contractor_type_other" x-show="newContractorType === 'other'" x-cloak placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="mt-1.5 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 </div>
                                 <x-text-input name="new_contractor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+                            </div>
+
+                            <div x-show="contractorMode === 'existing' && workOrders.filter(w => String(w.contractor_id) === String(editingCost.contractor_id)).length > 0" x-cloak class="mt-3">
+                                <x-input-label :value="__('Link to Work Order (optional)')" />
+                                <select id="edit_work_order_id" name="work_order_id" x-model="editingCost.work_order_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                    <option value="">{{ __('— Not linked to a work order —') }}</option>
+                                    <template x-for="wo in workOrders.filter(w => String(w.contractor_id) === String(editingCost.contractor_id))" :key="wo.id">
+                                        <option :value="wo.id" x-text="wo.label"></option>
+                                    </template>
+                                </select>
+                                <p class="mt-1 text-xs text-gray-400">{{ __('Counts this payment against that work order\'s balance.') }}</p>
                             </div>
                         </div>
                     @endif

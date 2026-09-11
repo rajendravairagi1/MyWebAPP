@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Contractor;
 use App\Models\Project;
 use App\Models\ProjectCost;
+use App\Models\WorkOrder;
 use App\Rules\Phone;
 use App\Support\ContractorResolver;
 use Illuminate\Http\RedirectResponse;
@@ -21,6 +22,7 @@ class ProjectCostController extends Controller
         $data = $this->applyCategory($data);
         $data = $this->applyCreditRules($request, $data);
         $data = $this->applyContractor($data);
+        $data = $this->applyWorkOrder($project, $data);
 
         if ($request->hasFile('bill')) {
             $file = $request->file('bill');
@@ -43,6 +45,7 @@ class ProjectCostController extends Controller
         $data = $this->applyCategory($data);
         $data = $this->applyCreditRules($request, $data);
         $data = $this->applyContractor($data);
+        $data = $this->applyWorkOrder($project, $data);
 
         if ($request->hasFile('bill')) {
             if ($cost->bill_path) {
@@ -88,6 +91,7 @@ class ProjectCostController extends Controller
             'spent_on' => ['required', 'date'],
             'vendor' => ['nullable', 'string', 'max:255'],
             'contractor_id' => ['nullable', 'integer'],
+            'work_order_id' => ['nullable', 'integer'],
             'new_contractor_name' => ['nullable', 'string', 'max:255'],
             'new_contractor_type' => ['nullable', 'string', 'in:'.implode(',', array_keys(Contractor::TYPES))],
             'new_contractor_type_other' => ['nullable', 'string', 'max:100'],
@@ -108,6 +112,31 @@ class ProjectCostController extends Controller
     {
         $data['contractor_id'] = ContractorResolver::resolve($data);
         unset($data['new_contractor_name'], $data['new_contractor_type'], $data['new_contractor_type_other'], $data['new_contractor_phone']);
+
+        return $data;
+    }
+
+    /**
+     * A payment can only be linked to a work order that's actually for
+     * this project and this same contractor — silently drops it
+     * otherwise (e.g. contractor got switched after picking a work
+     * order, or the dropdown was tampered with) rather than letting a
+     * work order's balance get charged against the wrong contractor.
+     */
+    protected function applyWorkOrder(Project $project, array $data): array
+    {
+        if (blank($data['work_order_id'] ?? null)) {
+            $data['work_order_id'] = null;
+
+            return $data;
+        }
+
+        $matches = WorkOrder::where('id', $data['work_order_id'])
+            ->where('project_id', $project->id)
+            ->where('contractor_id', $data['contractor_id'])
+            ->exists();
+
+        $data['work_order_id'] = $matches ? $data['work_order_id'] : null;
 
         return $data;
     }

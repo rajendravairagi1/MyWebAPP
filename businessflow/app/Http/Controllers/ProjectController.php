@@ -61,6 +61,8 @@ class ProjectController extends Controller
             'costs' => fn ($q) => $q->latest('spent_on'),
             'costs.account',
             'costs.contractor',
+            'costs.workOrder',
+            'workOrders.contractor',
             // A unit that's fully paid off or written off is done — it
             // no longer needs managing here, and it's already visible via
             // the customer's History or the Completed Projects page.

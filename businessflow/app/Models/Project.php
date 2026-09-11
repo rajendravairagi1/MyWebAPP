@@ -52,6 +52,11 @@ class Project extends Model
         return $this->hasMany(Followup::class);
     }
 
+    public function workOrders(): HasMany
+    {
+        return $this->hasMany(WorkOrder::class)->latest();
+    }
+
     public function totalCost(): float
     {
         return (float) $this->costs()->sum('amount');
