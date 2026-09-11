@@ -408,17 +408,42 @@
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add a Work Order') }}</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('A contract you\'ve given a contractor for a specific scope of work.') }}</p>
 
-                    <div>
+                    <div x-data="{ contractorMode: 'existing', newContractorType: 'other' }">
                         <x-input-label :value="__('Contractor')" />
-                        <select name="contractor_id" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                            <option value="">{{ __('— Select —') }}</option>
-                            @foreach ($contractors as $c)
-                                <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->typeLabel() }})</option>
-                            @endforeach
-                        </select>
-                        @if ($contractors->isEmpty())
-                            <p class="mt-1 text-xs text-amber-600">{{ __('No contractors yet — add one first from the Contractors / Vendors page.') }}</p>
-                        @endif
+                        <div class="flex gap-4 text-sm mb-2">
+                            <label class="flex items-center gap-1.5">
+                                <input type="radio" x-model="contractorMode" value="existing" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                {{ __('Existing contractor') }}
+                            </label>
+                            <label class="flex items-center gap-1.5">
+                                <input type="radio" x-model="contractorMode" value="new" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                {{ __('+ New contractor') }}
+                            </label>
+                        </div>
+                        <div x-show="contractorMode === 'existing'" @if ($contractors->isEmpty()) x-cloak @endif>
+                            <select name="contractor_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <option value="">{{ __('— Select —') }}</option>
+                                @foreach ($contractors as $c)
+                                    <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->typeLabel() }})</option>
+                                @endforeach
+                            </select>
+                            @if ($contractors->isEmpty())
+                                <p class="mt-1 text-xs text-amber-600">{{ __('No contractors yet — pick "+ New contractor" above to add one now.') }}</p>
+                            @endif
+                        </div>
+                        <div x-show="contractorMode === 'new'" @if ($contractors->isNotEmpty()) x-cloak @endif class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <x-text-input name="new_contractor_name" type="text" placeholder="{{ __('Name') }}" class="mt-1 block w-full" />
+                            <div class="mt-1">
+                                <select name="new_contractor_type" x-model="newContractorType" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                    @foreach (\App\Models\Contractor::TYPES as $key => $label)
+                                        <option value="{{ $key }}">{{ __($label) }}</option>
+                                    @endforeach
+                                </select>
+                                <input type="text" name="new_contractor_type_other" x-show="newContractorType === 'other'" x-cloak placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="mt-1.5 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                            </div>
+                            <x-text-input name="new_contractor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+                        </div>
+                        <p class="mt-1 text-xs text-gray-400">{{ __('A new contractor is saved to Contractors / Vendors too — no need to add them there separately.') }}</p>
                     </div>
 
                     <div>
