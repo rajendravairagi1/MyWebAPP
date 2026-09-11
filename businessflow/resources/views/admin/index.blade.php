@@ -47,86 +47,6 @@
                 </div>
             </div>
 
-            {{-- Shown across the whole product's footer — every business,
-                 every page. The WhatsApp number here only ever reaches
-                 paying customers (never the demo account); see
-                 resources/views/partials/footer.blade.php. --}}
-            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
-                <div class="font-medium text-gray-800 dark:text-gray-100 mb-1">{{ __('Platform Settings') }}</div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('Shown in the footer on every page, for every business.') }}</p>
-                <form method="POST" action="{{ route('admin.settings.update') }}" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    @csrf
-                    @method('PUT')
-                    <div>
-                        <x-input-label for="footer_text" :value="__('Footer text')" />
-                        <x-text-input id="footer_text" name="footer_text" type="text" class="mt-1 block w-full text-sm" :value="old('footer_text', $settings->footerText())" />
-                    </div>
-                    <div>
-                        <x-input-label for="support_whatsapp" :value="__('Support WhatsApp number (digits only, with country code)')" />
-                        <x-text-input id="support_whatsapp" name="support_whatsapp" type="text" placeholder="919876543210" class="mt-1 block w-full text-sm" :value="old('support_whatsapp', $settings->support_whatsapp)" />
-                    </div>
-                    <div class="sm:col-span-2">
-                        <x-primary-button>{{ __('Save Settings') }}</x-primary-button>
-                    </div>
-                </form>
-            </div>
-
-            {{-- Demo account — normally exactly one row. The oldest one is
-                 treated as the real public demo; any others only exist
-                 because "is_demo" got ticked by mistake while adding a
-                 real customer, which otherwise makes that customer's
-                 whole account silently disappear from the lists below. --}}
-            @php $demoBusiness = $demoBusinesses->first(); @endphp
-            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5 flex items-center justify-between gap-4">
-                <div>
-                    <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Public Demo Account') }}</div>
-                    @if ($demoBusiness)
-                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $demoBusiness->name }} — {{ __('linked to the homepage "See Demo" button') }}</div>
-                    @else
-                        <div class="text-xs text-amber-600 mt-0.5">{{ __('None set up yet — the "See Demo" button on the homepage won\'t work until you tick "is_demo" on an account below.') }}</div>
-                    @endif
-                </div>
-                @if ($demoBusiness)
-                    <div class="flex items-center gap-3 shrink-0">
-                        <form method="POST" action="{{ route('admin.businesses.plan', $demoBusiness) }}" class="inline-flex items-center gap-2">
-                            @csrf
-                            @method('PUT')
-                            <label class="text-xs text-gray-500 dark:text-gray-400">{{ __('Plan') }}</label>
-                            <select name="plan" onchange="this.form.submit()" class="text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                <option value="solo" @selected($demoBusiness->plan === 'solo')>{{ __('Solo') }}</option>
-                                <option value="team" @selected($demoBusiness->plan === 'team')>{{ __('Team') }}</option>
-                                <option value="company" @selected($demoBusiness->plan === 'company')>{{ __('Company (unlock)') }}</option>
-                            </select>
-                        </form>
-                        <form method="POST" action="{{ route('admin.demo.reset', $demoBusiness) }}" onsubmit="return confirm('{{ __('Wipe all data in the demo account? This cannot be undone.') }}')">
-                            @csrf
-                            <button class="text-xs px-3 py-1.5 rounded-md border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 whitespace-nowrap">{{ __('Reset Demo Data') }}</button>
-                        </form>
-                    </div>
-                @endif
-            </div>
-
-            @if ($demoBusinesses->count() > 1)
-                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-5 space-y-3">
-                    <div class="text-sm font-semibold text-amber-800 dark:text-amber-300">
-                        {{ __('These accounts are also marked as the public demo — probably by mistake ("This is the public demo account" got ticked while adding a real customer). While marked this way, they\'re hidden from the Businesses list below, share the same demo login as everyone who clicks "See Demo", and their data would be wiped by "Reset Demo Data" above.') }}
-                    </div>
-                    @foreach ($demoBusinesses->skip(1) as $strayDemo)
-                        @php $strayOwner = $strayDemo->users->first(); @endphp
-                        <div class="flex items-center justify-between gap-3 bg-white dark:bg-slate-800 rounded-md p-3">
-                            <div class="min-w-0">
-                                <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ $strayDemo->name }}</div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $strayOwner?->name }} <span class="text-gray-400">({{ $strayOwner?->email }})</span></div>
-                            </div>
-                            <form method="POST" action="{{ route('admin.businesses.unmark-demo', $strayDemo) }}" class="shrink-0">
-                                @csrf
-                                <button class="text-xs px-3 py-1.5 rounded-md bg-amber-600 text-white hover:bg-amber-700 whitespace-nowrap">{{ __('Not a demo — restore as normal account') }}</button>
-                            </form>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-
             {{-- Standalone businesses (Solo / Team plans) --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Businesses') }} ({{ __('Solo / Team plans') }})</div>
@@ -368,6 +288,85 @@
                 @endif
             </div>
 
+            {{-- Demo account — normally exactly one row. The oldest one is
+                 treated as the real public demo; any others only exist
+                 because "is_demo" got ticked by mistake while adding a
+                 real customer, which otherwise makes that customer's
+                 whole account silently disappear from the lists above. --}}
+            @php $demoBusiness = $demoBusinesses->first(); @endphp
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5 flex items-center justify-between gap-4">
+                <div>
+                    <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Public Demo Account') }}</div>
+                    @if ($demoBusiness)
+                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $demoBusiness->name }} — {{ __('linked to the homepage "See Demo" button') }}</div>
+                    @else
+                        <div class="text-xs text-amber-600 mt-0.5">{{ __('None set up yet — the "See Demo" button on the homepage won\'t work until you tick "is_demo" on an account below.') }}</div>
+                    @endif
+                </div>
+                @if ($demoBusiness)
+                    <div class="flex items-center gap-3 shrink-0">
+                        <form method="POST" action="{{ route('admin.businesses.plan', $demoBusiness) }}" class="inline-flex items-center gap-2">
+                            @csrf
+                            @method('PUT')
+                            <label class="text-xs text-gray-500 dark:text-gray-400">{{ __('Plan') }}</label>
+                            <select name="plan" onchange="this.form.submit()" class="text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <option value="solo" @selected($demoBusiness->plan === 'solo')>{{ __('Solo') }}</option>
+                                <option value="team" @selected($demoBusiness->plan === 'team')>{{ __('Team') }}</option>
+                                <option value="company" @selected($demoBusiness->plan === 'company')>{{ __('Company (unlock)') }}</option>
+                            </select>
+                        </form>
+                        <form method="POST" action="{{ route('admin.demo.reset', $demoBusiness) }}" onsubmit="return confirm('{{ __('Wipe all data in the demo account? This cannot be undone.') }}')">
+                            @csrf
+                            <button class="text-xs px-3 py-1.5 rounded-md border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 whitespace-nowrap">{{ __('Reset Demo Data') }}</button>
+                        </form>
+                    </div>
+                @endif
+            </div>
+
+            @if ($demoBusinesses->count() > 1)
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-5 space-y-3">
+                    <div class="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                        {{ __('These accounts are also marked as the public demo — probably by mistake ("This is the public demo account" got ticked while adding a real customer). While marked this way, they\'re hidden from the Businesses list above, share the same demo login as everyone who clicks "See Demo", and their data would be wiped by "Reset Demo Data" above.') }}
+                    </div>
+                    @foreach ($demoBusinesses->skip(1) as $strayDemo)
+                        @php $strayOwner = $strayDemo->users->first(); @endphp
+                        <div class="flex items-center justify-between gap-3 bg-white dark:bg-slate-800 rounded-md p-3">
+                            <div class="min-w-0">
+                                <div class="font-medium text-gray-900 dark:text-gray-100 truncate">{{ $strayDemo->name }}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $strayOwner?->name }} <span class="text-gray-400">({{ $strayOwner?->email }})</span></div>
+                            </div>
+                            <form method="POST" action="{{ route('admin.businesses.unmark-demo', $strayDemo) }}" class="shrink-0">
+                                @csrf
+                                <button class="text-xs px-3 py-1.5 rounded-md bg-amber-600 text-white hover:bg-amber-700 whitespace-nowrap">{{ __('Not a demo — restore as normal account') }}</button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
+            {{-- Shown across the whole product's footer — every business,
+                 every page. The WhatsApp number here only ever reaches
+                 paying customers (never the demo account); see
+                 resources/views/partials/footer.blade.php. --}}
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
+                <div class="font-medium text-gray-800 dark:text-gray-100 mb-1">{{ __('Platform Settings') }}</div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('Shown in the footer on every page, for every business.') }}</p>
+                <form method="POST" action="{{ route('admin.settings.update') }}" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @csrf
+                    @method('PUT')
+                    <div>
+                        <x-input-label for="footer_text" :value="__('Footer text')" />
+                        <x-text-input id="footer_text" name="footer_text" type="text" class="mt-1 block w-full text-sm" :value="old('footer_text', $settings->footerText())" />
+                    </div>
+                    <div>
+                        <x-input-label for="support_whatsapp" :value="__('Support WhatsApp number (digits only, with country code)')" />
+                        <x-text-input id="support_whatsapp" name="support_whatsapp" type="text" placeholder="919876543210" class="mt-1 block w-full text-sm" :value="old('support_whatsapp', $settings->support_whatsapp)" />
+                    </div>
+                    <div class="sm:col-span-2">
+                        <x-primary-button>{{ __('Save Settings') }}</x-primary-button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </x-app-layout>
