@@ -89,6 +89,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/integrations', [AdminIntegrationsController::class, 'index'])->name('integrations.index');
         Route::put('/integrations', [AdminIntegrationsController::class, 'update'])->name('integrations.update');
         Route::post('/integrations/ping-sitemap', [AdminIntegrationsController::class, 'pingSitemap'])->name('integrations.ping-sitemap');
+        Route::post('/integrations/send-test-email', [AdminIntegrationsController::class, 'sendTestEmail'])->name('integrations.send-test-email');
 
         Route::get('/leads', [AdminLeadsController::class, 'index'])->name('leads.index');
         Route::delete('/leads/{lead}', [AdminLeadsController::class, 'destroy'])->name('leads.destroy');

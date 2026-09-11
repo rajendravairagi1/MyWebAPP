@@ -85,6 +85,20 @@
         </form>
 
         <div class="card" style="margin-bottom: var(--space-lg);">
+            <strong style="display: block; margin-bottom: 8px;">Test Demo Request Notifications</strong>
+            <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin-bottom: var(--space-md);">
+                "Notifications are ON" above only means an email address is saved — it doesn't confirm the server can
+                actually send mail. Use this to check for real: it sends a genuine test email to the address(es) above,
+                through the exact same code path as a real demo request. If it fails, the error below will say why.
+            </p>
+
+            <form method="POST" action="{{ route('admin.integrations.send-test-email') }}">
+                @csrf
+                <button type="submit" class="btn btn-secondary">Send Test Email</button>
+            </form>
+        </div>
+
+        <div class="card" style="margin-bottom: var(--space-lg);">
             <strong style="display: block; margin-bottom: 8px;">Sitemap submission</strong>
             <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin-bottom: var(--space-md);">
                 <code>/sitemap.xml</code> already updates itself automatically - every time you publish or edit a blog
