@@ -29,6 +29,7 @@ Route::get('/terms-of-service', [PageController::class, 'termsOfService'])->name
 Route::get('/security', [PageController::class, 'dataSecurity'])->name('data-security');
 
 Route::get('/pricing', [PricingController::class, 'index'])->name('pricing');
+Route::post('/pricing/currency', [PricingController::class, 'setCurrency'])->name('pricing.currency');
 
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
@@ -75,6 +76,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/pricing-discount', [AdminPricingController::class, 'updateDiscount'])->name('pricing.discount');
         Route::get('/pricing/{plan}/edit', [AdminPricingController::class, 'edit'])->name('pricing.edit');
         Route::put('/pricing/{plan}', [AdminPricingController::class, 'update'])->name('pricing.update');
+        Route::post('/pricing/geoip/update', [AdminPricingController::class, 'updateGeoIp'])->name('pricing.geoip.update');
 
         Route::get('/theme', [AdminThemeController::class, 'index'])->name('theme.index');
         Route::put('/theme', [AdminThemeController::class, 'update'])->name('theme.update');

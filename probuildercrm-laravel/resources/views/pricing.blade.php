@@ -34,6 +34,19 @@
             <h2 style="margin-top: 12px;">Straightforward pricing, built to grow with you</h2>
         </div>
 
+        <div style="display: flex; justify-content: center; margin-bottom: var(--space-md);">
+            {{-- Detected from your location automatically - change it any
+                 time, it's remembered for your next visit. --}}
+            <form method="POST" action="{{ route('pricing.currency') }}" onchange="this.submit()">
+                @csrf
+                <select name="currency" class="form-input" style="width: auto; font-size: 0.85rem; padding: 6px 32px 6px 12px;">
+                    @foreach ($availableCurrencies as $code => $symbol)
+                        <option value="{{ $code }}" @selected($currency === $code)>{{ $symbol }} {{ $code }}</option>
+                    @endforeach
+                </select>
+            </form>
+        </div>
+
         <div class="pricing-cycle-toggle">
             <template x-for="c in cycles" :key="c.key">
                 <button type="button" class="pricing-cycle-btn" :class="{ active: cycleKey === c.key }" @click="cycleKey = c.key">
@@ -61,9 +74,9 @@
                     <div>
                         <div style="display: flex; align-items: baseline; gap: 8px;">
                             @if ($discountPercent > 0)
-                                <span class="pricing-original" x-text="'₹' + pricing({{ $plan->monthly_price }}).originalPrice.toLocaleString('en-IN')"></span>
+                                <span class="pricing-original" x-text="'{{ $currencySymbol }}' + pricing({{ $plan->priceIn($currency) }}).originalPrice.toLocaleString('{{ $currency === 'INR' ? 'en-IN' : 'en-US' }}')"></span>
                             @endif
-                            <span class="pricing-real" x-text="'₹' + pricing({{ $plan->monthly_price }}).price.toLocaleString('en-IN')"></span>
+                            <span class="pricing-real" x-text="'{{ $currencySymbol }}' + pricing({{ $plan->priceIn($currency) }}).price.toLocaleString('{{ $currency === 'INR' ? 'en-IN' : 'en-US' }}')"></span>
                         </div>
                         <div class="pricing-cycle-note">
                             <span x-show="cycle.bonusMonths > 0" x-text="'for ' + cycle.months + ' months - ' + (cycle.months + cycle.bonusMonths) + ' months of service'"></span>

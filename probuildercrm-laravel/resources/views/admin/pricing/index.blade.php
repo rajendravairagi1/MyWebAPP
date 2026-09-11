@@ -8,6 +8,9 @@
         @if (session('status'))
             <p style="color: var(--color-success); margin-bottom: var(--space-md);">{{ session('status') }}</p>
         @endif
+        @error('geoip')
+            <p class="form-error" style="margin-bottom: var(--space-md);">{{ $message }}</p>
+        @enderror
 
         <p style="color: var(--color-ink-soft); margin-bottom: var(--space-lg);">
             Set each plan's full price (MRP, before any discount) here - the pricing page works everything else out from there:
@@ -37,7 +40,7 @@
             @enderror
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: var(--space-lg);">
             @foreach ($plans as $plan)
                 <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
@@ -49,10 +52,51 @@
                             @endif
                             &middot; {{ count($plan->features) }} features
                         </p>
+                        @if (! empty($plan->extra_prices))
+                            <p style="color: var(--color-ink-soft); font-size: 0.85rem; margin-top: 4px;">
+                                Also priced in: {{ collect($plan->extra_prices)->map(fn ($price, $code) => \App\Support\Currency::symbol($code).$price.' '.$code)->join(', ') }}
+                            </p>
+                        @endif
                     </div>
                     <a href="{{ route('admin.pricing.edit', $plan) }}" class="btn btn-secondary">Edit</a>
                 </div>
             @endforeach
+        </div>
+
+        <div class="card" style="margin-bottom: var(--space-lg);">
+            <strong style="display: block; margin-bottom: 8px;">GeoIP Database (country-based pricing)</strong>
+            <p style="color: var(--color-ink-soft); font-size: 0.9rem; margin-bottom: var(--space-md);">
+                Powers the currency shown automatically on the Pricing page, based on a visitor's country. Without this
+                database installed, everyone sees the default (&#8377; INR) unless they pick a currency themselves from
+                the dropdown there.
+            </p>
+
+            @if (! $maxmindKeyConfigured)
+                <div style="background: var(--color-primary-light); border-radius: var(--radius-sm); padding: var(--space-md); font-size: 0.85rem; color: var(--color-ink-soft);">
+                    <strong style="color: var(--color-ink); display: block; margin-bottom: 6px;">One-time setup needed first:</strong>
+                    <ol style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px;">
+                        <li>Create a free account at <a href="https://www.maxmind.com/en/geolite2/signup" target="_blank" rel="noopener">maxmind.com/en/geolite2/signup</a>.</li>
+                        <li>Once logged in, go to <em>Manage License Keys</em> and generate a new key.</li>
+                        <li>Add it to the server's <code>.env</code> file as <code>MAXMIND_LICENSE_KEY=your-key-here</code>, then reload.</li>
+                    </ol>
+                </div>
+            @else
+                <p style="color: var(--color-ink-soft); font-size: 0.85rem; margin-bottom: var(--space-md);">
+                    Status:
+                    @if ($geoIpInstalled)
+                        Installed, last updated {{ \Illuminate\Support\Carbon::createFromTimestamp($geoIpUpdatedAt)->diffForHumans() }}.
+                    @else
+                        Not installed yet — click below to download it.
+                    @endif
+                </p>
+                <form method="POST" action="{{ route('admin.pricing.geoip.update') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-secondary">{{ $geoIpInstalled ? 'Update GeoIP Database Now' : 'Install GeoIP Database Now' }}</button>
+                </form>
+                <p style="color: var(--color-ink-soft); font-size: 0.8rem; margin-top: var(--space-sm);">
+                    MaxMind refreshes this data regularly — re-run this every few months to keep country detection accurate.
+                </p>
+            @endif
         </div>
     </div>
 </div>

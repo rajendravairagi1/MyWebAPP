@@ -42,6 +42,25 @@
                 <textarea id="features" name="features" rows="6" class="form-textarea">{{ old('features', implode("\n", $plan->features)) }}</textarea>
             </div>
 
+            <div class="form-field">
+                <label>Other currencies (optional)</label>
+                <p style="color: var(--color-ink-soft); font-size: 0.85rem; margin: 0 0 var(--space-sm);">
+                    Visitors detected in that country see this price instead of the &#8377; MRP above (the same discount %
+                    still applies on top). Leave a currency blank and it falls back to showing the &#8377; MRP as a plain
+                    number in that currency's symbol — set a real price here so it looks native instead.
+                </p>
+                <div class="grid-2">
+                    @foreach ($otherCurrencies as $code => $symbol)
+                        <div class="form-field">
+                            <label for="extra_prices_{{ $code }}">{{ $symbol }} {{ $code }} full price / MRP</label>
+                            <input id="extra_prices_{{ $code }}" name="extra_prices[{{ $code }}]" type="number" min="0"
+                                   value="{{ old('extra_prices.'.$code, $plan->extra_prices[$code] ?? '') }}"
+                                   class="form-input" placeholder="Falls back to ₹ price">
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
             <div class="admin-preview">
                 <strong>Live preview - MRP &#8377;<span x-text="monthlyPrice"></span>/month, {{ $discountPercent }}% off:</strong>
                 <ul style="margin: 8px 0 0; padding-left: 18px;">
