@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\BackupAdminController;
 use App\Http\Controllers\Admin\LoginActivityController;
+use App\Http\Controllers\Admin\SignupRequestAdminController;
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\AvailablePropertiesController;
 use App\Http\Controllers\BackupController;
@@ -82,6 +83,14 @@ Route::get('/pd/{token}/photos/{media}', [PropertyDealShareController::class, 'p
 Route::get('/u/{token}', [PublicProfileController::class, 'show'])->name('public-profile.show');
 Route::get('/u/{token}/photo', [PublicProfileController::class, 'photo'])->name('public-profile.photo');
 
+// The "get an account" form a QR code (or a plain shared link) on
+// Platform Admin points a prospect at — platform-wide rather than per-
+// business, since nobody has a business yet at this point. Never
+// creates a login by itself: it's a pending SignupRequest Platform
+// Admin reviews (see Admin\SignupRequestAdminController).
+Route::get('/get-started', [\App\Http\Controllers\Public\SignupRequestController::class, 'show'])->name('signup-requests.public.show');
+Route::post('/get-started', [\App\Http\Controllers\Public\SignupRequestController::class, 'store'])->name('signup-requests.public.store')->middleware('throttle:5,1');
+
 // The lead-capture form a QR code (or a direct WhatsApp link) points a
 // prospect at — one token per business, scoped by App\Support\Modules'
 // leads module rather than per-record, since the record doesn't exist
@@ -139,6 +148,10 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::get('/backups/{filename}/download', [BackupAdminController::class, 'download'])->name('backups.download');
     Route::delete('/backups/{filename}', [BackupAdminController::class, 'destroy'])->name('backups.destroy');
     Route::post('/backups/run', [BackupAdminController::class, 'runNow'])->name('backups.run');
+
+    Route::get('/signup-requests', [SignupRequestAdminController::class, 'index'])->name('signup-requests.index');
+    Route::get('/signup-requests/qr-poster', [SignupRequestAdminController::class, 'qrPoster'])->name('signup-requests.qr-poster');
+    Route::post('/signup-requests/{signupRequest}/reject', [SignupRequestAdminController::class, 'reject'])->name('signup-requests.reject');
 });
 
 Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');

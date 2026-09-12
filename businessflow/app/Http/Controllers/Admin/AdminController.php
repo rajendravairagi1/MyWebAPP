@@ -13,6 +13,7 @@ use App\Models\PlatformSetting;
 use App\Models\Product;
 use App\Models\Project;
 use App\Models\Quotation;
+use App\Models\SignupRequest;
 use App\Models\User;
 use App\Support\RenewalAlerts;
 use App\Support\Tenant;
@@ -167,22 +168,50 @@ class AdminController extends Controller
         return back()->with('status', 'Platform settings updated.');
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        $signupRequest = null;
+
+        if ($request->filled('signup_request_id')) {
+            $signupRequest = SignupRequest::where('status', 'pending')->find($request->integer('signup_request_id'));
+        }
+
         return view('admin.create', [
             'businessTypes' => config('business.types'),
             'currencies' => config('business.currencies'),
+            'signupRequest' => $signupRequest,
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $signupRequest = null;
+        if ($request->filled('signup_request_id')) {
+            // Still pending — abort_unless rather than a plain 404, so a
+            // request approved twice from two open tabs gets a clear
+            // reason instead of a confusing "not found" on the second.
+            $signupRequest = SignupRequest::where('status', 'pending')->findOrFail($request->integer('signup_request_id'));
+        }
+
+        // A left-blank text input still posts as an empty string, not a
+        // missing key — normalize that to a real null first so 'nullable'
+        // below actually skips the 'min:8' rule instead of rejecting "".
+        if (! $request->filled('owner_password')) {
+            $request->merge(['owner_password' => null]);
+        }
+
         $data = $request->validate([
             'plan' => ['required', 'in:solo,team,company'],
             'owner_name' => ['required', 'string', 'max:255'],
             'owner_email' => ['required', 'email', 'max:255'],
-            'owner_password' => ['required', 'string', 'min:8'],
+            // Coming from an approved signup request, the customer already
+            // chose their own password (see SignupRequest::password_hash
+            // below) — this field only needs a value when there's no
+            // request to inherit one from.
+            'owner_password' => [$signupRequest ? 'nullable' : 'required', 'string', 'min:8'],
             'account_name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'address' => ['nullable', 'string', 'max:500'],
             'business_type' => ['required_unless:plan,company', 'nullable', 'string', 'in:'.implode(',', array_keys(config('business.types')))],
             'country' => ['required_unless:plan,company', 'nullable', 'string', 'max:2'],
             'currency' => ['required_unless:plan,company', 'nullable', 'string', 'size:3'],
@@ -204,28 +233,42 @@ class AdminController extends Controller
             return back()->withErrors(['is_demo' => 'A public demo account already exists. Leave "This is the public demo account" unticked for a real customer.'])->withInput();
         }
 
+        // Already bcrypt-hashed at submission time on the public form, so
+        // this is never re-hashed (User::password casts as 'hashed', which
+        // leaves an already-hashed value alone) — the exact password the
+        // customer chose keeps working after approval, without Rajendra
+        // ever seeing or retyping it.
+        $password = $signupRequest && ! ($data['owner_password'] ?? null)
+            ? $signupRequest->password_hash
+            : bcrypt($data['owner_password']);
+
         $user = User::create([
             'name' => $data['owner_name'],
             'email' => $data['owner_email'],
-            'password' => bcrypt($data['owner_password']),
+            'password' => $password,
         ]);
 
         if ($data['plan'] === 'company') {
-            Company::create([
+            $company = Company::create([
                 'owner_user_id' => $user->id,
                 'name' => $data['account_name'],
+                'phone' => $data['phone'] ?? null,
                 'subscription_expires_at' => $data['subscription_expires_at'] ?? null,
             ]);
+
+            $signupRequest?->update(['status' => 'approved', 'reviewed_at' => now()]);
 
             return redirect()->route('admin.index')->with('status', "Company account \"{$data['account_name']}\" created for {$user->email}.");
         }
 
-        $user->businesses()->create([
+        $business = $user->businesses()->create([
             'name' => $data['account_name'],
             'business_type' => $data['business_type'],
             'country' => $data['country'],
             'currency' => $data['currency'],
             'timezone' => $data['timezone'],
+            'phone' => $data['phone'] ?? null,
+            'address' => $data['address'] ?? null,
             'invoice_prefix' => 'INV',
             'plan' => $data['plan'],
             'subscription_expires_at' => $data['subscription_expires_at'] ?? null,
@@ -234,6 +277,8 @@ class AdminController extends Controller
             'role' => 'owner',
             'status' => 'active',
         ]);
+
+        $signupRequest?->update(['status' => 'approved', 'business_id' => $business->id, 'reviewed_at' => now()]);
 
         return redirect()->route('admin.index')->with('status', "Account \"{$data['account_name']}\" created for {$user->email}.");
     }

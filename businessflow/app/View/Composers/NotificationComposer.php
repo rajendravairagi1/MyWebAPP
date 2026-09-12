@@ -8,6 +8,7 @@ use App\Models\Followup;
 use App\Models\Lead;
 use App\Models\Meeting;
 use App\Models\ProjectUnit;
+use App\Models\SignupRequest;
 use App\Support\RenewalAlerts;
 use App\Support\Tenant;
 use Illuminate\Support\Collection;
@@ -73,6 +74,12 @@ class NotificationComposer
         $view->with($isPlatformAdmin ? $this->adminRenewalAlertsForBell() : [
             'adminRenewalAlerts' => collect(),
             'adminRenewalCount' => 0,
+        ]);
+
+        // Badge for the "Signup Requests" nav item — how many public
+        // /get-started submissions are still waiting on Approve/Reject.
+        $view->with([
+            'pendingSignupRequestsCount' => $isPlatformAdmin ? SignupRequest::where('status', 'pending')->count() : 0,
         ]);
 
         if (! Tenant::check()) {

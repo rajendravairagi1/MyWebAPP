@@ -5,9 +5,25 @@
 
     <div class="py-12">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6" x-data="{ plan: 'solo' }">
+            @if ($signupRequest)
+                <div class="mb-4 bg-accent-50 dark:bg-accent-900/20 border border-accent-200 dark:border-accent-800 text-sm rounded-md p-4">
+                    <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('From a public account request') }}</div>
+                    <p class="text-gray-600 dark:text-gray-400 mt-1">
+                        {{ __('Submitted phone: :phone', ['phone' => $signupRequest->phone]) }}
+                        @if ($signupRequest->address)
+                            · {{ __('Address: :address', ['address' => $signupRequest->address]) }}
+                        @endif
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1">{{ __('Their password is already set from what they typed — leave the Password field below blank to keep it, or type a new one to override it.') }}</p>
+                </div>
+            @endif
+
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6" x-data="{ plan: '{{ old('plan', $signupRequest->plan ?? 'solo') }}' }">
                 <form method="POST" action="{{ route('admin.store') }}" class="space-y-6">
                     @csrf
+                    @if ($signupRequest)
+                        <input type="hidden" name="signup_request_id" value="{{ $signupRequest->id }}">
+                    @endif
 
                     <div>
                         <x-input-label :value="__('Plan')" />
@@ -35,19 +51,26 @@
                         <div class="space-y-3">
                             <div>
                                 <x-input-label for="owner_name" :value="__('Name')" />
-                                <x-text-input id="owner_name" name="owner_name" type="text" class="mt-1 block w-full" required autofocus />
+                                <x-text-input id="owner_name" name="owner_name" type="text" class="mt-1 block w-full" required autofocus value="{{ old('owner_name', $signupRequest->name ?? '') }}" />
                                 <x-input-error :messages="$errors->get('owner_name')" class="mt-2" />
                             </div>
                             <div>
                                 <x-input-label for="owner_email" :value="__('Email')" />
-                                <x-text-input id="owner_email" name="owner_email" type="email" class="mt-1 block w-full" required />
+                                <x-text-input id="owner_email" name="owner_email" type="email" class="mt-1 block w-full" required value="{{ old('owner_email', $signupRequest->email ?? '') }}" />
                                 <x-input-error :messages="$errors->get('owner_email')" class="mt-2" />
                             </div>
                             <div>
                                 <x-input-label for="owner_password" :value="__('Password')" />
-                                <x-text-input id="owner_password" name="owner_password" type="text" class="mt-1 block w-full" required />
-                                <p class="text-xs text-gray-400 mt-1">{{ __('Share this with them — they log in with this email and password.') }}</p>
+                                <x-text-input id="owner_password" name="owner_password" type="text" class="mt-1 block w-full" :required="! $signupRequest" />
+                                <p class="text-xs text-gray-400 mt-1">
+                                    {{ $signupRequest ? __('Leave blank to keep the password they set themselves.') : __('Share this with them — they log in with this email and password.') }}
+                                </p>
                                 <x-input-error :messages="$errors->get('owner_password')" class="mt-2" />
+                            </div>
+                            <div>
+                                <x-input-label for="phone" :value="__('Phone (optional)')" />
+                                <x-text-input id="phone" name="phone" type="text" class="mt-1 block w-full" value="{{ old('phone', $signupRequest->phone ?? '') }}" />
+                                <x-input-error :messages="$errors->get('phone')" class="mt-2" />
                             </div>
                         </div>
                     </div>
@@ -68,6 +91,11 @@
                                         <option value="{{ $value }}" @selected($value === 'real_estate')>{{ $label }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div>
+                                <x-input-label for="address" :value="__('Address (optional)')" />
+                                <textarea id="address" name="address" rows="2" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('address', $signupRequest->address ?? '') }}</textarea>
+                                <x-input-error :messages="$errors->get('address')" class="mt-2" />
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
