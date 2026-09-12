@@ -33,7 +33,7 @@
     </script>
 
     <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 space-y-6">
             @if (session('status'))
                 <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm rounded-md p-3">{{ session('status') }}</div>
             @endif
@@ -99,31 +99,40 @@
                                 <td class="px-5 py-3">
                                     @if ($isProtected)
                                         <span class="text-gray-400">—</span>
-                                    @elseif ($member->pivot->status === 'suspended')
-                                        <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400">{{ __('Suspended') }}</span>
                                     @else
-                                        <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400">{{ ucfirst($member->pivot->status) }}</span>
+                                        {{-- Two separate forms, not one form with two submit buttons — the
+                                             app-wide double-submit guard disables the clicked button the
+                                             instant the form submits, and a disabled control's name/value is
+                                             dropped from what actually gets sent, so a shared form would
+                                             silently submit no "status" at all. --}}
+                                        <div class="inline-flex rounded-lg border border-gray-200 dark:border-slate-600 overflow-hidden text-xs">
+                                            <form method="POST" action="{{ route('team.status', $member) }}">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="active">
+                                                <button type="submit" @class([
+                                                    'px-2.5 py-1 transition',
+                                                    'bg-green-600 text-white' => $member->pivot->status !== 'suspended',
+                                                    'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700' => $member->pivot->status === 'suspended',
+                                                ])>{{ __('Active') }}</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('team.status', $member) }}">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="suspended">
+                                                <button type="submit" @class([
+                                                    'px-2.5 py-1 border-l border-gray-200 dark:border-slate-600 transition',
+                                                    'bg-gray-500 text-white' => $member->pivot->status === 'suspended',
+                                                    'text-gray-400 dark:text-slate-500 hover:bg-gray-100 dark:hover:bg-slate-700' => $member->pivot->status !== 'suspended',
+                                                ])>{{ __('Suspended') }}</button>
+                                            </form>
+                                        </div>
                                     @endif
                                 </td>
-                                <td class="px-5 py-3 text-right whitespace-nowrap">
+                                <td class="px-5 py-3 whitespace-nowrap">
                                     @if (! $isProtected)
-                                        <div class="flex flex-col items-end gap-1">
-                                            <div>
-                                                <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-member-{{ $member->id }}')" class="text-accent-600 hover:underline text-xs">{{ __('Edit') }}</button>
-                                                <form method="POST" action="{{ route('team.status', $member) }}" class="inline">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    <input type="hidden" name="status" value="{{ $member->pivot->status === 'suspended' ? 'active' : 'suspended' }}">
-                                                    <button class="text-xs {{ $member->pivot->status === 'suspended' ? 'text-green-600' : 'text-amber-600' }} hover:underline ml-2">
-                                                        {{ $member->pivot->status === 'suspended' ? __('Reactivate') : __('Suspend') }}
-                                                    </button>
-                                                </form>
-                                                <form method="POST" action="{{ route('team.destroy', $member) }}" onsubmit="return confirm('{{ __('Remove this team member?') }}')" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="text-red-600 hover:underline text-xs ml-2">{{ __('Remove') }}</button>
-                                                </form>
-                                            </div>
+                                        <div class="flex flex-col items-start gap-1">
+                                            <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-member-{{ $member->id }}')" class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Edit') }}</button>
                                             <div x-data="{ open: false }">
                                                 <button type="button" x-show="!open" x-on:click="open = true" class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Reset password') }}</button>
                                                 <form x-show="open" x-cloak method="POST" action="{{ route('team.password', $member) }}" class="flex items-center gap-2">
@@ -133,6 +142,11 @@
                                                     <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
                                                 </form>
                                             </div>
+                                            <form method="POST" action="{{ route('team.destroy', $member) }}" onsubmit="return confirm('{{ __('Remove this team member?') }}')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="text-xs text-red-600 hover:underline whitespace-nowrap">{{ __('Remove') }}</button>
+                                            </form>
                                         </div>
                                     @endif
                                 </td>
