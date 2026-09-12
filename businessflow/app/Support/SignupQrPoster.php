@@ -79,15 +79,19 @@ class SignupQrPoster
 
             $height = (int) $y;
 
+            // A solid dark-navy background (not white) — the real logo has
+            // white/light strokes that disappear against a white canvas;
+            // this matches the app's own dark sidebar so the logo actually
+            // shows up.
             $im = imagecreatetruecolor($width, $height);
-            $white = imagecolorallocate($im, 255, 255, 255);
-            imagefill($im, 0, 0, $white);
+            $navy = imagecolorallocate($im, 15, 23, 42);
+            imagefill($im, 0, 0, $navy);
 
-            $dark = imagecolorallocate($im, 24, 24, 27);
-            $gray = imagecolorallocate($im, 100, 106, 118);
-            $lightGray = imagecolorallocate($im, 244, 245, 247);
-            $border = imagecolorallocate($im, 226, 229, 234);
-            $brandColor = imagecolorallocate($im, 79, 70, 229);
+            $textLight = imagecolorallocate($im, 241, 245, 249);
+            $gray = imagecolorallocate($im, 148, 163, 184);
+            $lightGray = imagecolorallocate($im, 248, 250, 252);
+            $border = imagecolorallocate($im, 71, 85, 105);
+            $brandColor = imagecolorallocate($im, 129, 140, 248);
 
             $cursorY = 50;
 
@@ -115,7 +119,7 @@ class SignupQrPoster
             $cursorY = self::drawCenteredLine($im, $fontRegular, 15, $gray, $width, $cursorY, $support) + 22;
 
             foreach ($messageLines as $line) {
-                $cursorY = self::drawCenteredLine($im, $fontBold, 17, $dark, $width, $cursorY, $line);
+                $cursorY = self::drawCenteredLine($im, $fontBold, 17, $textLight, $width, $cursorY, $line);
             }
 
             ob_start();
