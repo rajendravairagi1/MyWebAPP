@@ -89,6 +89,7 @@
                 // silently dead button.
                 document.addEventListener('DOMContentLoaded', function () {
                     var posterUrl = @json($posterUrl);
+                    var publicUrl = @json($publicUrl);
                     var refreshMsg = @json(__('This page loaded an old version of the app. Please close this tab, reopen this page, and try again.'));
 
                     if (typeof preloadFile === 'function') {
@@ -99,7 +100,7 @@
                     if (shareBtn) {
                         shareBtn.addEventListener('click', function () {
                             if (typeof shareImageFile === 'function') {
-                                shareImageFile(posterUrl, 'signup-qr.png', shareBtn);
+                                shareImageFile(posterUrl, 'signup-qr.png', shareBtn, publicUrl);
                             } else {
                                 window.alert(refreshMsg);
                             }

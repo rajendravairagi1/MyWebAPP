@@ -132,9 +132,12 @@ window.preloadFile = function (url) {
 
 // Hands the actual QR poster image to the phone's native share sheet —
 // WhatsApp, etc. — the same way PhonePe/BHIM share their QR as an image
-// rather than a text link. Falls back to a plain download if the browser
-// can't share files.
-window.shareImageFile = async function (url, filename, buttonEl) {
+// rather than a text link. The plain link (linkText, e.g. the Lead form
+// or /get-started URL) rides along as the share's text, so WhatsApp etc.
+// get both the QR image AND a tappable link in one send — the customer
+// doesn't have to scan the picture at all if they'd rather just click.
+// Falls back to a plain download if the browser can't share files.
+window.shareImageFile = async function (url, filename, buttonEl, linkText) {
     const originalLabel = buttonEl ? buttonEl.textContent : null;
 
     try {
@@ -149,10 +152,17 @@ window.shareImageFile = async function (url, filename, buttonEl) {
 
         const blob = await filePreloadCache.get(url);
         const file = new File([blob], filename, { type: blob.type || 'image/png' });
+        const shareData = linkText ? { files: [file], text: linkText } : { files: [file] };
 
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file] });
+        if (navigator.canShare && navigator.canShare(shareData)) {
+            await navigator.share(shareData);
             return;
+        }
+
+        // This browser/app can't attach a file, but can still share plain
+        // text — send the link on its own rather than silently dropping it.
+        if (linkText && navigator.canShare && navigator.canShare({ text: linkText })) {
+            await navigator.share({ text: linkText });
         }
 
         const objectUrl = URL.createObjectURL(blob);
