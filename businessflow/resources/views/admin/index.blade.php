@@ -41,6 +41,15 @@
                             <span class="text-xs px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200">{{ $archivedCount }}</span>
                         @endif
                     </a>
+                    <a href="{{ route('admin.backups.index') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        {{ __('Backups') }}
+                    </a>
+                    <a href="{{ route('admin.signup-requests.index') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                        {{ __('Signup Requests') }}
+                        @if ($pendingSignupRequestsCount > 0)
+                            <span class="text-xs px-1.5 py-0.5 rounded-full bg-red-600 text-white">{{ $pendingSignupRequestsCount }}</span>
+                        @endif
+                    </a>
                     <a href="{{ route('admin.create') }}" class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap bg-accent-600 text-white hover:bg-accent-700">
                         {{ __('+ Add Customer Account') }}
                     </a>

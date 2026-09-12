@@ -87,7 +87,9 @@ class AdminController extends Controller
 
         $settings = PlatformSetting::current();
 
-        return view('admin.index', compact('businesses', 'companies', 'demoBusinesses', 'archivedCount', 'settings'));
+        $pendingSignupRequestsCount = SignupRequest::where('status', 'pending')->count();
+
+        return view('admin.index', compact('businesses', 'companies', 'demoBusinesses', 'archivedCount', 'settings', 'pendingSignupRequestsCount'));
     }
 
     /**

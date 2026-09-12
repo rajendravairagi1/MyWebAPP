@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SignupRequest;
 use App\Support\DocumentQr;
+use App\Support\SignupQrPoster;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
@@ -34,7 +35,9 @@ class SignupRequestAdminController extends Controller
 
     public function qrPoster(): Response
     {
-        $png = DocumentQr::png(route('signup-requests.public.show'), 460);
+        $publicUrl = route('signup-requests.public.show');
+
+        $png = SignupQrPoster::build($publicUrl) ?? DocumentQr::png($publicUrl, 460);
 
         abort_if(! $png, 404);
 

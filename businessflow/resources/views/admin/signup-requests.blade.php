@@ -69,7 +69,7 @@
                 <div class="lg:order-2">
                     <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5" x-data="{ copied: false }">
                         <div class="text-sm font-medium text-gray-800 dark:text-gray-100 mb-3 text-center">{{ __('Share to get new signups') }}</div>
-                        <img src="{{ $posterUrl }}" alt="{{ __('Signup request QR') }}" class="w-full max-w-[220px] mx-auto rounded-lg border border-gray-200 dark:border-slate-700 bg-white p-3">
+                        <img src="{{ $posterUrl }}" alt="{{ __('Signup request QR') }}" class="w-full max-w-[220px] mx-auto rounded-lg border border-gray-200 dark:border-slate-700">
                         <div class="mt-4 flex flex-col gap-2">
                             <button type="button" id="signup-qr-share-btn" class="w-full inline-flex items-center justify-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700">{{ __('Share') }}</button>
                             <button type="button" id="signup-qr-download-btn" class="w-full inline-flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md hover:bg-gray-50 dark:hover:bg-slate-700">{{ __('Download') }}</button>
