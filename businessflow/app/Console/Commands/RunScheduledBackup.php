@@ -11,50 +11,60 @@ use Illuminate\Support\Str;
 
 /**
  * A full data+media backup for every business on this install, saved to
- * storage/app/backups/. Meant to be wired up as a cPanel cron job (see
- * `php artisan schedule:run` below) so a breach, a bad restore, or a
- * server-level crash never means data is gone for good — the same kind
- * of protection "Data-wipe on hack" asked for, without any automatic
- * destructive trigger that a false alarm could set off by mistake.
+ * its own dedicated storage/app/customer-backups/ folder (kept separate
+ * from everything else in storage/app), one zip per business named after
+ * it so it can be handed back to that customer if they ever need it.
+ * Anything older than --keep-days is deleted automatically so this
+ * folder never grows without bound.
  *
- * cPanel cron entry (once every 24 hours, adjust the path to your
- * install): * you must adjust /home/USER/businessflow to your actual
- * cPanel path.
- *   0 2 * * * php /home/USER/businessflow/artisan backup:run >> /dev/null 2>&1
+ * Wire this up one of two ways, whichever this host supports:
+ *
+ * 1) A cPanel Cron Job running once a day:
+ *      0 2 * * * php /home/USER/businessflow/artisan backup:run >> /dev/null 2>&1
+ *    (adjust /home/USER/businessflow to the real install path)
+ *
+ * 2) No cron access at all: an external free scheduler (e.g.
+ *    cron-job.org) hitting /run-backups?token=<INSTALL_TOKEN> once a day
+ *    — see RunBackupsController, which just calls this same command.
  */
 class RunScheduledBackup extends Command
 {
-    protected $signature = 'backup:run {--keep=7 : How many backups to keep per business}';
+    public const DIR = 'customer-backups';
 
-    protected $description = 'Back up every business\'s data + media to storage/app/backups, pruning old ones.';
+    protected $signature = 'backup:run {--keep-days=10 : Delete backups older than this many days}';
+
+    protected $description = 'Back up every business\'s data + media to storage/app/customer-backups, deleting old ones.';
 
     public function handle(BackupController $backupController): int
     {
-        $keep = (int) $this->option('keep');
+        $keepDays = (int) $this->option('keep-days');
         $disk = Storage::disk('local');
 
         foreach (Business::all() as $business) {
             $zipPath = Tenant::runAs($business->id, fn () => $backupController->buildZip($business));
 
-            $filename = 'backups/'.Str::slug($business->name).'-'.$business->id.'-'.now()->format('Y-m-d_His').'.zip';
+            $filename = self::DIR.'/'.Str::slug($business->name).'-'.$business->id.'-'.now()->format('Y-m-d_His').'.zip';
             $disk->put($filename, file_get_contents($zipPath));
             @unlink($zipPath);
 
             $this->info("Backed up \"{$business->name}\" -> storage/app/{$filename}");
-
-            $this->prune($disk, Str::slug($business->name).'-'.$business->id.'-', $keep);
         }
+
+        $this->pruneOlderThan($disk, $keepDays);
 
         return self::SUCCESS;
     }
 
-    private function prune($disk, string $prefix, int $keep): void
+    private function pruneOlderThan($disk, int $days): void
     {
-        $files = collect($disk->files('backups'))
-            ->filter(fn ($path) => str_starts_with(basename($path), $prefix))
-            ->sortByDesc(fn ($path) => $disk->lastModified($path))
-            ->values();
+        $cutoff = now()->subDays($days)->timestamp;
 
-        $files->slice($keep)->each(fn ($path) => $disk->delete($path));
+        $old = collect($disk->files(self::DIR))
+            ->filter(fn ($path) => str_ends_with($path, '.zip') && $disk->lastModified($path) < $cutoff);
+
+        $old->each(function ($path) use ($disk) {
+            $disk->delete($path);
+            $this->info('Deleted old backup -> storage/app/'.$path);
+        });
     }
 }

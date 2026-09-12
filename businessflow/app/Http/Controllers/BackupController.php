@@ -74,6 +74,22 @@ class BackupController extends Controller
     {
         $business = \App\Models\Business::findOrFail(Tenant::id());
 
+        $zipPath = $this->buildZip($business);
+        $filename = Str::slug($business->name).'-backup-'.now()->format('Y-m-d').'.zip';
+
+        return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Builds the same backup zip download() sends to the browser, but
+     * returns its temp path instead — the shared piece used both by the
+     * interactive owner-triggered download above and by the unattended
+     * `backup:run` command (see RunScheduledBackup) that snapshots every
+     * business on a schedule. Caller is responsible for deleting the
+     * returned file once it's done with it.
+     */
+    public function buildZip(\App\Models\Business $business): string
+    {
         $tables = $this->exportTables();
         $mediaPaths = $this->collectMediaPaths($tables);
 
@@ -99,9 +115,7 @@ class BackupController extends Controller
 
         $zip->close();
 
-        $filename = Str::slug($business->name).'-backup-'.now()->format('Y-m-d').'.zip';
-
-        return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
+        return $zipPath;
     }
 
     public function restore(Request $request): RedirectResponse

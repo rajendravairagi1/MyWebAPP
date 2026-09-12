@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\BackupAdminController;
 use App\Http\Controllers\Admin\LoginActivityController;
 use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\AvailablePropertiesController;
@@ -49,6 +50,7 @@ use App\Http\Controllers\PwaController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResetDataController;
+use App\Http\Controllers\RunBackupsController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TeamController;
@@ -132,6 +134,11 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::get('/users', [UserAdminController::class, 'index'])->name('users.index');
     Route::put('/users/{business}/{user}/status', [UserAdminController::class, 'setStatus'])->name('users.status');
     Route::delete('/users/{business}/{user}', [UserAdminController::class, 'destroy'])->name('users.destroy');
+
+    Route::get('/backups', [BackupAdminController::class, 'index'])->name('backups.index');
+    Route::get('/backups/{filename}/download', [BackupAdminController::class, 'download'])->name('backups.download');
+    Route::delete('/backups/{filename}', [BackupAdminController::class, 'destroy'])->name('backups.destroy');
+    Route::post('/backups/run', [BackupAdminController::class, 'runNow'])->name('backups.run');
 });
 
 Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
@@ -140,6 +147,7 @@ Route::get('/pwa-icon/{size}', [PwaController::class, 'icon'])->name('pwa.icon')
 Route::get('/install', [InstallController::class, 'index'])->name('install.index');
 Route::post('/install', [InstallController::class, 'store'])->name('install.store');
 Route::get('/migrate', MigrateController::class)->name('migrate');
+Route::get('/run-backups', RunBackupsController::class)->name('run-backups');
 
 // Public, signed verification pages linked from the QR code printed on
 // Quotation/Invoice/Statement PDFs — confirms a document is genuine
