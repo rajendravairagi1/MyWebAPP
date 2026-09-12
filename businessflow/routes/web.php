@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\LoginActivityController;
+use App\Http\Controllers\Admin\UserAdminController;
 use App\Http\Controllers\AvailablePropertiesController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BranchController;
@@ -127,6 +128,10 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::post('/demo/reset/{business}', [AdminController::class, 'resetDemo'])->name('demo.reset');
     Route::post('/clear-cache', [AdminController::class, 'clearCache'])->name('clear-cache');
     Route::put('/settings', [AdminController::class, 'updateSettings'])->name('settings.update');
+
+    Route::get('/users', [UserAdminController::class, 'index'])->name('users.index');
+    Route::put('/users/{business}/{user}/status', [UserAdminController::class, 'setStatus'])->name('users.status');
+    Route::delete('/users/{business}/{user}', [UserAdminController::class, 'destroy'])->name('users.destroy');
 });
 
 Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');

@@ -14,6 +14,13 @@ use Symfony\Component\HttpFoundation\Response;
  * NEVER comes from the request itself (route param, query string, body)
  * — only from session + a membership check against business_user. Users
  * with no business yet are sent to onboarding.
+ *
+ * wherePivot('status', 'active') on both lookups below is what makes a
+ * membership suspended from Admin > Users actually take effect — a
+ * suspended membership is treated exactly as if it didn't exist, same
+ * as every existing account today (business_user.status already
+ * defaults to 'active' for every row, so this changes nothing until a
+ * super-admin explicitly suspends someone).
  */
 class IdentifyTenant
 {
@@ -27,11 +34,11 @@ class IdentifyTenant
 
         $businessId = $request->session()->get('active_business_id');
         $membership = $businessId
-            ? $user->businesses()->where('businesses.id', $businessId)->first()
+            ? $user->businesses()->wherePivot('status', 'active')->where('businesses.id', $businessId)->first()
             : null;
 
         if (! $membership) {
-            $membership = $user->businesses()->oldest('business_user.created_at')->first();
+            $membership = $user->businesses()->wherePivot('status', 'active')->oldest('business_user.created_at')->first();
 
             if ($membership) {
                 $businessId = $membership->id;
