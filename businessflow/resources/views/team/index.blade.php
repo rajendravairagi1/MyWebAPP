@@ -54,6 +54,7 @@
                             <th class="px-5 py-3 text-left">{{ __('Email') }}</th>
                             <th class="px-5 py-3 text-left">{{ __('Role') }}</th>
                             <th class="px-5 py-3 text-left">{{ __('Modules') }}</th>
+                            <th class="px-5 py-3 text-left">{{ __('Status') }}</th>
                             <th class="px-5 py-3"></th>
                         </tr>
                     </thead>
@@ -95,14 +96,44 @@
                                         @endif
                                     @endif
                                 </td>
+                                <td class="px-5 py-3">
+                                    @if ($isProtected)
+                                        <span class="text-gray-400">—</span>
+                                    @elseif ($member->pivot->status === 'suspended')
+                                        <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400">{{ __('Suspended') }}</span>
+                                    @else
+                                        <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400">{{ ucfirst($member->pivot->status) }}</span>
+                                    @endif
+                                </td>
                                 <td class="px-5 py-3 text-right whitespace-nowrap">
                                     @if (! $isProtected)
-                                        <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-member-{{ $member->id }}')" class="text-accent-600 hover:underline text-xs">{{ __('Edit') }}</button>
-                                        <form method="POST" action="{{ route('team.destroy', $member) }}" onsubmit="return confirm('{{ __('Remove this team member?') }}')" class="inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="text-red-600 hover:underline text-xs ml-2">{{ __('Remove') }}</button>
-                                        </form>
+                                        <div class="flex flex-col items-end gap-1">
+                                            <div>
+                                                <button type="button" x-data="" x-on:click.prevent="$dispatch('open-modal', 'edit-member-{{ $member->id }}')" class="text-accent-600 hover:underline text-xs">{{ __('Edit') }}</button>
+                                                <form method="POST" action="{{ route('team.status', $member) }}" class="inline">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="status" value="{{ $member->pivot->status === 'suspended' ? 'active' : 'suspended' }}">
+                                                    <button class="text-xs {{ $member->pivot->status === 'suspended' ? 'text-green-600' : 'text-amber-600' }} hover:underline ml-2">
+                                                        {{ $member->pivot->status === 'suspended' ? __('Reactivate') : __('Suspend') }}
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ route('team.destroy', $member) }}" onsubmit="return confirm('{{ __('Remove this team member?') }}')" class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="text-red-600 hover:underline text-xs ml-2">{{ __('Remove') }}</button>
+                                                </form>
+                                            </div>
+                                            <div x-data="{ open: false }">
+                                                <button type="button" x-show="!open" x-on:click="open = true" class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Reset password') }}</button>
+                                                <form x-show="open" x-cloak method="POST" action="{{ route('team.password', $member) }}" class="flex items-center gap-2">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="text" name="password" placeholder="{{ __('New password') }}" minlength="8" required class="w-32 shrink-0 text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500 py-1">
+                                                    <button class="shrink-0 text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Save') }}</button>
+                                                </form>
+                                            </div>
+                                        </div>
                                     @endif
                                 </td>
                             </tr>

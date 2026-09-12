@@ -102,4 +102,44 @@ class TeamController extends Controller
 
         return back()->with('status', 'Team member removed.');
     }
+
+    /**
+     * Suspending sets business_user.status, which IdentifyTenant checks
+     * on every request — a suspended member is immediately signed out
+     * of this business (any other business they belong to is
+     * unaffected), reversible any time by switching it back to active.
+     */
+    public function setStatus(Request $request, User $member): RedirectResponse
+    {
+        $business = Business::findOrFail(Tenant::id());
+        $membership = $business->users()->where('users.id', $member->id)->first();
+        abort_unless($membership, 404);
+        abort_if(in_array($membership->pivot->role, self::PROTECTED_ROLES, true), 422, "Can't change this member's status here.");
+
+        $data = $request->validate(['status' => ['required', 'in:active,suspended']]);
+
+        $business->users()->updateExistingPivot($member->id, ['status' => $data['status']]);
+
+        return back()->with('status', "{$member->name} is now {$data['status']}.");
+    }
+
+    /**
+     * Sets a brand new password for a team member's login — there is no
+     * way to recover their old one (stored hashed, one-way), so this is
+     * how you help someone who's locked out: pick a new password here
+     * and relay it to them yourself.
+     */
+    public function resetPassword(Request $request, User $member): RedirectResponse
+    {
+        $business = Business::findOrFail(Tenant::id());
+        $membership = $business->users()->where('users.id', $member->id)->first();
+        abort_unless($membership, 404);
+        abort_if(in_array($membership->pivot->role, self::PROTECTED_ROLES, true), 422, "Can't reset this member's password here.");
+
+        $data = $request->validate(['password' => ['required', 'string', 'min:8']]);
+
+        $member->update(['password' => bcrypt($data['password'])]);
+
+        return back()->with('status', "New password set for {$member->email} — tell them directly, it can't be looked up again after this.");
+    }
 }

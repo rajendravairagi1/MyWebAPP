@@ -208,6 +208,8 @@ Route::middleware(['auth', 'verified', 'owner', 'plan:team'])->group(function ()
     Route::post('/team', [TeamController::class, 'store'])->name('team.store');
     Route::put('/team/{member}', [TeamController::class, 'update'])->name('team.update');
     Route::delete('/team/{member}', [TeamController::class, 'destroy'])->name('team.destroy');
+    Route::put('/team/{member}/status', [TeamController::class, 'setStatus'])->name('team.status');
+    Route::put('/team/{member}/password', [TeamController::class, 'resetPassword'])->name('team.password');
 });
 
 Route::middleware(['auth', 'verified', 'module:customers'])->group(function () {
