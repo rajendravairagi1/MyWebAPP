@@ -64,11 +64,14 @@
         </form>
 
         @if ($logoPath)
-            <form method="POST" action="{{ route('admin.branding.destroy') }}" onsubmit="return confirm('Remove the logo and go back to the text logo?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-secondary">Remove Logo</button>
-            </form>
+            <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                <a href="{{ route('admin.branding.download') }}" class="btn btn-secondary">Download Logo File</a>
+                <form method="POST" action="{{ route('admin.branding.destroy') }}" onsubmit="return confirm('Remove the logo and go back to the text logo?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-secondary">Remove Logo</button>
+                </form>
+            </div>
         @endif
 
         <hr style="border: none; border-top: 1px solid var(--color-border); margin: var(--space-2xl) 0;">

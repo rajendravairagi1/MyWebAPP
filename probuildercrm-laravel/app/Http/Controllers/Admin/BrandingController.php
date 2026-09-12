@@ -124,6 +124,28 @@ class BrandingController extends Controller
         return redirect()->route('admin.branding.index')->with('status', 'Logo removed - back to the text logo.');
     }
 
+    /**
+     * Hands back the exact logo file currently in use, under a fixed
+     * "probuildercrm-logo.<ext>" name regardless of what it was
+     * originally uploaded as — so it's always at hand to drop into a
+     * slide deck, a document, or anywhere else the live site itself
+     * can't be embedded from directly.
+     */
+    public function downloadLogo()
+    {
+        $logoPath = SiteSetting::get('logo_path');
+
+        abort_unless($logoPath, 404, 'No logo uploaded yet.');
+
+        $absolute = public_path($logoPath);
+
+        abort_unless(File::exists($absolute), 404);
+
+        $extension = pathinfo($absolute, PATHINFO_EXTENSION);
+
+        return response()->download($absolute, 'probuildercrm-logo.'.$extension);
+    }
+
     private function deleteExistingLogo(): void
     {
         foreach (glob(public_path(self::DIR.'/logo.*')) ?: [] as $existing) {

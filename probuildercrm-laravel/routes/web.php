@@ -84,6 +84,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/branding', [AdminBrandingController::class, 'index'])->name('branding.index');
         Route::post('/branding', [AdminBrandingController::class, 'update'])->name('branding.update');
         Route::delete('/branding', [AdminBrandingController::class, 'destroy'])->name('branding.destroy');
+        Route::get('/branding/download', [AdminBrandingController::class, 'downloadLogo'])->name('branding.download');
         Route::put('/branding/size', [AdminBrandingController::class, 'updateSize'])->name('branding.size');
         Route::post('/branding/favicon', [AdminBrandingController::class, 'updateFavicon'])->name('branding.favicon.update');
         Route::delete('/branding/favicon', [AdminBrandingController::class, 'destroyFavicon'])->name('branding.favicon.destroy');
