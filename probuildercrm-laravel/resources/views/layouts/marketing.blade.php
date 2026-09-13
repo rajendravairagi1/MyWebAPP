@@ -6,10 +6,41 @@
     @if ($__gaScript = \App\Models\SiteSetting::get('analytics_script'))
         {!! $__gaScript !!}
     @endif
-    <title>@yield('title', config('site.name').' - Real Estate & Construction CRM Software for Builders')</title>
-    <meta name="description" content="@yield('description', config('site.short_description'))">
-    <link rel="canonical" href="{{ config('site.url').request()->getPathInfo() }}">
+    @php
+        // Computed once so the <title>/description and the social-share
+        // (Open Graph/Twitter) tags below always say the exact same thing
+        // for a given page, instead of yielding the same section twice
+        // and risking them drifting apart.
+        $__pageTitle = trim($__env->yieldContent('title', config('site.name').' - Real Estate & Construction CRM Software for Builders'));
+        $__pageDescription = trim($__env->yieldContent('description', config('site.short_description')));
+        $__ogImage = asset('images/og-image.jpg');
+        $__canonicalUrl = config('site.url').request()->getPathInfo();
+    @endphp
+    {{-- $__pageTitle/$__pageDescription come out of yieldContent() already
+         HTML-escaped (Blade's @section('title', '...') short form and
+         yieldContent's own default both call e() internally) - {!! !!}
+         here, not {{ }}, so they aren't escaped a second time (which
+         previously turned "Builders & Developers" into
+         "Builders &amp;amp; Developers"). --}}
+    <title>{!! $__pageTitle !!}</title>
+    <meta name="description" content="{!! $__pageDescription !!}">
+    <link rel="canonical" href="{{ $__canonicalUrl }}">
     @include('partials.favicon-links')
+
+    {{-- Social share preview (WhatsApp, Facebook, LinkedIn, iMessage, ...) --}}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="{{ config('site.name') }}">
+    <meta property="og:url" content="{{ $__canonicalUrl }}">
+    <meta property="og:title" content="{!! $__pageTitle !!}">
+    <meta property="og:description" content="{!! $__pageDescription !!}">
+    <meta property="og:image" content="{{ $__ogImage }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ config('site.name') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{!! $__pageTitle !!}">
+    <meta name="twitter:description" content="{!! $__pageDescription !!}">
+    <meta name="twitter:image" content="{{ $__ogImage }}">
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) ?: '1' }}">
     @php
         $__startingPrice = (int) (\App\Models\PricingPlan::min('monthly_price') ?? 999);
