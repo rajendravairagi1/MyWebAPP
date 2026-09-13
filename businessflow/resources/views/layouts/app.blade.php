@@ -473,5 +473,9 @@
         @if ($subscriptionDaysRemaining !== null)
             @include('partials.renewal-modal')
         @endif
+
+        @auth
+            @include('partials.idle-logout')
+        @endauth
     </body>
 </html>

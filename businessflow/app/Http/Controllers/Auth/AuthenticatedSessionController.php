@@ -59,4 +59,23 @@ class AuthenticatedSessionController extends Controller
 
         return redirect(config('app.marketing_url'));
     }
+
+    /**
+     * Same effect as destroy() above - the idle-timeout JS in
+     * layouts.app (see resources/views/layouts/app.blade.php) submits a
+     * hidden form here after 5 minutes with no mouse/keyboard activity.
+     * Redirects back to this app's own login page with an explanation
+     * instead of the marketing site: landing on a different domain with
+     * no context right after an automatic logout would be confusing.
+     */
+    public function idleLogout(Request $request): RedirectResponse
+    {
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login')->with('status', __('You were logged out after 5 minutes of inactivity - please log in again.'));
+    }
 }
