@@ -275,7 +275,7 @@
                         <x-slot name="trigger">
                             <button type="button" class="relative text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
                                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                                @php $bellCount = $dueFollowupsCount + $pendingLeadsCount + $dueCommitmentsCount + $dueMeetingsCount + ($subscriptionDaysRemaining !== null ? 1 : 0) + $adminRenewalCount; @endphp
+                                @php $bellCount = $dueFollowupsCount + $pendingLeadsCount + $dueCommitmentsCount + $dueMeetingsCount + ($subscriptionDaysRemaining !== null ? 1 : 0) + $adminRenewalCount + $pendingSignupRequestsCount; @endphp
                                 @if ($bellCount > 0)
                                     <span class="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full {{ ($subscriptionDaysRemaining !== null || $adminRenewalCount > 0) ? 'bg-amber-500' : 'bg-red-600' }} text-white text-[10px] leading-4 text-center font-semibold">{{ $bellCount }}</span>
                                 @endif
@@ -312,6 +312,20 @@
                                     </div>
                                     <div class="text-xs text-amber-700 dark:text-amber-500 mt-0.5">{{ __('Valid till') }} {{ $subscriptionExpiresOn->format('d M Y') }} — {{ __('please contact us to renew and avoid losing access.') }}</div>
                                 </div>
+                            @endif
+
+                            @if ($pendingSignupRequestsCount > 0)
+                                <div class="flex items-center justify-between px-4 py-2 bg-green-50 dark:bg-green-900/20 border-b border-green-200 dark:border-green-800">
+                                    <span class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ __('New signup requests') }}</span>
+                                    <a href="{{ route('admin.signup-requests.index') }}" class="text-xs text-accent-600 hover:underline">{{ __('View all') }}</a>
+                                </div>
+                                @foreach ($pendingSignupRequestsForBell as $signupRequest)
+                                    <a href="{{ route('admin.signup-requests.index') }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700 border-b border-green-100 dark:border-green-900/30">
+                                        <div class="text-sm text-gray-800 dark:text-gray-100 font-medium truncate">{{ $signupRequest->name }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $signupRequest->phone }} · {{ $signupRequest->planLabel() }}</div>
+                                        <div class="text-xs text-gray-400">{{ $signupRequest->created_at->diffForHumans() }}</div>
+                                    </a>
+                                @endforeach
                             @endif
 
                             <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-slate-700">

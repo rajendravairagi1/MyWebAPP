@@ -55,9 +55,17 @@
                                             <div class="font-medium text-gray-900 dark:text-gray-100">{{ $r->name }}</div>
                                             <div class="text-xs text-gray-500 dark:text-gray-400">{{ $r->phone }} · {{ $r->email }} · {{ $r->planLabel() }}</div>
                                         </div>
-                                        <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium shrink-0 {{ $r->status === 'approved' ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400' }}">
-                                            {{ ucfirst($r->status) }}
-                                        </span>
+                                        <div class="flex items-center gap-2 shrink-0">
+                                            <span class="inline-flex px-2 py-0.5 rounded text-xs font-medium {{ $r->status === 'approved' ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400' }}">
+                                                {{ ucfirst($r->status) }}
+                                            </span>
+                                            @if ($r->status === 'rejected')
+                                                <form method="POST" action="{{ route('admin.signup-requests.reopen', $r) }}" onsubmit="return confirm('{{ __('Move this request back to Awaiting Approval?') }}')">
+                                                    @csrf
+                                                    <button class="text-xs text-accent-600 hover:underline whitespace-nowrap">{{ __('Reopen') }}</button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     </li>
                                 @endforeach
                             </ul>

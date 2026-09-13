@@ -152,6 +152,7 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::get('/signup-requests', [SignupRequestAdminController::class, 'index'])->name('signup-requests.index');
     Route::get('/signup-requests/qr-poster', [SignupRequestAdminController::class, 'qrPoster'])->name('signup-requests.qr-poster');
     Route::post('/signup-requests/{signupRequest}/reject', [SignupRequestAdminController::class, 'reject'])->name('signup-requests.reject');
+    Route::post('/signup-requests/{signupRequest}/reopen', [SignupRequestAdminController::class, 'reopen'])->name('signup-requests.reopen');
 });
 
 Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');

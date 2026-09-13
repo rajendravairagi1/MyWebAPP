@@ -55,4 +55,20 @@ class SignupRequestAdminController extends Controller
 
         return back()->with('status', "Request from \"{$signupRequest->name}\" rejected.");
     }
+
+    /**
+     * Undoes a reject — moves a mistakenly-rejected request back into
+     * "Awaiting Approval" so it can be approved after all. Only makes
+     * sense for a rejected one: an already-approved request already has
+     * its account created (see AdminController::store), so there's
+     * nothing to "reopen" there.
+     */
+    public function reopen(SignupRequest $signupRequest): RedirectResponse
+    {
+        abort_unless($signupRequest->status === 'rejected', 422, 'Only a rejected request can be reopened.');
+
+        $signupRequest->update(['status' => 'pending', 'reviewed_at' => null]);
+
+        return back()->with('status', "Request from \"{$signupRequest->name}\" moved back to Awaiting Approval.");
+    }
 }

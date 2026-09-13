@@ -76,9 +76,15 @@ class NotificationComposer
             'adminRenewalCount' => 0,
         ]);
 
-        // Badge for the "Signup Requests" nav item — how many public
-        // /get-started submissions are still waiting on Approve/Reject.
+        // Badge for the "Signup Requests" nav item, and the bell dropdown
+        // list below — how many public /get-started submissions are
+        // still waiting on Approve/Reject.
+        $pendingSignupRequests = $isPlatformAdmin
+            ? SignupRequest::where('status', 'pending')->latest()->limit(8)->get()
+            : collect();
+
         $view->with([
+            'pendingSignupRequestsForBell' => $pendingSignupRequests,
             'pendingSignupRequestsCount' => $isPlatformAdmin ? SignupRequest::where('status', 'pending')->count() : 0,
         ]);
 
