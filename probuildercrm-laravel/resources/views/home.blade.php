@@ -86,6 +86,18 @@
     </div>
 </section>
 
+<section class="section-tight" style="border-top: 1px solid var(--color-border);">
+    <div class="container" style="max-width: 720px; text-align: center;">
+        <span class="tag">Why Pro Builder CRM</span>
+        <h2 style="margin: 12px 0;">Buying Pro Builder CRM Software - An Advantage for Real Estate Builders and Developers</h2>
+        <p style="color: var(--color-ink-soft); font-size: 1.02rem;">
+            Looking to manage your projects, unit bookings, customer payments and loans all in one place? Pro Builder
+            CRM gives you a high-tech system built for real estate businesses - so projects, invoices, contractors,
+            brokers and loans all live on one centralized platform instead of scattered spreadsheets.
+        </p>
+    </div>
+</section>
+
 <section class="section-tight">
     <div class="container">
         <div class="pill-row">
@@ -106,6 +118,18 @@
 </section>
 
 @include('partials.dashboard-tabs-showcase')
+
+<section class="section-tight" style="border-top: 1px solid var(--color-border);">
+    <div class="container" style="max-width: 720px; text-align: center;">
+        <span class="tag">Built to be simple</span>
+        <h2 style="margin: 12px 0;">What are the features of real estate CRM software?</h2>
+        <p style="color: var(--color-ink-soft); font-size: 1.02rem;">
+            A good CRM keeps customer details, project data, sales records and payments organised in one app instead
+            of scattered spreadsheets. Your team stays updated on unit type, area, price and status, and can attach
+            photos, floor plans and legal documents to every unit - booked, available or sold.
+        </p>
+    </div>
+</section>
 
 <section class="section">
     <div class="container">
@@ -165,6 +189,18 @@
 
 @include('partials.team-grid')
 
+<section class="section-tight">
+    <div class="container" style="max-width: 720px; text-align: center;">
+        <span class="tag">Who it's for</span>
+        <h2 style="margin: 12px 0;">Who can benefit from Pro Builder CRM?</h2>
+        <p style="color: var(--color-ink-soft); font-size: 1.02rem;">
+            Independent builders, property developers, construction contractors, real estate companies and their
+            sales teams all use Pro Builder CRM to manage any number of projects and customers from one place - with
+            unit availability, bookings and sales enquiries tracked in real time.
+        </p>
+    </div>
+</section>
+
 <section class="section">
     <div class="container grid-2" style="align-items: center;">
         <div>
@@ -184,88 +220,42 @@
 
 @include('partials.onboarding-steps')
 
+<section class="section-tight" style="border-top: 1px solid var(--color-border);">
+    <div class="container" style="max-width: 720px; text-align: center;">
+        <span class="tag">Built for multi-branch teams</span>
+        <h2 style="margin: 12px 0;">Mobile-ready software with report delivery</h2>
+        <p style="color: var(--color-ink-soft); font-size: 1.02rem;">
+            Builders and developers running multiple branches across cities get one shared system for their whole
+            sales team - so a price list, a quotation or the latest booking status is always one tap away, wherever
+            the team is.
+        </p>
+    </div>
+</section>
+
+<section class="section-tight">
+    <div class="container" style="max-width: 720px; text-align: center;">
+        <span class="tag">Simple pricing</span>
+        <h2 style="margin: 12px 0;">Pricing and plans</h2>
+        <p style="color: var(--color-ink-soft); font-size: 1.02rem;">
+            Pro Builder CRM is moderately priced with straightforward plans and no complicated pricing structures -
+            pick what suits your business and get access to the features you actually need.
+        </p>
+    </div>
+</section>
+
 @include('partials.testimonials')
 
 @include('partials.trust-badges')
 
-<section class="section" id="why-pro-builder-crm">
-    <div class="container" style="max-width: 800px;">
-        <div style="text-align: center; max-width: 640px; margin: 0 auto var(--space-xl);">
-            <span class="tag">Why Pro Builder CRM</span>
-            <h2 style="margin-top: 12px;">Buying Pro Builder CRM Software - An Advantage for Real Estate Builders and Developers</h2>
-        </div>
-
-        <p class="body-lg" style="margin-bottom: var(--space-lg);">
-            Are you looking to manage your projects, unit bookings, customer payments and loans all in one place? You've come
-            to the right place. Installing real estate CRM software on your device brings all these elements into one
-            powerful platform, so you can run your real estate business efficiently and stay on top of every detail.
-            Pro Builder CRM gives you access to a high-tech system built for real estate businesses - with features that let
-            you manage projects, unit bookings, customer payments, invoices, contractors, brokers and loans, all from one
-            centralized platform.
+<section class="section-tight">
+    <div class="container" style="max-width: 720px; text-align: center;">
+        <span class="tag">Your data, protected</span>
+        <h2 style="margin: 12px 0;">Security and data protection</h2>
+        <p style="color: var(--color-ink-soft); font-size: 1.02rem;">
+            Business information stays accessible only to authorized users, with customer records, payments and
+            sales history organised and protected in one centralized, secure system - so nothing important ever
+            gets misplaced.
         </p>
-
-        <div style="display: flex; flex-direction: column; gap: var(--space-lg);">
-            <div>
-                <h3 style="margin-bottom: 8px;">What are the features of real estate CRM software?</h3>
-                <p style="color: var(--color-ink-soft);">
-                    A subscription to CRM software can be a real boon for your business, helping you manage it efficiently.
-                    It keeps customer information and details in one place, and consolidates project details, sales
-                    records, payments and other important business data in a single app. So instead of relying on
-                    scattered spreadsheets or paperwork, you can access and manage everything through one platform. The
-                    easy-to-use interface not only saves time but also reduces errors, and helps your team stay updated on
-                    details like unit type, area, price and status. You can add or remove the details of every unit -
-                    available, booked or sold - and attach photos, floor plans and legal documents to each one.
-                </p>
-            </div>
-
-            <div>
-                <h3 style="margin-bottom: 8px;">Who can benefit from the unique Pro Builder CRM software?</h3>
-                <p style="color: var(--color-ink-soft);">
-                    Pro Builder CRM can be used by real estate builders, property developers, construction contractors
-                    and their sales teams. It's designed to manage any number of projects and their customers, with
-                    payments and sales activity all in one place - improving visibility for builders and developers and
-                    keeping an accurate inventory of every project. It's built for independent real estate builders,
-                    property developers, construction contractors and real estate companies alike, managing projects,
-                    units and prices on one portal without any hassle. Unit availability and bookings are recorded
-                    instantly, and information for every ongoing project stays organized and easily accessible. For
-                    construction contractors selling their properties, the software tracks every available unit, customer
-                    enquiry, booking and sales milestone.
-                </p>
-            </div>
-
-            <div>
-                <h3 style="margin-bottom: 8px;">Mobile-ready software with report delivery</h3>
-                <p style="color: var(--color-ink-soft);">
-                    Many builders, property developers, contractors and real estate companies operate across multiple
-                    cities and branches. A common software platform gives their sales teams and supervisors a shared
-                    system that manages every ongoing project, records all customer information, and keeps sales records
-                    updated with a price list ready to quote customers - so anyone can quickly check the status of
-                    available units and follow up. Pro Builder CRM is built for exactly this: businesses managing
-                    multiple projects at once, each with its own pricing, without relying on scattered spreadsheets or
-                    paperwork.
-                </p>
-            </div>
-
-            <div>
-                <h3 style="margin-bottom: 8px;">Pricing and plans</h3>
-                <p style="color: var(--color-ink-soft);">
-                    Pro Builder CRM is moderately priced with straightforward plans, making it easy to choose an option
-                    that suits your business and budget. There are no complicated pricing structures - just pick a plan
-                    based on what your business needs and get access to the CRM features that matter to you.
-                </p>
-            </div>
-
-            <div>
-                <h3 style="margin-bottom: 8px;">Security and data protection</h3>
-                <p style="color: var(--color-ink-soft);">
-                    Pro Builder CRM keeps your business information secure and accessible only to authorized users. It
-                    maintains a log of your customers, the payments received against their name, and sales information -
-                    all organized and protected in one centralized, highly secure system. That makes it easier to
-                    restrict access and reduce the risk of misplaced records, so everything about your projects and units
-                    is available exactly when you need it.
-                </p>
-            </div>
-        </div>
     </div>
 </section>
 
