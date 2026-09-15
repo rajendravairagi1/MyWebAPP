@@ -46,8 +46,8 @@ $maxWidth = [
     x-on:keydown.tab.prevent="$event.shiftKey || nextFocusable().focus()"
     x-on:keydown.shift.tab.prevent="prevFocusable().focus()"
     x-show="show"
-    class="fixed inset-0 overflow-y-auto px-4 py-6 sm:px-0 z-50"
-    style="display: {{ $show ? 'block' : 'none' }};"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="display: {{ $show ? 'flex' : 'none' }};"
 >
     <div
         x-show="show"
@@ -63,9 +63,19 @@ $maxWidth = [
         <div class="modal-backdrop absolute inset-0 bg-gray-500 opacity-75"></div>
     </div>
 
+    {{--
+        Height is capped to the viewport (minus the padding above) and the
+        panel scrolls internally, rather than the old pattern of letting
+        the whole fixed overlay grow to the form's height and scrolling
+        that — a long form (e.g. Add Payment, with its conditional
+        contractor/credit fields) could end up taller than the viewport
+        with no reliable way back to its own Save button. This way the
+        backdrop is always a separate, full, static layer and the panel
+        can never extend past what's visible.
+    --}}
     <div
         x-show="show"
-        class="modal-panel mb-6 bg-white dark:bg-slate-800 rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full {{ $maxWidth }} sm:mx-auto"
+        class="modal-panel relative bg-white dark:bg-slate-800 rounded-lg shadow-xl transform transition-all w-full {{ $maxWidth }} max-h-[calc(100vh-2rem)] overflow-y-auto"
         x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
