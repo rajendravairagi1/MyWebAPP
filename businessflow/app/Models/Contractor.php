@@ -51,6 +51,21 @@ class Contractor extends Model
     }
 
     /**
+     * The Project Cost "category" a payment to this contractor is
+     * auto-filed under when added via the Contractor side of the Add
+     * Payment form — so a builder is never asked to separately classify
+     * something already implied by who they're paying, and Reports'
+     * cost-by-category breakdown still means something. Only 'labor'
+     * gets its own bucket; every other work-trade type (painter,
+     * plumber, tiles, electrician, fabrication, POP, other) is
+     * construction work, so they share that one.
+     */
+    public function defaultProjectCostCategory(): string
+    {
+        return $this->type === 'labor' ? 'labor' : 'construction';
+    }
+
+    /**
      * Money that has actually left an account for this contractor —
      * paid immediately, or credit that's since been settled. Excludes
      * outstanding "udhar" (see ProjectCost::isOutstandingCredit()).

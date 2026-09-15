@@ -535,7 +535,13 @@
             @if ($canFinancials)
             <div x-data="{
                     fixedCategories: ['land', 'construction', 'material', 'labor', 'approval', 'marketing'],
-                    editingCost: { id: null, categorySelect: 'land', categoryOther: '', description: '', amount: '', spent_on: '', vendor: '', contractor_id: '', work_order_id: '', payment_account_id: '', is_credit: false, notes: '', bill_name: null },
+                    editingCost: {
+                        id: null, paymentType: 'material',
+                        categorySelect: 'land', categoryOther: '', description: '', amount: '', spent_on: '',
+                        vendor: '', contractor_id: '', contractorMode: 'existing', vendorMode: 'existing', newContractorType: 'other',
+                        work_order_id: '', workOrderMode: 'existing',
+                        payment_account_id: '', is_credit: false, notes: '', bill_name: null,
+                    },
                     workOrders: {!! \Illuminate\Support\Js::from($project->workOrders->map(fn ($wo) => [
                         'id' => $wo->id,
                         'contractor_id' => $wo->contractor_id,
@@ -543,10 +549,20 @@
                     ])->values()) !!},
                     openEdit(cost) {
                         const isFixed = this.fixedCategories.includes(cost.category);
+                        // A payment is Contractor-type if it's linked to an
+                        // actual work contractor — a vendor-type contractor_id
+                        // (from the old combined form) still belongs on the
+                        // Material tab, since that's where vendors live now.
+                        const isContractor = !!cost.contractor_id && cost.contractor_type !== 'vendor';
                         this.editingCost = {
                             ...cost,
                             categorySelect: isFixed ? cost.category : 'other',
                             categoryOther: isFixed ? '' : cost.category,
+                            paymentType: isContractor ? 'contractor' : 'material',
+                            contractorMode: 'existing',
+                            vendorMode: 'existing',
+                            workOrderMode: 'existing',
+                            newContractorType: 'other',
                         };
                         $dispatch('open-modal', 'edit-cost');
                     },
@@ -616,6 +632,7 @@
                                             'spent_on' => $entry->spent_on->format('Y-m-d'),
                                             'vendor' => $entry->vendor,
                                             'contractor_id' => $entry->contractor_id ?? '',
+                                            'contractor_type' => $entry->contractor?->type,
                                             'work_order_id' => $entry->work_order_id ?? '',
                                             'payment_account_id' => $entry->payment_account_id,
                                             'is_credit' => $entry->is_credit && ! $entry->credit_settled_at,
@@ -637,33 +654,191 @@
 
             </div>
 
-            <x-modal name="add-cost" :show="$errors->has('category') || $errors->has('description') || $errors->has('amount') || $errors->has('spent_on') || $errors->has('bill')">
-                <form method="POST" action="{{ route('project-costs.store', $project) }}" enctype="multipart/form-data" class="p-6 space-y-4" x-data="{ category: 'land', isCredit: false }">
+            <x-modal name="add-cost" :show="$errors->has('category') || $errors->has('description') || $errors->has('amount') || $errors->has('spent_on') || $errors->has('bill') || $errors->has('new_work_order_description') || $errors->has('new_work_order_total_amount') || $errors->has('work_order_id')">
+                <form method="POST" action="{{ route('project-costs.store', $project) }}" enctype="multipart/form-data" class="p-6 space-y-4"
+                      x-data="{
+                          paymentType: 'contractor',
+                          contractorMode: 'existing', newContractorType: 'other', selectedContractorId: '',
+                          workOrderMode: 'existing',
+                          vendorMode: 'existing',
+                          category: 'land', isCredit: false,
+                      }">
                     @csrf
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Add a Payment') }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Record money you paid out for this project.') }}</p>
 
-                    <div>
-                        <x-input-label for="category" :value="__('What was it for?')" />
-                        <select id="category" name="category" x-model="category" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                            <option value="land">{{ __('Land') }}</option>
-                            <option value="construction">{{ __('Construction') }}</option>
-                            <option value="material">{{ __('Material') }}</option>
-                            <option value="labor">{{ __('Labor') }}</option>
-                            <option value="approval">{{ __('Government / Approvals') }}</option>
-                            <option value="marketing">{{ __('Marketing') }}</option>
-                            <option value="other">{{ __('Other — type my own') }}</option>
-                        </select>
+                    {{-- Who the money is going to decides which fields matter -
+                         a contractor payment (tracked against a Work Order's
+                         own balance) has nothing to do with a vendor purchase
+                         (which can be taken on credit) — see ProjectCost. --}}
+                    <div class="grid grid-cols-2 gap-1 p-1 bg-gray-100 dark:bg-slate-700 rounded-lg text-sm font-medium">
+                        <button type="button" x-on:click="paymentType = 'contractor'"
+                            :class="paymentType === 'contractor' ? 'bg-white dark:bg-slate-800 shadow text-accent-700 dark:text-accent-400' : 'text-gray-500 dark:text-gray-400'"
+                            class="rounded-md py-2 transition">{{ __('Contractor (Thekedar)') }}</button>
+                        <button type="button" x-on:click="paymentType = 'material'"
+                            :class="paymentType === 'material' ? 'bg-white dark:bg-slate-800 shadow text-accent-700 dark:text-accent-400' : 'text-gray-500 dark:text-gray-400'"
+                            class="rounded-md py-2 transition">{{ __('Material / Construction / Land') }}</button>
+                    </div>
+                    <input type="hidden" name="payment_type" x-model="paymentType">
+
+                    {{-- ============ Contractor path ============ --}}
+                    <div x-show="paymentType === 'contractor'" x-cloak class="space-y-4">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Pay a contractor against a contract (Work Order) — the balance still owed always comes from that contract, not from this payment form.') }}</p>
+
+                        @if (\App\Support\Tenant::can('contractors'))
+                            @php $workContractors = $contractors->where('type', '!=', 'vendor')->values(); @endphp
+                            <div>
+                                <x-input-label :value="__('Contractor')" />
+                                <div class="flex gap-4 text-sm mb-2">
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="contractorMode" value="existing" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('Existing contractor') }}
+                                    </label>
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="contractorMode" value="new" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('+ New contractor') }}
+                                    </label>
+                                </div>
+                                <div x-show="contractorMode === 'existing'" @if ($workContractors->isEmpty()) x-cloak @endif>
+                                    <select name="contractor_id" x-model="selectedContractorId" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                        <option value="">{{ __('— Select —') }}</option>
+                                        @foreach ($workContractors as $c)
+                                            <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->typeLabel() }})</option>
+                                        @endforeach
+                                    </select>
+                                    @if ($workContractors->isEmpty())
+                                        <p class="mt-1 text-xs text-amber-600">{{ __('No contractors yet — pick "+ New contractor" above to add one now.') }}</p>
+                                    @endif
+                                </div>
+                                <div x-show="contractorMode === 'new'" @if ($workContractors->isNotEmpty()) x-cloak @endif class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <x-text-input name="new_contractor_name" type="text" placeholder="{{ __('Name') }}" class="mt-1 block w-full" />
+                                    <div class="mt-1">
+                                        <select name="new_contractor_type" x-model="newContractorType" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                            @foreach (\App\Models\Contractor::TYPES as $key => $label)
+                                                @unless ($key === 'vendor')
+                                                    <option value="{{ $key }}">{{ __($label) }}</option>
+                                                @endunless
+                                            @endforeach
+                                        </select>
+                                        <input type="text" name="new_contractor_type_other" x-show="newContractorType === 'other'" x-cloak placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="mt-1.5 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                    </div>
+                                    <x-text-input name="new_contractor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <x-input-label :value="__('Work Order (contract)')" />
+                                <div class="flex gap-4 text-sm mb-2">
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="workOrderMode" value="existing" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('Existing work order') }}
+                                    </label>
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="workOrderMode" value="new" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('+ New work order') }}
+                                    </label>
+                                </div>
+                                <input type="hidden" name="work_order_mode" x-model="workOrderMode">
+
+                                <div x-show="workOrderMode === 'existing'">
+                                    <select name="work_order_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                        <option value="">{{ __('— Select —') }}</option>
+                                        <template x-for="wo in workOrders.filter(w => String(w.contractor_id) === String(selectedContractorId))" :key="wo.id">
+                                            <option :value="wo.id" x-text="wo.label"></option>
+                                        </template>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-400" x-show="selectedContractorId && workOrders.filter(w => String(w.contractor_id) === String(selectedContractorId)).length === 0">
+                                        {{ __('This contractor has no work orders yet — pick "+ New work order" above.') }}
+                                    </p>
+                                </div>
+
+                                <div x-show="workOrderMode === 'new'" x-cloak class="space-y-3" x-data="{ woArea: '', woRate: '', woTotal: '', recalcWo() { const a = parseFloat(this.woArea), r = parseFloat(this.woRate); if (!isNaN(a) && !isNaN(r)) { this.woTotal = (a * r).toFixed(2); } } }">
+                                    <x-text-input name="new_work_order_description" type="text" placeholder="{{ __('Scope of work — e.g. Plastering, Ground Floor') }}" class="mt-1 block w-full" />
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <x-input-label :value="__('Area in sqft (optional)')" />
+                                            <x-text-input name="new_work_order_area_sqft" type="number" step="0.01" min="0" x-model="woArea" x-on:input="recalcWo()" class="mt-1 block w-full" />
+                                        </div>
+                                        <div>
+                                            <x-input-label :value="__('Rate per sqft (optional)')" />
+                                            <x-text-input name="new_work_order_rate_per_sqft" type="number" step="0.01" min="0" x-model="woRate" x-on:input="recalcWo()" class="mt-1 block w-full" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <x-input-label :value="__('Total Contract Amount — kitna ka kaam diya')" />
+                                        <x-text-input name="new_work_order_total_amount" type="number" step="0.01" min="0.01" x-model="woTotal" class="mt-1 block w-full" />
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                     </div>
 
-                    <div x-show="category === 'other'" x-cloak>
-                        <x-input-label for="category_other" :value="__('Custom category name')" />
-                        <x-text-input id="category_other" name="category_other" type="text" placeholder="{{ __('e.g. Electricity Bill') }}" class="mt-1 block w-full" />
+                    {{-- ============ Material / Vendor path ============ --}}
+                    <div x-show="paymentType === 'material'" x-cloak class="space-y-4">
+                        <div>
+                            <x-input-label for="category" :value="__('What was it for?')" />
+                            <select id="category" name="category" x-model="category" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <option value="land">{{ __('Land') }}</option>
+                                <option value="construction">{{ __('Construction') }}</option>
+                                <option value="material">{{ __('Material') }}</option>
+                                <option value="labor">{{ __('Labor') }}</option>
+                                <option value="approval">{{ __('Government / Approvals') }}</option>
+                                <option value="marketing">{{ __('Marketing') }}</option>
+                                <option value="other">{{ __('Other — type my own') }}</option>
+                            </select>
+                        </div>
+
+                        <div x-show="category === 'other'" x-cloak>
+                            <x-input-label for="category_other" :value="__('Custom category name')" />
+                            <x-text-input id="category_other" name="category_other" type="text" placeholder="{{ __('e.g. Electricity Bill') }}" class="mt-1 block w-full" />
+                        </div>
+
+                        @if (\App\Support\Tenant::can('contractors'))
+                            @php $vendors = $contractors->where('type', 'vendor')->values(); @endphp
+                            <div>
+                                <x-input-label :value="__('Vendor (optional)')" />
+                                <div class="flex gap-4 text-sm mb-2">
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="vendorMode" value="existing" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('Existing vendor') }}
+                                    </label>
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="vendorMode" value="new" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('+ New vendor') }}
+                                    </label>
+                                </div>
+                                <div x-show="vendorMode === 'existing'" @if ($vendors->isEmpty()) x-cloak @endif>
+                                    <select name="vendor_contractor_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                        <option value="">{{ __('— Not linked to a vendor —') }}</option>
+                                        @foreach ($vendors as $v)
+                                            <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @if ($vendors->isEmpty())
+                                        <p class="mt-1 text-xs text-gray-400">{{ __('No vendors yet — pick "+ New vendor" above, or leave this as not linked.') }}</p>
+                                    @endif
+                                </div>
+                                <div x-show="vendorMode === 'new'" x-cloak class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <x-text-input name="new_vendor_name" type="text" placeholder="{{ __('Shop / vendor name') }}" class="mt-1 block w-full" />
+                                    <x-text-input name="new_vendor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+                                </div>
+                                <p class="mt-1 text-xs text-gray-400">{{ __('Saved to Contractors / Vendors too — see their full purchase history any time.') }}</p>
+                            </div>
+                        @endif
+
+                        <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3">
+                            <input id="is_credit" name="is_credit" type="checkbox" value="1" x-model="isCredit" class="mt-0.5 rounded border-gray-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500">
+                            <label for="is_credit" class="text-sm text-amber-800 dark:text-amber-300">
+                                {{ __('Taken on credit — received material/labor from the vendor, payment not made yet.') }}
+                                <span class="block text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">{{ __('Shows on the Material Credit page until you mark it paid — no account is picked now.') }}</span>
+                            </label>
+                        </div>
                     </div>
 
+                    {{-- ============ Shared fields ============ --}}
                     <div>
-                        <x-input-label for="description" :value="__('Description')" />
-                        <x-text-input id="description" name="description" type="text" placeholder="{{ __('e.g. Cement 20 bags') }}" class="mt-1 block w-full" required />
+                        <x-input-label for="description" :value="__('Description')" x-text="paymentType === 'material' ? '{{ __('Description') }}' : '{{ __('Description (optional)') }}'" />
+                        <input id="description" name="description" type="text" x-bind:placeholder="paymentType === 'material' ? '{{ __('e.g. Cement 20 bags') }}' : '{{ __('e.g. Advance payment, 2nd installment') }}'" x-bind:required="paymentType === 'material'" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -677,70 +852,8 @@
                         </div>
                     </div>
 
-                    @if (\App\Support\Tenant::can('contractors'))
-                        <div x-data="{ contractorMode: 'existing', newContractorType: 'other', selectedContractorId: '' }">
-                            <x-input-label :value="__('Paid to (optional)')" />
-                            <div class="flex gap-4 text-sm mb-2">
-                                <label class="flex items-center gap-1.5">
-                                    <input type="radio" x-model="contractorMode" value="existing" class="border-gray-300 text-accent-600 focus:ring-accent-500">
-                                    {{ __('Existing contractor') }}
-                                </label>
-                                <label class="flex items-center gap-1.5">
-                                    <input type="radio" x-model="contractorMode" value="new" class="border-gray-300 text-accent-600 focus:ring-accent-500">
-                                    {{ __('+ New contractor') }}
-                                </label>
-                            </div>
-                            <div x-show="contractorMode === 'existing'" @if ($contractors->isEmpty()) x-cloak @endif>
-                                <select name="contractor_id" x-model="selectedContractorId" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                    <option value="">{{ __('— Not linked to a contractor —') }}</option>
-                                    @foreach ($contractors as $c)
-                                        <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->typeLabel() }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div x-show="contractorMode === 'new'" @if ($contractors->isNotEmpty()) x-cloak @endif class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                <x-text-input name="new_contractor_name" type="text" placeholder="{{ __('Name') }}" class="mt-1 block w-full" />
-                                <div class="mt-1">
-                                    <select name="new_contractor_type" x-model="newContractorType" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                        @foreach (\App\Models\Contractor::TYPES as $key => $label)
-                                            <option value="{{ $key }}">{{ __($label) }}</option>
-                                        @endforeach
-                                    </select>
-                                    <input type="text" name="new_contractor_type_other" x-show="newContractorType === 'other'" x-cloak placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="mt-1.5 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                </div>
-                                <x-text-input name="new_contractor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
-                            </div>
-                            <p class="mt-1 text-xs text-gray-400">{{ __('Link this payment to a contractor so their full history and statement stay together — see it any time under Contractors / Vendors.') }}</p>
-
-                            <div x-show="contractorMode === 'existing' && workOrders.filter(w => String(w.contractor_id) === String(selectedContractorId)).length > 0" x-cloak class="mt-3">
-                                <x-input-label :value="__('Link to Work Order (optional)')" />
-                                <select name="work_order_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                    <option value="">{{ __('— Not linked to a work order —') }}</option>
-                                    <template x-for="wo in workOrders.filter(w => String(w.contractor_id) === String(selectedContractorId))" :key="wo.id">
-                                        <option :value="wo.id" x-text="wo.label"></option>
-                                    </template>
-                                </select>
-                                <p class="mt-1 text-xs text-gray-400">{{ __('Counts this payment against that work order\'s balance.') }}</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    <div>
-                        <x-input-label for="vendor" :value="__('Vendor note (optional)')" />
-                        <x-text-input id="vendor" name="vendor" type="text" placeholder="{{ __('e.g. ABC Building Supply, Contractor name') }}" class="mt-1 block w-full" />
-                        <p class="mt-1 text-xs text-gray-400">{{ __('Free text — use this only if you\'re not linking a contractor above.') }}</p>
-                    </div>
-
-                    <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3">
-                        <input id="is_credit" name="is_credit" type="checkbox" value="1" x-model="isCredit" class="mt-0.5 rounded border-gray-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500">
-                        <label for="is_credit" class="text-sm text-amber-800 dark:text-amber-300">
-                            {{ __('Taken on credit — received material/labor from the vendor, payment not made yet.') }}
-                            <span class="block text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">{{ __('Shows on the Material Credit page until you mark it paid — no account is picked now.') }}</span>
-                        </label>
-                    </div>
-
                     @if ($paymentAccounts->isNotEmpty())
-                        <div x-show="!isCredit" x-cloak>
+                        <div x-show="!(paymentType === 'material' && isCredit)" x-cloak>
                             <x-input-label for="payment_account_id" :value="__('Paid From (optional)')" />
                             <select id="payment_account_id" name="payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 <option value="">{{ __('— Not specified —') }}</option>
@@ -777,29 +890,169 @@
                     @csrf
                     @method('PUT')
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Edit Payment') }}</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Update this expense entry.') }}</p>
 
-                    <div>
-                        <x-input-label for="edit_category" :value="__('What was it for?')" />
-                        <select id="edit_category" name="category" x-model="editingCost.categorySelect" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                            <option value="land">{{ __('Land') }}</option>
-                            <option value="construction">{{ __('Construction') }}</option>
-                            <option value="material">{{ __('Material') }}</option>
-                            <option value="labor">{{ __('Labor') }}</option>
-                            <option value="approval">{{ __('Government / Approvals') }}</option>
-                            <option value="marketing">{{ __('Marketing') }}</option>
-                            <option value="other">{{ __('Other — type my own') }}</option>
-                        </select>
+                    <div class="grid grid-cols-2 gap-1 p-1 bg-gray-100 dark:bg-slate-700 rounded-lg text-sm font-medium">
+                        <button type="button" x-on:click="editingCost.paymentType = 'contractor'"
+                            :class="editingCost.paymentType === 'contractor' ? 'bg-white dark:bg-slate-800 shadow text-accent-700 dark:text-accent-400' : 'text-gray-500 dark:text-gray-400'"
+                            class="rounded-md py-2 transition">{{ __('Contractor (Thekedar)') }}</button>
+                        <button type="button" x-on:click="editingCost.paymentType = 'material'"
+                            :class="editingCost.paymentType === 'material' ? 'bg-white dark:bg-slate-800 shadow text-accent-700 dark:text-accent-400' : 'text-gray-500 dark:text-gray-400'"
+                            class="rounded-md py-2 transition">{{ __('Material / Construction / Land') }}</button>
+                    </div>
+                    <input type="hidden" name="payment_type" x-model="editingCost.paymentType">
+
+                    {{-- ============ Contractor path ============ --}}
+                    <div x-show="editingCost.paymentType === 'contractor'" x-cloak class="space-y-4">
+                        @if (\App\Support\Tenant::can('contractors'))
+                            @php $workContractors = $contractors->where('type', '!=', 'vendor')->values(); @endphp
+                            <div>
+                                <x-input-label :value="__('Contractor')" />
+                                <div class="flex gap-4 text-sm mb-2">
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="editingCost.contractorMode" value="existing" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('Existing contractor') }}
+                                    </label>
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="editingCost.contractorMode" value="new" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('+ New contractor') }}
+                                    </label>
+                                </div>
+                                <div x-show="editingCost.contractorMode === 'existing'" @if ($workContractors->isEmpty()) x-cloak @endif>
+                                    <select id="edit_contractor_id" name="contractor_id" x-model="editingCost.contractor_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                        <option value="">{{ __('— Select —') }}</option>
+                                        @foreach ($workContractors as $c)
+                                            <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->typeLabel() }})</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div x-show="editingCost.contractorMode === 'new'" x-cloak class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <x-text-input name="new_contractor_name" type="text" placeholder="{{ __('Name') }}" class="mt-1 block w-full" />
+                                    <div class="mt-1">
+                                        <select name="new_contractor_type" x-model="editingCost.newContractorType" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                            @foreach (\App\Models\Contractor::TYPES as $key => $label)
+                                                @unless ($key === 'vendor')
+                                                    <option value="{{ $key }}">{{ __($label) }}</option>
+                                                @endunless
+                                            @endforeach
+                                        </select>
+                                        <input type="text" name="new_contractor_type_other" x-show="editingCost.newContractorType === 'other'" x-cloak placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="mt-1.5 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                    </div>
+                                    <x-text-input name="new_contractor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+                                </div>
+                            </div>
+
+                            <div>
+                                <x-input-label :value="__('Work Order (contract)')" />
+                                <div class="flex gap-4 text-sm mb-2">
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="editingCost.workOrderMode" value="existing" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('Existing work order') }}
+                                    </label>
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="editingCost.workOrderMode" value="new" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('+ New work order') }}
+                                    </label>
+                                </div>
+                                <input type="hidden" name="work_order_mode" x-model="editingCost.workOrderMode">
+
+                                <div x-show="editingCost.workOrderMode === 'existing'">
+                                    <select id="edit_work_order_id" name="work_order_id" x-model="editingCost.work_order_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                        <option value="">{{ __('— Not linked to a work order —') }}</option>
+                                        <template x-for="wo in workOrders.filter(w => String(w.contractor_id) === String(editingCost.contractor_id))" :key="wo.id">
+                                            <option :value="wo.id" x-text="wo.label"></option>
+                                        </template>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-400">{{ __('Counts this payment against that work order\'s balance.') }}</p>
+                                </div>
+
+                                <div x-show="editingCost.workOrderMode === 'new'" x-cloak class="space-y-3" x-data="{ woArea: '', woRate: '', woTotal: '', recalcWo() { const a = parseFloat(this.woArea), r = parseFloat(this.woRate); if (!isNaN(a) && !isNaN(r)) { this.woTotal = (a * r).toFixed(2); } } }">
+                                    <x-text-input name="new_work_order_description" type="text" placeholder="{{ __('Scope of work — e.g. Plastering, Ground Floor') }}" class="mt-1 block w-full" />
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <x-input-label :value="__('Area in sqft (optional)')" />
+                                            <x-text-input name="new_work_order_area_sqft" type="number" step="0.01" min="0" x-model="woArea" x-on:input="recalcWo()" class="mt-1 block w-full" />
+                                        </div>
+                                        <div>
+                                            <x-input-label :value="__('Rate per sqft (optional)')" />
+                                            <x-text-input name="new_work_order_rate_per_sqft" type="number" step="0.01" min="0" x-model="woRate" x-on:input="recalcWo()" class="mt-1 block w-full" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <x-input-label :value="__('Total Contract Amount — kitna ka kaam diya')" />
+                                        <x-text-input name="new_work_order_total_amount" type="number" step="0.01" min="0.01" x-model="woTotal" class="mt-1 block w-full" />
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                     </div>
 
-                    <div x-show="editingCost.categorySelect === 'other'" x-cloak>
-                        <x-input-label for="edit_category_other" :value="__('Custom category name')" />
-                        <input id="edit_category_other" name="category_other" type="text" x-model="editingCost.categoryOther" placeholder="{{ __('e.g. Electricity Bill') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                    {{-- ============ Material / Vendor path ============ --}}
+                    <div x-show="editingCost.paymentType === 'material'" x-cloak class="space-y-4">
+                        <div>
+                            <x-input-label for="edit_category" :value="__('What was it for?')" />
+                            <select id="edit_category" name="category" x-model="editingCost.categorySelect" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <option value="land">{{ __('Land') }}</option>
+                                <option value="construction">{{ __('Construction') }}</option>
+                                <option value="material">{{ __('Material') }}</option>
+                                <option value="labor">{{ __('Labor') }}</option>
+                                <option value="approval">{{ __('Government / Approvals') }}</option>
+                                <option value="marketing">{{ __('Marketing') }}</option>
+                                <option value="other">{{ __('Other — type my own') }}</option>
+                            </select>
+                        </div>
+
+                        <div x-show="editingCost.categorySelect === 'other'" x-cloak>
+                            <x-input-label for="edit_category_other" :value="__('Custom category name')" />
+                            <input id="edit_category_other" name="category_other" type="text" x-model="editingCost.categoryOther" placeholder="{{ __('e.g. Electricity Bill') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        </div>
+
+                        @if (\App\Support\Tenant::can('contractors'))
+                            @php $vendors = $contractors->where('type', 'vendor')->values(); @endphp
+                            <div>
+                                <x-input-label :value="__('Vendor (optional)')" />
+                                <div class="flex gap-4 text-sm mb-2">
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="editingCost.vendorMode" value="existing" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('Existing vendor') }}
+                                    </label>
+                                    <label class="flex items-center gap-1.5">
+                                        <input type="radio" x-model="editingCost.vendorMode" value="new" class="border-gray-300 text-accent-600 focus:ring-accent-500">
+                                        {{ __('+ New vendor') }}
+                                    </label>
+                                </div>
+                                <div x-show="editingCost.vendorMode === 'existing'" @if ($vendors->isEmpty()) x-cloak @endif>
+                                    <select name="vendor_contractor_id" x-model="editingCost.contractor_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                        <option value="">{{ __('— Not linked to a vendor —') }}</option>
+                                        @foreach ($vendors as $v)
+                                            <option value="{{ $v->id }}">{{ $v->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div x-show="editingCost.vendorMode === 'new'" x-cloak class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <x-text-input name="new_vendor_name" type="text" placeholder="{{ __('Shop / vendor name') }}" class="mt-1 block w-full" />
+                                    <x-text-input name="new_vendor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
+                                </div>
+                            </div>
+                        @endif
+
+                        {{-- A legacy free-text vendor note from before this entry linked
+                             a proper Vendor record - kept read-only for context. --}}
+                        <p x-show="editingCost.vendor" class="text-xs text-gray-400">{{ __('Old vendor note:') }} <span x-text="editingCost.vendor"></span></p>
+
+                        <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3">
+                            <input id="edit_is_credit" name="is_credit" type="checkbox" value="1" x-model="editingCost.is_credit" class="mt-0.5 rounded border-gray-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500">
+                            <label for="edit_is_credit" class="text-sm text-amber-800 dark:text-amber-300">
+                                {{ __('Taken on credit — received material/labor from the vendor, payment not made yet.') }}
+                                <span class="block text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">{{ __('Shows on the Material Credit page until you mark it paid — no account is picked now.') }}</span>
+                            </label>
+                        </div>
                     </div>
 
+                    {{-- ============ Shared fields ============ --}}
                     <div>
-                        <x-input-label for="edit_description" :value="__('Description')" />
-                        <input id="edit_description" name="description" type="text" x-model="editingCost.description" required class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <x-input-label for="edit_description" :value="__('Description')" x-text="editingCost.paymentType === 'material' ? '{{ __('Description') }}' : '{{ __('Description (optional)') }}'" />
+                        <input id="edit_description" name="description" type="text" x-model="editingCost.description" x-bind:placeholder="editingCost.paymentType === 'material' ? '{{ __('e.g. Cement 20 bags') }}' : '{{ __('e.g. Advance payment, 2nd installment') }}'" x-bind:required="editingCost.paymentType === 'material'" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -813,68 +1066,8 @@
                         </div>
                     </div>
 
-                    @if (\App\Support\Tenant::can('contractors'))
-                        <div x-data="{ contractorMode: 'existing', newContractorType: 'other' }">
-                            <x-input-label :value="__('Paid to (optional)')" />
-                            <div class="flex gap-4 text-sm mb-2">
-                                <label class="flex items-center gap-1.5">
-                                    <input type="radio" x-model="contractorMode" value="existing" class="border-gray-300 text-accent-600 focus:ring-accent-500">
-                                    {{ __('Existing contractor') }}
-                                </label>
-                                <label class="flex items-center gap-1.5">
-                                    <input type="radio" x-model="contractorMode" value="new" class="border-gray-300 text-accent-600 focus:ring-accent-500">
-                                    {{ __('+ New contractor') }}
-                                </label>
-                            </div>
-                            <div x-show="contractorMode === 'existing'" @if ($contractors->isEmpty()) x-cloak @endif>
-                                <select id="edit_contractor_id" name="contractor_id" x-model="editingCost.contractor_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                    <option value="">{{ __('— Not linked to a contractor —') }}</option>
-                                    @foreach ($contractors as $c)
-                                        <option value="{{ $c->id }}">{{ $c->name }} ({{ $c->typeLabel() }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div x-show="contractorMode === 'new'" @if ($contractors->isNotEmpty()) x-cloak @endif class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                <x-text-input name="new_contractor_name" type="text" placeholder="{{ __('Name') }}" class="mt-1 block w-full" />
-                                <div class="mt-1">
-                                    <select name="new_contractor_type" x-model="newContractorType" class="block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                        @foreach (\App\Models\Contractor::TYPES as $key => $label)
-                                            <option value="{{ $key }}">{{ __($label) }}</option>
-                                        @endforeach
-                                    </select>
-                                    <input type="text" name="new_contractor_type_other" x-show="newContractorType === 'other'" x-cloak placeholder="{{ __('e.g. Waterproofing Contractor') }}" class="mt-1.5 block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                </div>
-                                <x-text-input name="new_contractor_phone" type="tel" placeholder="{{ __('Phone (optional)') }}" class="mt-1 block w-full" />
-                            </div>
-
-                            <div x-show="contractorMode === 'existing' && workOrders.filter(w => String(w.contractor_id) === String(editingCost.contractor_id)).length > 0" x-cloak class="mt-3">
-                                <x-input-label :value="__('Link to Work Order (optional)')" />
-                                <select id="edit_work_order_id" name="work_order_id" x-model="editingCost.work_order_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                                    <option value="">{{ __('— Not linked to a work order —') }}</option>
-                                    <template x-for="wo in workOrders.filter(w => String(w.contractor_id) === String(editingCost.contractor_id))" :key="wo.id">
-                                        <option :value="wo.id" x-text="wo.label"></option>
-                                    </template>
-                                </select>
-                                <p class="mt-1 text-xs text-gray-400">{{ __('Counts this payment against that work order\'s balance.') }}</p>
-                            </div>
-                        </div>
-                    @endif
-
-                    <div>
-                        <x-input-label for="edit_vendor" :value="__('Vendor note (optional)')" />
-                        <input id="edit_vendor" name="vendor" type="text" x-model="editingCost.vendor" placeholder="{{ __('e.g. ABC Building Supply, Contractor name') }}" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                    </div>
-
-                    <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md p-3">
-                        <input id="edit_is_credit" name="is_credit" type="checkbox" value="1" x-model="editingCost.is_credit" class="mt-0.5 rounded border-gray-300 dark:border-slate-600 text-accent-600 focus:ring-accent-500">
-                        <label for="edit_is_credit" class="text-sm text-amber-800 dark:text-amber-300">
-                            {{ __('Taken on credit — received material/labor from the vendor, payment not made yet.') }}
-                            <span class="block text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5">{{ __('Shows on the Material Credit page until you mark it paid — no account is picked now.') }}</span>
-                        </label>
-                    </div>
-
                     @if ($paymentAccounts->isNotEmpty())
-                        <div x-show="!editingCost.is_credit" x-cloak>
+                        <div x-show="!(editingCost.paymentType === 'material' && editingCost.is_credit)" x-cloak>
                             <x-input-label for="edit_payment_account_id" :value="__('Paid From (optional)')" />
                             <select id="edit_payment_account_id" name="payment_account_id" x-model="editingCost.payment_account_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 <option value="">{{ __('— Not specified —') }}</option>

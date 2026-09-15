@@ -91,7 +91,7 @@
                                                 <a href="{{ route('projects.show', $cost->project) }}" class="text-accent-600 hover:underline">{{ $cost->project->name }}</a>
                                             @endif
                                         </td>
-                                        <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $cost->vendor ?: '—' }}</td>
+                                        <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $cost->vendorLabel() ?: '—' }}</td>
                                         <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $cost->description }}</td>
                                         <td class="px-5 py-2 text-right font-medium text-red-600">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($cost->amount, 0) }}</td>
                                         <td class="px-5 py-2 text-right whitespace-nowrap">
@@ -146,7 +146,7 @@
                                     <tr>
                                         <td class="px-5 py-2 whitespace-nowrap text-gray-500 dark:text-gray-400">{{ $cost->credit_settled_at->format('d M Y') }}</td>
                                         <td class="px-5 py-2 text-gray-900 dark:text-gray-100">{{ $cost->project?->name }}</td>
-                                        <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $cost->vendor ?: '—' }}</td>
+                                        <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $cost->vendorLabel() ?: '—' }}</td>
                                         <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $cost->description }}</td>
                                         <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $cost->account?->label() ?? '—' }}</td>
                                         <td class="px-5 py-2 text-right text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($cost->amount, 0) }}</td>

@@ -75,4 +75,14 @@ class ProjectCost extends Model
     {
         return $this->credit_settled_at ?? $this->spent_on;
     }
+
+    /**
+     * Who this was paid to/for, for display — a linked Contractor/Vendor
+     * record when there is one, falling back to the old free-text
+     * `vendor` note kept from before entries linked a proper record.
+     */
+    public function vendorLabel(): ?string
+    {
+        return $this->contractor?->name ?: $this->vendor;
+    }
 }

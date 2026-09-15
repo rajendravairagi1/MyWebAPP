@@ -16,11 +16,12 @@ class MaterialCreditController extends Controller
      */
     public function index(Request $request): View
     {
-        $entries = ProjectCost::with('project')
+        $entries = ProjectCost::with(['project', 'contractor'])
             ->where('is_credit', true)
             ->when($request->string('q')->trim()->isNotEmpty(), fn ($q) => $q->where(function ($qq) use ($request) {
                 $term = '%'.$request->string('q')->trim().'%';
                 $qq->where('vendor', 'like', $term)
+                    ->orWhereHas('contractor', fn ($c) => $c->where('name', 'like', $term))
                     ->orWhereHas('project', fn ($p) => $p->where('name', 'like', $term));
             }))
             ->orderByDesc('spent_on')
@@ -35,7 +36,7 @@ class MaterialCreditController extends Controller
             ->map(fn ($group) => (float) $group->sum('amount'))
             ->sortDesc();
 
-        $byVendor = $outstanding->groupBy(fn (ProjectCost $c) => $c->vendor ?: 'Not specified')
+        $byVendor = $outstanding->groupBy(fn (ProjectCost $c) => $c->vendorLabel() ?: 'Not specified')
             ->map(fn ($group) => (float) $group->sum('amount'))
             ->sortDesc();
 
