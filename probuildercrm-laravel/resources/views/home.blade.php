@@ -240,6 +240,7 @@
             Pro Builder CRM is moderately priced with straightforward plans and no complicated pricing structures -
             pick what suits your business and get access to the features you actually need.
         </p>
+        <a href="{{ route('pricing') }}" class="btn btn-primary" style="margin-top: var(--space-md);">See Pricing Plans</a>
     </div>
 </section>
 
