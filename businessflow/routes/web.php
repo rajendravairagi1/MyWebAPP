@@ -176,6 +176,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/onboarding/business', [OnboardingController::class, 'store'])->name('onboarding.store');
 
     Route::get('/subscription-expired', [SubscriptionController::class, 'expired'])->name('subscription.expired');
+
+    Route::post('/notifications/plan-expiry-seen', [\App\Http\Controllers\NotificationController::class, 'markPlanExpirySeen'])->name('notifications.plan-expiry-seen');
 });
 
 // Company → Branch → Builder hierarchy, for owners running multiple
