@@ -163,9 +163,28 @@ class AdminController extends Controller
         $data = $request->validate([
             'footer_text' => ['nullable', 'string', 'max:255'],
             'support_whatsapp' => ['nullable', 'string', 'max:20', 'regex:/^[0-9]+$/'],
+            'payment_qr' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'remove_payment_qr' => ['nullable', 'boolean'],
         ]);
 
-        PlatformSetting::current()->update($data);
+        $settings = PlatformSetting::current();
+
+        if ($request->boolean('remove_payment_qr') && $settings->payment_qr_path) {
+            Storage::disk('local')->delete($settings->payment_qr_path);
+            $data['payment_qr_path'] = null;
+        }
+
+        if ($request->hasFile('payment_qr')) {
+            if ($settings->payment_qr_path) {
+                Storage::disk('local')->delete($settings->payment_qr_path);
+            }
+
+            $data['payment_qr_path'] = $request->file('payment_qr')->store('platform/payment-qr', 'local');
+        }
+
+        unset($data['payment_qr'], $data['remove_payment_qr']);
+
+        $settings->update($data);
 
         return back()->with('status', 'Platform settings updated.');
     }

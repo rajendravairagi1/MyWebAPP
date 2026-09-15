@@ -15,6 +15,7 @@ class PlatformSetting extends Model
     protected $fillable = [
         'footer_text',
         'support_whatsapp',
+        'payment_qr_path',
     ];
 
     public static function current(): self
@@ -25,5 +26,10 @@ class PlatformSetting extends Model
     public function footerText(): string
     {
         return $this->footer_text ?: '© '.date('Y').' '.config('app.name').'. All rights reserved.';
+    }
+
+    public function hasPaymentQr(): bool
+    {
+        return (bool) $this->payment_qr_path;
     }
 }

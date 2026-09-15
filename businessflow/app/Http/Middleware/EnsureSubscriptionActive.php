@@ -32,7 +32,7 @@ class EnsureSubscriptionActive
             return $next($request);
         }
 
-        if ($request->routeIs(['subscription.expired', 'logout', 'profile.*'])) {
+        if ($request->routeIs(['subscription.expired', 'logout', 'profile.*', 'billing.*'])) {
             return $next($request);
         }
 

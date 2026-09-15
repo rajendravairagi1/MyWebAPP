@@ -385,7 +385,7 @@
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">
                 <div class="font-medium text-gray-800 dark:text-gray-100 mb-1">{{ __('Platform Settings') }}</div>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('Shown in the footer on every page, for every business.') }}</p>
-                <form method="POST" action="{{ route('admin.settings.update') }}" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     @csrf
                     @method('PUT')
                     <div>
@@ -395,6 +395,24 @@
                     <div>
                         <x-input-label for="support_whatsapp" :value="__('Support WhatsApp number (digits only, with country code)')" />
                         <x-text-input id="support_whatsapp" name="support_whatsapp" type="text" placeholder="919876543210" class="mt-1 block w-full text-sm" :value="old('support_whatsapp', $settings->support_whatsapp)" />
+                    </div>
+                    <div class="sm:col-span-2 border-t border-gray-100 dark:border-slate-700 pt-4">
+                        <x-input-label for="payment_qr" :value="__('Subscription payment QR code (shown to every business on their Renew Plan page)')" />
+                        <div class="mt-2 flex items-start gap-4">
+                            @if ($settings->hasPaymentQr())
+                                <img src="{{ route('billing.payment-qr') }}" alt="{{ __('Current payment QR') }}" class="h-28 w-28 rounded-md border border-gray-200 dark:border-slate-600 object-contain bg-white p-1">
+                            @endif
+                            <div class="flex-1 space-y-2">
+                                <input id="payment_qr" name="payment_qr" type="file" accept="image/png,image/jpeg,image/webp" class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-accent-50 file:text-accent-700 hover:file:bg-accent-100">
+                                @if ($settings->hasPaymentQr())
+                                    <label class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                        <input type="checkbox" name="remove_payment_qr" value="1" class="rounded border-gray-300 dark:border-slate-600">
+                                        {{ __('Remove current QR code') }}
+                                    </label>
+                                @endif
+                                <p class="text-xs text-gray-400">{{ __('Upload your UPI/bank QR code image (PNG/JPG, up to 5MB). Businesses scan this to pay when renewing — you then update their validity date from their row above.') }}</p>
+                            </div>
+                        </div>
                     </div>
                     <div class="sm:col-span-2">
                         <x-primary-button>{{ __('Save Settings') }}</x-primary-button>

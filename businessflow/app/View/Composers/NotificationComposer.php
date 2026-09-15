@@ -59,22 +59,17 @@ class NotificationComposer
         // already redirected to the "subscription expired" page by then,
         // see App\Http\Middleware\EnsureSubscriptionActive).
         $expiresOn = ! $isPlatformAdmin ? $activeBusiness?->effectiveExpiresAt() : null;
-        // diffInDays() returns a float; cast to int so it compares equal
-        // (via ===/!==) against plan_expiry_seen_days, an integer column.
-        $daysRemaining = $expiresOn ? (int) now()->startOfDay()->diffInDays($expiresOn->copy()->startOfDay(), false) : null;
-
-        $subscriptionDaysRemaining = ($daysRemaining !== null && $daysRemaining >= 0 && $daysRemaining <= 7) ? $daysRemaining : null;
+        $daysRemaining = $expiresOn ? now()->startOfDay()->diffInDays($expiresOn->copy()->startOfDay(), false) : null;
 
         $view->with([
+            // Stays visible in the bell dropdown (with a "Pay Now" button)
+            // for the whole 7-day window right up until renewed - but
+            // deliberately never counted into $bellCount in layouts.app,
+            // since it isn't a discrete new event the way a lead or
+            // follow-up is, and shouldn't be able to bury one under a
+            // badge number that never goes away on its own.
             'subscriptionExpiresOn' => ($daysRemaining !== null && $daysRemaining >= 0 && $daysRemaining <= 7) ? $expiresOn : null,
-            'subscriptionDaysRemaining' => $subscriptionDaysRemaining,
-            // The banner itself always shows while within the 7-day window,
-            // but only counts toward the bell badge until the user has
-            // opened the bell on this exact day count once — see
-            // NotificationController::markPlanExpirySeen(). It naturally
-            // counts again once the countdown ticks over to a new day.
-            'subscriptionDaysRemainingUnseen' => $subscriptionDaysRemaining !== null
-                && $user?->plan_expiry_seen_days !== $subscriptionDaysRemaining,
+            'subscriptionDaysRemaining' => ($daysRemaining !== null && $daysRemaining >= 0 && $daysRemaining <= 7) ? $daysRemaining : null,
         ]);
 
         // The platform admin's own "who needs to renew" list — every

@@ -22,8 +22,14 @@
         </p>
 
         <p class="text-sm text-gray-600 dark:text-gray-400">
-            {{ __('All your data is safe and untouched — it comes right back the moment your renewal is confirmed. Please contact us to renew.') }}
+            {{ __('All your data is safe and untouched — it comes right back the moment your renewal is confirmed.') }}
         </p>
+
+        @unless ($paused)
+            <a href="{{ route('billing.show') }}" class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-accent-600 text-white text-sm font-semibold rounded-md hover:bg-accent-700">
+                {{ __('Pay Now to Renew') }}
+            </a>
+        @endunless
 
         <form method="POST" action="{{ route('logout') }}" class="pt-2">
             @csrf

@@ -177,7 +177,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/subscription-expired', [SubscriptionController::class, 'expired'])->name('subscription.expired');
 
-    Route::post('/notifications/plan-expiry-seen', [\App\Http\Controllers\NotificationController::class, 'markPlanExpirySeen'])->name('notifications.plan-expiry-seen');
+    Route::get('/billing', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
+    Route::get('/billing/payment-qr', [\App\Http\Controllers\BillingController::class, 'paymentQr'])->name('billing.payment-qr');
 });
 
 // Company → Branch → Builder hierarchy, for owners running multiple
