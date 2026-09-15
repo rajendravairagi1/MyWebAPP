@@ -7,8 +7,13 @@
 
         <script>
             (function () {
+                // Defaults to dark regardless of the visitor's device theme -
+                // the brand logo is a light-colored mark made for a dark
+                // background, so it disappears if this ever renders light.
+                // A returning visitor's own explicit choice (from the admin
+                // app's theme toggle) is still respected.
                 var stored = localStorage.getItem('theme');
-                var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var dark = stored !== 'light';
                 if (dark) document.documentElement.classList.add('dark');
             })();
         </script>

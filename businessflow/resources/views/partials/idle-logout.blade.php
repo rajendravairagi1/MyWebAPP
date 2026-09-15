@@ -1,5 +1,5 @@
 {{--
-    5-minute inactivity auto-logout. A warning modal appears after 4
+    10-minute inactivity auto-logout. A warning modal appears after 9
     minutes with no mouse/keyboard/scroll activity, giving a 60-second
     countdown to click "Stay Logged In" before the session is ended -
     matching how a banking app behaves, so nobody's session stays open
@@ -8,7 +8,7 @@
     The countdown you see here is just the on-screen display; the actual
     logout is driven independently by the plain window-level timers
     below (scheduled together, reset together on any activity) so it
-    still fires at 5 minutes even if this modal never opened correctly.
+    still fires at 10 minutes even if this modal never opened correctly.
 --}}
 <x-modal name="idle-warning" maxWidth="sm">
     <div class="p-6 text-center" x-data="{ seconds: 60 }" x-init="
@@ -48,8 +48,8 @@
 
 <script>
     (function () {
-        var WARN_AFTER_MS = 4 * 60 * 1000;
-        var LOGOUT_AFTER_MS = 5 * 60 * 1000;
+        var WARN_AFTER_MS = 9 * 60 * 1000;
+        var LOGOUT_AFTER_MS = 10 * 60 * 1000;
         var warnTimer = null;
         var logoutTimer = null;
         var lastReset = 0;
