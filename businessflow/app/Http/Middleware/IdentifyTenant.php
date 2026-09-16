@@ -26,6 +26,16 @@ class IdentifyTenant
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // The no-SSH-access recovery route (upload code, hit /migrate to
+        // apply it) must never depend on tenant resolution succeeding —
+        // that's precisely what it exists to fix when something (e.g. a
+        // schema drift like a missing column) is broken. Tenant-scoped
+        // queries here would otherwise make a broken deploy's own recovery
+        // route unreachable while logged in.
+        if ($request->routeIs('migrate')) {
+            return $next($request);
+        }
+
         $user = $request->user();
 
         if (! $user) {

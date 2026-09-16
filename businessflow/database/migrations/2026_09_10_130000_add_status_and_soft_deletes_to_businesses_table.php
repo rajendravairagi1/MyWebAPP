@@ -14,21 +14,35 @@ return new class extends Migration
             // per-team-member status column. An inactive account is blocked
             // from access the same way an expired subscription is (see
             // EnsureSubscriptionActive).
-            $table->string('status')->default('active');
+            //
+            // Guarded with hasColumn() so a deploy on a database where one
+            // of these two columns already landed (e.g. an install that
+            // only partially applied this migration before) doesn't abort
+            // the whole statement and leave the other column missing too.
+            if (! Schema::hasColumn('businesses', 'status')) {
+                $table->string('status')->default('active');
+            }
 
             // "Remove" in the admin panel archives the account (soft
             // delete) instead of destroying it — nothing here is ever
             // permanently deleted, so a removed account can always be
             // restored later.
-            $table->softDeletes();
+            if (! Schema::hasColumn('businesses', 'deleted_at')) {
+                $table->softDeletes();
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('businesses', function (Blueprint $table) {
-            $table->dropColumn('status');
-            $table->dropSoftDeletes();
+            if (Schema::hasColumn('businesses', 'status')) {
+                $table->dropColumn('status');
+            }
+
+            if (Schema::hasColumn('businesses', 'deleted_at')) {
+                $table->dropSoftDeletes();
+            }
         });
     }
 };
