@@ -1,7 +1,8 @@
 @extends('layouts.marketing')
 
-@section('title', $post->title)
-@section('description', $post->excerpt)
+@section('title', $post->seoTitle())
+@section('description', $post->seoDescription())
+@section('keywords', $post->meta_keywords ?? '')
 
 @push('head')
 @include('partials.json-ld', ['schemas' => [

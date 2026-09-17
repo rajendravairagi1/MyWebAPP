@@ -8,6 +8,7 @@
         'theme' => 'Theme',
         'branding' => 'Branding',
         'social' => 'Social & Contact',
+        'seo' => 'SEO',
         'integrations' => 'Integrations',
         'security' => 'Security',
         'maintenance' => 'Maintenance',

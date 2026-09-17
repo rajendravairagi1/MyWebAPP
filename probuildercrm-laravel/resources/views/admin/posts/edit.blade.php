@@ -62,6 +62,29 @@
                 <textarea id="excerpt" name="excerpt" required rows="2" class="form-textarea">{{ old('excerpt', $post->excerpt) }}</textarea>
             </div>
 
+            <div class="card" style="margin-bottom: var(--space-md);">
+                <strong style="display: block; margin-bottom: var(--space-md);">SEO (optional)</strong>
+                <p style="color: var(--color-ink-soft); font-size: 0.85rem; margin-bottom: var(--space-md);">
+                    Leave blank to use the Title / Excerpt above for search results - only fill these in if you want
+                    the page's &lt;title&gt;, description or keywords to say something different.
+                </p>
+
+                <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                    <div class="form-field">
+                        <label for="meta_title">Meta title</label>
+                        <input id="meta_title" name="meta_title" value="{{ old('meta_title', $post->meta_title) }}" class="form-input" maxlength="255" placeholder="Defaults to the Title above">
+                    </div>
+                    <div class="form-field">
+                        <label for="meta_description">Meta description</label>
+                        <textarea id="meta_description" name="meta_description" rows="2" class="form-textarea" maxlength="500" placeholder="Defaults to the Excerpt above">{{ old('meta_description', $post->meta_description) }}</textarea>
+                    </div>
+                    <div class="form-field">
+                        <label for="meta_keywords">Meta keywords</label>
+                        <textarea id="meta_keywords" name="meta_keywords" rows="2" class="form-textarea" placeholder="Comma-separated">{{ old('meta_keywords', $post->meta_keywords) }}</textarea>
+                    </div>
+                </div>
+            </div>
+
             <div class="form-field">
                 <label for="featured_image">Featured image</label>
                 @if ($post->featured_image)

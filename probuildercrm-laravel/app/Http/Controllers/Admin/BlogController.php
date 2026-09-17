@@ -114,6 +114,9 @@ class BlogController extends Controller
             'featured_image_alt' => 'nullable|string|max:255',
             'featured_image_caption' => 'nullable|string|max:255',
             'featured_image_size' => 'nullable|in:'.implode(',', array_keys(self::SIZES)),
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'meta_keywords' => 'nullable|string|max:2000',
         ]);
 
         $content = json_decode($validated['content'], true);

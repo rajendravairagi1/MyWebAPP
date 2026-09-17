@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\LeadsController as AdminLeadsController;
 use App\Http\Controllers\Admin\MaintenanceController as AdminMaintenanceController;
 use App\Http\Controllers\Admin\PricingController as AdminPricingController;
 use App\Http\Controllers\Admin\SecurityController as AdminSecurityController;
+use App\Http\Controllers\Admin\SeoController as AdminSeoController;
 use App\Http\Controllers\Admin\SocialController as AdminSocialController;
 use App\Http\Controllers\Admin\TestimonialsController as AdminTestimonialsController;
 use App\Http\Controllers\Admin\ThemeController as AdminThemeController;
@@ -113,6 +114,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/social', [AdminSocialController::class, 'index'])->name('social.index');
         Route::put('/social', [AdminSocialController::class, 'update'])->name('social.update');
+
+        Route::get('/seo', [AdminSeoController::class, 'index'])->name('seo.index');
+        Route::put('/seo', [AdminSeoController::class, 'update'])->name('seo.update');
 
         Route::get('/maintenance', [AdminMaintenanceController::class, 'index'])->name('maintenance.index');
         Route::post('/maintenance/clear-cache', [AdminMaintenanceController::class, 'clearCache'])->name('maintenance.clear-cache');

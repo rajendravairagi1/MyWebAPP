@@ -14,6 +14,20 @@
         $__pageTitle = trim($__env->yieldContent('title', config('site.name').' - Real Estate & Construction CRM Software for Builders'));
         $__pageDescription = trim($__env->yieldContent('description', config('site.short_description')));
         $__pageKeywords = trim($__env->yieldContent('keywords', ''));
+
+        // Admin > SEO lets the title/description/keywords above be
+        // overridden per page without touching code - a blank field there
+        // means "keep the built-in default", so only non-empty overrides
+        // win here.
+        if ($__pageSeo = \App\Models\PageSeo::forRoute(request()->route()?->getName())) {
+            // e() here (not raw) so this matches yieldContent()'s own
+            // escaping - the {!! !!} below only skips a *second* escape,
+            // it isn't a license to print unescaped input.
+            $__pageTitle = filled($__pageSeo->meta_title) ? e($__pageSeo->meta_title) : $__pageTitle;
+            $__pageDescription = filled($__pageSeo->meta_description) ? e($__pageSeo->meta_description) : $__pageDescription;
+            $__pageKeywords = filled($__pageSeo->meta_keywords) ? e($__pageSeo->meta_keywords) : $__pageKeywords;
+        }
+
         $__ogImage = asset('images/og-image.jpg');
         $__canonicalUrl = config('site.url').request()->getPathInfo();
     @endphp
