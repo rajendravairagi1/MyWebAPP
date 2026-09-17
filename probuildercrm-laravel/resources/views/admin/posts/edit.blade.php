@@ -10,18 +10,12 @@
         </div>
 
         <form method="POST"
+              id="post-form"
               action="{{ $post->exists ? route('admin.posts.update', $post) : route('admin.posts.store') }}"
               class="card"
               enctype="multipart/form-data"
               data-upload-progress
-              style="display: flex; flex-direction: column; gap: 16px;"
-              x-data="{
-                blocks: {{ json_encode($post->content ?: [['type' => 'paragraph', 'text' => '']]) }},
-                addBlock(type) { this.blocks.push(type === 'list' ? { type: 'list', items: [''] } : { type, text: '' }) },
-                removeBlock(i) { this.blocks.splice(i, 1) },
-                moveBlock(i, dir) { const t = i + dir; if (t < 0 || t >= this.blocks.length) return; const tmp = this.blocks[i]; this.blocks[i] = this.blocks[t]; this.blocks[t] = tmp; }
-              }"
-              @submit="$refs.contentInput.value = JSON.stringify(blocks)">
+              style="display: flex; flex-direction: column; gap: 16px;">
             @csrf
             @if ($post->exists) @method('PUT') @endif
 
@@ -124,47 +118,10 @@
             </div>
 
             <div class="form-field">
-                <label>Content</label>
-
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <template x-for="(block, index) in blocks" :key="index">
-                        <div class="admin-block">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--color-ink-soft);" x-text="block.type"></span>
-                                <div style="display: flex; gap: 6px;">
-                                    <button type="button" class="mini-btn" @click="moveBlock(index, -1)">&uarr;</button>
-                                    <button type="button" class="mini-btn" @click="moveBlock(index, 1)">&darr;</button>
-                                    <button type="button" class="mini-btn" style="color: #dc2626;" @click="removeBlock(index)">Remove</button>
-                                </div>
-                            </div>
-
-                            <template x-if="block.type === 'list'">
-                                <div style="display: flex; flex-direction: column; gap: 6px;">
-                                    <template x-for="(item, itemIndex) in block.items" :key="itemIndex">
-                                        <div style="display: flex; gap: 6px;">
-                                            <input class="form-input" x-model="block.items[itemIndex]">
-                                            <button type="button" class="mini-btn" @click="block.items.splice(itemIndex, 1)">&times;</button>
-                                        </div>
-                                    </template>
-                                    <button type="button" class="mini-btn" @click="block.items.push('')">+ List item</button>
-                                </div>
-                            </template>
-
-                            <template x-if="block.type !== 'list'">
-                                <textarea class="form-textarea" x-model="block.text" :rows="block.type === 'heading' ? 1 : 3"></textarea>
-                            </template>
-                        </div>
-                    </template>
-                </div>
-
-                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                    <button type="button" class="btn btn-secondary" @click="addBlock('paragraph')">+ Paragraph</button>
-                    <button type="button" class="btn btn-secondary" @click="addBlock('heading')">+ Heading</button>
-                    <button type="button" class="btn btn-secondary" @click="addBlock('list')">+ List</button>
-                </div>
+                <label for="quill-editor">Content</label>
+                <div id="quill-editor" style="background: #fff; min-height: 320px;">{!! old('content', $post->content) !!}</div>
+                <textarea id="content-input" name="content" hidden></textarea>
             </div>
-
-            <input type="hidden" name="content" x-ref="contentInput">
 
             @if ($errors->any())
                 <p class="form-error">{{ $errors->first() }}</p>
@@ -176,4 +133,68 @@
         </form>
     </div>
 </div>
+
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/vendor/quill/quill.snow.css') }}">
+@endpush
+
+@push('scripts')
+    <script src="{{ asset('js/vendor/quill/quill.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var quill = new Quill('#quill-editor', {
+                theme: 'snow',
+                modules: {
+                    toolbar: {
+                        container: [
+                            [{ header: [2, 3, false] }],
+                            ['bold', 'italic', 'underline'],
+                            [{ list: 'ordered' }, { list: 'bullet' }],
+                            [{ align: [] }],
+                            ['link', 'image'],
+                            ['clean'],
+                        ],
+                        handlers: {
+                            image: function () {
+                                var input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/png,image/jpeg,image/webp';
+                                input.onchange = function () {
+                                    var file = input.files[0];
+                                    if (!file) return;
+
+                                    var range = quill.getSelection(true);
+                                    var form = document.getElementById('post-form');
+                                    var token = form.querySelector('input[name="_token"]').value;
+                                    var body = new FormData();
+                                    body.append('image', file);
+                                    body.append('_token', token);
+
+                                    quill.insertText(range.index, 'Uploading image…', { italic: true });
+
+                                    fetch('{{ route('admin.posts.upload-image') }}', { method: 'POST', body: body })
+                                        .then(function (res) { return res.json(); })
+                                        .then(function (data) {
+                                            quill.deleteText(range.index, 'Uploading image…'.length);
+                                            quill.insertEmbed(range.index, 'image', data.url);
+                                            quill.setSelection(range.index + 1);
+                                        })
+                                        .catch(function () {
+                                            quill.deleteText(range.index, 'Uploading image…'.length);
+                                            alert('Image upload failed — please try again.');
+                                        });
+                                };
+                                input.click();
+                            },
+                        },
+                    },
+                },
+            });
+
+            document.getElementById('post-form').addEventListener('submit', function () {
+                document.getElementById('content-input').value = quill.root.innerHTML;
+            });
+        });
+    </script>
+@endpush
 @endsection

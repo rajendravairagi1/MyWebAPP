@@ -7,6 +7,7 @@
     <meta name="robots" content="noindex, nofollow">
     @include('partials.favicon-links')
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ @filemtime(public_path('css/app.css')) ?: '1' }}">
+    @stack('styles')
 </head>
 <body class="admin-body">
     @php

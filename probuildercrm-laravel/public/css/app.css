@@ -227,6 +227,77 @@ h3 {
   padding: var(--space-2xl) 0;
 }
 
+/* ---- Blog post body (rendered from the admin's rich-text editor) ---- */
+.blog-content {
+  color: var(--color-ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.blog-content > *:first-child {
+  margin-top: 0;
+}
+
+.blog-content p {
+  margin: 0 0 var(--space-md);
+}
+
+.blog-content h2,
+.blog-content h3 {
+  color: var(--color-ink);
+  line-height: 1.3;
+  margin: var(--space-lg) 0 var(--space-sm);
+}
+
+.blog-content h2 {
+  font-size: 1.5rem;
+}
+
+.blog-content h3 {
+  font-size: 1.2rem;
+}
+
+.blog-content ul,
+.blog-content ol {
+  padding-left: 1.4rem;
+  margin: 0 0 var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.blog-content a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.blog-content strong {
+  color: var(--color-ink);
+}
+
+.blog-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  margin: var(--space-md) 0;
+  display: block;
+}
+
+/* Quill (the admin's rich-text editor) marks alignment with these classes
+   rather than inline styles - matched here so Center/Right/Justify from
+   the editor toolbar actually shows on the public page. */
+.blog-content .ql-align-center {
+  text-align: center;
+}
+
+.blog-content .ql-align-right {
+  text-align: right;
+}
+
+.blog-content .ql-align-justify {
+  text-align: justify;
+}
+
 .section-hero {
   background: var(--color-bg-inverse);
   padding: var(--space-3xl) 0;

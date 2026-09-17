@@ -34,7 +34,6 @@ class BlogPost extends Model
 
     protected $casts = [
         'date' => 'date',
-        'content' => 'array',
     ];
 
     public static function uniqueSlugFrom(string $source, ?int $ignoreId = null): string

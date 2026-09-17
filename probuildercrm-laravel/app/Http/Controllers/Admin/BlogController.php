@@ -9,6 +9,7 @@ use App\Support\SitemapPing;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
@@ -45,7 +46,7 @@ class BlogController extends Controller
         $post = new BlogPost([
             'date' => now()->format('Y-m-d'),
             'read_time' => '5 min read',
-            'content' => [['type' => 'paragraph', 'text' => '']],
+            'content' => '',
             'featured_image_size' => self::DEFAULT_SIZE,
         ]);
 
@@ -94,6 +95,27 @@ class BlogController extends Controller
         return redirect()->route('admin.posts.index')->with('status', 'Post deleted.');
     }
 
+    /**
+     * The rich-text editor's image button uploads straight from here
+     * instead of embedding a base64 copy in the post's own HTML - keeps
+     * post content small and reuses the same optimize-and-resize pipeline
+     * as the featured image.
+     */
+    public function uploadContentImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:png,jpg,jpeg,webp|max:4096',
+        ]);
+
+        $dir = public_path(self::IMAGE_DIR);
+        File::ensureDirectoryExists($dir);
+
+        $filename = 'inline-'.time().'-'.Str::random(6).'.'.$request->file('image')->getClientOriginalExtension();
+        ImageOptimizer::optimizeAndSave($request->file('image'), $dir.'/'.$filename);
+
+        return response()->json(['url' => asset(self::IMAGE_DIR.'/'.$filename)]);
+    }
+
     public static function pixelsFor(?string $size): int
     {
         return self::SIZES[$size] ?? self::SIZES[self::DEFAULT_SIZE];
@@ -109,7 +131,7 @@ class BlogController extends Controller
             'author' => 'required|string|max:100',
             'date' => 'required|date',
             'read_time' => 'required|string|max:50',
-            'content' => 'required|string',
+            'content' => 'required|string|max:200000',
             'featured_image' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:4096',
             'featured_image_alt' => 'nullable|string|max:255',
             'featured_image_caption' => 'nullable|string|max:255',
@@ -119,11 +141,6 @@ class BlogController extends Controller
             'meta_keywords' => 'nullable|string|max:2000',
         ]);
 
-        $content = json_decode($validated['content'], true);
-        if (! is_array($content)) {
-            $content = [];
-        }
-        $validated['content'] = $content;
         $validated['featured_image_size'] = $validated['featured_image_size'] ?? self::DEFAULT_SIZE;
         unset($validated['featured_image']);
 

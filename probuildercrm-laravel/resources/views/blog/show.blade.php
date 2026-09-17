@@ -40,20 +40,8 @@
     @endif
 
     <section class="section">
-        <div class="container" style="max-width: 720px; display: flex; flex-direction: column; gap: var(--space-md);">
-            @foreach ($post->content as $block)
-                @if (($block['type'] ?? 'paragraph') === 'heading')
-                    <h2 style="font-size: 1.5rem; margin-top: var(--space-sm);">{{ $block['text'] }}</h2>
-                @elseif (($block['type'] ?? '') === 'list')
-                    <ul style="padding-left: 1.2rem; display: flex; flex-direction: column; gap: 6px;">
-                        @foreach ($block['items'] ?? [] as $item)
-                            <li style="color: var(--color-ink-soft); font-size: 1.02rem; line-height: 1.7;">{{ $item }}</li>
-                        @endforeach
-                    </ul>
-                @else
-                    <p style="color: var(--color-ink-soft); font-size: 1.05rem; line-height: 1.75;">{{ $block['text'] ?? '' }}</p>
-                @endif
-            @endforeach
+        <div class="container blog-content" style="max-width: 720px;">
+            {!! $post->content !!}
         </div>
     </section>
 </article>
