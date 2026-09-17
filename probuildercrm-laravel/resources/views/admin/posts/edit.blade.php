@@ -117,9 +117,9 @@
                 <input id="featured_image_caption" name="featured_image_caption" value="{{ old('featured_image_caption', $post->featured_image_caption) }}" class="form-input">
             </div>
 
-            <div class="form-field">
+            <div class="form-field" id="quill-wrap">
                 <label for="quill-editor">Content</label>
-                <div id="quill-editor" style="background: #fff; min-height: 320px;">{!! old('content', $post->content) !!}</div>
+                <div id="quill-editor" style="min-height: 320px;">{!! old('content', $post->content) !!}</div>
                 <textarea id="content-input" name="content" hidden></textarea>
             </div>
 
@@ -136,6 +136,29 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/vendor/quill/quill.snow.css') }}">
+    <style>
+        /* The admin panel's dark theme text color otherwise cascades into
+           the editor's white writing area, making typed text nearly
+           invisible (light-on-white) - this pins the editor itself to a
+           plain light theme regardless of admin dark mode. */
+        #quill-wrap .ql-toolbar.ql-snow {
+            background: #fff;
+            border-color: #cbd5e1;
+            border-radius: 8px 8px 0 0;
+        }
+        #quill-wrap .ql-container.ql-snow {
+            border-color: #cbd5e1;
+            border-radius: 0 0 8px 8px;
+        }
+        #quill-wrap .ql-editor {
+            background: #fff;
+            color: #1e293b;
+            min-height: 300px;
+        }
+        #quill-wrap .ql-editor.ql-blank::before {
+            color: #94a3b8;
+        }
+    </style>
 @endpush
 
 @push('scripts')
