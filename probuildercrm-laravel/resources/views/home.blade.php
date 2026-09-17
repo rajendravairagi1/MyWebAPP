@@ -1,7 +1,8 @@
 @extends('layouts.marketing')
 
-@section('title', 'Real Estate & Construction CRM Software for Builders')
-@section('description', config('site.short_description'))
+@section('title', 'Real Estate CRM Software for Builders & Developers | Pro Builder CRM')
+@section('description', 'Manage projects, unit bookings, customer payments, loans, invoices, contractors & brokers - all in one real estate CRM. Book a free demo today.')
+@section('keywords', 'Real estate CRM software, Construction CRM software, Construction project management software, Real estate inventory management software, Real estate sales CRM, Real estate developer CRM, CRM for builders, CRM for construction companies, Builder CRM software India, CRM for contractors, Property builder management software, Contractor and vendor ledger software, Invoice and receipt software for builders, Multi-branch real estate CRM, Real estate accounting and ledger software, CRM for real estate builders in India, Unit booking software, Real estate payment tracking software, Broker commission software, Loan disbursement CRM, Construction CRM software Madhya Pradesh, Real estate software for builders Indore, Property management software Bhopal')
 
 @section('content')
 

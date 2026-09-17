@@ -13,17 +13,22 @@
         // and risking them drifting apart.
         $__pageTitle = trim($__env->yieldContent('title', config('site.name').' - Real Estate & Construction CRM Software for Builders'));
         $__pageDescription = trim($__env->yieldContent('description', config('site.short_description')));
+        $__pageKeywords = trim($__env->yieldContent('keywords', ''));
         $__ogImage = asset('images/og-image.jpg');
         $__canonicalUrl = config('site.url').request()->getPathInfo();
     @endphp
-    {{-- $__pageTitle/$__pageDescription come out of yieldContent() already
-         HTML-escaped (Blade's @section('title', '...') short form and
-         yieldContent's own default both call e() internally) - {!! !!}
-         here, not {{ }}, so they aren't escaped a second time (which
-         previously turned "Builders & Developers" into
+    {{-- $__pageTitle/$__pageDescription/$__pageKeywords come out of
+         yieldContent() already HTML-escaped (Blade's @section('title', '...')
+         short form and yieldContent's own default both call e() internally)
+         - {!! !!} here, not {{ }}, so they aren't escaped a second time
+         (which previously turned "Builders & Developers" into
          "Builders &amp;amp; Developers"). --}}
     <title>{!! $__pageTitle !!}</title>
     <meta name="description" content="{!! $__pageDescription !!}">
+    @if ($__pageKeywords)
+        <meta name="keywords" content="{!! $__pageKeywords !!}">
+    @endif
+    <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ $__canonicalUrl }}">
     @include('partials.favicon-links')
 
