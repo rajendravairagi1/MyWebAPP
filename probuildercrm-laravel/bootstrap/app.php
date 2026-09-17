@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.auth' => \App\Http\Middleware\EnsureAdminAuthenticated::class,
         ]);
 
+        $middleware->web(prepend: [
+            \App\Http\Middleware\EnforceCanonicalHost::class,
+        ]);
+
         $middleware->web(append: [
             \App\Http\Middleware\AddSecurityHeaders::class,
         ]);

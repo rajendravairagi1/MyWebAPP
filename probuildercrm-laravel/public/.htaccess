@@ -5,6 +5,24 @@
 
     RewriteEngine On
 
+    # Canonicalize every request to https://probuildercrm.com (no www,
+    # always TLS) in a single hop - fixes Google Search Console flagging
+    # the http:// and www. copies of every page as duplicates of the
+    # canonical URL. Runs here (not just in Laravel) so it also covers
+    # static files (css/js/images) that never reach the app.
+    #
+    # The X-Forwarded-Proto check keeps this safe if TLS is ever
+    # terminated by a proxy/CDN in front of this server instead of
+    # here directly - without it, %{HTTPS} off would be true even for
+    # an already-https visitor and this would redirect-loop forever.
+    RewriteCond %{HTTP_HOST} ^(www\.)?probuildercrm\.com$ [NC]
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^ https://probuildercrm.com%{REQUEST_URI} [L,R=301]
+
+    RewriteCond %{HTTP_HOST} ^www\.probuildercrm\.com$ [NC]
+    RewriteRule ^ https://probuildercrm.com%{REQUEST_URI} [L,R=301]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
