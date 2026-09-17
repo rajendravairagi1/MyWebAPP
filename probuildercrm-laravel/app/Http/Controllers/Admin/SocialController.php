@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
  */
 class SocialController extends Controller
 {
-    public const PLATFORMS = ['facebook', 'instagram', 'linkedin', 'twitter', 'whatsapp'];
+    public const PLATFORMS = ['facebook', 'instagram', 'linkedin', 'twitter', 'whatsapp', 'youtube'];
 
     public const DEFAULT_FOOTER_DESCRIPTION = 'Pro Builder CRM brings every project, unit and customer payment into one place - built for real estate builders and developers, without spreadsheets or scattered WhatsApp chats.';
 
@@ -25,12 +25,14 @@ class SocialController extends Controller
 
         $showHeader = (bool) SiteSetting::get('social_show_header');
         $showFooter = (bool) SiteSetting::get('social_show_footer');
+        $showFooterBottom = (bool) SiteSetting::get('social_show_footer_bottom');
 
         return view('admin.social.index', [
             'links' => $links,
             'showHeader' => $showHeader,
             'showFooter' => $showFooter,
-            'hasLinksButHidden' => collect($links)->filter()->isNotEmpty() && ! $showHeader && ! $showFooter,
+            'showFooterBottom' => $showFooterBottom,
+            'hasLinksButHidden' => collect($links)->filter()->isNotEmpty() && ! $showHeader && ! $showFooter && ! $showFooterBottom,
             'phoneNumber' => SiteSetting::get('phone_number'),
             'footerDescription' => SiteSetting::get('footer_description', self::DEFAULT_FOOTER_DESCRIPTION),
         ]);
@@ -44,6 +46,7 @@ class SocialController extends Controller
             'social_linkedin' => 'nullable|url|max:255',
             'social_twitter' => 'nullable|url|max:255',
             'social_whatsapp' => 'nullable|url|max:255',
+            'social_youtube' => 'nullable|url|max:255',
             'phone_number' => 'nullable|string|max:50',
             'footer_description' => 'nullable|string|max:500',
         ]);
@@ -54,6 +57,7 @@ class SocialController extends Controller
 
         SiteSetting::set('social_show_header', $request->boolean('social_show_header') ? '1' : '');
         SiteSetting::set('social_show_footer', $request->boolean('social_show_footer') ? '1' : '');
+        SiteSetting::set('social_show_footer_bottom', $request->boolean('social_show_footer_bottom') ? '1' : '');
         SiteSetting::set('phone_number', trim($validated['phone_number'] ?? ''));
         SiteSetting::set('footer_description', trim($validated['footer_description'] ?? '') ?: self::DEFAULT_FOOTER_DESCRIPTION);
 

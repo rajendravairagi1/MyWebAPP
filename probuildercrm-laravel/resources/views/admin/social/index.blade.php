@@ -65,6 +65,10 @@
                         <label for="social_whatsapp">WhatsApp</label>
                         <input id="social_whatsapp" name="social_whatsapp" value="{{ old('social_whatsapp', $links['whatsapp']) }}" class="form-input" placeholder="https://wa.me/917898002496">
                     </div>
+                    <div class="form-field">
+                        <label for="social_youtube">YouTube</label>
+                        <input id="social_youtube" name="social_youtube" value="{{ old('social_youtube', $links['youtube']) }}" class="form-input" placeholder="https://youtube.com/@yourchannel">
+                    </div>
                 </div>
 
                 @if ($hasLinksButHidden)
@@ -82,9 +86,14 @@
                         <input type="checkbox" name="social_show_footer" value="1" @checked(old('social_show_footer', $showFooter))>
                         Show in footer
                     </label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 600; cursor: pointer;">
+                        <input type="checkbox" name="social_show_footer_bottom" value="1" @checked(old('social_show_footer_bottom', $showFooterBottom))>
+                        Show below copyright line (smaller icons)
+                    </label>
                 </div>
                 <p style="color: var(--color-ink-soft); font-size: 0.82rem; margin-top: 8px;">
-                    A link above only appears on the site once you check "Show in header" and/or "Show in footer" here.
+                    A link above only appears on the site once you check at least one of these three - they're independent,
+                    so you can show icons in more than one place at once (e.g. footer + below the copyright line).
                 </p>
             </div>
 

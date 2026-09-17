@@ -35,8 +35,11 @@
         </div>
 
         <div class="footer-bottom">
-            &copy; 2022 &ndash; {{ now()->year }} {{ config('site.name') }}. All rights reserved.
-            &middot; Designed &amp; Developed by {{ config('site.legal_name') }}
+            <span>
+                &copy; 2022 &ndash; {{ now()->year }} {{ config('site.name') }}. All rights reserved.
+                &middot; Designed &amp; Developed by {{ config('site.legal_name') }}
+            </span>
+            @include('partials.social-links', ['location' => 'footer-bottom'])
         </div>
     </div>
 </footer>
