@@ -76,7 +76,10 @@
     <table class="totals">
         <tr><td>Subtotal</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($quotation->subtotal, 2) }}</td></tr>
         <tr><td>Discount</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($quotation->discount_total, 2) }}</td></tr>
-        <tr><td>Tax</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($quotation->tax_total, 2) }}</td></tr>
+        <tr><td>GST</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($quotation->tax_total, 2) }}</td></tr>
+        @if ($quotation->tax_total > 0 && $business->gst_number)
+            <tr><td>GSTIN</td><td class="text-right">{{ $business->gst_number }}</td></tr>
+        @endif
         <tr class="grand"><td>Total</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($quotation->total, 2) }}</td></tr>
     </table>
 

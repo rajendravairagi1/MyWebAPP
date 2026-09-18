@@ -1,5 +1,13 @@
 @props(['products', 'items' => null])
 
+@php
+    // The GST option only exists at all once a business adds its GST
+    // number in Business Settings — that's the switch, not a per-invoice
+    // setting. Below that, every invoice/quotation still chooses whether
+    // to actually apply it (overallTaxRate stays 0 unless filled in).
+    $__gstNumber = \App\Models\Business::find(\App\Support\Tenant::id())?->gst_number;
+@endphp
+
 <div x-data="lineItemsForm(
         @js($products->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'price' => (float) $p->price])),
         @js($items ? $items->map(fn ($i) => ['product_id' => $i->product_id, 'description' => $i->description, 'unit_price' => (float) $i->unit_price])->all() : []),
@@ -91,13 +99,15 @@
                         class="w-full text-sm text-right border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md">
                 </td>
             </tr>
-            <tr>
-                <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Tax') }} <span class="text-gray-400">(%)</span></td>
-                <td class="py-1 text-right">
-                    <input type="text" inputmode="decimal" x-model.number="overallTaxRate" @focus="$event.target.select()" placeholder="0"
-                        class="w-full text-sm text-right border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md">
-                </td>
-            </tr>
+            @if ($__gstNumber)
+                <tr>
+                    <td class="py-1 text-gray-500 dark:text-gray-400">{{ __('GST') }} <span class="text-gray-400">(%)</span></td>
+                    <td class="py-1 text-right">
+                        <input type="text" inputmode="decimal" x-model.number="overallTaxRate" @focus="$event.target.select()" placeholder="0"
+                            class="w-full text-sm text-right border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md">
+                    </td>
+                </tr>
+            @endif
             <tr class="border-t border-gray-200 dark:border-slate-700 font-semibold">
                 <td class="py-1 text-gray-700 dark:text-gray-300">{{ __('Total') }}</td>
                 <td class="py-1 text-right text-gray-900 dark:text-gray-100" x-text="grandTotal().toFixed(2)"></td>

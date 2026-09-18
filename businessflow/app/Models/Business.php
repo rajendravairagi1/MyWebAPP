@@ -37,6 +37,7 @@ class Business extends Model
         'timezone',
         'tax_config',
         'invoice_prefix',
+        'gst_number',
         'logo_path',
         'enabled_modules',
     ];

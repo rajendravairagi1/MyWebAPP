@@ -152,6 +152,14 @@
                     </div>
 
                     <div>
+                        <x-input-label for="gst_number" :value="__('GST Number')" />
+                        <input type="text" id="gst_number" name="gst_number" value="{{ old('gst_number', $business->gst_number) }}" placeholder="{{ __('e.g. 22AAAAA0000A1Z5') }}"
+                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                        <p class="text-xs text-gray-400 mt-1">{{ __('Add this to turn on a GST option on every invoice & quotation — you\'ll still choose per invoice whether to apply it. Leave blank and invoices generate with no GST at all.') }}</p>
+                        <x-input-error :messages="$errors->get('gst_number')" class="mt-2" />
+                    </div>
+
+                    <div>
                         <x-input-label for="currency" :value="__('Currency')" />
                         <select id="currency" name="currency" required
                             class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">

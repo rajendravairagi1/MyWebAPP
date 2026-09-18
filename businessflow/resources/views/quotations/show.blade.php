@@ -122,7 +122,10 @@
                     <table class="text-sm w-64">
                         <tr><td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Subtotal') }}</td><td class="py-1 text-right">{{ number_format($quotation->subtotal, 2) }}</td></tr>
                         <tr><td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Discount') }}</td><td class="py-1 text-right">{{ number_format($quotation->discount_total, 2) }}</td></tr>
-                        <tr><td class="py-1 text-gray-500 dark:text-gray-400">{{ __('Tax') }}</td><td class="py-1 text-right">{{ number_format($quotation->tax_total, 2) }}</td></tr>
+                        <tr><td class="py-1 text-gray-500 dark:text-gray-400">{{ __('GST') }}</td><td class="py-1 text-right">{{ number_format($quotation->tax_total, 2) }}</td></tr>
+                        @if ($quotation->tax_total > 0 && ($__gstNumber = \App\Models\Business::find(\App\Support\Tenant::id())?->gst_number))
+                            <tr><td class="py-1 text-gray-500 dark:text-gray-400">{{ __('GSTIN') }}</td><td class="py-1 text-right">{{ $__gstNumber }}</td></tr>
+                        @endif
                         <tr class="border-t border-gray-200 font-semibold"><td class="py-1">{{ __('Total') }}</td><td class="py-1 text-right">{{ number_format($quotation->total, 2) }}</td></tr>
                     </table>
                 </div>

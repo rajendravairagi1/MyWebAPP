@@ -77,7 +77,10 @@
     <table class="totals">
         <tr><td>Subtotal</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->subtotal, 2) }}</td></tr>
         <tr><td>Discount</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->discount_total, 2) }}</td></tr>
-        <tr><td>Tax</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->tax_total, 2) }}</td></tr>
+        <tr><td>GST</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->tax_total, 2) }}</td></tr>
+        @if ($invoice->tax_total > 0 && $business->gst_number)
+            <tr><td>GSTIN</td><td class="text-right">{{ $business->gst_number }}</td></tr>
+        @endif
         <tr class="grand"><td>Total</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->total, 2) }}</td></tr>
         <tr><td>Paid</td><td class="text-right">{{ $business->currencySymbol() }}{{ number_format($invoice->amount_paid, 2) }}</td></tr>
         <tr><td class="balance">Balance due</td><td class="text-right balance">{{ $business->currencySymbol() }}{{ $invoice->balanceDue() }}</td></tr>
