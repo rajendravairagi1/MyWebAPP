@@ -16,6 +16,7 @@ class PlatformSetting extends Model
         'footer_text',
         'support_whatsapp',
         'payment_qr_path',
+        'payment_upi_id',
     ];
 
     public static function current(): self
@@ -31,5 +32,31 @@ class PlatformSetting extends Model
     public function hasPaymentQr(): bool
     {
         return (bool) $this->payment_qr_path;
+    }
+
+    public function hasUpiId(): bool
+    {
+        return (bool) $this->payment_upi_id;
+    }
+
+    /**
+     * A upi://pay deep link built fresh from the current UPI ID every
+     * time it's called — on mobile this opens the visitor's UPI app
+     * directly (GPay/PhonePe/Paytm/…) with the payee prefilled, no QR
+     * scan needed. The QR code shown alongside it (see App\Support\
+     * DocumentQr) encodes this exact same string, so both are always
+     * in sync with whatever UPI ID is currently saved here.
+     */
+    public function upiPaymentLink(): ?string
+    {
+        if (! $this->payment_upi_id) {
+            return null;
+        }
+
+        return 'upi://pay?'.http_build_query([
+            'pa' => $this->payment_upi_id,
+            'pn' => config('app.name'),
+            'cu' => 'INR',
+        ]);
     }
 }

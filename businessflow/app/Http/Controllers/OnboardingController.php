@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PlatformSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,6 +14,7 @@ class OnboardingController extends Controller
         return view('onboarding.create', [
             'businessTypes' => config('business.types'),
             'currencies' => config('business.currencies'),
+            'settings' => PlatformSetting::current(),
         ]);
     }
 

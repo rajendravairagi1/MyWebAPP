@@ -163,8 +163,11 @@ class AdminController extends Controller
         $data = $request->validate([
             'footer_text' => ['nullable', 'string', 'max:255'],
             'support_whatsapp' => ['nullable', 'string', 'max:20', 'regex:/^[0-9]+$/'],
+            'payment_upi_id' => ['nullable', 'string', 'max:100', 'regex:/^[\w.\-]{2,}@[a-zA-Z][\w.\-]{1,}$/'],
             'payment_qr' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'remove_payment_qr' => ['nullable', 'boolean'],
+        ], [
+            'payment_upi_id.regex' => 'Enter a valid UPI ID, e.g. yourname@okaxis.',
         ]);
 
         $settings = PlatformSetting::current();
