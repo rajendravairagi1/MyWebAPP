@@ -62,9 +62,15 @@ class UnitMediaController extends Controller
             }
         }
 
+        // Appends after whatever's already there (within this same
+        // unit + type) rather than always 0, so newly uploaded photos
+        // land at the end of the order instead of jumping to the front.
+        $nextPosition = (int) $unit->media()->where('type', $type)->max('position') + 1;
+
         $unit->media()->create([
             'type' => $type,
             'path' => $path,
+            'position' => $nextPosition,
             'original_name' => $originalName,
             'mime_type' => $mimeType,
             'size' => $size,
@@ -100,5 +106,33 @@ class UnitMediaController extends Controller
         $media->delete();
 
         return back()->with('status', 'Removed.');
+    }
+
+    /**
+     * Drag-and-drop reordering — `ids` is every media id of one type
+     * (photo/layout/document) for this unit, in the new display order.
+     * Scoped to $type so dragging the photo grid can never touch layout/
+     * document ordering, even though they share the same media table.
+     */
+    public function reorder(Request $request, ProjectUnit $unit): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->validate([
+            'type' => ['required', 'in:photo,layout,document'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $ownedIds = $unit->media()->where('type', $data['type'])->pluck('id');
+
+        abort_unless(
+            $ownedIds->count() === count($data['ids']) && $ownedIds->diff($data['ids'])->isEmpty(),
+            422
+        );
+
+        foreach (array_values($data['ids']) as $position => $id) {
+            UnitMedia::where('id', $id)->update(['position' => $position]);
+        }
+
+        return response()->json(['status' => 'ok']);
     }
 }

@@ -297,6 +297,7 @@ Route::middleware(['auth', 'verified', 'module:property_deals'])->group(function
     Route::delete('/property-deals/{deal}', [PropertyDealController::class, 'destroy'])->name('property-deals.destroy');
     Route::post('/property-deals/{deal}/share', [PropertyDealShareController::class, 'generate'])->name('property-deal-share.generate');
     Route::post('/property-deals/{deal}/media', [PropertyDealMediaController::class, 'store'])->name('property-deal-media.store');
+    Route::post('/property-deals/{deal}/media/reorder', [PropertyDealMediaController::class, 'reorder'])->name('property-deal-media.reorder');
     Route::get('/property-deals/{deal}/media/{media}', [PropertyDealMediaController::class, 'show'])->name('property-deal-media.show');
     Route::get('/property-deals/{deal}/media/{media}/download', [PropertyDealMediaController::class, 'download'])->name('property-deal-media.download');
     Route::delete('/property-deals/{deal}/media/{media}', [PropertyDealMediaController::class, 'destroy'])->name('property-deal-media.destroy');
@@ -329,6 +330,7 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::get('/project-units/{unit}', [ProjectUnitController::class, 'show'])->name('project-units.show');
     Route::post('/project-units/{unit}/share', [PropertyShareController::class, 'generate'])->name('property-share.generate');
     Route::post('/project-units/{unit}/media', [UnitMediaController::class, 'store'])->name('unit-media.store');
+    Route::post('/project-units/{unit}/media/reorder', [UnitMediaController::class, 'reorder'])->name('unit-media.reorder');
     Route::get('/project-units/{unit}/media/{media}', [UnitMediaController::class, 'show'])->name('unit-media.show');
     Route::get('/project-units/{unit}/media/{media}/download', [UnitMediaController::class, 'download'])->name('unit-media.download');
     Route::delete('/project-units/{unit}/media/{media}', [UnitMediaController::class, 'destroy'])->name('unit-media.destroy');

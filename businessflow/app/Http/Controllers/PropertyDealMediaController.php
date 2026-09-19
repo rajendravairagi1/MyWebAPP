@@ -69,9 +69,15 @@ class PropertyDealMediaController extends Controller
             }
         }
 
+        // Appends after whatever's already there (within this same deal +
+        // type) rather than always 0, so newly uploaded photos land at
+        // the end of the order instead of jumping to the front.
+        $nextPosition = (int) $deal->media()->where('type', $type)->max('position') + 1;
+
         $deal->media()->create([
             'type' => $type,
             'path' => $path,
+            'position' => $nextPosition,
             'original_name' => $originalName,
             'mime_type' => $mimeType,
             'size' => $size,
@@ -110,5 +116,34 @@ class PropertyDealMediaController extends Controller
         $media->delete();
 
         return back()->with('status', 'Removed.');
+    }
+
+    /**
+     * Drag-and-drop reordering — same scheme as UnitMediaController::
+     * reorder(), scoped to $type so reordering photos can never touch
+     * layout/document ordering.
+     */
+    public function reorder(Request $request, PropertyDeal $deal): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->validate([
+            'type' => ['required', 'in:photo,layout,document'],
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+        ]);
+
+        abort_unless($data['type'] === 'photo' || Tenant::canFinancials('property_deals'), 403);
+
+        $ownedIds = $deal->media()->where('type', $data['type'])->pluck('id');
+
+        abort_unless(
+            $ownedIds->count() === count($data['ids']) && $ownedIds->diff($data['ids'])->isEmpty(),
+            422
+        );
+
+        foreach (array_values($data['ids']) as $position => $id) {
+            PropertyDealMedia::where('id', $id)->update(['position' => $position]);
+        }
+
+        return response()->json(['status' => 'ok']);
     }
 }

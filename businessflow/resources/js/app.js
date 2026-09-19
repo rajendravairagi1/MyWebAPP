@@ -5,6 +5,8 @@ import {
 } from 'chart.js';
 import 'cropperjs/dist/cropper.css';
 import { initCropFields } from './crop-field';
+import { initUploadProgress } from './upload-progress';
+import { initDragReorder } from './drag-reorder';
 
 Chart.register(
     BarController, BarElement, LineController, LineElement, PointElement,
@@ -233,3 +235,5 @@ window.downloadImageFile = async function (url, filename, buttonEl) {
 Alpine.start();
 
 document.addEventListener('DOMContentLoaded', initCropFields);
+document.addEventListener('DOMContentLoaded', initUploadProgress);
+document.addEventListener('DOMContentLoaded', initDragReorder);

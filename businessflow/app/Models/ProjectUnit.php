@@ -106,7 +106,7 @@ class ProjectUnit extends Model
 
     public function media(): HasMany
     {
-        return $this->hasMany(UnitMedia::class)->latest();
+        return $this->hasMany(UnitMedia::class)->orderBy('position')->orderBy('id');
     }
 
     public function photos(): HasMany

@@ -85,7 +85,7 @@ class PropertyDeal extends Model
 
     public function media(): HasMany
     {
-        return $this->hasMany(PropertyDealMedia::class)->latest();
+        return $this->hasMany(PropertyDealMedia::class)->orderBy('position')->orderBy('id');
     }
 
     public function photos(): HasMany

@@ -117,11 +117,12 @@
                     @if ($deal->photos->isEmpty())
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No photos uploaded yet.') }}</p>
                     @else
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        <p class="text-xs text-gray-400 -mt-2">{{ __('Drag photos to reorder — the first one is used as the cover photo.') }}</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" data-reorder-container data-reorder-url="{{ route('property-deal-media.reorder', $deal) }}" data-reorder-type="photo">
                             @foreach ($deal->photos as $photo)
-                                <div class="relative group">
+                                <div class="relative group" data-reorder-item data-id="{{ $photo->id }}">
                                     <a href="{{ route('property-deal-media.show', [$deal, $photo]) }}" target="_blank" rel="noopener">
-                                        <img src="{{ route('property-deal-media.show', [$deal, $photo]) }}" alt="{{ $photo->original_name }}" loading="lazy" class="w-full h-32 object-cover rounded-md border border-gray-200 dark:border-slate-700">
+                                        <img src="{{ route('property-deal-media.show', [$deal, $photo]) }}" alt="{{ $photo->original_name }}" loading="lazy" draggable="false" class="w-full h-32 object-cover rounded-md border border-gray-200 dark:border-slate-700">
                                     </a>
                                     <form method="POST" action="{{ route('property-deal-media.destroy', [$deal, $photo]) }}" onsubmit="return confirm('{{ __('Delete this photo?') }}')" class="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         @csrf
@@ -165,7 +166,7 @@
         </div>
 
         <x-modal name="upload-photo" max-width="md">
-            <form method="POST" action="{{ route('property-deal-media.store', $deal) }}" enctype="multipart/form-data" class="p-6 space-y-4">
+            <form method="POST" action="{{ route('property-deal-media.store', $deal) }}" enctype="multipart/form-data" class="p-6 space-y-4" data-upload-progress>
                 @csrf
                 <input type="hidden" name="type" value="photo">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Photos') }}</h2>
@@ -173,6 +174,7 @@
                     <input type="file" name="files[]" accept="image/*" multiple required data-crop
                         class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
                     <p class="text-xs text-gray-400 mt-1">{{ __('Photos are compressed automatically for fast loading.') }}</p>
+                    <x-upload-progress-bar />
                 </div>
                 <div class="flex justify-end gap-3">
                     <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
@@ -183,13 +185,14 @@
 
         @if ($canFinancials)
             <x-modal name="upload-layout" max-width="md">
-                <form method="POST" action="{{ route('property-deal-media.store', $deal) }}" enctype="multipart/form-data" class="p-6 space-y-4">
+                <form method="POST" action="{{ route('property-deal-media.store', $deal) }}" enctype="multipart/form-data" class="p-6 space-y-4" data-upload-progress>
                     @csrf
                     <input type="hidden" name="type" value="layout">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Layout') }}</h2>
                     <div>
                         <input type="file" name="files[]" accept="image/*,application/pdf" multiple required
                             class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
+                        <x-upload-progress-bar />
                     </div>
                     <div class="flex justify-end gap-3">
                         <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>
@@ -199,13 +202,14 @@
             </x-modal>
 
             <x-modal name="upload-document" max-width="md">
-                <form method="POST" action="{{ route('property-deal-media.store', $deal) }}" enctype="multipart/form-data" class="p-6 space-y-4">
+                <form method="POST" action="{{ route('property-deal-media.store', $deal) }}" enctype="multipart/form-data" class="p-6 space-y-4" data-upload-progress>
                     @csrf
                     <input type="hidden" name="type" value="document">
                     <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Papers') }}</h2>
                     <div>
                         <input type="file" name="files[]" accept="image/*,application/pdf" multiple required
                             class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
+                        <x-upload-progress-bar />
                     </div>
                     <div class="flex justify-end gap-3">
                         <button type="button" x-on:click="show = false" class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Cancel') }}</button>

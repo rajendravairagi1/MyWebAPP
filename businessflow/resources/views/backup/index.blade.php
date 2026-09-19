@@ -24,10 +24,16 @@
                 {{ __('Please keep your own copy of this backup file safe (your computer, Google Drive, etc.), for your own protection. Pro Builder CRM is a service that makes your day-to-day work easier — keeping your own backups is your responsibility, not ours.') }}
             </div>
 
+            <div class="bg-gray-50 dark:bg-slate-700/40 border border-gray-200 dark:border-slate-600 text-sm rounded-md p-3 text-gray-600 dark:text-gray-300">
+                <strong class="text-gray-800 dark:text-gray-100">{{ __('Which one do I need?') }}</strong><br>
+                {{ __('Want to restore this data back into Pro Builder CRM later (e.g. onto a new device, or to undo a mistake)? Download the .zip below — only it can be restored.') }}<br>
+                {{ __('Just want your own readable copy — to check, print, or keep for your records? Download the Excel file instead.') }}
+            </div>
+
             {{-- Download --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 space-y-3">
                 <h3 class="font-medium text-gray-800 dark:text-gray-100">{{ __('Download a backup') }}</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Keep this file somewhere safe (your computer, Google Drive, etc.). Do this regularly, and always before a big change.') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Use this one if you ever need to restore — keep it somewhere safe (your computer, Google Drive, etc.). Do this regularly, and always before a big change.') }}</p>
                 <a href="{{ route('backup.download') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-accent-600 text-white text-sm font-medium rounded-md hover:bg-accent-700">
                     <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>
                     {{ __('Download backup (.zip)') }}

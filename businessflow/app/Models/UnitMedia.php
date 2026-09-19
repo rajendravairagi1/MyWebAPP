@@ -16,6 +16,7 @@ class UnitMedia extends Model
         'project_unit_id',
         'type',
         'path',
+        'position',
         'original_name',
         'mime_type',
         'size',

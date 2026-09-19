@@ -16,6 +16,7 @@ class PropertyDealMedia extends Model
         'property_deal_id',
         'type',
         'path',
+        'position',
         'original_name',
         'mime_type',
         'size',
