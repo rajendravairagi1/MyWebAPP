@@ -10,8 +10,8 @@
     below (scheduled together, reset together on any activity) so it
     still fires at 10 minutes even if this modal never opened correctly.
 --}}
-<x-modal name="idle-warning" maxWidth="sm">
-    <div class="p-6 text-center" x-data="{ seconds: 60 }" x-init="
+<x-modal name="idle-warning" maxWidth="sm" :compact="true">
+    <div class="p-5 text-center" x-data="{ seconds: 60 }" x-init="
         let iv = setInterval(() => {
             seconds = Math.max(0, seconds - 1);
             if (seconds === 0) clearInterval(iv);
