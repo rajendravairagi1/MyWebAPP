@@ -224,7 +224,7 @@
                 <input type="hidden" name="type" value="photo">
                 <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">{{ __('Upload Photos') }}</h2>
                 <div>
-                    <input type="file" name="files[]" accept="image/*" multiple required
+                    <input type="file" name="files[]" accept="image/*" multiple required data-crop
                         class="block w-full text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
                     <p class="text-xs text-gray-400 mt-1">{{ __('Photos are compressed automatically for fast loading.') }}</p>
                 </div>

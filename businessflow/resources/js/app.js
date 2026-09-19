@@ -3,6 +3,8 @@ import {
     Chart, BarController, BarElement, LineController, LineElement, PointElement,
     DoughnutController, ArcElement, CategoryScale, LinearScale, Tooltip, Legend, Filler,
 } from 'chart.js';
+import 'cropperjs/dist/cropper.css';
+import { initCropFields } from './crop-field';
 
 Chart.register(
     BarController, BarElement, LineController, LineElement, PointElement,
@@ -229,3 +231,5 @@ window.downloadImageFile = async function (url, filename, buttonEl) {
 // start() is called, so an x-init referencing e.g. preloadFile() would
 // throw "not defined" if start() ran before that assignment above.
 Alpine.start();
+
+document.addEventListener('DOMContentLoaded', initCropFields);

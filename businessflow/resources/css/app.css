@@ -30,6 +30,17 @@ aside nav::-webkit-scrollbar {
     width: 6px;
 }
 
+/*
+ * Round crop preview for avatar-style crops (profile photo) - the crop
+ * box itself stays a normal Cropper.js square/rect (that's what actually
+ * gets cropped), this only masks the live preview inside it to a circle
+ * so it's obvious the result will be used as a round avatar.
+ */
+.crop-field-round + .cropper-container .cropper-view-box,
+.crop-field-round + .cropper-container .cropper-face {
+    border-radius: 50%;
+}
+
 aside nav::-webkit-scrollbar-track {
     background: transparent;
 }

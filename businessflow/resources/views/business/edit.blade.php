@@ -108,7 +108,7 @@
                             @else
                                 <div class="h-16 w-16 rounded-md border border-dashed border-gray-300 dark:border-slate-600 flex items-center justify-center text-xs text-gray-400">{{ __('No logo') }}</div>
                             @endif
-                            <input type="file" name="logo" accept="image/*"
+                            <input type="file" name="logo" accept="image/*" data-crop
                                 class="block text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
                         </div>
                         <p class="text-xs text-gray-400 mt-1">{{ __('Compressed automatically. JPG, PNG, or WEBP.') }}</p>

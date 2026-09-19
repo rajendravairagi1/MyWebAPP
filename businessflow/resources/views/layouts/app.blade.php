@@ -237,7 +237,7 @@
                     </div>
                 @endif
 
-                <header class="min-h-16 shrink-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex items-center gap-4 px-4 sm:px-6 py-2">
+                <header class="sticky top-0 z-20 min-h-16 shrink-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 flex items-center gap-4 px-4 sm:px-6 py-2">
                     <button @click="mobileOpen = true" type="button" class="lg:hidden text-gray-500 dark:text-slate-400">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
                     </button>
@@ -494,6 +494,8 @@
         @if ($subscriptionDaysRemaining !== null)
             @include('partials.renewal-modal')
         @endif
+
+        <x-crop-modal />
 
         @auth
             @include('partials.idle-logout')

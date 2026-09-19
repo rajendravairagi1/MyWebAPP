@@ -33,7 +33,7 @@
                     </template>
                 </span>
                 <div>
-                    <input type="file" name="photo" accept="image/*"
+                    <input type="file" name="photo" accept="image/*" data-crop data-crop-aspect="1" data-crop-round="1"
                         x-on:change="photoPreview = $event.target.files[0] ? URL.createObjectURL($event.target.files[0]) : null"
                         class="block text-sm text-gray-600 dark:text-gray-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-gray-100 dark:file:bg-slate-700 file:text-gray-700 dark:file:text-gray-200 hover:file:bg-gray-200 dark:hover:file:bg-slate-600">
                     <p class="text-xs text-gray-400 mt-1">{{ __('Shown on your public profile page and in the header — replaces the style picker below once uploaded.') }}</p>
