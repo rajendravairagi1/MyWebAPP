@@ -62,8 +62,12 @@ class IdentifyTenant
             // A Company Owner/Branch Manager may legitimately have zero
             // business memberships yet (e.g. a branch with no builders
             // added so far) — let them through to set that up instead of
-            // forcing single-business onboarding.
-            $exemptRoutes = ['onboarding.*', 'logout', 'company.*', 'branches.*', 'builders.*', 'businesses.switch', 'admin.*'];
+            // forcing single-business onboarding. billing.* is here too:
+            // it's platform-wide content (the UPI QR/link), not scoped to
+            // a business, and now shown right on the onboarding page
+            // itself — without this, that QR's <img> silently redirected
+            // back to onboarding instead of loading.
+            $exemptRoutes = ['onboarding.*', 'logout', 'company.*', 'branches.*', 'builders.*', 'businesses.switch', 'admin.*', 'billing.*'];
 
             if ($request->routeIs($exemptRoutes)) {
                 return $next($request);

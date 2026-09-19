@@ -72,17 +72,9 @@
                 @if ($settings->hasUpiId() || $settings->hasPaymentQr())
                     <div class="mt-8 pt-6 border-t border-gray-100 dark:border-slate-700 text-center">
                         <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">{{ __('Want to pay for your plan now?') }}</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ __('Totally optional — you can start using :name right away either way.', ['name' => config('app.name', 'Pro Builder CRM')]) }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-4">{{ __('Totally optional — you can start using :name right away either way.', ['name' => config('app.name', 'Pro Builder CRM')]) }}</p>
 
-                        <img src="{{ route('billing.payment-qr') }}" alt="{{ __('Scan to pay') }}" class="mx-auto mt-4 h-40 w-40 rounded-lg border border-gray-200 dark:border-slate-700 bg-white p-2">
-
-                        @if ($settings->hasUpiId())
-                            <a href="{{ $settings->upiPaymentLink() }}"
-                               class="mt-3 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-accent-200 dark:border-accent-800 text-accent-700 dark:text-accent-400 text-sm font-semibold rounded-md hover:bg-accent-50 dark:hover:bg-accent-900/20">
-                                {{ __('Pay via UPI App') }}
-                            </a>
-                            <p class="text-xs text-gray-400 mt-1">{{ __('On a phone, this opens GPay/PhonePe/Paytm directly — no scanning needed.') }}</p>
-                        @endif
+                        <x-upi-payment-card :settings="$settings" />
 
                         @if ($settings->support_whatsapp)
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">

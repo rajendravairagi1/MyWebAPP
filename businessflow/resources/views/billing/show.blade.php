@@ -22,21 +22,8 @@
 
         @if ($settings->hasUpiId() || $settings->hasPaymentQr())
             <div class="pt-1">
-                <img src="{{ route('billing.payment-qr') }}" alt="{{ __('Scan to pay') }}" class="mx-auto h-52 w-52 rounded-lg border border-gray-200 dark:border-slate-700 bg-white p-2">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">
-                    {{ __('Scan and pay with any UPI app for your plan amount.') }}
-                </p>
+                <x-upi-payment-card :settings="$settings" />
             </div>
-
-            @if ($settings->hasUpiId())
-                <div class="pt-1">
-                    <a href="{{ $settings->upiPaymentLink() }}"
-                       class="w-full inline-flex items-center justify-center px-4 py-2.5 border border-accent-200 dark:border-accent-800 text-accent-700 dark:text-accent-400 text-sm font-semibold rounded-md hover:bg-accent-50 dark:hover:bg-accent-900/20">
-                        {{ __('Pay via UPI App') }}
-                    </a>
-                    <p class="text-xs text-gray-400 mt-1">{{ __('On a phone, this opens GPay/PhonePe/Paytm directly — no scanning needed.') }}</p>
-                </div>
-            @endif
         @endif
 
         <p class="text-sm text-gray-600 dark:text-gray-400">
