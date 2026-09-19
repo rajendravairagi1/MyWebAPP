@@ -41,6 +41,13 @@
                     @else
                         <span class="text-xs text-gray-400">{{ __('No expiry set') }}</span>
                     @endif
+
+                    <div class="mt-2">
+                        <a href="{{ route('billing.show') }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">
+                            <svg class="h-3.5 w-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75V6a2.25 2.25 0 002.25 2.25h2.25M3 8.25V19.5a2.25 2.25 0 002.25 2.25h13.5a2.25 2.25 0 002.25-2.25V8.25m-18 0V6a2.25 2.25 0 012.25-2.25h9.879a1.5 1.5 0 011.06.44l3.622 3.621a1.5 1.5 0 01.44 1.06v2.129M3 8.25h18" /></svg>
+                            {{ __('Renew Plan') }}
+                        </a>
+                    </div>
                 </div>
             </div>
 
