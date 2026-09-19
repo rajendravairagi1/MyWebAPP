@@ -40,6 +40,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectCostController;
+use App\Http\Controllers\ProjectLoanController;
 use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\ProjectUnitController;
 use App\Http\Controllers\PropertyDealController;
@@ -348,6 +349,15 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::post('/loans/{loan}/documents', [LoanDocumentController::class, 'store'])->name('loan-documents.store');
     Route::get('/loans/{loan}/documents/{document}', [LoanDocumentController::class, 'download'])->name('loan-documents.download');
     Route::delete('/loans/{loan}/documents/{document}', [LoanDocumentController::class, 'destroy'])->name('loan-documents.destroy');
+
+    Route::get('/project-loans', [ProjectLoanController::class, 'index'])->name('project-loans.index');
+    Route::post('/project-loans', [ProjectLoanController::class, 'store'])->name('project-loans.store');
+    Route::get('/project-loans/{projectLoan}', [ProjectLoanController::class, 'show'])->name('project-loans.show');
+    Route::put('/project-loans/{projectLoan}', [ProjectLoanController::class, 'update'])->name('project-loans.update');
+    Route::delete('/project-loans/{projectLoan}', [ProjectLoanController::class, 'destroy'])->name('project-loans.destroy');
+    Route::post('/project-loans/{projectLoan}/payments', [ProjectLoanController::class, 'storePayment'])->name('project-loans.payments.store');
+    Route::delete('/project-loans/{projectLoan}/payments/{payment}', [ProjectLoanController::class, 'destroyPayment'])->name('project-loans.payments.destroy');
+
     Route::post('/project-units/{unit}/materials', [MaterialEntryController::class, 'store'])->name('material-entries.store');
     Route::put('/project-units/{unit}/materials/{entry}', [MaterialEntryController::class, 'update'])->name('material-entries.update');
     Route::delete('/project-units/{unit}/materials/{entry}', [MaterialEntryController::class, 'destroy'])->name('material-entries.destroy');

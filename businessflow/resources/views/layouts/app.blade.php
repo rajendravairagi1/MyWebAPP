@@ -121,6 +121,7 @@
                         'payment-accounts' => ['label' => __('Payment Accounts'), 'href' => route('payment-accounts.index'), 'pattern' => 'payment-accounts.*', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />', 'visible' => \App\Support\Tenant::isOwner()],
                         'ledger' => ['label' => __('Ledger'), 'href' => route('ledger.index'), 'pattern' => 'ledger.*', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />', 'visible' => \App\Support\Tenant::can('ledger')],
                         'loans' => ['label' => __('Loans'), 'href' => route('loans.index'), 'pattern' => 'loans.*', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21" />', 'visible' => \App\Support\Tenant::can('projects')],
+                        'project-loans' => ['label' => __('Project Loans'), 'href' => route('project-loans.index'), 'pattern' => 'project-loans.*', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />', 'visible' => \App\Support\Tenant::can('projects')],
                         'investors' => ['label' => __('Investors'), 'href' => route('investors.index'), 'pattern' => 'investors.*', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.306a11.95 11.95 0 015.814-5.518l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />', 'visible' => \App\Support\Tenant::can('investors')],
                         'brokers' => ['label' => __('Brokers'), 'href' => route('brokers.index'), 'pattern' => 'brokers.*', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />', 'visible' => \App\Support\Tenant::can('brokers')],
                         'contractors' => ['label' => __('Contractors / Vendors'), 'href' => route('contractors.index'), 'pattern' => 'contractors.*', 'icon' => '<path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75a4.5 4.5 0 01-4.884 4.484c-1.076-.091-2.264.071-2.95.904l-7.152 8.684a2.548 2.548 0 11-3.586-3.586l8.684-7.152c.833-.686.995-1.874.904-2.95a4.5 4.5 0 016.336-4.486l-3.276 3.276a3.004 3.004 0 002.25 2.25l3.276-3.276c.256.565.398 1.192.398 1.852z" />', 'visible' => \App\Support\Tenant::can('contractors')],
@@ -131,7 +132,7 @@
                     ];
 
                     // Flat mode: workflow order, top to bottom, no grouping.
-                    $flatOrder = ['dashboard', 'company', 'platform-admin', 'leads', 'followups', 'meetings', 'customers', 'projects', 'property-deals', 'available-properties', 'quotations', 'invoices', 'payment-reminders', 'payment-accounts', 'ledger', 'loans', 'investors', 'brokers', 'contractors', 'material-credit', 'completed-projects', 'team', 'reports', 'backup'];
+                    $flatOrder = ['dashboard', 'company', 'platform-admin', 'leads', 'followups', 'meetings', 'customers', 'projects', 'property-deals', 'available-properties', 'quotations', 'invoices', 'payment-reminders', 'payment-accounts', 'ledger', 'loans', 'project-loans', 'investors', 'brokers', 'contractors', 'material-credit', 'completed-projects', 'team', 'reports', 'backup'];
 
                     // Grouped mode: frequent, single items stay top-level;
                     // related, less-frequent items collapse under a heading.
@@ -147,7 +148,7 @@
                         ['type' => 'item', 'key' => 'invoices'],
                         ['type' => 'item', 'key' => 'reports'],
                         ['type' => 'group', 'key' => 'finance-group', 'label' => __('Finance'), 'items' => ['payment-reminders', 'payment-accounts', 'ledger']],
-                        ['type' => 'group', 'key' => 'financing-group', 'label' => __('Financing'), 'items' => ['loans', 'investors']],
+                        ['type' => 'group', 'key' => 'financing-group', 'label' => __('Financing'), 'items' => ['loans', 'project-loans', 'investors']],
                         ['type' => 'group', 'key' => 'partners-group', 'label' => __('Partners & Vendors'), 'items' => ['brokers', 'contractors', 'material-credit']],
                         ['type' => 'group', 'key' => 'settings-group', 'label' => __('Settings'), 'items' => ['company', 'team', 'backup']],
                     ];
