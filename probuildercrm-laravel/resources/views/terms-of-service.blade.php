@@ -16,7 +16,7 @@
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">Payments</h2>
             <p>Subscription fees are billed in advance on the plan you choose.</p>
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">Refund Policy</h2>
-            <p>Where a refund is due, we process the refund on our end within 3 days of approval. Once processed, it can take up to 7 days for the refunded amount to reach you, depending on your bank or payment provider.</p>
+            <p>You may apply for a refund within 3 days of your purchase/plan start. Requests made after this 3-day window will not be accepted, and the payment will not be refunded. Where a refund request is approved, it can take up to 7 days for the refunded amount to reach you, depending on your bank or payment provider.</p>
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">Your data</h2>
             <p>You own the business data you enter into Pro Builder CRM. We do not sell it or share it with third parties.</p>
             <p>Pro Builder CRM provides you tools — including an in-app backup/export feature — to make managing your data easier, but keeping your own copies of critical business data is your responsibility, not ours. We recommend downloading and safely storing a backup regularly, and always before a major change.</p>
