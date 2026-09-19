@@ -20,6 +20,7 @@ use App\Models\Quotation;
 use App\Models\QuotationItem;
 use App\Models\UnitMedia;
 use App\Models\UnitPayment;
+use App\Support\SimpleXlsxWriter;
 use App\Support\Tenant;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use ZipArchive;
 
 /**
@@ -78,6 +80,128 @@ class BackupController extends Controller
         $filename = Str::slug($business->name).'-backup-'.now()->format('Y-m-d').'.zip';
 
         return response()->download($zipPath, $filename)->deleteFileAfterSend(true);
+    }
+
+    /**
+     * The .zip backup above is built to be restored back into this same
+     * app (raw DB rows, foreign key ids, not meant for a human to open)
+     * — this is the opposite: one .xlsx with every table as its own
+     * readable tab (customer/project names instead of ids, formatted
+     * amounts and dates), for a builder who just wants their own copy
+     * of their data in a spreadsheet, not tied to this app at all.
+     */
+    public function downloadExcel(): BinaryFileResponse
+    {
+        $business = \App\Models\Business::findOrFail(Tenant::id());
+
+        $xlsxPath = $this->buildXlsx();
+        $filename = Str::slug($business->name).'-data-'.now()->format('Y-m-d').'.xlsx';
+
+        return response()->download($xlsxPath, $filename)->deleteFileAfterSend(true);
+    }
+
+    private function buildXlsx(): string
+    {
+        $customers = Customer::withTrashed()->orderBy('name')->get();
+        $projects = Project::orderBy('name')->get();
+        $units = ProjectUnit::with(['project', 'customer'])->get();
+        $quotations = Quotation::with(['customer', 'project'])->orderByDesc('id')->get();
+        $invoices = Invoice::with(['customer', 'project'])->orderByDesc('id')->get();
+        $payments = Payment::with('invoice')->orderByDesc('id')->get();
+        $costs = ProjectCost::with('project')->orderByDesc('spent_on')->get();
+        $followups = Followup::with(['customer', 'project'])->orderByDesc('due_at')->get();
+        $investors = Investor::orderBy('name')->get();
+        $investorTx = InvestorTransaction::with(['investor', 'project'])->orderByDesc('transaction_date')->get();
+        $products = Product::orderBy('name')->get();
+        $ledger = LedgerEntry::with(['customer', 'project'])->orderByDesc('entry_date')->get();
+        $unitPayments = UnitPayment::with(['unit', 'customer'])->orderByDesc('paid_at')->get();
+        $materialEntries = MaterialEntry::with('unit')->orderByDesc('entered_on')->get();
+
+        $writer = new SimpleXlsxWriter();
+
+        $writer->addSheet('Customers', ['Name', 'Company', 'Phone', 'Email', 'Address', 'Source', 'Notes', 'Added On'],
+            $customers->map(fn (Customer $c) => [
+                $c->name, $c->company, $c->phone, $c->email, $c->address, $c->source, $c->notes,
+                optional($c->created_at)->format('d M Y'),
+            ])->all());
+
+        $writer->addSheet('Projects', ['Name', 'Type', 'Location', 'Status', 'Start Date', 'Expected Completion', 'Notes'],
+            $projects->map(fn (Project $p) => [
+                $p->name, $p->type, $p->location, $p->status,
+                optional($p->start_date)->format('d M Y'), optional($p->expected_completion_date)->format('d M Y'), $p->notes,
+            ])->all());
+
+        $writer->addSheet('Project Units', ['Project', 'Unit Number', 'Type', 'Area (sqft)', 'Price', 'Status', 'Customer', 'Commitment Date'],
+            $units->map(fn (ProjectUnit $u) => [
+                $u->project?->name, $u->unit_number, $u->type, (float) $u->area_sqft, (float) $u->price, $u->status,
+                $u->customer?->name, optional($u->commitment_date)->format('d M Y'),
+            ])->all());
+
+        $writer->addSheet('Quotations', ['Number', 'Customer', 'Project', 'Status', 'Valid Until', 'Subtotal', 'Discount', 'Tax', 'Total', 'Created On'],
+            $quotations->map(fn (Quotation $q) => [
+                $q->number, $q->customer?->name, $q->project?->name, $q->status, optional($q->valid_until)->format('d M Y'),
+                (float) $q->subtotal, (float) $q->discount_total, (float) $q->tax_total, (float) $q->total,
+                optional($q->created_at)->format('d M Y'),
+            ])->all());
+
+        $writer->addSheet('Invoices', ['Number', 'Customer', 'Project', 'Status', 'Due Date', 'Subtotal', 'Discount', 'Tax', 'Total', 'Paid', 'Balance Due', 'Created On'],
+            $invoices->map(fn (Invoice $i) => [
+                $i->number, $i->customer?->name, $i->project?->name, $i->status, optional($i->due_date)->format('d M Y'),
+                (float) $i->subtotal, (float) $i->discount_total, (float) $i->tax_total, (float) $i->total, (float) $i->amount_paid,
+                (float) $i->balanceDue(), optional($i->created_at)->format('d M Y'),
+            ])->all());
+
+        $writer->addSheet('Payments', ['Invoice Number', 'Amount', 'Method', 'Paid On', 'Reference', 'Notes'],
+            $payments->map(fn (Payment $p) => [
+                $p->invoice?->number, (float) $p->amount, $p->method, optional($p->paid_at)->format('d M Y'), $p->reference, $p->notes,
+            ])->all());
+
+        $writer->addSheet('Project Costs', ['Project', 'Category', 'Description', 'Amount', 'Spent On', 'Vendor', 'Notes'],
+            $costs->map(fn (ProjectCost $c) => [
+                $c->project?->name, $c->category, $c->description, (float) $c->amount, optional($c->spent_on)->format('d M Y'), $c->vendor, $c->notes,
+            ])->all());
+
+        $writer->addSheet('Follow-ups', ['Customer', 'Project', 'Note', 'Category', 'Due On', 'Status'],
+            $followups->map(fn (Followup $f) => [
+                $f->customer?->name, $f->project?->name, $f->note, $f->category, optional($f->due_at)->format('d M Y H:i'), $f->status,
+            ])->all());
+
+        $writer->addSheet('Investors', ['Name', 'Phone', 'Email', 'Notes'],
+            $investors->map(fn (Investor $inv) => [$inv->name, $inv->phone, $inv->email, $inv->notes])->all());
+
+        $writer->addSheet('Investor Transactions', ['Investor', 'Project', 'Type', 'Amount', 'Date', 'Method', 'Reference', 'Description'],
+            $investorTx->map(fn (InvestorTransaction $t) => [
+                $t->investor?->name, $t->project?->name, $t->type, (float) $t->amount,
+                optional($t->transaction_date)->format('d M Y'), $t->method, $t->reference, $t->description,
+            ])->all());
+
+        $writer->addSheet('Products', ['Name', 'SKU', 'Type', 'Unit', 'Price', 'Tax Rate', 'Stock Qty'],
+            $products->map(fn (Product $p) => [
+                $p->name, $p->sku, $p->type, $p->unit, (float) $p->price, (float) $p->tax_rate, (float) $p->stock_qty,
+            ])->all());
+
+        $writer->addSheet('Ledger', ['Type', 'Category', 'Description', 'Amount', 'Date', 'Customer', 'Project'],
+            $ledger->map(fn (LedgerEntry $l) => [
+                $l->type, $l->category, $l->description, (float) $l->amount, optional($l->entry_date)->format('d M Y'),
+                $l->customer?->name, $l->project?->name,
+            ])->all());
+
+        $writer->addSheet('Unit Payments', ['Unit', 'Customer', 'Amount', 'Purpose', 'Description', 'Method', 'Paid On', 'Reference'],
+            $unitPayments->map(fn (UnitPayment $p) => [
+                $p->unit?->unit_number, $p->customer?->name, (float) $p->amount, $p->purpose, $p->description,
+                $p->method, optional($p->paid_at)->format('d M Y'), $p->reference,
+            ])->all());
+
+        $writer->addSheet('Material Entries', ['Unit', 'Material', 'Quantity', 'Unit Label', 'Direction', 'Entered On', 'Note'],
+            $materialEntries->map(fn (MaterialEntry $m) => [
+                $m->unit?->unit_number, $m->material_name, (float) $m->quantity, $m->unit_label, $m->direction,
+                optional($m->entered_on)->format('d M Y'), $m->note,
+            ])->all());
+
+        $path = storage_path('app/tmp-export-'.Str::uuid().'.xlsx');
+        $writer->save($path);
+
+        return $path;
     }
 
     /**

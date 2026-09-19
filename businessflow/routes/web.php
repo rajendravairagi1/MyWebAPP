@@ -214,6 +214,7 @@ Route::middleware(['auth', 'verified', 'owner'])->group(function () {
 
     Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
     Route::get('/backup/download', [BackupController::class, 'download'])->name('backup.download');
+    Route::get('/backup/download-excel', [BackupController::class, 'downloadExcel'])->name('backup.download-excel');
     Route::post('/backup/restore', [BackupController::class, 'restore'])->name('backup.restore');
 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

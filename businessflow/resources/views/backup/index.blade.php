@@ -34,6 +34,18 @@
                 </a>
             </div>
 
+            {{-- Excel export --}}
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 space-y-3">
+                <h3 class="font-medium text-gray-800 dark:text-gray-100">{{ __('Export to Excel') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ __('One .xlsx file with every customer, project, unit, quotation, invoice, payment and more — each as its own tab, in plain readable form (names instead of ids). For your own records, or to open in Excel/Google Sheets — this one isn\'t for restoring back into the app, use the .zip backup above for that.') }}
+                </p>
+                <a href="{{ route('backup.download-excel') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700">
+                    <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75M3.75 3.75h16.5v16.5H3.75V3.75z" /><path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25h18" /></svg>
+                    {{ __('Download Excel (.xlsx)') }}
+                </a>
+            </div>
+
             {{-- Restore --}}
             <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-6 space-y-4">
                 <h3 class="font-medium text-gray-800 dark:text-gray-100">{{ __('Restore from a backup') }}</h3>
