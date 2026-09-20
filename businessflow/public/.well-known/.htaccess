@@ -1,0 +1,13 @@
+# Some shared-hosting Apache configs block any dot-prefixed path
+# (".well-known", ".env", etc.) by default for security — which also
+# catches this folder even though /.well-known/assetlinks.json is
+# supposed to be public (it's how Android verifies this domain owns
+# the Play Store app). This explicitly re-allows access to this one
+# folder, for both old and new Apache versions.
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+</IfModule>
