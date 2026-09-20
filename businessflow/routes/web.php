@@ -65,6 +65,30 @@ use Illuminate\Support\Facades\Route;
 // No public landing page here — the marketing site is probuildercrm.com.
 Route::get('/', fn () => redirect()->away('https://probuildercrm.com', 301));
 
+// Proves to Android that this domain and the Play Store app package are
+// the same publisher, so the TWA (Trusted Web Activity) wrapper opens
+// without a browser address bar. Returns 404 until ANDROID_PACKAGE_NAME
+// and ANDROID_SHA256_FINGERPRINTS are set in .env (values come from the
+// Android package PWABuilder generates, plus the fingerprint Play
+// Console shows once Play App Signing takes over).
+Route::get('/.well-known/assetlinks.json', function () {
+    $packageName = config('app.android_package_name');
+    $fingerprints = array_values(array_filter(array_map('trim', explode(',', (string) config('app.android_sha256_fingerprints')))));
+
+    abort_if(! $packageName || empty($fingerprints), 404);
+
+    return response()->json([
+        [
+            'relation' => ['delegate_permission/common.handle_all_urls'],
+            'target' => [
+                'namespace' => 'android_app',
+                'package_name' => $packageName,
+                'sha256_cert_fingerprints' => $fingerprints,
+            ],
+        ],
+    ]);
+});
+
 Route::get('/demo', DemoLoginController::class)->name('demo.login');
 
 // Public, no-login property brochure — a link generated from inside the

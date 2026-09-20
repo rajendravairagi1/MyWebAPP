@@ -168,6 +168,17 @@ return [
     'brand_favicon_svg_url' => env('BRAND_FAVICON_SVG_URL', 'https://probuildercrm.com/favicon.svg'),
     'brand_favicon_apple_url' => env('BRAND_FAVICON_APPLE_URL', 'https://probuildercrm.com/apple-touch-icon.png'),
 
+    /*
+    | Android app details for /.well-known/assetlinks.json (see
+    | routes/web.php) — set once the Android package is generated via
+    | PWABuilder. ANDROID_SHA256_FINGERPRINTS can hold more than one
+    | fingerprint, comma-separated (the local upload key plus the Play
+    | App Signing key Play Console shows after the first upload).
+    */
+
+    'android_package_name' => env('ANDROID_PACKAGE_NAME'),
+    'android_sha256_fingerprints' => env('ANDROID_SHA256_FINGERPRINTS'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
