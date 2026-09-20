@@ -32,6 +32,7 @@ class Invoice extends Model
         'amount_paid',
         'notes',
         'created_by',
+        'push_reminded_at',
     ];
 
     protected $casts = [
@@ -42,11 +43,17 @@ class Invoice extends Model
         'total' => 'decimal:2',
         'amount_paid' => 'decimal:2',
         'counts_toward_property_price' => 'boolean',
+        'push_reminded_at' => 'datetime',
     ];
 
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function quotation(): BelongsTo

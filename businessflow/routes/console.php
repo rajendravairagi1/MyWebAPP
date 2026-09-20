@@ -13,3 +13,8 @@ Artisan::command('inspire', function () {
 // cron access, use /run-backups?token=<INSTALL_TOKEN> instead (see
 // RunBackupsController) — both ways call the same backup:run command.
 Schedule::command('backup:run')->daily()->withoutOverlapping();
+
+// Same no-cron caveat as above — use /run-notifications?token=<INSTALL_TOKEN>
+// (see RunNotificationsController) on a host with no cron access, e.g. via
+// a free external scheduler hitting that URL every few minutes.
+Schedule::command('notifications:send-due')->everyFiveMinutes()->withoutOverlapping();

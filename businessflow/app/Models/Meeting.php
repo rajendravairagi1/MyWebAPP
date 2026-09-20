@@ -22,10 +22,12 @@ class Meeting extends Model
         'scheduled_at',
         'status',
         'created_by',
+        'push_reminded_at',
     ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
+        'push_reminded_at' => 'datetime',
     ];
 
     public function customer(): BelongsTo

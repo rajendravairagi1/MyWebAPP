@@ -38,6 +38,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PaymentReminderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectCostController;
 use App\Http\Controllers\ProjectLoanController;
@@ -53,6 +54,7 @@ use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResetDataController;
 use App\Http\Controllers\RunBackupsController;
+use App\Http\Controllers\RunNotificationsController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\TeamController;
@@ -187,6 +189,7 @@ Route::get('/install', [InstallController::class, 'index'])->name('install.index
 Route::post('/install', [InstallController::class, 'store'])->name('install.store');
 Route::get('/migrate', MigrateController::class)->name('migrate');
 Route::get('/run-backups', RunBackupsController::class)->name('run-backups');
+Route::get('/run-notifications', RunNotificationsController::class)->name('run-notifications');
 
 // Public, signed verification pages linked from the QR code printed on
 // Quotation/Invoice/Statement PDFs — confirms a document is genuine
@@ -223,6 +226,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/branches/{branch}/builders', [BuilderController::class, 'store'])->name('builders.store');
 
     Route::post('/businesses/{business}/switch', [BusinessSwitchController::class, 'switch'])->name('businesses.switch');
+
+    Route::post('/push/subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
+    Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

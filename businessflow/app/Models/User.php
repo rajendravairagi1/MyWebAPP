@@ -46,6 +46,11 @@ class User extends Authenticatable
         return $this->hasMany(Branch::class, 'manager_user_id');
     }
 
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
     /**
      * Whether this user is entitled to create a Company — i.e. the
      * platform admin has upgraded one of their owned businesses to the

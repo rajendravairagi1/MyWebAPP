@@ -287,6 +287,16 @@
                             </button>
                         </x-slot>
                         <x-slot name="content">
+                            @if (config('services.web_push.public_key'))
+                                <div id="push-enable-banner" class="hidden px-4 py-3 bg-indigo-50 dark:bg-indigo-900/20 border-b border-indigo-200 dark:border-indigo-800">
+                                    <div class="text-sm font-semibold text-indigo-800 dark:text-indigo-300">{{ __('Get reminders on this phone') }}</div>
+                                    <div class="text-xs text-indigo-700 dark:text-indigo-400 mt-0.5">{{ __('Meeting, follow-up and payment reminders — even when the app is closed.') }}</div>
+                                    <button type="button" id="push-enable-button" data-vapid-public-key="{{ config('services.web_push.public_key') }}" class="mt-2 inline-flex items-center justify-center w-full px-3 py-1.5 bg-indigo-600 text-white text-xs font-semibold rounded-md hover:bg-indigo-700">
+                                        {{ __('Enable Notifications') }}
+                                    </button>
+                                </div>
+                            @endif
+
                             @if ($adminRenewalCount > 0)
                                 <div class="flex items-center justify-between px-4 py-2 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
                                     <span class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500">{{ __('Accounts needing renewal') }}</span>

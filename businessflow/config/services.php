@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    /*
+    | Web Push (App\Support\PushNotifier) — meeting/follow-up/payment
+    | reminder alerts on a phone. Generated once via
+    | Minishlink\WebPush\VAPID::createVapidKeys() and fixed forever —
+    | changing these invalidates every device that already subscribed.
+    */
+    'web_push' => [
+        'public_key' => env('VAPID_PUBLIC_KEY'),
+        'private_key' => env('VAPID_PRIVATE_KEY'),
+        'subject' => env('VAPID_SUBJECT', 'mailto:'.env('PLATFORM_ADMIN_EMAIL', 'rajendravairagi1@gmail.com')),
+    ],
+
 ];

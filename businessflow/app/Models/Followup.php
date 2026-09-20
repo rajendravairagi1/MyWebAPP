@@ -21,10 +21,12 @@ class Followup extends Model
         'due_at',
         'status',
         'owner_id',
+        'push_reminded_at',
     ];
 
     protected $casts = [
         'due_at' => 'datetime',
+        'push_reminded_at' => 'datetime',
     ];
 
     public const CATEGORIES = [

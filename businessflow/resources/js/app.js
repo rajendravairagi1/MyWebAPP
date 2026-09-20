@@ -7,6 +7,7 @@ import 'cropperjs/dist/cropper.css';
 import { initCropFields } from './crop-field';
 import { initUploadProgress } from './upload-progress';
 import { initDragReorder } from './drag-reorder';
+import { initPushNotifications } from './push-notifications';
 
 Chart.register(
     BarController, BarElement, LineController, LineElement, PointElement,
@@ -237,3 +238,4 @@ Alpine.start();
 document.addEventListener('DOMContentLoaded', initCropFields);
 document.addEventListener('DOMContentLoaded', initUploadProgress);
 document.addEventListener('DOMContentLoaded', initDragReorder);
+document.addEventListener('DOMContentLoaded', initPushNotifications);
