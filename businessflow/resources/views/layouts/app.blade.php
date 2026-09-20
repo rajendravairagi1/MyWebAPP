@@ -280,7 +280,7 @@
                                      count - it's a standing reminder, not a discrete new event, and
                                      would otherwise sit here permanently for the whole 7-day window
                                      and bury a genuinely new lead/follow-up under the same "1". --}}
-                                @php $bellCount = $dueFollowupsCount + $pendingLeadsCount + $dueCommitmentsCount + $dueMeetingsCount + $adminRenewalCount + $pendingSignupRequestsCount; @endphp
+                                @php $bellCount = $notificationItems->count() + $adminRenewalCount + $pendingSignupRequestsCount; @endphp
                                 @if ($bellCount > 0)
                                     <span class="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full {{ $adminRenewalCount > 0 ? 'bg-amber-500' : 'bg-red-600' }} text-white text-[10px] leading-4 text-center font-semibold">{{ $bellCount }}</span>
                                 @endif
@@ -346,62 +346,29 @@
                                 @endforeach
                             @endif
 
-                            <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-slate-700">
-                                {{ __('New leads awaiting approval') }}
-                            </div>
-                            @forelse ($pendingLeadsForBell as $pendingLead)
-                                <a href="{{ route('leads.show', $pendingLead) }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700">
-                                    <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ $pendingLead->name }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $pendingLead->phone }}</div>
-                                    <div class="text-xs text-gray-400">{{ $pendingLead->created_at->diffForHumans() }}</div>
-                                </a>
+                            @forelse ($notificationItems as $item)
+                                <div class="flex items-start gap-3 px-4 py-3 bg-indigo-50/70 dark:bg-indigo-900/10 border-b border-indigo-100 dark:border-slate-700 hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
+                                    <div class="shrink-0 mt-0.5 h-7 w-7 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 flex items-center justify-center">
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">{!! $item->icon() !!}</svg>
+                                    </div>
+                                    <a href="{{ $item->url }}" class="min-w-0 flex-1">
+                                        <div class="text-sm text-gray-800 dark:text-gray-100 font-medium truncate">{{ $item->title }}</div>
+                                        @if ($item->body)
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $item->body }}</div>
+                                        @endif
+                                        <div class="text-xs text-gray-400">{{ $item->created_at->diffForHumans() }}</div>
+                                    </a>
+                                    <form method="POST" action="{{ route('notifications.dismiss', $item) }}" onclick="event.stopPropagation();" class="shrink-0">
+                                        @csrf
+                                        <button type="submit" class="text-xs px-2 py-1 rounded border border-gray-300 dark:border-slate-600 text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-slate-600" title="{{ __('Done — hide this notification') }}">
+                                            {{ __('Done') }}
+                                        </button>
+                                    </form>
+                                </div>
                             @empty
-                                <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ __('No new leads right now.') }}</div>
+                                <div class="px-4 py-6 text-sm text-center text-gray-500 dark:text-gray-400">{{ __("You're all caught up.") }}</div>
                             @endforelse
-                            <a href="{{ route('leads.index') }}" class="block px-4 py-2 text-xs text-center text-accent-600 border-t border-gray-100 dark:border-slate-700 hover:underline">{{ __('View all leads') }}</a>
-
-                            <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-t border-b border-gray-100 dark:border-slate-700">
-                                {{ __('Follow-ups due') }}
-                            </div>
-                            @forelse ($dueFollowupsForBell as $followup)
-                                <a href="{{ $followup->customer_id ? route('customers.show', $followup->customer_id) : route('leads.show', $followup->lead_id) }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700">
-                                    <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ $followup->contact()->name }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $followup->note }}</div>
-                                    <div class="text-xs {{ $followup->due_at->isPast() ? 'text-red-500' : 'text-gray-400' }}">{{ $followup->due_at->diffForHumans() }}</div>
-                                </a>
-                            @empty
-                                <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ __('Nothing due right now.') }}</div>
-                            @endforelse
-                            <a href="{{ route('followups.index') }}" class="block px-4 py-2 text-xs text-center text-accent-600 border-t border-gray-100 dark:border-slate-700 hover:underline">{{ __('View all follow-ups') }}</a>
-
-                            <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-t border-b border-gray-100 dark:border-slate-700">
-                                {{ __('Possession commitments overdue') }}
-                            </div>
-                            @forelse ($dueCommitmentsForBell as $commitmentUnit)
-                                <a href="{{ route('customers.show', $commitmentUnit->customer) }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700">
-                                    <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ $commitmentUnit->customer?->name }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $commitmentUnit->project->name }} · {{ $commitmentUnit->unit_number }}</div>
-                                    <div class="text-xs text-red-500">{{ __('Promised') }} {{ $commitmentUnit->commitment_date->diffForHumans() }}</div>
-                                </a>
-                            @empty
-                                <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ __('Nothing overdue right now.') }}</div>
-                            @endforelse
-
-                            <div class="px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 border-t border-b border-gray-100 dark:border-slate-700">
-                                {{ __('Meetings today / soon') }}
-                            </div>
-                            @forelse ($dueMeetingsForBell as $meeting)
-                                <a href="{{ route('meetings.index') }}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-slate-700">
-                                    <div class="text-sm text-gray-800 dark:text-gray-100 font-medium">{{ $meeting->title }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $meeting->customer?->name }}{{ $meeting->location ? ' · '.$meeting->location : '' }}</div>
-                                    <div class="text-xs {{ $meeting->scheduled_at->isPast() ? 'text-red-500' : 'text-gray-400' }}">{{ $meeting->scheduled_at->format('d M, h:i A') }} · {{ $meeting->scheduled_at->diffForHumans() }}</div>
-                                </a>
-                            @empty
-                                <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">{{ __('No meetings coming up.') }}</div>
-                            @endforelse
-                            @if (\App\Support\Tenant::can('meetings'))
-                                <a href="{{ route('meetings.index') }}" class="block px-4 py-2 text-xs text-center text-accent-600 border-t border-gray-100 dark:border-slate-700 hover:underline">{{ __('View all meetings') }}</a>
-                            @endif
+                            <a href="{{ route('notifications.index') }}" class="block px-4 py-2 text-xs text-center text-accent-600 border-t border-gray-100 dark:border-slate-700 hover:underline">{{ __('View all notifications') }}</a>
                         </x-slot>
                     </x-dropdown>
 

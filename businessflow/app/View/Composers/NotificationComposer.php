@@ -2,6 +2,7 @@
 
 namespace App\View\Composers;
 
+use App\Models\AppNotification;
 use App\Models\Branch;
 use App\Models\Business;
 use App\Models\Followup;
@@ -96,13 +97,10 @@ class NotificationComposer
 
         if (! Tenant::check()) {
             $view->with([
-                'dueFollowupsForBell' => collect(),
+                'notificationItems' => collect(),
                 'dueFollowupsCount' => 0,
-                'pendingLeadsForBell' => collect(),
                 'pendingLeadsCount' => 0,
-                'dueCommitmentsForBell' => collect(),
                 'dueCommitmentsCount' => 0,
-                'dueMeetingsForBell' => collect(),
                 'dueMeetingsCount' => 0,
             ]);
 
@@ -138,16 +136,110 @@ class NotificationComposer
             ->limit(8)
             ->get();
 
+        $candidates = collect()
+            ->concat($due->map(fn (Followup $f) => [
+                'type' => 'followup',
+                'source_id' => $f->id,
+                'title' => $f->contact()?->name ?? __('Follow-up'),
+                'body' => $f->note,
+                'url' => $f->customer_id ? route('customers.show', $f->customer_id) : route('leads.show', $f->lead_id),
+            ]))
+            ->concat($pendingLeads->map(fn (Lead $l) => [
+                'type' => 'lead',
+                'source_id' => $l->id,
+                'title' => $l->name,
+                'body' => __('New lead awaiting approval'),
+                'url' => route('leads.show', $l),
+            ]))
+            ->concat($overdueCommitments->map(fn (ProjectUnit $u) => [
+                'type' => 'commitment',
+                'source_id' => $u->id,
+                'title' => $u->customer?->name ?? __('Possession commitment'),
+                'body' => $u->project->name.' · '.$u->unit_number,
+                'url' => $u->customer ? route('customers.show', $u->customer) : route('projects.show', $u->project),
+            ]))
+            ->concat($dueMeetings->map(fn (Meeting $m) => [
+                'type' => 'meeting',
+                'source_id' => $m->id,
+                'title' => $m->title,
+                'body' => $m->customer?->name,
+                'url' => route('meetings.index'),
+            ]));
+
+        $notificationItems = $this->syncNotifications($candidates)
+            ->reject(fn (AppNotification $n) => $n->dismissed_at)
+            ->sortByDesc('created_at')
+            ->values();
+
         $view->with([
-            'dueFollowupsForBell' => $due,
+            'notificationItems' => $notificationItems,
             'dueFollowupsCount' => Followup::where('status', 'pending')->where('due_at', '<=', now())->count(),
-            'pendingLeadsForBell' => $pendingLeads,
             'pendingLeadsCount' => Lead::where('status', Lead::STATUS_PENDING)->count(),
-            'dueCommitmentsForBell' => $overdueCommitments,
             'dueCommitmentsCount' => ProjectUnit::whereNull('archived_at')->whereNotNull('commitment_date')->where('commitment_date', '<=', now()->toDateString())->count(),
-            'dueMeetingsForBell' => $dueMeetings,
             'dueMeetingsCount' => Meeting::where('status', 'scheduled')->where('scheduled_at', '<=', now()->addDay())->count(),
         ]);
+    }
+
+    /**
+     * Idempotently turns every "currently due" item into a persisted
+     * AppNotification row, in two queries total (not one per item) —
+     * this runs on every authenticated page load, so N+1 here would mean
+     * N+1 extra queries on every single request. Rows that already exist
+     * are left untouched (never resets a dismissed_at the user already
+     * set), only genuinely new ones get inserted.
+     *
+     * @param  Collection<int, array{type: string, source_id: int, title: ?string, body: ?string, url: string}>  $candidates
+     * @return Collection<int, AppNotification>
+     */
+    private function syncNotifications(Collection $candidates): Collection
+    {
+        if ($candidates->isEmpty()) {
+            return collect();
+        }
+
+        $businessId = Tenant::id();
+
+        $existing = AppNotification::where('business_id', $businessId)
+            ->where(function ($query) use ($candidates) {
+                foreach ($candidates->groupBy('type') as $type => $items) {
+                    $query->orWhere(fn ($q) => $q->where('type', $type)->whereIn('source_id', $items->pluck('source_id')));
+                }
+            })
+            ->get()
+            ->keyBy(fn (AppNotification $n) => $n->type.':'.$n->source_id);
+
+        $toInsert = $candidates
+            ->reject(fn (array $c) => $existing->has($c['type'].':'.$c['source_id']))
+            ->map(fn (array $c) => [
+                'business_id' => $businessId,
+                'type' => $c['type'],
+                'source_id' => $c['source_id'],
+                'title' => $c['title'] ?: ucfirst($c['type']),
+                'body' => $c['body'],
+                'url' => $c['url'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])
+            ->values();
+
+        if ($toInsert->isNotEmpty()) {
+            AppNotification::insert($toInsert->all());
+
+            $existing = AppNotification::where('business_id', $businessId)
+                ->where(function ($query) use ($candidates) {
+                    foreach ($candidates->groupBy('type') as $type => $items) {
+                        $query->orWhere(fn ($q) => $q->where('type', $type)->whereIn('source_id', $items->pluck('source_id')));
+                    }
+                })
+                ->get()
+                ->keyBy(fn (AppNotification $n) => $n->type.':'.$n->source_id);
+        }
+
+        return $candidates
+            ->map(fn (array $c) => $existing->get($c['type'].':'.$c['source_id']))
+            ->filter()
+            ->unique('id')
+            ->values();
     }
 
     /**

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BackupAdminController;
 use App\Http\Controllers\Admin\LoginActivityController;
 use App\Http\Controllers\Admin\SignupRequestAdminController;
 use App\Http\Controllers\Admin\UserAdminController;
+use App\Http\Controllers\AppNotificationController;
 use App\Http\Controllers\AvailablePropertiesController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\BranchController;
@@ -229,6 +230,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/push/subscribe', [PushSubscriptionController::class, 'store'])->name('push.subscribe');
     Route::post('/push/unsubscribe', [PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+
+    Route::get('/notifications', [AppNotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/dismiss', [AppNotificationController::class, 'dismiss'])->name('notifications.dismiss');
+    Route::delete('/notifications/{notification}', [AppNotificationController::class, 'destroy'])->name('notifications.destroy');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
