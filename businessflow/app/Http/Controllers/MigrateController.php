@@ -29,6 +29,13 @@ class MigrateController extends Controller
         Artisan::call('view:clear');
         Artisan::call('config:clear');
         Artisan::call('route:clear');
+        // Refreshes bootstrap/cache/packages.php + services.php against
+        // whatever's actually in vendor/ right now — without this, a
+        // stale cache from an earlier deploy can still reference a
+        // provider class (e.g. a dev-only package) that no longer
+        // exists in vendor/, crashing every request with "Class ... not
+        // found" even though nothing else is wrong.
+        Artisan::call('package:discover');
         Artisan::call('migrate', ['--force' => true]);
         Artisan::call('payments:backfill-invoices');
 
