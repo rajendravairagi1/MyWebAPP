@@ -167,6 +167,18 @@
                     </div>
 
                     <div>
+                        <x-input-label for="access_mode" :value="__('App Access')" />
+                        <select id="access_mode" name="access_mode" required
+                            class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">
+                            @foreach (\App\Models\Business::ACCESS_MODES as $value => $label)
+                                <option value="{{ $value }}" @selected(old('access_mode', $business->access_mode) === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">{{ __('"Android app only" blocks opening this account in a regular web browser — this page always stays reachable from either, so you can never lock yourself out of this setting.') }}</p>
+                        <x-input-error :messages="$errors->get('access_mode')" class="mt-2" />
+                    </div>
+
+                    <div>
                         <x-input-label for="currency" :value="__('Currency')" />
                         <select id="currency" name="currency" required
                             class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500 rounded-md shadow-sm">

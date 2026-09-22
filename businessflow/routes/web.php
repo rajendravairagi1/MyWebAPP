@@ -205,6 +205,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/onboarding/business', [OnboardingController::class, 'store'])->name('onboarding.store');
 
     Route::get('/subscription-expired', [SubscriptionController::class, 'expired'])->name('subscription.expired');
+    Route::get('/android-required', [SubscriptionController::class, 'androidRequired'])->name('android-required');
 
     Route::get('/billing', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
     Route::get('/billing/payment-qr', [\App\Http\Controllers\BillingController::class, 'paymentQr'])->name('billing.payment-qr');

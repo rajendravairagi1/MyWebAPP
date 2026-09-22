@@ -23,6 +23,7 @@ class Business extends Model
         'renewal_alert_dismissed_at',
         'is_demo',
         'status',
+        'access_mode',
         'smart_alerts_enabled',
         'payment_reminders_enabled',
         'voice_notes_enabled',
@@ -119,6 +120,16 @@ class Business extends Model
     public function isActive(): bool
     {
         return $this->effectiveStatus() !== 'inactive';
+    }
+
+    public const ACCESS_MODES = [
+        'web_and_android' => 'Web + Android app',
+        'android_only' => 'Android app only',
+    ];
+
+    public function isAndroidOnly(): bool
+    {
+        return $this->access_mode === 'android_only';
     }
 
     public function users(): BelongsToMany

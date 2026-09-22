@@ -22,4 +22,11 @@ class SubscriptionController extends Controller
             'paused' => $request->query('reason') === 'paused',
         ]);
     }
+
+    public function androidRequired(): View
+    {
+        $business = Tenant::check() ? Business::find(Tenant::id()) : null;
+
+        return view('android-required', compact('business'));
+    }
 }

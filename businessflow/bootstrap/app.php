@@ -24,6 +24,7 @@ $builder = Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\IdentifyTenant::class,
             \App\Http\Middleware\EnsureSubscriptionActive::class,
+            \App\Http\Middleware\EnsureAccessChannel::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\NoCacheForAuthenticatedPages::class,
         ]);
