@@ -147,6 +147,7 @@ Route::middleware(['auth', 'verified', 'platform-admin'])->prefix('admin')->name
     Route::get('/create', [AdminController::class, 'create'])->name('create');
     Route::post('/', [AdminController::class, 'store'])->name('store');
     Route::put('/businesses/{business}/plan', [AdminController::class, 'updatePlan'])->name('businesses.plan');
+    Route::put('/businesses/{business}/access-mode', [AdminController::class, 'updateAccessMode'])->name('businesses.access-mode');
     Route::put('/businesses/{business}/expiry', [AdminController::class, 'updateExpiry'])->name('businesses.expiry');
     Route::put('/companies/{company}/expiry', [AdminController::class, 'updateCompanyExpiry'])->name('companies.expiry');
     Route::put('/companies/{company}/phone', [AdminController::class, 'updateCompanyPhone'])->name('companies.phone');

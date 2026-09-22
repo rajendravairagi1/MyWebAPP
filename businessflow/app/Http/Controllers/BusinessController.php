@@ -36,7 +36,6 @@ class BusinessController extends Controller
             'website' => ['nullable', 'string', 'max:255'],
             'invoice_prefix' => ['nullable', 'string', 'max:20'],
             'gst_number' => ['nullable', 'string', 'max:20'],
-            'access_mode' => ['required', 'in:'.implode(',', array_keys(Business::ACCESS_MODES))],
             'currency' => ['required', 'in:'.implode(',', array_keys(config('business.currencies')))],
             'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);

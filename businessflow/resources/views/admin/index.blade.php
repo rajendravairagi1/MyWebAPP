@@ -97,6 +97,15 @@
                                                 <option value="company" @selected($business->plan === 'company')>{{ __('Company (unlock)') }}</option>
                                             </select>
                                         </form>
+                                        <form method="POST" action="{{ route('admin.businesses.access-mode', $business) }}" class="inline-flex items-center gap-2 mt-1" title="{{ __('Which channel(s) this account can log in from') }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <select name="access_mode" onchange="this.form.submit()" class="text-xs border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                                @foreach (\App\Models\Business::ACCESS_MODES as $value => $label)
+                                                    <option value="{{ $value }}" @selected($business->access_mode === $value)>{{ $label }}</option>
+                                                @endforeach
+                                            </select>
+                                        </form>
                                     </td>
                                     <td class="px-5 py-2">
                                         @php

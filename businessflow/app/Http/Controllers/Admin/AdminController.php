@@ -321,6 +321,25 @@ class AdminController extends Controller
     }
 
     /**
+     * Which channel(s) a business can log in from — set here rather than
+     * by the business owner themselves, since it's tied to what they're
+     * paying for (see App\Http\Middleware\EnsureAccessChannel). Switching
+     * this never touches any data — it's purely a login-channel gate, so
+     * a business moved from "Android only" to "Web + Android" sees every
+     * bit of its existing data on the web immediately, nothing to migrate.
+     */
+    public function updateAccessMode(Request $request, Business $business): RedirectResponse
+    {
+        $data = $request->validate([
+            'access_mode' => ['required', 'in:'.implode(',', array_keys(Business::ACCESS_MODES))],
+        ]);
+
+        $business->update(['access_mode' => $data['access_mode']]);
+
+        return back()->with('status', "\"{$business->name}\" access set to \"".Business::ACCESS_MODES[$data['access_mode']].'".');
+    }
+
+    /**
      * Payment is collected manually outside the app, so this is how you
      * record when a business paid through to — access is cut off the day
      * after (see App\Http\Middleware\EnsureSubscriptionActive).
