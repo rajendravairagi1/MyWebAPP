@@ -123,13 +123,13 @@ class Business extends Model
     }
 
     public const ACCESS_MODES = [
-        'web_and_android' => 'Web + Android app',
-        'android_only' => 'Android app only',
+        'all_devices' => 'Web + Mobile (all devices)',
+        'mobile_only' => 'Mobile only (phone/tablet)',
     ];
 
-    public function isAndroidOnly(): bool
+    public function isMobileOnly(): bool
     {
-        return $this->access_mode === 'android_only';
+        return $this->access_mode === 'mobile_only';
     }
 
     public function users(): BelongsToMany

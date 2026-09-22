@@ -5,16 +5,16 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Lets a business be restricted to the Android app only — see
+ * Lets a business be restricted to mobile devices only — see
  * App\Http\Middleware\EnsureAccessChannel. Every existing business
- * defaults to 'web_and_android' (no behavior change on deploy).
+ * defaults to 'all_devices' (no behavior change on deploy).
  */
 return new class extends Migration
 {
     public function up(): void
     {
         Schema::table('businesses', function (Blueprint $table) {
-            $table->string('access_mode')->default('web_and_android')->after('status');
+            $table->string('access_mode')->default('all_devices')->after('status');
         });
     }
 

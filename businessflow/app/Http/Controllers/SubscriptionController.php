@@ -23,10 +23,10 @@ class SubscriptionController extends Controller
         ]);
     }
 
-    public function androidRequired(): View
+    public function mobileRequired(): View
     {
         $business = Tenant::check() ? Business::find(Tenant::id()) : null;
 
-        return view('android-required', compact('business'));
+        return view('mobile-required', compact('business'));
     }
 }
