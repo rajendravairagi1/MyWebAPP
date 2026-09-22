@@ -57,12 +57,31 @@
             </div>
 
             {{-- Standalone businesses (Solo / Team plans) --}}
-            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
-                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Businesses') }} ({{ __('Solo / Team plans') }})</div>
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden" x-data="{ scrollTable(dir) { $refs.businessesScroll.scrollBy({ left: dir * 220, behavior: 'smooth' }) } }">
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-2">
+                    <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Businesses') }} ({{ __('Solo / Team plans') }})</div>
+                    @if ($businesses->isNotEmpty())
+                        {{-- The table has more columns (incl. Reset password /
+                             Remove, in Actions) than fit most screens.
+                             overflow-x-auto below already lets you drag/swipe
+                             it sideways, but that's easy to miss — these
+                             buttons make the scrolling obvious and let you
+                             move the table with a tap instead of a swipe. --}}
+                        <div class="flex items-center gap-1 shrink-0">
+                            <span class="text-xs text-gray-400 dark:text-slate-500 hidden sm:inline">{{ __('Scroll for more') }} →</span>
+                            <button type="button" x-on:click="scrollTable(-1)" class="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700" aria-label="{{ __('Scroll left') }}">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                            </button>
+                            <button type="button" x-on:click="scrollTable(1)" class="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700" aria-label="{{ __('Scroll right') }}">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                            </button>
+                        </div>
+                    @endif
+                </div>
                 @if ($businesses->isEmpty())
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('None yet.') }}</div>
                 @else
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto" x-ref="businessesScroll">
                     <table class="min-w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
@@ -193,12 +212,25 @@
             </div>
 
             {{-- Companies (Company plan) --}}
-            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden">
-                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">{{ __('Companies') }} ({{ __('Multi-branch plan') }})</div>
+            <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg overflow-hidden" x-data="{ scrollTable(dir) { $refs.companiesScroll.scrollBy({ left: dir * 220, behavior: 'smooth' }) } }">
+                <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between gap-2">
+                    <div class="font-medium text-gray-800 dark:text-gray-100">{{ __('Companies') }} ({{ __('Multi-branch plan') }})</div>
+                    @if ($companies->isNotEmpty())
+                        <div class="flex items-center gap-1 shrink-0">
+                            <span class="text-xs text-gray-400 dark:text-slate-500 hidden sm:inline">{{ __('Scroll for more') }} →</span>
+                            <button type="button" x-on:click="scrollTable(-1)" class="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700" aria-label="{{ __('Scroll left') }}">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                            </button>
+                            <button type="button" x-on:click="scrollTable(1)" class="h-7 w-7 flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-600 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700" aria-label="{{ __('Scroll right') }}">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+                            </button>
+                        </div>
+                    @endif
+                </div>
                 @if ($companies->isEmpty())
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('None yet.') }}</div>
                 @else
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto" x-ref="companiesScroll">
                     <table class="min-w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-slate-700/60 text-xs uppercase text-gray-500 dark:text-gray-400">
                             <tr>
