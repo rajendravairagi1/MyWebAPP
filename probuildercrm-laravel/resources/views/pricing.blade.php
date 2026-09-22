@@ -8,8 +8,9 @@
 <section class="section-hero">
     <div class="container" style="max-width: 720px;">
         <p class="eyebrow">Pricing</p>
-        <h1>Simple pricing, no surprises</h1>
-        <p class="body-lg">Pick the plan that matches how your business runs today - upgrade any time as your team grows.</p>
+        <h1>Simple and transparent pricing</h1>
+        <p class="body-lg">Pro Builder CRM offers plans designed to suit different real estate and construction businesses. Choose the plan that fits you today, and upgrade any time as your team or project count grows - there's no unnecessary complexity in the pricing.</p>
+        <p class="body-lg">Every plan is affordable and built around your actual business size - the number of users and the projects you're managing - so you only pay for what you need. We recommend booking a free demo before you subscribe, so you can see every feature in action and confirm the plan fits your business processes before committing.</p>
     </div>
 </section>
 

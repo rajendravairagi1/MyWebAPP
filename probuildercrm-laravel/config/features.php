@@ -19,8 +19,8 @@ return [
         ],
         [
             'icon' => 'file-text',
-            'title' => "Professional paperwork, without the paperwork",
-            'description' => "Turn a quotation into an invoice in one click. Every receipt is generated automatically the moment a payment is recorded - no one has to remember to raise it. Products & services, tax, discounts, all handled.",
+            'title' => "Automatic receipt generation",
+            'description' => "Turn a quotation into an invoice in one click. A receipt is generated automatically the moment a payment is recorded - no manual record-keeping for payments or payouts. Service, tax and discount details are all handled for you, saving your team time on every transaction.",
         ],
         [
             'icon' => 'share-2',
