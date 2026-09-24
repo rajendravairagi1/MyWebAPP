@@ -201,10 +201,16 @@ Route::get('/verify/invoice/{invoice}', [VerifyController::class, 'invoice'])->n
 Route::get('/verify/customer/{customer}', [VerifyController::class, 'customer'])->name('verify.customer')->middleware('signed');
 Route::get('/verify/investor/{investor}', [VerifyController::class, 'investor'])->name('verify.investor')->middleware('signed');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Verified specifically here, not just on the routes below it —
+    // this is where the 7-day trial actually starts (see
+    // OnboardingController::store), so an unverified email must never
+    // be able to reach it directly by URL and spin up a trial anyway.
     Route::get('/onboarding/business', [OnboardingController::class, 'create'])->name('onboarding.create');
     Route::post('/onboarding/business', [OnboardingController::class, 'store'])->name('onboarding.store');
+});
 
+Route::middleware('auth')->group(function () {
     Route::get('/subscription-expired', [SubscriptionController::class, 'expired'])->name('subscription.expired');
     Route::get('/mobile-required', [SubscriptionController::class, 'mobileRequired'])->name('mobile-required');
 

@@ -1,4 +1,8 @@
 <x-guest-layout>
+    <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">
+        {{ __('Start your free 7-day trial — no card needed. Just verify your email and you\'re in.') }}
+    </p>
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
 

@@ -46,6 +46,10 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Not /dashboard: this account has no business yet (that's
+        // OnboardingController, reached after verifying) and 'verified'
+        // middleware would bounce them here anyway — going straight
+        // there skips the extra redirect.
+        return redirect()->route('verification.notice');
     }
 }

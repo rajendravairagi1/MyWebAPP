@@ -44,4 +44,11 @@
             </x-primary-button>
         </div>
     </form>
+
+    @if (Route::has('register'))
+        <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+            {{ __("New here?") }}
+            <a href="{{ route('register') }}" class="font-medium text-accent-600 hover:underline">{{ __('Start your free 7-day trial') }}</a>
+        </p>
+    @endif
 </x-guest-layout>
