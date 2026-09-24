@@ -139,10 +139,13 @@
                                     @if ($payment->reference)<span class="text-gray-400">· {{ $payment->reference }}</span>@endif
                                     @if ($payment->account)<span class="text-gray-400">· {{ __('Received in') }}: {{ $payment->account->label() }}</span>@endif
                                 </div>
-                                <div class="flex items-center gap-3 shrink-0">
-                                    <details class="relative">
+                                <div class="flex items-start gap-3 shrink-0">
+                                    <details>
                                         <summary class="cursor-pointer text-xs text-accent-600 hover:underline list-none [&::-webkit-details-marker]:hidden">{{ __('Edit') }}</summary>
-                                        <form method="POST" action="{{ route('payments.update', [$invoice, $payment]) }}" class="absolute right-0 z-10 mt-2 w-72 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-3 rounded-md space-y-2 text-left">
+                                        {{-- Not position:absolute — see unit-payment-ledger.blade.php,
+                                             same fix for the same reason (it used to float over
+                                             whatever came after this payment row). --}}
+                                        <form method="POST" action="{{ route('payments.update', [$invoice, $payment]) }}" class="mt-2 ml-auto w-72 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-3 rounded-md space-y-2 text-left">
                                             @csrf
                                             @method('PUT')
                                             <input type="number" step="0.01" min="0.01" name="amount" value="{{ $payment->amount }}" required class="w-full text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">

@@ -34,15 +34,19 @@
                     </div>
                     <div class="text-right shrink-0 pr-1">
                         <div class="text-lg font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($payment->amount, 0) }}</div>
-                        <div class="mt-1.5 flex items-center justify-end gap-1.5 text-xs">
+                        <div class="mt-1.5 flex items-start justify-end gap-1.5 text-xs">
                             @if ($payment->invoice)
                                 <a href="{{ route('invoices.show', $payment->invoice) }}" class="px-2 py-1 rounded border border-accent-200 dark:border-accent-800 text-accent-600 dark:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/20">{{ $payment->invoice->number }}</a>
                             @endif
                             @if ($editable)
-                                <details class="relative">
+                                <details>
                                     <summary class="cursor-pointer px-2 py-1 rounded border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 list-none [&::-webkit-details-marker]:hidden">{{ __('Edit') }}</summary>
                                     @php $paymentPurposeIsCustom = ! array_key_exists($payment->purpose, \App\Models\UnitPayment::PURPOSES); @endphp
-                                    <form method="POST" action="{{ route('unit-payments.update', [$unit, $payment]) }}" x-data="{ purpose: '{{ $paymentPurposeIsCustom ? 'other' : $payment->purpose }}', method: '{{ $payment->method ?: 'cash' }}', paymentAccountId: '{{ $payment->payment_account_id }}' }" class="absolute right-0 z-10 mt-2 grid grid-cols-2 gap-1.5 text-left w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-3 rounded-md">
+                                    {{-- Not position:absolute (this used to float over whatever
+                                         came after it — the next payment row, "Write off remaining
+                                         balance", etc. — hiding it until the form was closed again)
+                                         — a normal block just pushes that content down instead. --}}
+                                    <form method="POST" action="{{ route('unit-payments.update', [$unit, $payment]) }}" x-data="{ purpose: '{{ $paymentPurposeIsCustom ? 'other' : $payment->purpose }}', method: '{{ $payment->method ?: 'cash' }}', paymentAccountId: '{{ $payment->payment_account_id }}' }" class="mt-2 ml-auto grid grid-cols-2 gap-1.5 text-left w-64 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 shadow-lg p-3 rounded-md">
                                         @csrf
                                         @method('PUT')
                                         <select name="purpose" x-model="purpose" class="col-span-2 text-xs rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
