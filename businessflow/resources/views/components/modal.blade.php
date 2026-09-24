@@ -83,7 +83,20 @@ $maxWidth = [
     <div
         x-show="show"
         class="modal-panel relative bg-white dark:bg-slate-800 rounded-lg shadow-xl transform transition-all w-full {{ $maxWidth }} max-h-[calc(100vh-2rem)] overflow-y-auto"
-        style="max-height: calc(100vh - 2rem); overflow-y: auto;{{ $compact ? ' max-width: 20rem;' : '' }}"
+        {{--
+            Two max-height declarations, not one — a browser that doesn't
+            know 100dvh discards that whole line as invalid and keeps the
+            100vh one above it; a browser that does know it applies the
+            second, overriding the first. That's deliberate: on a phone,
+            100vh is the height with no on-screen keyboard up, so a modal
+            sized against it can end up taller than what's actually left
+            once the keyboard opens for one of its inputs — the keyboard
+            covers its own Save button, or the panel visibly grows/shrinks
+            as the keyboard shows and hides while typing. 100dvh already
+            tracks the space actually available and doesn't have either
+            problem.
+        --}}
+        style="max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); overflow-y: auto;{{ $compact ? ' max-width: 20rem;' : '' }}"
         x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
         x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
