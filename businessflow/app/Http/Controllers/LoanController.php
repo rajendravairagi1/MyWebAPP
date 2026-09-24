@@ -58,14 +58,33 @@ class LoanController extends Controller
         return view('loans.show', compact('loan', 'accounts'));
     }
 
+    /**
+     * "+ Bank Loan" on a property with none yet — its own page rather
+     * than a popup, same reasoning as loans.show replacing the old
+     * "Manage" modal: a small popup can still misbehave on a phone (the
+     * on-screen keyboard resizing the viewport out from under a
+     * height-capped modal is a known source of exactly the "keeps
+     * resizing, won't scroll" symptom), where a normal page never has
+     * that problem at all.
+     */
+    public function create(ProjectUnit $unit): View
+    {
+        abort_if(! $unit->customer_id, 422, 'Assign this property to a customer before adding a bank loan.');
+        abort_if($unit->loan, 422, 'This property already has a bank loan on record.');
+
+        $unit->load('project', 'customer');
+
+        return view('loans.create', compact('unit'));
+    }
+
     public function store(Request $request, ProjectUnit $unit): RedirectResponse
     {
         abort_if(! $unit->customer_id, 422, 'Assign this property to a customer before adding a bank loan.');
         abort_if($unit->loan, 422, 'This property already has a bank loan on record.');
 
-        $unit->loan()->create($this->validated($request) + ['customer_id' => $unit->customer_id]);
+        $loan = $unit->loan()->create($this->validated($request) + ['customer_id' => $unit->customer_id]);
 
-        return back()->with('status', 'Bank loan added.');
+        return redirect()->route('loans.show', $loan)->with('status', 'Bank loan added — add its first disbursement below whenever it comes in.');
     }
 
     public function update(Request $request, Loan $loan): RedirectResponse

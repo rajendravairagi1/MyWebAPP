@@ -392,6 +392,7 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::post('/loans/{loan}/restore', [LoanController::class, 'restore'])->name('loans.restore');
     Route::delete('/loans/{loan}/permanent', [LoanController::class, 'destroyPermanent'])->name('loans.destroy-permanent');
     Route::get('/loans/{loan}', [LoanController::class, 'show'])->name('loans.show');
+    Route::get('/project-units/{unit}/loan/create', [LoanController::class, 'create'])->name('loans.create');
     Route::post('/project-units/{unit}/loan', [LoanController::class, 'store'])->name('loans.store');
     Route::put('/loans/{loan}', [LoanController::class, 'update'])->name('loans.update');
     Route::delete('/loans/{loan}', [LoanController::class, 'destroy'])->name('loans.destroy');
