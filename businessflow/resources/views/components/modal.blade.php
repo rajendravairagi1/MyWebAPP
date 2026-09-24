@@ -21,6 +21,22 @@ $maxWidth = [
 ][$maxWidth];
 @endphp
 
+{{--
+    Teleported to <body> rather than left wherever Blade put it in the
+    page — a modal used to render nested inside whatever card it was
+    declared in (e.g. the Properties card on the customer page), and any
+    ancestor with transform/filter/backdrop-filter/perspective/will-change
+    becomes the containing block for a position:fixed descendant per the
+    CSS spec. The Nova theme's dark-mode glass effect
+    (`.dark[data-accent="nova"] main .dark\:bg-slate-800`) sets exactly
+    that on every card, which silently confined the whole modal — panel
+    and dimmed backdrop both — to that one card's box instead of the
+    viewport: it rendered small, off-center, didn't dim the rest of the
+    page, and content below the card (Quotations/Invoices, etc.) showed
+    through untouched. Teleporting to <body> means no ancestor, now or
+    added later, can ever trap it again.
+--}}
+<template x-teleport="body">
 <div
     x-data="{
         show: @js($show),
@@ -107,3 +123,4 @@ $maxWidth = [
         {{ $slot }}
     </div>
 </div>
+</template>
