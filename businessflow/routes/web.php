@@ -381,6 +381,7 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::get('/project-units/{unit}/media/{media}', [UnitMediaController::class, 'show'])->name('unit-media.show');
     Route::get('/project-units/{unit}/media/{media}/download', [UnitMediaController::class, 'download'])->name('unit-media.download');
     Route::delete('/project-units/{unit}/media/{media}', [UnitMediaController::class, 'destroy'])->name('unit-media.destroy');
+    Route::get('/project-units/{unit}/payments/create', [UnitPaymentController::class, 'create'])->name('unit-payments.create');
     Route::post('/project-units/{unit}/payments', [UnitPaymentController::class, 'store'])->name('unit-payments.store');
     Route::put('/project-units/{unit}/payments/{payment}', [UnitPaymentController::class, 'update'])->name('unit-payments.update');
     Route::delete('/project-units/{unit}/payments/{payment}', [UnitPaymentController::class, 'destroy'])->name('unit-payments.destroy');
