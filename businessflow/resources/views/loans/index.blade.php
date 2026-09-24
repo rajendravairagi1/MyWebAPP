@@ -9,9 +9,17 @@
                 <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-sm rounded-md p-3">{{ session('status') }}</div>
             @endif
 
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ __('Every bank loan across every customer — who took how much, how much has actually come in, and how much is still owed to be disbursed. Click a row for the full statement, disbursements and documents.') }}
-            </p>
+            <div class="flex items-start justify-between gap-4 flex-wrap">
+                <p class="text-sm text-gray-500 dark:text-gray-400 max-w-3xl">
+                    {{ __('Every bank loan across every customer — who took how much, how much has actually come in, and how much is still owed to be disbursed. Click a row for the full statement, disbursements and documents.') }}
+                </p>
+                <a href="{{ route('loans.archived') }}" class="shrink-0 inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold whitespace-nowrap border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                    {{ __('Archived Loans') }}
+                    @if ($archivedCount > 0)
+                        <span class="text-xs px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-gray-200">{{ $archivedCount }}</span>
+                    @endif
+                </a>
+            </div>
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-lg p-5">

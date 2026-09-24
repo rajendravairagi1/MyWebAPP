@@ -386,6 +386,11 @@ Route::middleware(['auth', 'verified', 'module:projects'])->group(function () {
     Route::delete('/project-units/{unit}/payments/{payment}', [UnitPaymentController::class, 'destroy'])->name('unit-payments.destroy');
 
     Route::get('/loans', [LoanController::class, 'index'])->name('loans.index');
+    // Before /loans/{loan} — otherwise "archived" would itself be
+    // parsed as a {loan} id and 404 on route-model binding.
+    Route::get('/loans/archived', [LoanController::class, 'archived'])->name('loans.archived');
+    Route::post('/loans/{loan}/restore', [LoanController::class, 'restore'])->name('loans.restore');
+    Route::delete('/loans/{loan}/permanent', [LoanController::class, 'destroyPermanent'])->name('loans.destroy-permanent');
     Route::get('/loans/{loan}', [LoanController::class, 'show'])->name('loans.show');
     Route::post('/project-units/{unit}/loan', [LoanController::class, 'store'])->name('loans.store');
     Route::put('/loans/{loan}', [LoanController::class, 'update'])->name('loans.update');

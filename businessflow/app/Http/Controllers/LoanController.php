@@ -45,7 +45,9 @@ class LoanController extends Controller
             ->paginate(\App\Support\ListPagination::perPage($request))
             ->withQueryString();
 
-        return view('loans.index', compact('loans', 'totals'));
+        $archivedCount = Loan::onlyTrashed()->count();
+
+        return view('loans.index', compact('loans', 'totals', 'archivedCount'));
     }
 
     public function show(Loan $loan): View
@@ -74,15 +76,59 @@ class LoanController extends Controller
     }
 
     /**
-     * Removing the loan record itself never removes the money already
-     * disbursed — those stay as ordinary payments in the unit's ledger,
-     * they just stop being grouped under a "loan" going forward.
+     * "Remove loan" archives it (soft delete) rather than destroying it —
+     * same pattern as Admin's Archived Accounts. Every disbursement, its
+     * receipt invoice, and the documents on this loan all stay exactly as
+     * they were; the loan just drops off the main Loans list until
+     * Restore brings it back from archived(). Not back() — the referer
+     * for this exact request is the loan's own page, which 404s the
+     * instant this archives it.
      */
     public function destroy(Loan $loan): RedirectResponse
     {
         $loan->delete();
 
-        return back()->with('status', 'Loan record removed — disbursements already recorded stay in the payment ledger.');
+        return redirect()->route('loans.index')->with('status', "\"{$loan->bank_name}\" loan archived — restore it any time from Archived Loans.");
+    }
+
+    /**
+     * Archived (soft-deleted) loans, on their own page — same shape as
+     * Admin's Archived Accounts. Disbursements/documents on an archived
+     * loan are still exactly what they were; this is only ever reached
+     * to Restore one or permanently delete it.
+     */
+    public function archived(Request $request): View
+    {
+        $loans = Loan::onlyTrashed()
+            ->with(['customer', 'unit.project'])
+            ->orderByDesc('deleted_at')
+            ->paginate(\App\Support\ListPagination::perPage($request));
+
+        return view('loans.archived', compact('loans'));
+    }
+
+    public function restore(int $loan): RedirectResponse
+    {
+        $loan = Loan::onlyTrashed()->findOrFail($loan);
+        $loan->restore();
+
+        return back()->with('status', "\"{$loan->bank_name}\" loan restored.");
+    }
+
+    /**
+     * Scoped to already-archived loans only, same reasoning as
+     * ProjectUnitController::destroyArchived() — this can't be used to
+     * skip archiving and delete an active loan by mistake. Disbursements
+     * aren't touched (unit_payments.loan_id just goes back to null — see
+     * the loans migration); loan_documents cascade-delete with it.
+     */
+    public function destroyPermanent(int $loan): RedirectResponse
+    {
+        $loan = Loan::onlyTrashed()->findOrFail($loan);
+        $bankName = $loan->bank_name;
+        $loan->forceDelete();
+
+        return back()->with('status', "\"{$bankName}\" loan permanently deleted.");
     }
 
     public function storeDisbursement(Request $request, Loan $loan): RedirectResponse
