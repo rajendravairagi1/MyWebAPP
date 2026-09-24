@@ -685,7 +685,7 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Pay a contractor against a contract (Work Order) — the balance still owed always comes from that contract, not from this payment form.') }}</p>
 
                         @if (\App\Support\Tenant::can('contractors'))
-                            @php $workContractors = $contractors->where('type', '!=', 'vendor')->values(); @endphp
+                            @php $workContractors = $projectContractors->where('type', '!=', 'vendor')->values(); @endphp
                             <div>
                                 <x-input-label :value="__('Contractor')" />
                                 <div class="flex gap-4 text-sm mb-2">
@@ -904,7 +904,7 @@
                     {{-- ============ Contractor path ============ --}}
                     <div x-show="editingCost.paymentType === 'contractor'" x-cloak class="space-y-4">
                         @if (\App\Support\Tenant::can('contractors'))
-                            @php $workContractors = $contractors->where('type', '!=', 'vendor')->values(); @endphp
+                            @php $workContractors = $projectContractors->where('type', '!=', 'vendor')->values(); @endphp
                             <div>
                                 <x-input-label :value="__('Contractor')" />
                                 <div class="flex gap-4 text-sm mb-2">

@@ -81,7 +81,16 @@ class ProjectController extends Controller
 
         $contractors = Tenant::can('contractors') ? Contractor::orderBy('name')->get() : collect();
 
-        return view('projects.show', compact('project', 'costsByCategory', 'customers', 'paymentAccounts', 'contractors'));
+        // Narrower than $contractors above (which is every contractor the
+        // business has ever worked with, used by the "Add a Work Order"
+        // form where picking someone from another project is expected) —
+        // this is only who already has a work order on *this* project, for
+        // the payment form's "existing contractor" list. Picking from the
+        // full business-wide list there meant scrolling past everyone
+        // who'd just show "no work orders yet" for this project anyway.
+        $projectContractors = $project->workOrders->pluck('contractor')->filter()->unique('id')->sortBy('name')->values();
+
+        return view('projects.show', compact('project', 'costsByCategory', 'customers', 'paymentAccounts', 'contractors', 'projectContractors'));
     }
 
     public function edit(Project $project): View
