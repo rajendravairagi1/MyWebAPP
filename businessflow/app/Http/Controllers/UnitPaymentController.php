@@ -2,36 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\PaymentAccount;
 use App\Models\ProjectUnit;
 use App\Models\UnitPayment;
 use App\Support\UnitPaymentRecorder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class UnitPaymentController extends Controller
 {
-    /**
-     * "Record Payment" on a property — its own page, same reasoning as
-     * loans.create replacing the "+ Bank Loan" modal: this form has
-     * enough in it (payment source, purpose, amount/date/method/
-     * reference/account) that a height-capped popup could clip on a
-     * short screen or resize under a phone's on-screen keyboard.
-     */
-    public function create(ProjectUnit $unit): View
-    {
-        $unit->load('project', 'customer', 'loan');
-        $paymentAccounts = PaymentAccount::orderBy('name')->get();
-
-        return view('unit-payments.create', compact('unit', 'paymentAccounts'));
-    }
-
     public function store(Request $request, ProjectUnit $unit): RedirectResponse
     {
         UnitPaymentRecorder::record($unit, $this->validated($request));
 
-        return redirect()->route('customers.show', $unit->customer_id)->with('status', 'Payment recorded.');
+        return back()->with('status', 'Payment recorded.');
     }
 
     public function update(Request $request, ProjectUnit $unit, UnitPayment $payment): RedirectResponse

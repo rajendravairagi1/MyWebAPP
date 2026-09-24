@@ -173,19 +173,6 @@ class LoanController extends Controller
             'payment_account_id' => $data['payment_account_id'] ?? null,
         ]);
 
-        // This route is shared with unit-payments/create.blade.php's
-        // "Bank Loan Disbursement" option, where back() would return to
-        // that form again instead of the customer whose payment history
-        // just changed. That form sends its own customer_id (never a raw
-        // URL — this only ever builds a route, so there's no open-redirect
-        // risk here) to redirect there instead; the loan page's own "+ Add
-        // Disbursement" form below doesn't send it, so back() (staying on
-        // this same page) is unaffected.
-        if ($request->filled('redirect_to_customer')) {
-            return redirect()->route('customers.show', $request->integer('redirect_to_customer'))
-                ->with('status', 'Disbursement recorded.');
-        }
-
         return back()->with('status', 'Disbursement recorded.');
     }
 
