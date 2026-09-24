@@ -50,7 +50,7 @@ class LoanController extends Controller
 
     public function show(Loan $loan): View
     {
-        $loan->load(['customer', 'unit.project', 'disbursements.account', 'documents']);
+        $loan->load(['customer', 'unit.project', 'disbursements.account', 'disbursements.invoice', 'documents']);
         $accounts = PaymentAccount::orderBy('name')->get();
 
         return view('loans.show', compact('loan', 'accounts'));

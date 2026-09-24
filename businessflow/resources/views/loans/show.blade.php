@@ -106,6 +106,7 @@
                 <div class="px-5 py-3 border-b border-gray-100 dark:border-slate-700 font-medium text-gray-800 dark:text-gray-100">
                     {{ __('Disbursements') }} ({{ $loan->disbursements->count() }})
                 </div>
+                @php $bankAccounts = $accounts->filter(fn ($a) => ! $a->isCash()); @endphp
                 @if ($loan->disbursements->isEmpty())
                     <div class="p-5 text-sm text-gray-500 dark:text-gray-400">{{ __('No disbursements recorded yet.') }}</div>
                 @else
@@ -117,20 +118,73 @@
                                     <th class="px-5 py-2 text-left">{{ __('Method') }}</th>
                                     <th class="px-5 py-2 text-left">{{ __('Reference / Cheque No.') }}</th>
                                     <th class="px-5 py-2 text-left">{{ __('Received In') }}</th>
+                                    <th class="px-5 py-2 text-left">{{ __('Invoice') }}</th>
                                     <th class="px-5 py-2 text-right">{{ __('Amount') }}</th>
+                                    <th class="px-5 py-2 text-left">{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
-                                @foreach ($loan->disbursements as $disbursement)
+                            @foreach ($loan->disbursements as $disbursement)
+                                {{-- Its own <tbody> (valid HTML — a table can have several) so
+                                     "editing" is scoped to just this one row, and the edit form
+                                     below opens as a full-width row of its own instead of a
+                                     dropdown box narrow enough to clip against the table's own
+                                     horizontal scroll, right where Actions sits at the far edge. --}}
+                                <tbody class="divide-y divide-gray-100 dark:divide-slate-700" x-data="{ editing: false }">
                                     <tr>
                                         <td class="px-5 py-2 text-gray-600 dark:text-gray-400 whitespace-nowrap">{{ $disbursement->paid_at->format('d M Y') }}</td>
                                         <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $disbursement->method ? ucfirst(str_replace('_', ' ', $disbursement->method)) : '—' }}</td>
                                         <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $disbursement->reference ?: '—' }}</td>
                                         <td class="px-5 py-2 text-gray-600 dark:text-gray-400">{{ $disbursement->account?->label() ?? '—' }}</td>
-                                        <td class="px-5 py-2 text-right font-medium text-gray-900 dark:text-gray-100">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($disbursement->amount, 0) }}</td>
+                                        <td class="px-5 py-2">
+                                            @if ($disbursement->invoice)
+                                                <a href="{{ route('invoices.show', $disbursement->invoice) }}" class="px-2 py-1 rounded border border-accent-200 dark:border-accent-800 text-accent-600 dark:text-accent-400 hover:bg-accent-50 dark:hover:bg-accent-900/20 whitespace-nowrap">{{ $disbursement->invoice->number }}</a>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+                                        <td class="px-5 py-2 text-right font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ \App\Support\Tenant::currencySymbol() }}{{ number_format($disbursement->amount, 0) }}</td>
+                                        <td class="px-5 py-2">
+                                            <div class="flex items-center gap-1.5 text-xs">
+                                                <button type="button" x-on:click="editing = ! editing" class="px-2 py-1 rounded border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700" x-text="editing ? '{{ __('Cancel') }}' : '{{ __('Edit') }}'"></button>
+                                                <form method="POST" action="{{ route('unit-payments.destroy', [$loan->unit, $disbursement]) }}" onsubmit="return confirm('{{ __('Remove this disbursement?') }}')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="px-2 py-1 rounded border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">{{ __('Delete') }}</button>
+                                                </form>
+                                            </div>
+                                        </td>
                                     </tr>
-                                @endforeach
-                            </tbody>
+                                    <tr x-show="editing" x-cloak>
+                                        <td colspan="7" class="px-5 py-4 bg-gray-50 dark:bg-slate-900/40">
+                                            <form method="POST" action="{{ route('unit-payments.update', [$loan->unit, $disbursement]) }}" class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="purpose" value="installment">
+                                                <input type="text" name="description" value="{{ $disbursement->description }}" placeholder="{{ __('Description') }}" class="col-span-2 sm:col-span-4 text-sm rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                                <input type="number" step="0.01" min="0.01" name="amount" value="{{ $disbursement->amount }}" required class="text-sm rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                                <input type="date" name="paid_at" value="{{ $disbursement->paid_at->format('Y-m-d') }}" required class="text-sm rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                                <select name="method" class="text-sm rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                                    @foreach (['bank_transfer' => 'Bank Transfer', 'cheque' => 'Cheque', 'neft' => 'NEFT', 'rtgs' => 'RTGS'] as $val => $label)
+                                                        <option value="{{ $val }}" @selected($disbursement->method === $val)>{{ __($label) }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <input type="text" name="reference" value="{{ $disbursement->reference }}" placeholder="{{ __('Reference / Cheque No.') }}" class="text-sm rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                                @if ($bankAccounts->isNotEmpty())
+                                                    <select name="payment_account_id" class="col-span-2 sm:col-span-4 text-sm rounded border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 focus:border-accent-500 focus:ring-accent-500">
+                                                        <option value="">{{ __('Received in — not specified') }}</option>
+                                                        @foreach ($bankAccounts as $account)
+                                                            <option value="{{ $account->id }}" @selected($disbursement->payment_account_id === $account->id)>{{ $account->label() }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                @endif
+                                                <div class="col-span-2 sm:col-span-4 flex justify-end">
+                                                    <button class="px-3 py-1.5 bg-accent-600 text-white text-xs font-semibold rounded-md hover:bg-accent-700">{{ __('Save') }}</button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            @endforeach
                         </table>
                     </div>
                 @endif
@@ -149,7 +203,6 @@
                         </select>
                         <input type="text" name="reference" placeholder="{{ __('Reference / Cheque No.') }}" class="block w-full text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                     </div>
-                    @php $bankAccounts = $accounts->filter(fn ($a) => ! $a->isCash()); @endphp
                     @if ($bankAccounts->isNotEmpty())
                         <select name="payment_account_id" class="block w-full sm:w-1/2 text-sm border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                             <option value="">{{ __('Received in (optional)') }}</option>
