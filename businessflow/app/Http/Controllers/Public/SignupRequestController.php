@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Mail\SignupRequestVerificationMail;
 use App\Models\SignupRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -49,16 +51,37 @@ class SignupRequestController extends Controller
             'email.unique' => 'An account (or a request awaiting approval) already uses this email.',
         ]);
 
-        SignupRequest::create([
+        $signupRequest = SignupRequest::create([
             'name' => $data['name'],
             'phone' => $data['phone'],
             'email' => $data['email'],
             'password_hash' => bcrypt($data['password']),
             'plan' => $data['plan'],
             'address' => $data['address'] ?? null,
-            'status' => 'pending',
+            // Not 'pending' yet — see verify() below. Admin's queue only
+            // ever shows a request once its email is confirmed real, so
+            // a mistyped or made-up address never reaches him at all.
+            'status' => 'unverified',
         ]);
 
+        Mail::to($signupRequest->email)->send(new SignupRequestVerificationMail($signupRequest));
+
         return redirect()->route('signup-requests.public.show')->with('requestSubmitted', true);
+    }
+
+    /**
+     * The link sent by SignupRequestVerificationMail. Confirming here is
+     * what actually moves the request into Admin's 'pending' queue —
+     * see SignupRequest::isVerified() and Admin\SignupRequestAdminController.
+     */
+    public function verify(Request $request, SignupRequest $signupRequest): View
+    {
+        abort_unless(hash_equals(sha1($signupRequest->email), (string) $request->route('hash')), 403);
+
+        if (! $signupRequest->isVerified() && $signupRequest->status === 'unverified') {
+            $signupRequest->update(['status' => 'pending', 'email_verified_at' => now()]);
+        }
+
+        return view('signup-requests.verified');
     }
 }

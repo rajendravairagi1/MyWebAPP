@@ -118,6 +118,9 @@ Route::get('/u/{token}/photo', [PublicProfileController::class, 'photo'])->name(
 // Admin reviews (see Admin\SignupRequestAdminController).
 Route::get('/get-started', [\App\Http\Controllers\Public\SignupRequestController::class, 'show'])->name('signup-requests.public.show');
 Route::post('/get-started', [\App\Http\Controllers\Public\SignupRequestController::class, 'store'])->name('signup-requests.public.store')->middleware('throttle:5,1');
+Route::get('/get-started/verify/{signupRequest}/{hash}', [\App\Http\Controllers\Public\SignupRequestController::class, 'verify'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('signup-requests.public.verify');
 
 // The lead-capture form a QR code (or a direct WhatsApp link) points a
 // prospect at — one token per business, scoped by App\Support\Modules'

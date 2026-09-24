@@ -18,19 +18,32 @@ class SignupRequest extends Model
 {
     protected $fillable = [
         'name', 'phone', 'email', 'password_hash', 'plan', 'address',
-        'status', 'business_id', 'reviewed_at',
+        'status', 'business_id', 'reviewed_at', 'email_verified_at',
     ];
 
     protected function casts(): array
     {
         return [
             'reviewed_at' => 'datetime',
+            'email_verified_at' => 'datetime',
         ];
     }
 
     public function isPending(): bool
     {
         return $this->status === 'pending';
+    }
+
+    /**
+     * Whether this request has confirmed its email address yet — see
+     * Public\SignupRequestController::verify(). A request sits in
+     * 'unverified' (not 'pending') until this happens, so Admin's
+     * queue never even shows a request built on an email nobody can
+     * actually receive at.
+     */
+    public function isVerified(): bool
+    {
+        return $this->email_verified_at !== null;
     }
 
     public const PLAN_LABELS = [

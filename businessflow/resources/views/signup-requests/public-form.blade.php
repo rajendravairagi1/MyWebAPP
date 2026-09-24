@@ -31,9 +31,9 @@
 
             @if (session('requestSubmitted'))
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-6 text-center space-y-2">
-                    <div class="text-2xl">✅</div>
-                    <h1 class="text-lg font-semibold">{{ __('Thank you!') }}</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Your request has been received. Our team will review it and set up your account shortly.') }}</p>
+                    <div class="text-2xl">📧</div>
+                    <h1 class="text-lg font-semibold">{{ __('Check your email') }}</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __("We've sent a confirmation link to your email address. Click it to send your request through for review.") }}</p>
                 </div>
             @else
                 <div class="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-6 space-y-4">

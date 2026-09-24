@@ -24,8 +24,11 @@ class SignupRequestAdminController extends Controller
 {
     public function index(): View
     {
+        // 'unverified' requests never appear here at all — see
+        // Public\SignupRequestController::verify(). An email nobody
+        // confirmed never reaches this queue, reviewed or not.
         $pending = SignupRequest::where('status', 'pending')->latest()->get();
-        $recent = SignupRequest::where('status', '!=', 'pending')->latest('reviewed_at')->limit(20)->get();
+        $recent = SignupRequest::whereNotIn('status', ['pending', 'unverified'])->latest('reviewed_at')->limit(20)->get();
 
         $publicUrl = route('signup-requests.public.show');
         $posterUrl = route('admin.signup-requests.qr-poster');
