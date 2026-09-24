@@ -546,6 +546,7 @@
                         'id' => $wo->id,
                         'contractor_id' => $wo->contractor_id,
                         'label' => $wo->description.' — '.number_format($wo->balance(), 0).' due',
+                        'balance' => $wo->balance(),
                     ])->values()) !!},
                     openEdit(cost) {
                         const isFixed = this.fixedCategories.includes(cost.category);
@@ -659,7 +660,7 @@
                       x-data="{
                           paymentType: 'contractor',
                           contractorMode: 'existing', newContractorType: 'other', selectedContractorId: '',
-                          workOrderMode: 'existing',
+                          workOrderMode: 'existing', selectedWorkOrderId: '',
                           vendorMode: 'existing',
                           category: 'land', isCredit: false,
                       }">
@@ -739,8 +740,27 @@
                                 </div>
                                 <input type="hidden" name="work_order_mode" x-model="workOrderMode">
 
-                                <div x-show="workOrderMode === 'existing'">
-                                    <select name="work_order_id" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                <div x-show="workOrderMode === 'existing'"
+                                     {{--
+                                         Default to the OLDEST work order this
+                                         contractor still has a balance on —
+                                         not just their latest one — so a
+                                         payment naturally goes toward closing
+                                         out an older contract before a newer
+                                         one even starts. Once that one is
+                                         fully paid off (balance reaches 0)
+                                         this same logic moves on to whichever
+                                         is next in line by itself, contract
+                                         after contract, without anyone having
+                                         to remember which one is still open.
+                                     --}}
+                                     x-effect="if (workOrderMode === 'existing') {
+                                         const matches = workOrders.filter(w => String(w.contractor_id) === String(selectedContractorId));
+                                         const oldestFirst = matches.slice().sort((a, b) => a.id - b.id);
+                                         const openOne = oldestFirst.find(w => w.balance > 0);
+                                         selectedWorkOrderId = openOne ? String(openOne.id) : (oldestFirst.length ? String(oldestFirst[oldestFirst.length - 1].id) : '');
+                                     }">
+                                    <select name="work_order_id" x-model="selectedWorkOrderId" class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                         <option value="">{{ __('— Select —') }}</option>
                                         <template x-for="wo in workOrders.filter(w => String(w.contractor_id) === String(selectedContractorId))" :key="wo.id">
                                             <option :value="wo.id" x-text="wo.label"></option>
