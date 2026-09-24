@@ -22,6 +22,7 @@
     },
     "dependencies": {
         "chart.js": "^4.5.1",
-        "cropperjs": "^1.6.3"
+        "cropperjs": "^1.6.3",
+        "flatpickr": "^4.6.13"
     }
 }

@@ -4,10 +4,12 @@ import {
     DoughnutController, ArcElement, CategoryScale, LinearScale, Tooltip, Legend, Filler,
 } from 'chart.js';
 import 'cropperjs/dist/cropper.css';
+import 'flatpickr/dist/flatpickr.min.css';
 import { initCropFields } from './crop-field';
 import { initUploadProgress } from './upload-progress';
 import { initDragReorder } from './drag-reorder';
 import { initPushNotifications } from './push-notifications';
+import { initDatePickers } from './date-picker';
 
 Chart.register(
     BarController, BarElement, LineController, LineElement, PointElement,
@@ -239,3 +241,4 @@ document.addEventListener('DOMContentLoaded', initCropFields);
 document.addEventListener('DOMContentLoaded', initUploadProgress);
 document.addEventListener('DOMContentLoaded', initDragReorder);
 document.addEventListener('DOMContentLoaded', initPushNotifications);
+document.addEventListener('DOMContentLoaded', initDatePickers);

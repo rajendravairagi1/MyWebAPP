@@ -437,3 +437,70 @@ input[type="submit"]:disabled {
     --accent-600: 123 116 231;
     --accent-700: 197 194 244;
 }
+
+/*
+ * flatpickr (resources/js/date-picker.js) ships its own light-only
+ * theme with no idea this app has a dark mode — without this, its
+ * calendar popup stayed a plain white box even with the rest of the
+ * page in dark mode. Matches the slate-800/900 dark surfaces and the
+ * --accent-* variables already used everywhere else, rather than
+ * introducing new colors just for this one widget.
+ */
+.dark .flatpickr-calendar {
+    background: rgb(30 41 59);
+    border-color: rgb(51 65 85);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+}
+.dark .flatpickr-calendar.arrowTop::before,
+.dark .flatpickr-calendar.arrowTop::after {
+    border-bottom-color: rgb(30 41 59);
+}
+.dark .flatpickr-months .flatpickr-month,
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months,
+.dark .flatpickr-current-month input.cur-year {
+    color: rgb(241 245 249);
+    fill: rgb(241 245 249);
+    background: transparent;
+}
+.dark .flatpickr-current-month .flatpickr-monthDropdown-months option {
+    background: rgb(30 41 59);
+}
+.dark .flatpickr-months .flatpickr-prev-month,
+.dark .flatpickr-months .flatpickr-next-month {
+    fill: rgb(148 163 184);
+}
+.dark .flatpickr-months .flatpickr-prev-month:hover svg,
+.dark .flatpickr-months .flatpickr-next-month:hover svg {
+    fill: rgb(226 232 240);
+}
+.dark .flatpickr-weekdays,
+.dark span.flatpickr-weekday {
+    background: transparent;
+    color: rgb(148 163 184);
+}
+.dark .flatpickr-day {
+    color: rgb(226 232 240);
+}
+.dark .flatpickr-day.flatpickr-disabled,
+.dark .flatpickr-day.prevMonthDay,
+.dark .flatpickr-day.nextMonthDay {
+    color: rgb(100 116 139);
+}
+.dark .flatpickr-day:hover,
+.dark .flatpickr-day:focus {
+    background: rgb(51 65 85);
+    border-color: rgb(51 65 85);
+}
+.dark .flatpickr-day.today {
+    border-color: rgb(var(--accent-500));
+}
+.dark .flatpickr-day.selected,
+.dark .flatpickr-day.selected:hover {
+    background: rgb(var(--accent-600));
+    border-color: rgb(var(--accent-600));
+    color: #fff;
+}
+.dark .flatpickr-time input,
+.dark .flatpickr-time .flatpickr-am-pm {
+    color: rgb(241 245 249);
+}
