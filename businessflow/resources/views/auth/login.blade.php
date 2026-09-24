@@ -45,10 +45,8 @@
         </div>
     </form>
 
-    @if (Route::has('register'))
-        <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-            {{ __("New here?") }}
-            <a href="{{ route('register') }}" class="font-medium text-accent-600 hover:underline">{{ __('Start your free 7-day trial') }}</a>
-        </p>
-    @endif
+    <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+        {{ __("New here?") }}
+        <a href="{{ route('signup-requests.public.show') }}" class="font-medium text-accent-600 hover:underline">{{ __('Request your account') }}</a>
+    </p>
 </x-guest-layout>

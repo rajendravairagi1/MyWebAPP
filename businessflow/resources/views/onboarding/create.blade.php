@@ -8,11 +8,8 @@
     <div class="py-12">
         <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-slate-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
                     {{ __('A couple of details and your :name dashboard will be ready.', ['name' => config('app.name', 'Pro Builder CRM')]) }}
-                </p>
-                <p class="text-sm font-medium text-accent-600 mb-6">
-                    {{ __('Your 7-day free trial starts the moment you save this.') }}
                 </p>
 
                 <form method="POST" action="{{ route('onboarding.store') }}" class="space-y-6">

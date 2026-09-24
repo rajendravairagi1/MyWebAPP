@@ -30,12 +30,6 @@ class OnboardingController extends Controller
 
         $business = $request->user()->businesses()->create($data + [
             'invoice_prefix' => 'INV',
-            // Reaching this form at all means the account has no
-            // business yet (see IdentifyTenant) — today that only
-            // happens right after self-signup, so this is the one place
-            // the free trial actually starts. plan defaults to 'solo' at
-            // the database level, matching the trial tier.
-            'subscription_expires_at' => now()->addDays(7),
         ], [
             'role' => 'owner',
             'status' => 'active',

@@ -17,6 +17,7 @@ use App\Models\SignupRequest;
 use App\Models\User;
 use App\Support\RenewalAlerts;
 use App\Support\Tenant;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -271,6 +272,13 @@ class AdminController extends Controller
             'email' => $data['owner_email'],
             'password' => $password,
         ]);
+
+        // Every route already requires a verified email (see
+        // App\Models\User) — without firing this, an approved customer
+        // would land on "please verify your email" with no email ever
+        // sent, and no way to trigger one short of finding the Resend
+        // button themselves on that first, confusing login.
+        event(new Registered($user));
 
         if ($data['plan'] === 'company') {
             $company = Company::create([
