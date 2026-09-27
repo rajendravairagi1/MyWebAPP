@@ -65,8 +65,16 @@ use App\Http\Controllers\UnitPaymentController;
 use App\Http\Controllers\VerifyController;
 use Illuminate\Support\Facades\Route;
 
-// No public landing page here — the marketing site is probuildercrm.com.
-Route::get('/', fn () => redirect()->away('https://probuildercrm.com', 301));
+// No public landing page here — send a casual visitor to the marketing
+// site instead... except this used to send EVERY plain visit to '/'
+// there, including PWABuilder's own scan of app.probuildercrm.com,
+// which needs to land on a page of THIS app (one with the
+// <link rel="manifest"> tag from partials/pwa-head.blade.php) to detect
+// installability at all — landing on an entirely different domain's
+// homepage instead, it just saw no PWA there and failed. /login is
+// still this app, still has that same tag, and is exactly where a human
+// visiting bare app.probuildercrm.com should end up anyway.
+Route::get('/', fn () => redirect()->route('login'));
 
 // Proves to Android that this domain and the Play Store app package are
 // the same publisher, so the TWA (Trusted Web Activity) wrapper opens
