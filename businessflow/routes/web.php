@@ -219,6 +219,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/billing', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
     Route::get('/billing/payment-qr', [\App\Http\Controllers\BillingController::class, 'paymentQr'])->name('billing.payment-qr');
+    Route::post('/billing/google-play/activate', [\App\Http\Controllers\BillingController::class, 'activateGooglePlay'])->name('billing.google-play.activate');
 });
 
 // Company → Branch → Builder hierarchy, for owners running multiple

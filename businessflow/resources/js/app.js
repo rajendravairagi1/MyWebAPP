@@ -10,6 +10,7 @@ import { initUploadProgress } from './upload-progress';
 import { initDragReorder } from './drag-reorder';
 import { initPushNotifications } from './push-notifications';
 import { initDatePickers } from './date-picker';
+import { initPlayBilling } from './play-billing';
 
 Chart.register(
     BarController, BarElement, LineController, LineElement, PointElement,
@@ -242,3 +243,4 @@ document.addEventListener('DOMContentLoaded', initUploadProgress);
 document.addEventListener('DOMContentLoaded', initDragReorder);
 document.addEventListener('DOMContentLoaded', initPushNotifications);
 document.addEventListener('DOMContentLoaded', initDatePickers);
+document.addEventListener('DOMContentLoaded', initPlayBilling);

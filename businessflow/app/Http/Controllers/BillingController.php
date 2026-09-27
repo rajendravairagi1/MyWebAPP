@@ -5,7 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Business;
 use App\Models\PlatformSetting;
 use App\Support\DocumentQr;
+use App\Support\GooglePlayBillingService;
 use App\Support\Tenant;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -31,7 +34,31 @@ class BillingController extends Controller
             'business' => $business,
             'expiresOn' => $business?->effectiveExpiresAt(),
             'settings' => PlatformSetting::current(),
+            // Product ID -> plan, flipped to plan -> product ID for the
+            // view — see resources/js/play-billing.js, which only shows
+            // this section at all once it's confirmed (client-side) that
+            // this page is running inside the Android app, not a browser.
+            'googlePlayProducts' => array_flip(config('services.google_play.product_plan_map', [])),
         ]);
+    }
+
+    /**
+     * Called by resources/js/play-billing.js once the Play Billing sheet
+     * (triggered from inside the TWA app) hands back a purchase token —
+     * never trusts that token's own claimed state, just hands it to
+     * GooglePlayBillingService to look up fresh from Google and apply.
+     */
+    public function activateGooglePlay(Request $request, GooglePlayBillingService $billing): JsonResponse
+    {
+        $data = $request->validate(['purchase_token' => ['required', 'string']]);
+
+        $business = Tenant::check() ? Business::find(Tenant::id()) : null;
+        abort_unless($business, 401);
+
+        $purchase = $billing->activateFromToken($data['purchase_token'], $business);
+        abort_unless($purchase, 422, 'Could not verify this purchase with Google Play.');
+
+        return response()->json(['status' => 'ok']);
     }
 
     /**

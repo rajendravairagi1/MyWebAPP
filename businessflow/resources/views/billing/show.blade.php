@@ -20,13 +20,33 @@
             @endif
         </p>
 
+        {{--
+            Two mutually-exclusive ways to pay, never both shown at once —
+            Google Play policy requires any in-app digital subscription
+            purchase to go through Play Billing, so a non-Google payment
+            method (the UPI QR below) can't be offered alongside it inside
+            the Android app. Both blocks render on every page load; only
+            resources/js/play-billing.js decides — client-side, from
+            whether this page is actually running inside the TWA — which
+            one a given visitor ever sees.
+        --}}
+        <div id="play-billing-root" data-business-id="{{ $business?->id }}" data-activate-url="{{ route('billing.google-play.activate') }}" style="display: none;" class="pt-1 space-y-2">
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Choose a plan to subscribe or renew — billed through Google Play.') }}</p>
+            @foreach ($googlePlayProducts as $plan => $productId)
+                <button type="button" data-play-product="{{ $productId }}"
+                    class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-accent-600 text-white text-sm font-semibold rounded-md hover:bg-accent-700 disabled:opacity-60">
+                    {{ __('Subscribe to :plan', ['plan' => \App\Models\SignupRequest::PLAN_LABELS[$plan] ?? ucfirst($plan)]) }}
+                </button>
+            @endforeach
+        </div>
+
         @if ($settings->hasUpiId() || $settings->hasPaymentQr())
-            <div class="pt-1">
+            <div id="upi-payment-block" class="pt-1">
                 <x-upi-payment-card :settings="$settings" />
             </div>
         @endif
 
-        <p class="text-sm text-gray-600 dark:text-gray-400">
+        <p id="upi-payment-note" class="text-sm text-gray-600 dark:text-gray-400">
             @if ($settings->support_whatsapp)
                 {{ __('After paying, send us the payment screenshot on WhatsApp and we\'ll update your validity — usually within a few hours.') }}
             @else
