@@ -7,6 +7,7 @@ use App\Mail\SignupRequestVerificationMail;
 use App\Models\SignupRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -22,8 +23,19 @@ use Illuminate\View\View;
  */
 class SignupRequestController extends Controller
 {
-    public function show(): View
+    /**
+     * This is also the PWA manifest's start_url (see PwaController) — the
+     * page the Android app opens to fresh, for someone with no session
+     * yet. Someone who already has one and opens the app anyway (their
+     * session outlives any one visit) shouldn't be shown a signup form
+     * for an account they're already logged into.
+     */
+    public function show(): View|RedirectResponse
     {
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+
         return view('signup-requests.public-form');
     }
 

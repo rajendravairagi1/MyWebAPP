@@ -131,7 +131,15 @@
 
                     <div class="border-t border-gray-100 dark:border-slate-700 pt-4">
                         <x-input-label for="subscription_expires_at" :value="__('Valid till (optional)')" />
-                        <x-text-input id="subscription_expires_at" name="subscription_expires_at" type="date" class="mt-1 block w-full sm:w-56" />
+                        {{-- Pre-filled to a 15-day trial from today when approving a
+                             self-serve signup request — not for the plain "Add
+                             Customer Account" path (no $signupRequest), where a
+                             manually-added real customer has no trial to default
+                             to and this should stay blank unless typed in. Still
+                             just a starting point either way: clear it, or pick
+                             any other date, before submitting. --}}
+                        <x-text-input id="subscription_expires_at" name="subscription_expires_at" type="date" class="mt-1 block w-full sm:w-56"
+                            value="{{ old('subscription_expires_at', $signupRequest ? now()->addDays(15)->toDateString() : '') }}" />
                         <p class="text-xs text-gray-400 mt-1">{{ __('Leave blank for no expiry. Access pauses automatically the day after this date — you can change it anytime from the account list.') }}</p>
                         <x-input-error :messages="$errors->get('subscription_expires_at')" class="mt-2" />
                     </div>

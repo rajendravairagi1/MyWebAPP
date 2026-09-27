@@ -32,7 +32,16 @@ class PwaController extends Controller
         $manifest = [
             'name' => $name,
             'short_name' => \Illuminate\Support\Str::limit($name, 12, ''),
-            'start_url' => url('/dashboard'),
+            // Not /dashboard — this manifest is also what PWABuilder reads
+            // to bake a start_url into the Play Store Android package,
+            // generated with no one logged in, so a brand-new person who
+            // just installed the app from Play Store needs this to be
+            // somewhere useful for THEM: the signup form, not a login
+            // wall for an account they don't have yet. Someone who
+            // already has one isn't stuck on it either — see
+            // SignupRequestController::show(), which sends an already-
+            // authenticated visitor straight on to /dashboard itself.
+            'start_url' => route('signup-requests.public.show'),
             'display' => 'standalone',
             'background_color' => '#ffffff',
             'theme_color' => '#4f46e5',
