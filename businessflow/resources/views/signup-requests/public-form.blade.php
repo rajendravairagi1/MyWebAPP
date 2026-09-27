@@ -5,45 +5,46 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ __('Get Started') }} — {{ config('app.name') }}</title>
 
-        <script>
-            (function () {
-                // Defaults to dark regardless of the visitor's device theme -
-                // the brand logo is a light-colored mark made for a dark
-                // background, so it disappears if this ever renders light.
-                // A returning visitor's own explicit choice (from the admin
-                // app's theme toggle) is still respected.
-                var stored = localStorage.getItem('theme');
-                var dark = stored !== 'light';
-                if (dark) document.documentElement.classList.add('dark');
-            })();
-        </script>
+        {{--
+            Deliberately no dark-mode script here (the main app's other
+            pages read a `theme` value from localStorage and toggle a
+            `dark` class) — this page is the very first thing a brand-new,
+            not-yet-logged-in visitor sees, so there's no stored preference
+            of theirs to read yet, and one could leak in from a previous
+            visit to a different page on this same browser. That made this
+            page's look depend on whatever the visitor's browser happened
+            to have stored, drifting out of sync with the fixed, always-
+            light look of the probuildercrm.com marketing site. This page
+            now always renders the same way for every visitor, matching
+            that site, full stop.
+        --}}
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-gray-50 dark:bg-slate-900 text-gray-900 dark:text-gray-100 min-h-screen flex items-center justify-center py-10 px-4">
+    <body class="font-sans antialiased bg-gray-50 text-gray-900 min-h-screen flex items-center justify-center py-10 px-4">
         <div class="w-full max-w-md space-y-5">
             <div class="flex items-center justify-center">
                 <x-application-logo base-height="2.5rem" />
             </div>
 
             @if (session('requestSubmitted'))
-                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-6 text-center space-y-2">
+                <div class="bg-white shadow-sm rounded-xl p-6 text-center space-y-2">
                     <div class="text-2xl">📧</div>
                     <h1 class="text-lg font-semibold">{{ __('Check your email') }}</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __("We've sent a confirmation link to your email address. Click it to send your request through for review.") }}</p>
+                    <p class="text-sm text-gray-500">{{ __("We've sent a confirmation link to your email address. Click it to send your request through for review.") }}</p>
                 </div>
             @else
-                <div class="bg-white dark:bg-slate-800 shadow-sm rounded-xl p-6 space-y-4">
+                <div class="bg-white shadow-sm rounded-xl p-6 space-y-4">
                     <div class="text-center">
                         <h1 class="text-lg font-semibold">{{ __('Get Your Account') }}</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ __('Fill in your details below and our team will set up your account.') }}</p>
+                        <p class="text-sm text-gray-500 mt-1">{{ __('Fill in your details below and our team will set up your account.') }}</p>
                     </div>
 
                     @if ($errors->any())
-                        <div class="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-md p-3">{{ $errors->first() }}</div>
+                        <div class="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md p-3">{{ $errors->first() }}</div>
                     @endif
 
                     <form method="POST" action="{{ route('signup-requests.public.store') }}" class="space-y-4">
@@ -58,34 +59,34 @@
                         </div>
 
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Username') }}</label>
+                            <label for="name" class="block text-sm font-medium text-gray-700">{{ __('Username') }}</label>
                             <input id="name" name="name" type="text" required value="{{ old('name') }}" autofocus
-                                class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                         </div>
 
                         <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Phone Number') }}</label>
+                            <label for="phone" class="block text-sm font-medium text-gray-700">{{ __('Phone Number') }}</label>
                             <input id="phone" name="phone" type="tel" required value="{{ old('phone') }}"
-                                class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                         </div>
 
                         <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Email') }}</label>
+                            <label for="email" class="block text-sm font-medium text-gray-700">{{ __('Email') }}</label>
                             <input id="email" name="email" type="email" required value="{{ old('email') }}"
-                                class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                         </div>
 
                         <div>
-                            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Password') }}</label>
+                            <label for="password" class="block text-sm font-medium text-gray-700">{{ __('Password') }}</label>
                             <input id="password" name="password" type="password" required minlength="8"
-                                class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                             <p class="text-xs text-gray-400 mt-1">{{ __('At least 8 characters — this is what you\'ll log in with once approved.') }}</p>
                         </div>
 
                         <div>
-                            <label for="plan" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Plan') }}</label>
+                            <label for="plan" class="block text-sm font-medium text-gray-700">{{ __('Plan') }}</label>
                             <select id="plan" name="plan" required
-                                class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
                                 @foreach (\App\Models\SignupRequest::PLAN_LABELS as $value => $label)
                                     <option value="{{ $value }}" @selected(old('plan', 'team') === $value)>{{ $label }}</option>
                                 @endforeach
@@ -93,9 +94,9 @@
                         </div>
 
                         <div>
-                            <label for="address" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Address') }}</label>
+                            <label for="address" class="block text-sm font-medium text-gray-700">{{ __('Address') }}</label>
                             <textarea id="address" name="address" rows="2"
-                                class="mt-1 block w-full border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('address') }}</textarea>
+                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('address') }}</textarea>
                         </div>
 
                         <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-accent-600 text-white text-sm font-semibold rounded-md hover:bg-accent-700">
