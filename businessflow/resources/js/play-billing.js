@@ -10,23 +10,32 @@
  * Chrome-documented signal that the current page was opened by a
  * Trusted Web Activity rather than a normal browser tab — see
  * https://developer.chrome.com/docs/android/trusted-web-activity/. But
- * Chrome only sets that referrer on the TWA's very first page load —
- * the moment the app launches and reaches its start_url. Any page
- * reached afterward by clicking something inside the app (the common
- * case: Dashboard -> ... -> Renew Your Plan) has document.referrer set
- * to whatever page linked to it instead, which is just this same site's
- * own URL, not "android-app://" — the billing page almost never sees
- * that value directly. So the flag gets captured once, on whichever
- * page happens to be first, and remembered in sessionStorage (scoped to
- * this one browsing session, cleared when the app/tab actually closes)
- * for every page after that.
+ * Chrome only sets that referrer on a TWA's cold-launch page load — the
+ * moment the app's process starts fresh and reaches its start_url. Any
+ * page reached afterward by clicking something inside the app (the
+ * common case: Dashboard -> ... -> Renew Your Plan) has document.referrer
+ * set to whatever page linked to it instead, which is just this same
+ * site's own URL, not "android-app://" — the billing page almost never
+ * sees that value directly.
+ *
+ * That flag is remembered in localStorage rather than sessionStorage:
+ * sessionStorage is tied to one browsing session and is gone the moment
+ * Android kills the app's process in the background (which it does
+ * often, well before the user ever "closes" the app), so the very next
+ * resume — even though it's still visually the same installed app to
+ * the user — can start a brand new session with no flag and no fresh
+ * android-app:// referrer to re-derive it from (a warm resume from the
+ * recent-apps switcher doesn't re-navigate at all). localStorage has no
+ * such expiry: once this device has confirmed even once, on any page,
+ * that it's genuinely running inside the installed TWA, that's true for
+ * as long as the app stays installed.
  */
-const TWA_SESSION_FLAG = 'pbc_opened_as_twa';
+const TWA_DEVICE_FLAG = 'pbc_opened_as_twa';
 
 function rememberIfLaunchedAsTwa() {
     if (document.referrer.startsWith('android-app://')) {
         try {
-            sessionStorage.setItem(TWA_SESSION_FLAG, '1');
+            localStorage.setItem(TWA_DEVICE_FLAG, '1');
         } catch (e) {
             // Private-browsing/storage-blocked — nothing to do; the
             // referrer check on this exact page load still works below.
@@ -38,7 +47,7 @@ function isInsideTwa() {
     if (document.referrer.startsWith('android-app://')) return true;
 
     try {
-        return sessionStorage.getItem(TWA_SESSION_FLAG) === '1';
+        return localStorage.getItem(TWA_DEVICE_FLAG) === '1';
     } catch (e) {
         return false;
     }
