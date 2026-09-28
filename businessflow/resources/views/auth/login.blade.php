@@ -1,4 +1,16 @@
 <x-guest-layout>
+    {{--
+        Mirrors the same toggle on the signup page (both pages are
+        reachable directly — this one is also the Android app's
+        start_url for anyone already logged out there) so either one is
+        one click from the other, instead of only signup -> login
+        working via the plain text link further down.
+    --}}
+    <div class="grid grid-cols-2 gap-1 p-1 bg-white/5 rounded-lg text-sm font-medium mb-4">
+        <span class="rounded-md py-2 text-center bg-white/10 text-white">{{ __('Login') }}</span>
+        <a href="{{ route('signup-requests.public.show') }}" class="rounded-md py-2 text-center text-gray-400 hover:text-gray-200">{{ __('Sign Up') }}</a>
+    </div>
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 

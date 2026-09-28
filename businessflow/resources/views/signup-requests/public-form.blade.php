@@ -31,6 +31,20 @@
                 <x-application-logo base-height="2.5rem" />
             </div>
 
+            {{--
+                A brand-new visitor and a returning one land on this exact
+                same URL (it's the Android app's start_url — see
+                PwaController::manifest()), so this has to work for both:
+                Sign Up stays highlighted since this page IS the signup
+                form, Login just goes to the login page directly — no
+                in-page form-swapping needed since that page already has
+                its own "New here? Request your account" link back here.
+            --}}
+            <div class="grid grid-cols-2 gap-1 p-1 bg-slate-800 rounded-lg text-sm font-medium">
+                <span class="rounded-md py-2 text-center bg-slate-700 text-white">{{ __('Sign Up') }}</span>
+                <a href="{{ route('login') }}" class="rounded-md py-2 text-center text-gray-400 hover:text-gray-200">{{ __('Login') }}</a>
+            </div>
+
             @if (session('requestSubmitted'))
                 <div class="bg-slate-800 shadow-sm rounded-xl p-6 text-center space-y-2">
                     <div class="text-2xl">📧</div>
