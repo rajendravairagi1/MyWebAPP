@@ -9,16 +9,51 @@
  * `document.referrer` starting with "android-app://" is the standard,
  * Chrome-documented signal that the current page was opened by a
  * Trusted Web Activity rather than a normal browser tab — see
- * https://developer.chrome.com/docs/android/trusted-web-activity/ — so
- * everything below is skipped entirely for anyone in a regular mobile or
- * desktop browser, who keeps seeing exactly today's UPI flow.
+ * https://developer.chrome.com/docs/android/trusted-web-activity/. But
+ * Chrome only sets that referrer on the TWA's very first page load —
+ * the moment the app launches and reaches its start_url. Any page
+ * reached afterward by clicking something inside the app (the common
+ * case: Dashboard -> ... -> Renew Your Plan) has document.referrer set
+ * to whatever page linked to it instead, which is just this same site's
+ * own URL, not "android-app://" — the billing page almost never sees
+ * that value directly. So the flag gets captured once, on whichever
+ * page happens to be first, and remembered in sessionStorage (scoped to
+ * this one browsing session, cleared when the app/tab actually closes)
+ * for every page after that.
  */
+const TWA_SESSION_FLAG = 'pbc_opened_as_twa';
+
+function rememberIfLaunchedAsTwa() {
+    if (document.referrer.startsWith('android-app://')) {
+        try {
+            sessionStorage.setItem(TWA_SESSION_FLAG, '1');
+        } catch (e) {
+            // Private-browsing/storage-blocked — nothing to do; the
+            // referrer check on this exact page load still works below.
+        }
+    }
+}
+
+function isInsideTwa() {
+    if (document.referrer.startsWith('android-app://')) return true;
+
+    try {
+        return sessionStorage.getItem(TWA_SESSION_FLAG) === '1';
+    } catch (e) {
+        return false;
+    }
+}
+
 export function initPlayBilling() {
+    // Runs on every page (not just the billing one) so the very first
+    // page the TWA opens to — whichever one that is — gets the chance
+    // to record the flag before its own referrer is gone.
+    rememberIfLaunchedAsTwa();
+
     const root = document.getElementById('play-billing-root');
     if (! root) return;
 
-    const isTwa = document.referrer.startsWith('android-app://');
-    if (! isTwa) return;
+    if (! isInsideTwa()) return;
 
     root.style.display = '';
     document.getElementById('upi-payment-block')?.style.setProperty('display', 'none');
