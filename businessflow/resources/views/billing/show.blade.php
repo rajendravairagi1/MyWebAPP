@@ -6,6 +6,11 @@
 
         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Renew Your Plan') }}</h2>
 
+        {{-- TEMPORARY — pure server-rendered marker (no JS involved) to prove
+             a fresh deploy of this exact file reached the live server. Remove
+             once the "still showing UPI on a real device" issue is diagnosed. --}}
+        <p class="text-xs font-mono text-yellow-500">DEPLOY-CHECK-B</p>
+
         <p class="text-sm text-gray-600 dark:text-gray-400">
             @if ($business)
                 <span class="font-medium text-gray-800 dark:text-gray-100">{{ $business->name }}</span>
