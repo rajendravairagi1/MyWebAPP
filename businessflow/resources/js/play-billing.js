@@ -53,6 +53,24 @@ function isInsideTwa() {
     }
 }
 
+// TEMPORARY — remove once the "still showing UPI on a real Play Store
+// install" report is diagnosed. Prints the exact values this file sees
+// at the top of the billing page itself, in plain text, so a screenshot
+// from the real device tells us whether this script is even running,
+// and if so, why it's deciding not to show Play Billing.
+function showDebugInfo() {
+    const box = document.createElement('div');
+    box.style.cssText = 'background:#000;color:#0f0;font:11px monospace;padding:8px;white-space:pre-wrap;word-break:break-all;';
+    box.textContent = [
+        'play-billing.js DEBUG',
+        'referrer: ' + JSON.stringify(document.referrer),
+        'localStorage flag: ' + JSON.stringify((() => { try { return localStorage.getItem(TWA_DEVICE_FLAG); } catch (e) { return 'ERR:' + e.message; } })()),
+        'isInsideTwa(): ' + isInsideTwa(),
+        'UA: ' + navigator.userAgent,
+    ].join('\n');
+    document.body.prepend(box);
+}
+
 export function initPlayBilling() {
     // Runs on every page (not just the billing one) so the very first
     // page the TWA opens to — whichever one that is — gets the chance
@@ -61,6 +79,8 @@ export function initPlayBilling() {
 
     const root = document.getElementById('play-billing-root');
     if (! root) return;
+
+    showDebugInfo();
 
     if (! isInsideTwa()) return;
 
