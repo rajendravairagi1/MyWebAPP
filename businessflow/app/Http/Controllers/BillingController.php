@@ -63,13 +63,25 @@ class BillingController extends Controller
         // was attributed to and what grantsAccess() decided, so it can be
         // compared against which business/company Account & Billing
         // actually reads. Revert once diagnosed.
+        // TEMPORARY — the derived expiry_time keeps coming back hours in
+        // the past even for a purchase button just tapped seconds ago.
+        // Echo the purchase token the client actually sent plus Google's
+        // raw subscriptionsv2 response (order id, start time, every line
+        // item) instead of just the one field we derived from it — this
+        // will show whether Google is returning multiple line items (and
+        // we're reading the wrong one) or genuinely stale data for this
+        // token. Revert once diagnosed.
         return response()->json([
             'status' => 'ok',
+            'debug_purchase_token' => $data['purchase_token'],
             'debug_business_id' => $business->id,
-            'debug_business_branch_id' => $business->branch_id,
+            'debug_order_id' => $purchase->order_id,
             'debug_purchase_status' => $purchase->status,
             'debug_expiry_time' => optional($purchase->expiry_time)->toIso8601String(),
             'debug_grants_access' => $purchase->grantsAccess(),
+            'debug_raw_line_items' => $purchase->last_api_response['lineItems'] ?? null,
+            'debug_raw_subscription_state' => $purchase->last_api_response['subscriptionState'] ?? null,
+            'debug_raw_start_time' => $purchase->last_api_response['startTime'] ?? null,
         ]);
     }
 

@@ -104,7 +104,7 @@ async function startPlayPurchase(root, button) {
             // to, to compare against whatever Account & Billing shows.
             // Revert once diagnosed.
             const okBody = await response.text().catch(() => '(could not read response body)');
-            alert('DEBUG success body:\n' + okBody.slice(0, 2500));
+            alert('DEBUG success body:\n' + okBody.slice(0, 4000));
 
             // Land on Account & Billing rather than reloading this same
             // page — a plain reload leaves a visitor who just paid
