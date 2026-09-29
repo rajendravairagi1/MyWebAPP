@@ -72,7 +72,7 @@ class GooglePlayBillingService
 
         $response = Http::withToken($this->accessToken())->get($url);
 
-        if (! $response->ok()) {
+        if (! $response->successful()) {
             throw new RuntimeException("Google Play subscription lookup failed ({$response->status()}): {$response->body()}");
         }
 
@@ -92,7 +92,11 @@ class GooglePlayBillingService
 
         $response = Http::withToken($this->accessToken())->post($url, ['developerPayload' => '']);
 
-        if (! $response->ok()) {
+        // Google's own success response for this endpoint is 204 No
+        // Content, not 200 — ok() checks for exactly 200, which made this
+        // throw on every genuinely successful acknowledgement.
+        // successful() correctly covers the whole 2xx range.
+        if (! $response->successful()) {
             throw new RuntimeException("Google Play acknowledge failed ({$response->status()}) for url {$url}: {$response->body()}");
         }
     }
