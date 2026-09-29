@@ -11,11 +11,15 @@
         @include('partials.brand-favicon-links')
         @include('partials.brand-logo-sync')
 
-        {{-- Set theme + accent color before first paint to avoid a flash --}}
+        {{-- Set theme + accent color before first paint to avoid a flash.
+             A brand new visitor (nothing in localStorage yet) always gets
+             dark mode — the app's fixed default look, same as the signup
+             page — rather than following whatever the device's OS happens
+             to be set to. --}}
         <script>
             (function () {
                 var stored = localStorage.getItem('theme');
-                var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var dark = stored ? stored === 'dark' : true;
                 if (dark) document.documentElement.classList.add('dark');
 
                 var accent = localStorage.getItem('accent');
@@ -36,7 +40,11 @@
                 mobileOpen: false,
                 dark: document.documentElement.classList.contains('dark'),
                 accent: document.documentElement.getAttribute('data-accent') || 'indigo',
-                menuStyle: localStorage.getItem('menuStyle') || 'grouped',
+                // A new user sees every sidebar item, ungrouped, until
+                // they themselves switch to the grouped layout below —
+                // discovering what's even in the app matters more than a
+                // tidy sidebar on day one.
+                menuStyle: localStorage.getItem('menuStyle') || 'flat',
                 openGroups: JSON.parse(localStorage.getItem('sidebarOpenGroups') || '{}'),
                 accents: [
                     { key: 'indigo', label: '{{ __('Indigo') }}', swatch: '#4f46e5' },
