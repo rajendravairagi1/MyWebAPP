@@ -123,10 +123,14 @@ async function startPlayPurchase(root, button) {
             alert('Payment went through, but we could not confirm it here — please contact support with your Play Store order.');
         }
     } catch (error) {
-        // A visitor closing the Play Billing sheet themselves throws
-        // here too (AbortError) — not worth alerting for, just reset the
-        // button so they can try again.
-        if (error?.name !== 'AbortError') console.error(error);
+        // TEMPORARY — a visitor closing the Play Billing sheet themselves
+        // also throws AbortError here, which is normal and not worth
+        // alerting for on a finished build; alerting for it too, for now,
+        // is the fastest way to see on-device exactly what's failing
+        // when tapping a plan button does nothing visible. Revert to
+        // "only log non-AbortError" once this is diagnosed.
+        alert('DEBUG: ' + (error?.name || 'Error') + ' — ' + (error?.message || String(error)));
+        console.error(error);
     } finally {
         button.disabled = false;
         button.textContent = originalLabel;
