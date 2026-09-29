@@ -409,6 +409,13 @@
                                         {{ __('Business Settings') }}
                                     </span>
                                 </x-dropdown-link>
+
+                                <x-dropdown-link :href="route('account-billing.show')">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5h-15A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5z" /></svg>
+                                        {{ __('Account & Billing') }}
+                                    </span>
+                                </x-dropdown-link>
                             @endif
 
                             <div class="px-4 py-3 border-t border-gray-100 dark:border-slate-700">

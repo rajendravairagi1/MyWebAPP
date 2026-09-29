@@ -14,6 +14,7 @@ use App\Models\Product;
 use App\Models\Project;
 use App\Models\Quotation;
 use App\Models\SignupRequest;
+use App\Models\SubscriptionRenewal;
 use App\Models\User;
 use App\Support\RenewalAlerts;
 use App\Support\Tenant;
@@ -288,6 +289,17 @@ class AdminController extends Controller
                 'subscription_expires_at' => $data['subscription_expires_at'] ?? null,
             ]);
 
+            if ($data['subscription_expires_at'] ?? null) {
+                SubscriptionRenewal::create([
+                    'company_id' => $company->id,
+                    'source' => 'admin_manual',
+                    'plan' => 'company',
+                    'previous_expires_at' => null,
+                    'new_expires_at' => $data['subscription_expires_at'],
+                    'note' => 'Account created',
+                ]);
+            }
+
             $signupRequest?->update(['status' => 'approved', 'reviewed_at' => now()]);
 
             return redirect()->route('admin.index')->with('status', "Company account \"{$data['account_name']}\" created for {$user->email}.");
@@ -309,6 +321,17 @@ class AdminController extends Controller
             'role' => 'owner',
             'status' => 'active',
         ]);
+
+        if ($data['subscription_expires_at'] ?? null) {
+            SubscriptionRenewal::create([
+                'business_id' => $business->id,
+                'source' => 'admin_manual',
+                'plan' => $business->plan,
+                'previous_expires_at' => null,
+                'new_expires_at' => $data['subscription_expires_at'],
+                'note' => 'Account created',
+            ]);
+        }
 
         $signupRequest?->update(['status' => 'approved', 'business_id' => $business->id, 'reviewed_at' => now()]);
 
@@ -360,12 +383,24 @@ class AdminController extends Controller
             'subscription_expires_at' => ['nullable', 'date'],
         ]);
 
+        $previousExpiresAt = $business->subscription_expires_at;
+
         $business->update([
             'subscription_expires_at' => $data['subscription_expires_at'] ?? null,
             // A new date means a new renewal cycle — never let a stale
             // dismissal hide the next one.
             'renewal_alert_dismissed_at' => null,
         ]);
+
+        if ($data['subscription_expires_at'] ?? null) {
+            SubscriptionRenewal::create([
+                'business_id' => $business->id,
+                'source' => 'admin_manual',
+                'plan' => $business->plan,
+                'previous_expires_at' => $previousExpiresAt,
+                'new_expires_at' => $data['subscription_expires_at'],
+            ]);
+        }
 
         return back()->with('status', $data['subscription_expires_at']
             ? "\"{$business->name}\" is now valid through {$data['subscription_expires_at']}."
@@ -397,10 +432,22 @@ class AdminController extends Controller
             'subscription_expires_at' => ['nullable', 'date'],
         ]);
 
+        $previousExpiresAt = $company->subscription_expires_at;
+
         $company->update([
             'subscription_expires_at' => $data['subscription_expires_at'] ?? null,
             'renewal_alert_dismissed_at' => null,
         ]);
+
+        if ($data['subscription_expires_at'] ?? null) {
+            SubscriptionRenewal::create([
+                'company_id' => $company->id,
+                'source' => 'admin_manual',
+                'plan' => 'company',
+                'previous_expires_at' => $previousExpiresAt,
+                'new_expires_at' => $data['subscription_expires_at'],
+            ]);
+        }
 
         return back()->with('status', $data['subscription_expires_at']
             ? "\"{$company->name}\" is now valid through {$data['subscription_expires_at']}."

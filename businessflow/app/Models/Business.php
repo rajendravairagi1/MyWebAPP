@@ -151,6 +151,11 @@ class Business extends Model
         return $this->hasMany(PlayPurchase::class);
     }
 
+    public function subscriptionRenewals(): HasMany
+    {
+        return $this->hasMany(SubscriptionRenewal::class);
+    }
+
     /**
      * The token used in this business's public, no-login lead-capture form
      * link (and the QR code that encodes it) — generated once on first use

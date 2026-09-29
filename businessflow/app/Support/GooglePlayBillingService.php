@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\Business;
 use App\Models\PlayPurchase;
+use App\Models\SubscriptionRenewal;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -156,11 +157,27 @@ class GooglePlayBillingService
 
         if ($purchase->grantsAccess()) {
             $plan = config('services.google_play.product_plan_map')[$productId] ?? null;
+            $previousExpiresAt = $business->subscription_expires_at;
+            $newExpiresAt = $purchase->expiry_time->toDateString();
 
             $business->update([
                 'plan' => $plan ?: $business->plan,
-                'subscription_expires_at' => $purchase->expiry_time->toDateString(),
+                'subscription_expires_at' => $newExpiresAt,
             ]);
+
+            // Google re-sends the same renewal state on retries/duplicate
+            // RTDN deliveries — only log it as a new history entry the
+            // first time the expiry actually moves.
+            if (! $previousExpiresAt?->toDateString() || $previousExpiresAt->toDateString() !== $newExpiresAt) {
+                SubscriptionRenewal::create([
+                    'business_id' => $business->id,
+                    'source' => 'google_play',
+                    'plan' => $plan ?: $business->plan,
+                    'previous_expires_at' => $previousExpiresAt,
+                    'new_expires_at' => $newExpiresAt,
+                    'note' => $purchase->order_id,
+                ]);
+            }
         }
 
         return $purchase;

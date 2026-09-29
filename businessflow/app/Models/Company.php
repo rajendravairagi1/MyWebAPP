@@ -28,6 +28,11 @@ class Company extends Model
         return $this->hasMany(Branch::class);
     }
 
+    public function subscriptionRenewals(): HasMany
+    {
+        return $this->hasMany(SubscriptionRenewal::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status !== 'inactive';
