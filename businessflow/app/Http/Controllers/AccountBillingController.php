@@ -33,6 +33,8 @@ class AccountBillingController extends Controller
                 'expiresOn' => $company->subscription_expires_at,
                 'isExpired' => $company->subscription_expires_at?->copy()->endOfDay()->isPast() ?? false,
                 'renewals' => $company->subscriptionRenewals()->latest()->get(),
+                // TEMPORARY
+                'debugInfo' => "resolved via COMPANY id={$company->id}, business_id=".($business->id ?? 'null'),
             ]);
         }
 
@@ -44,6 +46,8 @@ class AccountBillingController extends Controller
             'expiresOn' => $business->subscription_expires_at,
             'isExpired' => $business->isSubscriptionExpired(),
             'renewals' => $business->subscriptionRenewals()->latest()->get(),
+            // TEMPORARY
+            'debugInfo' => "resolved via BUSINESS id={$business->id}",
         ]);
     }
 }

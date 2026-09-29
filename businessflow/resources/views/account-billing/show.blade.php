@@ -9,6 +9,12 @@
                 $daysRemaining = $expiresOn ? now()->startOfDay()->diffInDays($expiresOn->copy()->startOfDay(), false) : null;
             @endphp
 
+            {{-- TEMPORARY — remove once the mismatch between the
+                 activation call and this page is diagnosed. --}}
+            <div class="bg-black text-green-400 text-xs font-mono p-3 rounded break-all">
+                DEBUG: {{ $debugInfo }}
+            </div>
+
             @if (request()->boolean('renewed'))
                 <div class="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-5 text-center space-y-3">
                     <div class="text-2xl">🎉</div>

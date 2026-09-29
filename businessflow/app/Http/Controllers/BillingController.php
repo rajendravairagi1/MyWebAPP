@@ -58,7 +58,19 @@ class BillingController extends Controller
         $purchase = $billing->activateFromToken($data['purchase_token'], $business);
         abort_unless($purchase, 422, 'Could not verify this purchase with Google Play.');
 
-        return response()->json(['status' => 'ok']);
+        // TEMPORARY — "Subscription completed" shows but Account & Billing
+        // never reflects it. Echo exactly which business this purchase
+        // was attributed to and what grantsAccess() decided, so it can be
+        // compared against which business/company Account & Billing
+        // actually reads. Revert once diagnosed.
+        return response()->json([
+            'status' => 'ok',
+            'debug_business_id' => $business->id,
+            'debug_business_branch_id' => $business->branch_id,
+            'debug_purchase_status' => $purchase->status,
+            'debug_expiry_time' => optional($purchase->expiry_time)->toIso8601String(),
+            'debug_grants_access' => $purchase->grantsAccess(),
+        ]);
     }
 
     /**
