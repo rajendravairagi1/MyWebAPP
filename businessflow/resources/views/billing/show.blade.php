@@ -30,7 +30,7 @@
             whether this page is actually running inside the TWA — which
             one a given visitor ever sees.
         --}}
-        <div id="play-billing-root" data-business-id="{{ $business?->id }}" data-activate-url="{{ route('billing.google-play.activate') }}" style="display: none;" class="pt-1 space-y-2">
+        <div id="play-billing-root" data-business-id="{{ $business?->id }}" data-activate-url="{{ route('billing.google-play.activate') }}" data-account-billing-url="{{ route('account-billing.show') }}" style="display: none;" class="pt-1 space-y-2">
             <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Choose a plan to subscribe or renew — billed through Google Play.') }}</p>
             @foreach ($googlePlayProducts as $plan => $productId)
                 <button type="button" data-play-product="{{ $productId }}"

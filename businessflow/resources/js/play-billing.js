@@ -100,7 +100,12 @@ async function startPlayPurchase(root, button) {
         await paymentResponse.complete(response.ok ? 'success' : 'fail');
 
         if (response.ok) {
-            window.location.reload();
+            // Land on Account & Billing rather than reloading this same
+            // page — a plain reload leaves a visitor who just paid
+            // wondering whether anything actually happened; landing
+            // somewhere that visibly shows "Subscription completed" and a
+            // way back to the app answers that immediately.
+            window.location.href = root.dataset.accountBillingUrl + '?renewed=1';
         } else {
             // TEMPORARY — the generic message alone doesn't say why the
             // server-side verification call failed. Show the exact HTTP

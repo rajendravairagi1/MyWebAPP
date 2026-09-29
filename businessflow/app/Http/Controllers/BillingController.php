@@ -55,7 +55,24 @@ class BillingController extends Controller
         $business = Tenant::check() ? Business::find(Tenant::id()) : null;
         abort_unless($business, 401);
 
-        $purchase = $billing->activateFromToken($data['purchase_token'], $business);
+        // TEMPORARY — a real purchase completed on Google's side but this
+        // call came back a plain 500 (production hides the real exception
+        // behind a generic HTML error page, useless for diagnosing from a
+        // phone with no log access). Catch it here and hand the message
+        // back as JSON instead, so the client's debug alert shows the
+        // actual failure. Revert to letting it propagate normally once
+        // diagnosed.
+        try {
+            $purchase = $billing->activateFromToken($data['purchase_token'], $business);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return response()->json([
+                'status' => 'error',
+                'debug_exception' => get_class($e).': '.$e->getMessage(),
+            ], 500);
+        }
+
         abort_unless($purchase, 422, 'Could not verify this purchase with Google Play.');
 
         return response()->json(['status' => 'ok']);
