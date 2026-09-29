@@ -73,7 +73,7 @@ class GooglePlayBillingService
         $response = Http::withToken($this->accessToken())->get($url);
 
         if (! $response->ok()) {
-            throw new RuntimeException("Google Play subscription lookup failed: {$response->body()}");
+            throw new RuntimeException("Google Play subscription lookup failed ({$response->status()}): {$response->body()}");
         }
 
         return $response->json();
@@ -93,7 +93,7 @@ class GooglePlayBillingService
         $response = Http::withToken($this->accessToken())->post($url, ['developerPayload' => '']);
 
         if (! $response->ok()) {
-            throw new RuntimeException("Google Play acknowledge failed: {$response->body()}");
+            throw new RuntimeException("Google Play acknowledge failed ({$response->status()}) for url {$url}: {$response->body()}");
         }
     }
 
