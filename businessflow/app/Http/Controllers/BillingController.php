@@ -75,7 +75,19 @@ class BillingController extends Controller
 
         abort_unless($purchase, 422, 'Could not verify this purchase with Google Play.');
 
-        return response()->json(['status' => 'ok']);
+        // TEMPORARY — the client got "ok" back but the business's plan/
+        // expiry never changed. Echo exactly what Google reported and
+        // what grantsAccess() decided, so the next screenshot shows why
+        // the activation was skipped instead of guessing blind. Revert
+        // once diagnosed.
+        return response()->json([
+            'status' => 'ok',
+            'debug_purchase_status' => $purchase->status,
+            'debug_expiry_time' => optional($purchase->expiry_time)->toIso8601String(),
+            'debug_grants_access' => $purchase->grantsAccess(),
+            'debug_business_plan' => $business->fresh()->plan,
+            'debug_business_expires_at' => optional($business->fresh()->subscription_expires_at)->toDateString(),
+        ]);
     }
 
     /**

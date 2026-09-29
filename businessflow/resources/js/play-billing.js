@@ -100,6 +100,14 @@ async function startPlayPurchase(root, button) {
         await paymentResponse.complete(response.ok ? 'success' : 'fail');
 
         if (response.ok) {
+            // TEMPORARY — the server said "ok" but the business's plan/
+            // expiry didn't change on the last test. Show exactly what
+            // Google reported and what grantsAccess() decided before
+            // moving on, so the next screenshot explains why. Revert once
+            // diagnosed.
+            const okBody = await response.text().catch(() => '(could not read response body)');
+            alert('DEBUG success body:\n' + okBody.slice(0, 2500));
+
             // Land on Account & Billing rather than reloading this same
             // page — a plain reload leaves a visitor who just paid
             // wondering whether anything actually happened; landing
