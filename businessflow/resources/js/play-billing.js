@@ -112,7 +112,7 @@ async function startPlayPurchase(root, button) {
             // status and response body so the next screenshot reveals
             // the real error instead of just "could not confirm it".
             const bodyText = await response.text().catch(() => '(could not read response body)');
-            alert('Payment went through, but we could not confirm it here.\n\nDEBUG status: ' + response.status + '\nDEBUG body: ' + bodyText.slice(0, 500));
+            alert('Payment went through, but we could not confirm it here.\n\nDEBUG status: ' + response.status + '\nDEBUG body: ' + bodyText.slice(0, 2500));
         }
     } catch (error) {
         // A visitor closing the Play Billing sheet themselves throws
