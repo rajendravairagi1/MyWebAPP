@@ -46,14 +46,19 @@ class GooglePlayBillingTest extends TestCase
         parent::tearDown();
     }
 
-    private function fakeSubscriptionResponse(string $productId = 'probuildercrm_team', string $state = 'SUBSCRIPTION_STATE_ACTIVE', ?string $obfuscatedAccountId = null): array
+    private function fakeSubscriptionResponse(string $productId = 'probuildercrm_team', string $state = 'SUBSCRIPTION_STATE_ACTIVE', ?string $obfuscatedAccountId = null, ?string $expiryTime = null): array
     {
         $response = [
             'subscriptionState' => $state,
             'latestOrderId' => 'GPA.1234-5678',
             'acknowledgementState' => 'ACKNOWLEDGEMENT_STATE_PENDING',
             'lineItems' => [
-                ['productId' => $productId, 'expiryTime' => now()->addDays(30)->toRfc3339String()],
+                // Google always sends this as UTC ("Z"), never with this
+                // app's own +05:30 offset — matching that exactly here is
+                // what makes test_expiry_time_from_google_utc_z_timestamp_
+                // is_correctly_interpreted_as_future() below able to catch
+                // the timezone bug it's named for.
+                ['productId' => $productId, 'expiryTime' => $expiryTime ?? now()->utc()->addDays(30)->format('Y-m-d\TH:i:s.v\Z')],
             ],
         ];
 
@@ -82,6 +87,39 @@ class GooglePlayBillingTest extends TestCase
         $this->assertNotNull($business->subscription_expires_at);
         $this->assertSame('active', $purchase->status);
         $this->assertNotNull($purchase->acknowledged_at);
+    }
+
+    /**
+     * Regression test for a real bug: Eloquent's date-format guessing
+     * didn't recognise Google's UTC "...Z" shape and silently kept the
+     * UTC clock digits while relabelling them as this app's Asia/Kolkata
+     * timezone — no actual 5:30 shift applied. A purchase genuinely
+     * expiring 3 hours from now (in real UTC time) would misread as
+     * roughly 2.5 hours in the past, so grantsAccess() and the business's
+     * subscription_expires_at would silently fail even for a perfectly
+     * valid, currently-active purchase.
+     */
+    public function test_expiry_time_from_google_utc_z_timestamp_is_correctly_interpreted_as_future(): void
+    {
+        $utcExpiry = now()->utc()->addHours(3)->format('Y-m-d\TH:i:s.v\Z');
+
+        Http::fake([
+            'oauth2.googleapis.com/token' => Http::response(['access_token' => 'fake-token'], 200),
+            'androidpublisher.googleapis.com/*' => Http::sequence()
+                ->push($this->fakeSubscriptionResponse(expiryTime: $utcExpiry))
+                ->push([]),
+        ]);
+
+        $business = Business::create(['name' => 'Test Biz', 'plan' => 'solo']);
+
+        $purchase = app(GooglePlayBillingService::class)->activateFromToken('token-utc-z', $business);
+
+        $this->assertTrue($purchase->expiry_time->isFuture(), 'A purchase expiring 3 real hours from now must not read as already past.');
+        $this->assertTrue($purchase->grantsAccess());
+
+        $business->refresh();
+        $this->assertSame('team', $business->plan);
+        $this->assertNotNull($business->subscription_expires_at);
     }
 
     public function test_activate_from_token_resolves_business_from_obfuscated_id_when_none_given(): void

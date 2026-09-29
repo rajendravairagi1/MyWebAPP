@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Business;
 use App\Models\PlayPurchase;
 use App\Models\SubscriptionRenewal;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
@@ -138,7 +139,18 @@ class GooglePlayBillingService
         }
 
         $productId = $lineItem['productId'];
-        $expiryTime = $lineItem['expiryTime'];
+        // Google always sends this as UTC (the trailing "Z"). Handing the
+        // raw string straight to Eloquent's date cast is what caused the
+        // bug this replaces: its format-guessing didn't recognise this
+        // exact shape and silently kept the UTC clock digits while
+        // relabelling them as this app's Asia/Kolkata timezone — no
+        // actual 5:30 shift — so a genuinely-future expiry read as
+        // hours in the past. Parsing explicitly (respecting the "Z") and
+        // converting to the app's own timezone before Eloquent ever sees
+        // it sidesteps that guessing entirely, and also matches what
+        // Eloquent assumes when it later formats this for storage as a
+        // timezone-less DATETIME column.
+        $expiryTime = Carbon::parse($lineItem['expiryTime'])->setTimezone(config('app.timezone'));
         $status = $this->mapSubscriptionState($data['subscriptionState'] ?? null);
 
         $purchase = PlayPurchase::updateOrCreate(

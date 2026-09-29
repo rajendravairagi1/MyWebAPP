@@ -100,12 +100,6 @@ async function startPlayPurchase(root, button) {
         await paymentResponse.complete(response.ok ? 'success' : 'fail');
 
         if (response.ok) {
-            // TEMPORARY — see which business this purchase was attributed
-            // to, to compare against whatever Account & Billing shows.
-            // Revert once diagnosed.
-            const okBody = await response.text().catch(() => '(could not read response body)');
-            alert('DEBUG success body:\n' + okBody.slice(0, 4000));
-
             // Land on Account & Billing rather than reloading this same
             // page — a plain reload leaves a visitor who just paid
             // wondering whether anything actually happened; landing
