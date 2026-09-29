@@ -102,7 +102,12 @@ async function startPlayPurchase(root, button) {
         if (response.ok) {
             window.location.reload();
         } else {
-            alert('Payment went through, but we could not confirm it here — please contact support with your Play Store order.');
+            // TEMPORARY — the generic message alone doesn't say why the
+            // server-side verification call failed. Show the exact HTTP
+            // status and response body so the next screenshot reveals
+            // the real error instead of just "could not confirm it".
+            const bodyText = await response.text().catch(() => '(could not read response body)');
+            alert('Payment went through, but we could not confirm it here.\n\nDEBUG status: ' + response.status + '\nDEBUG body: ' + bodyText.slice(0, 500));
         }
     } catch (error) {
         // A visitor closing the Play Billing sheet themselves throws
