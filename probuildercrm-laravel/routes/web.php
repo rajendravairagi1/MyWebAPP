@@ -28,6 +28,7 @@ Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-of-service', [PageController::class, 'termsOfService'])->name('terms-of-service');
 Route::get('/security', [PageController::class, 'dataSecurity'])->name('data-security');
+Route::get('/account-deletion', [PageController::class, 'accountDeletion'])->name('account-deletion');
 
 Route::get('/pricing', [PricingController::class, 'index'])->name('pricing');
 Route::post('/pricing/currency', [PricingController::class, 'setCurrency'])->name('pricing.currency');

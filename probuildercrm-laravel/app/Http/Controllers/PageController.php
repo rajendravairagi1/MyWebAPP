@@ -42,4 +42,9 @@ class PageController extends Controller
     {
         return view('data-security');
     }
+
+    public function accountDeletion()
+    {
+        return view('account-deletion');
+    }
 }
