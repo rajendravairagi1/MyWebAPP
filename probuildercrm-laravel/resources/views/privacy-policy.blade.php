@@ -15,6 +15,10 @@
             <p>When you fill out our contact form or book a demo, we collect your name, email address, phone number and any message you send us. When you use Pro Builder CRM itself, the business data you enter (projects, customers, payments, etc.) is stored to provide the service to you.</p>
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">How we use it</h2>
             <p>We use this information to respond to your enquiries, provide the CRM service, and improve our product. We do not sell your information to third parties.</p>
+            <h2 style="font-size: 1.25rem; color: var(--color-ink);">Payments</h2>
+            <p>Subscription payments made through the Google Play app are processed by Google Play Billing — we do not receive or store your card or payment details. Payments made directly with us (such as by UPI) are handled the same way: we record that a payment was made, not your card or bank details.</p>
+            <h2 style="font-size: 1.25rem; color: var(--color-ink);">Who this is for</h2>
+            <p>{{ config('site.name') }} is a business tool for builders, real estate developers and their staff. It is not directed at children, and we do not knowingly collect information from children under 18.</p>
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">Data security</h2>
             <p>Every business's data on Pro Builder CRM is isolated from every other business, and passwords are stored using one-way industry-standard hashing. For plain-language answers to common questions — do we sell your data, share it, or look at it — see our <a href="{{ route('data-security') }}">Data Security</a> page.</p>
             <h2 style="font-size: 1.25rem; color: var(--color-ink);">Contact</h2>
