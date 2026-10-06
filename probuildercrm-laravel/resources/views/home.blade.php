@@ -17,9 +17,13 @@
             Projects, unit bookings, customer payments, loans, invoices, contractors and brokers - Pro Builder CRM keeps every
             number in one place, so you always know exactly where your business stands.
         </p>
-        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: var(--space-2xl);">
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: var(--space-lg);">
             <a href="{{ route('contact') }}" class="btn btn-primary btn-lg">Book a Free Demo</a>
             <a href="{{ route('features') }}" class="btn btn-secondary btn-lg btn-on-dark">See Features</a>
+        </div>
+
+        <div style="margin-bottom: var(--space-2xl);">
+            @include('partials.store-badges')
         </div>
     </div>
 

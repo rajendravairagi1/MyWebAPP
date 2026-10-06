@@ -20,6 +20,9 @@
                 <div style="margin-top: 12px;">
                     @include('partials.social-links', ['location' => 'footer'])
                 </div>
+                <div style="margin-top: 16px;">
+                    @include('partials.store-badges')
+                </div>
             </div>
 
             @foreach (config('site.footer_columns') as $column)

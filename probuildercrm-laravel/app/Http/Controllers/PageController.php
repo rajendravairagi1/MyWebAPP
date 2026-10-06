@@ -47,4 +47,9 @@ class PageController extends Controller
     {
         return view('account-deletion');
     }
+
+    public function iosInstall()
+    {
+        return view('ios-install');
+    }
 }
