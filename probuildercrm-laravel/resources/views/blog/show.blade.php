@@ -32,7 +32,7 @@
         <div class="container" style="max-width: 900px; margin-top: -40px;">
             <img src="{{ asset($post->featured_image) }}"
                  alt="{{ $post->featured_image_alt ?: $post->title }}"
-                 style="width: 100%; height: {{ \App\Http\Controllers\Admin\BlogController::pixelsFor($post->featured_image_size) }}px; object-fit: cover; border-radius: var(--radius-lg); display: block;">
+                 style="width: 100%; height: {{ \App\Http\Controllers\Admin\BlogController::pixelsFor($post->featured_image_size) }}px; object-fit: contain; background: var(--color-bg-soft); border-radius: var(--radius-lg); display: block;">
             @if ($post->featured_image_caption)
                 <p style="text-align: center; font-size: 0.85rem; color: var(--color-ink-soft); margin-top: 8px;">{{ $post->featured_image_caption }}</p>
             @endif
