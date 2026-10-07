@@ -1,9 +1,10 @@
 @php
+    $align = $align ?? 'center';
     $badgeStyle = 'display: flex; align-items: center; gap: 10px; background: #0b0e1a; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; padding: 9px 16px; text-decoration: none; min-width: 176px;';
 @endphp
 
-<div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-    <a href="{{ config('site.play_store_url') }}" target="_blank" rel="noopener" style="{{ $badgeStyle }}" aria-label="Get Pro Builder CRM on Google Play">
+<div style="display: flex; gap: 12px; justify-content: {{ $align }}; flex-wrap: wrap;">
+    <a href="{{ config('site.play_store_url') }}" target="_blank" rel="noopener" class="store-badge-link" style="{{ $badgeStyle }}" aria-label="Get Pro Builder CRM on Google Play">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M4 3.5v17a1 1 0 0 0 1.53.85l14-8.5a1 1 0 0 0 0-1.7l-14-8.5A1 1 0 0 0 4 3.5z" fill="url(#pbcrm-play-grad)"/>
             <defs>
@@ -20,7 +21,7 @@
         </span>
     </a>
 
-    <a href="{{ route('ios-install') }}" style="{{ $badgeStyle }}" aria-label="Install Pro Builder CRM on iPhone - App Store version coming soon">
+    <a href="{{ route('ios-install') }}" class="store-badge-link" style="{{ $badgeStyle }}" aria-label="Install Pro Builder CRM on iPhone - App Store version coming soon">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" aria-hidden="true">
             <rect x="6" y="2.5" width="12" height="19" rx="2.5"/>
             <line x1="10.3" y1="19" x2="13.7" y2="19" stroke-linecap="round"/>

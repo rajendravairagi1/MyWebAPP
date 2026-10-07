@@ -563,6 +563,32 @@ h3 {
   50% { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), 0 0 0 10px rgba(37, 211, 102, 0); }
 }
 
+/* Store badges (Google Play / iPhone) — a slow continuous glow so they
+   read as clickable even before a visitor's cursor reaches them, plus a
+   stronger lift-and-glow on hover/focus for direct feedback. */
+.store-badge-link {
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.45);
+}
+
+.store-badge-link:hover,
+.store-badge-link:focus-visible {
+  transform: translateY(-3px) scale(1.03);
+  border-color: rgba(99, 102, 241, 0.6) !important;
+  background: #11152a !important;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .store-badge-link {
+    animation: store-badge-pulse-glow 2.6s ease-in-out infinite;
+  }
+}
+
+@keyframes store-badge-pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.45); }
+  50% { box-shadow: 0 0 0 7px rgba(99, 102, 241, 0); }
+}
+
 /* Back-to-top button — sits below the WhatsApp bubble (WhatsApp moved
    up to bottom:158px to make room), so neither one sits inside the
    sticky CTA bar's area on most pages. Only appears once the visitor

@@ -21,7 +21,7 @@
                     @include('partials.social-links', ['location' => 'footer'])
                 </div>
                 <div style="margin-top: 16px;">
-                    @include('partials.store-badges')
+                    @include('partials.store-badges', ['align' => 'flex-start'])
                 </div>
             </div>
 
