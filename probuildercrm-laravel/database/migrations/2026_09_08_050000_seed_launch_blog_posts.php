@@ -8,6 +8,13 @@ return new class extends Migration
     public function up(): void
     {
         foreach ($this->posts() as $post) {
+            // The posts() below predate the move to a plain-HTML `content`
+            // column (see 2026_09_17_140000_convert_blog_posts_content_to_html)
+            // and are still written as the old paragraph/heading/list block
+            // array, for readability here - convert on the way in rather
+            // than rewriting every post's text as raw HTML.
+            $post['content'] = $this->blocksToHtml($post['content']);
+
             BlogPost::updateOrCreate(['slug' => $post['slug']], $post);
         }
     }
@@ -15,6 +22,27 @@ return new class extends Migration
     public function down(): void
     {
         BlogPost::whereIn('slug', array_column($this->posts(), 'slug'))->delete();
+    }
+
+    private function blocksToHtml(array $blocks): string
+    {
+        return collect($blocks)->map(function ($block) {
+            $type = $block['type'] ?? 'paragraph';
+
+            if ($type === 'heading') {
+                return '<h2>'.e($block['text'] ?? '').'</h2>';
+            }
+
+            if ($type === 'list') {
+                $items = collect($block['items'] ?? [])
+                    ->map(fn ($item) => '<li>'.e($item).'</li>')
+                    ->implode('');
+
+                return "<ul>{$items}</ul>";
+            }
+
+            return '<p>'.e($block['text'] ?? '').'</p>';
+        })->implode('');
     }
 
     private function posts(): array

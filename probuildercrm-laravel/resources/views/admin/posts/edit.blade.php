@@ -195,15 +195,25 @@
 
                                     quill.insertText(range.index, 'Uploading image…', { italic: true });
 
+                                    // Lock the editor while the upload is in flight. Without this,
+                                    // anything typed during the upload lands inside the "Uploading…"
+                                    // placeholder (inheriting its italic formatting), and the image
+                                    // then gets inserted in front of that new text instead of where
+                                    // it belongs once the upload finishes - this is what made content
+                                    // look like it was landing in the wrong order.
+                                    quill.enable(false);
+
                                     fetch('{{ route('admin.posts.upload-image') }}', { method: 'POST', body: body })
                                         .then(function (res) { return res.json(); })
                                         .then(function (data) {
                                             quill.deleteText(range.index, 'Uploading image…'.length);
                                             quill.insertEmbed(range.index, 'image', data.url);
+                                            quill.enable(true);
                                             quill.setSelection(range.index + 1);
                                         })
                                         .catch(function () {
                                             quill.deleteText(range.index, 'Uploading image…'.length);
+                                            quill.enable(true);
                                             alert('Image upload failed — please try again.');
                                         });
                                 };

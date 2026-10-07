@@ -17,7 +17,7 @@ return new class extends Migration
         BlogPost::all()->each(function (BlogPost $post) {
             $post->title = $this->clean($post->title);
             $post->excerpt = $this->clean($post->excerpt);
-            $post->content = $this->cleanContent($post->content);
+            $post->content = $this->cleanContentValue($post->content);
             $post->save();
         });
     }
@@ -48,5 +48,16 @@ return new class extends Migration
         }
 
         return $content;
+    }
+
+    /**
+     * content is a plain HTML string by the time this runs on a database
+     * seeded by the now-fixed 050000 migration - the array-block form
+     * above only still applies to a database whose content predates that
+     * fix and was never converted.
+     */
+    private function cleanContentValue(string|array|null $content): string|array|null
+    {
+        return is_array($content) ? $this->cleanContent($content) : $this->clean($content);
     }
 };
