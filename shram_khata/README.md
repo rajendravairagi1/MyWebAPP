@@ -1,17 +1,42 @@
-# shram_khata
+# Shram Khata
 
-Labour contractor agency manager
+Android app for labour contractor agencies: attendance (P / A / H + overtime),
+daily payments and ledger, company contracts and billing, PDF statements and
+invoices, with a live dashboard. Works offline; data is stored on the phone in
+SQLite.
 
-## Getting Started
+## Plans
+| Plan | Who | What it unlocks |
+|---|---|---|
+| Solo | One person does everything | All features, single user |
+| Owner + Team | Owner with supervisors / accountants | Team members, custom roles with per-permission switches, supervisors limited to their sites |
+| Company | Several branches | Branches, branch switcher, per-branch team |
 
-This project is a starting point for a Flutter application.
+Limits live in `lib/core/plans.dart`.
 
-A few resources to get you started if this is your first Flutter project:
+## Run
+```bash
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs   # only after schema changes
+flutter run
+flutter test
+flutter build apk --release
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Layout
+- `lib/data/` Drift schema (`tables.dart`) and one service per area (`services/`).
+- `lib/domain/` pure money / wage / ledger rules (`calc.dart`) and business profile.
+- `lib/pdf/` statement, invoice (with attendance annexure) and register PDFs.
+- `lib/features/` screens. `lib/state/providers.dart` holds session and shared data providers.
+- `test/` service tests, PDF rendering, and widget tests that walk every main screen.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Rules worth knowing
+- Money is stored as integer paise. Dates are `yyyy-MM-dd` text.
+- Labour is deactivated, never deleted (unless nothing refers to them). Payments are voided, never removed.
+- A person cannot be marked for more than one full day across sites (H + H is fine).
+- Pay rates are dated: changing a rate never rewrites earlier days.
+- Invoices copy their lines when created, so later rate changes do not alter them.
+
+## Not built yet
+- Cloud sync, email verification and password reset (needs a backend; ids are uuids so rows can be merged later).
+- PF / ESI, Hindi UI strings, holidays.

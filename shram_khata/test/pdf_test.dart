@@ -55,14 +55,14 @@ void main() {
     final data = await ReportService(db).statement(id, '2026-10-01', '2026-10-31');
     final bytes = await StatementPdf.build(data);
     expect(String.fromCharCodes(bytes.take(4)), '%PDF');
-    final out = File('/tmp/claude-0/-home-user-MyWebAPP/757c936b-c65a-5e91-aa27-fdf5aa4b6b70/scratchpad/statement.pdf');
+    final out = File('$_scratch/statement.pdf');
     await out.parent.create(recursive: true);
     await out.writeAsBytes(bytes);
     await db.close();
   });
 }
 
-const _scratch = '/tmp/claude-0/-home-user-MyWebAPP/757c936b-c65a-5e91-aa27-fdf5aa4b6b70/scratchpad';
+final _scratch = Directory.systemTemp.createTempSync('shram_pdf').path;
 
 void invoiceMain() {
   test('invoice, registers render to PDFs', () async {
