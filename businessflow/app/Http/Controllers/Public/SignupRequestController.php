@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\SignupRequestVerificationMail;
 use App\Models\SignupRequest;
 use App\Models\User;
+use App\Support\Recaptcha;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,6 +51,14 @@ class SignupRequestController extends Controller
         // blind will. Pretend success rather than tipping it off.
         if (filled($request->input('hp_check_1'))) {
             return redirect()->route('signup-requests.public.show')->with('requestSubmitted', true);
+        }
+
+        // Invisible (v3, no checkbox) — scores this submit in the
+        // background. Skipped entirely when RECAPTCHA_SECRET_KEY isn't
+        // set (see config('services.recaptcha')), so this never blocks
+        // signups on an unconfigured environment.
+        if (! Recaptcha::passes($request->input('recaptcha_token'), 'signup')) {
+            return back()->withErrors(['recaptcha' => 'Spam check failed — please reload the page and try again.'])->withInput();
         }
 
         $data = $request->validate([

@@ -36,6 +36,23 @@ return [
     ],
 
     /*
+    | Google reCAPTCHA v3 (App\Support\Recaptcha) — the invisible,
+    | no-checkbox kind: it scores every submit of the public
+    | /get-started form in the background instead of showing a widget,
+    | so it adds spam protection without adding friction to signup.
+    | Get a site key + secret key at
+    | https://www.google.com/recaptcha/admin/create (pick "v3", add
+    | app.probuildercrm.com as the domain). Left unset, verification is
+    | skipped entirely rather than blocking signups - so local dev and
+    | a not-yet-configured production both keep working.
+    */
+    'recaptcha' => [
+        'site_key' => env('RECAPTCHA_SITE_KEY'),
+        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+        'min_score' => env('RECAPTCHA_MIN_SCORE', 0.5),
+    ],
+
+    /*
     | Web Push (App\Support\PushNotifier) — meeting/follow-up/payment
     | reminder alerts on a phone. Generated once via
     | Minishlink\WebPush\VAPID::createVapidKeys() and fixed forever —

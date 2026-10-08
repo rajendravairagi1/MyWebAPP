@@ -65,6 +65,8 @@
                     <form method="POST" action="{{ route('signup-requests.public.store') }}" class="space-y-4">
                         @csrf
 
+                        <input type="hidden" name="recaptcha_token" id="recaptcha_token">
+
                         {{-- Honeypot — hidden with inline styles (never depends on the CSS build), off the tab
                              order, and named/id'd away from anything browser autofill recognises. A genuine
                              visitor never sees or fills this. --}}
@@ -125,5 +127,36 @@
                 {{ __('Powered by') }} {{ config('app.name') }}
             </div>
         </div>
+
+        {{--
+            reCAPTCHA v3 — invisible, no checkbox. Only loaded when a site
+            key is actually configured (see config('services.recaptcha'))
+            so a fresh/local environment with no keys set never tries to
+            load it. The token has to be fetched asynchronously, so the
+            first submit is intercepted, fetches the token, fills the
+            hidden field, then re-submits for real.
+        --}}
+        @if ($recaptchaSiteKey = config('services.recaptcha.site_key'))
+            <script src="https://www.google.com/recaptcha/api.js?render={{ $recaptchaSiteKey }}"></script>
+            <script>
+                (function () {
+                    var form = document.querySelector('form');
+                    if (!form) return;
+
+                    form.addEventListener('submit', function (e) {
+                        if (form.dataset.recaptchaDone) return;
+                        e.preventDefault();
+
+                        grecaptcha.ready(function () {
+                            grecaptcha.execute('{{ $recaptchaSiteKey }}', { action: 'signup' }).then(function (token) {
+                                document.getElementById('recaptcha_token').value = token;
+                                form.dataset.recaptchaDone = '1';
+                                form.submit();
+                            });
+                        });
+                    });
+                })();
+            </script>
+        @endif
     </body>
 </html>
