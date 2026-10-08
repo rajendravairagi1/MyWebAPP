@@ -49,13 +49,13 @@
                 <div class="bg-slate-800 shadow-sm rounded-xl p-6 text-center space-y-2">
                     <div class="text-2xl">📧</div>
                     <h1 class="text-lg font-semibold">{{ __('Check your email') }}</h1>
-                    <p class="text-sm text-gray-400">{{ __("We've sent a confirmation link to your email address. Click it to send your request through for review.") }}</p>
+                    <p class="text-sm text-gray-400">{{ __("We've sent a confirmation link to your email address. Click it to confirm and get started.") }}</p>
                 </div>
             @else
                 <div class="bg-slate-800 shadow-sm rounded-xl p-6 space-y-4">
                     <div class="text-center">
                         <h1 class="text-lg font-semibold">{{ __('Get Your Account') }}</h1>
-                        <p class="text-sm text-gray-400 mt-1">{{ __('Fill in your details below and our team will set up your account.') }}</p>
+                        <p class="text-sm text-gray-400 mt-1">{{ __('Fill in your details below to get started.') }}</p>
                     </div>
 
                     @if ($errors->any())
@@ -95,7 +95,7 @@
                             <label for="password" class="block text-sm font-medium text-gray-300">{{ __('Password') }}</label>
                             <input id="password" name="password" type="password" required minlength="8"
                                 class="mt-1 block w-full border-slate-600 bg-slate-700 text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">
-                            <p class="text-xs text-gray-400 mt-1">{{ __('At least 8 characters — this is what you\'ll log in with once approved.') }}</p>
+                            <p class="text-xs text-gray-400 mt-1">{{ __('At least 8 characters — this is what you\'ll log in with.') }}</p>
                         </div>
 
                         <div>

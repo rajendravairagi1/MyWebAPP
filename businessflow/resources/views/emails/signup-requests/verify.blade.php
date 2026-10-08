@@ -1,7 +1,7 @@
 <x-mail::message>
 # {{ __('Hi :name,', ['name' => $name]) }}
 
-{{ __('Thanks for requesting an account with :app. Confirm this is really your email address to send your request through for review.', ['app' => config('app.name')]) }}
+{{ __('Thanks for requesting an account with :app. Confirm this is really your email address to activate your account.', ['app' => config('app.name')]) }}
 
 <x-mail::button :url="$url">
 {{ __('Confirm Email Address') }}

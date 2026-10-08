@@ -25,6 +25,7 @@ class SubscriptionRenewal extends Model
     public const SOURCE_LABELS = [
         'admin_manual' => 'UPI / manual',
         'google_play' => 'Google Play',
+        'trial_auto' => 'Auto trial (15-day)',
     ];
 
     public function business(): BelongsTo
