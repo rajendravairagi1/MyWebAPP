@@ -7,6 +7,7 @@ use App\Mail\SignupRequestVerificationMail;
 use App\Models\SignupRequest;
 use App\Models\User;
 use App\Support\Recaptcha;
+use App\Support\ReturningUser;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,12 +34,19 @@ class SignupRequestController extends Controller
      * page the Android app opens to fresh, for someone with no session
      * yet. Someone who already has one and opens the app anyway (their
      * session outlives any one visit) shouldn't be shown a signup form
-     * for an account they're already logged into.
+     * for an account they're already logged into - and someone who HAD
+     * one but is currently logged out (session expired, reinstalled,
+     * new device) shouldn't land on Sign Up by default either, since
+     * they already have an account: see App\Support\ReturningUser.
      */
-    public function show(): View|RedirectResponse
+    public function show(Request $request): View|RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
+        }
+
+        if (ReturningUser::isKnown($request)) {
+            return redirect()->route('login');
         }
 
         return view('signup-requests.public-form');
@@ -145,6 +153,7 @@ class SignupRequestController extends Controller
                 Auth::login($user);
                 $request->session()->regenerate();
                 $request->session()->put('trial_signup_request_id', $signupRequest->id);
+                ReturningUser::remember();
 
                 return redirect()->route('onboarding.create');
             }

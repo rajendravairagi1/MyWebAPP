@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\ReturningUser;
 use App\Support\Totp;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Http\RedirectResponse;
@@ -62,6 +63,7 @@ class TwoFactorChallengeController extends Controller
 
             Auth::login($user, $remember);
             $request->session()->regenerate();
+            ReturningUser::remember();
 
             return redirect()->intended(route('dashboard', absolute: false));
         }
