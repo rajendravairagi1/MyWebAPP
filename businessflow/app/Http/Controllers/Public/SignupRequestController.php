@@ -72,8 +72,15 @@ class SignupRequestController extends Controller
             'password' => ['required', 'string', 'min:8'],
             'plan' => ['required', 'in:solo,team,company'],
             'address' => ['nullable', 'string', 'max:500'],
+            // The checkbox is also disabled client-side until checked
+            // (see public-form.blade.php), but that's convenience, not
+            // proof - 'accepted' is what actually stops a submit with
+            // it unticked, and terms_accepted_at below is the record of
+            // it for our own records if that acceptance is ever disputed.
+            'terms' => ['accepted'],
         ], [
             'email.unique' => 'An account (or a request awaiting approval) already uses this email.',
+            'terms.accepted' => 'Please agree to the Terms of Service and Privacy Policy to continue.',
         ]);
 
         $signupRequest = SignupRequest::create([
@@ -83,6 +90,7 @@ class SignupRequestController extends Controller
             'password_hash' => bcrypt($data['password']),
             'plan' => $data['plan'],
             'address' => $data['address'] ?? null,
+            'terms_accepted_at' => now(),
             // Not 'pending' yet — see verify() below. Admin's queue only
             // ever shows a request once its email is confirmed real, so
             // a mistyped or made-up address never reaches him at all.

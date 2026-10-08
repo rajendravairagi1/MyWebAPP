@@ -4,11 +4,14 @@
         reachable directly — this one is also the Android app's
         start_url for anyone already logged out there) so either one is
         one click from the other, instead of only signup -> login
-        working via the plain text link further down.
+        working via the plain text link further down. Sign Up stays on
+        the left and Login on the right on BOTH pages - only which one
+        is highlighted changes - so clicking between them never makes
+        the tabs swap places.
     --}}
     <div class="grid grid-cols-2 gap-1 p-1 bg-white/5 rounded-lg text-sm font-medium mb-4">
-        <span class="rounded-md py-2 text-center bg-white/10 text-white">{{ __('Login') }}</span>
         <a href="{{ route('signup-requests.public.show') }}" class="rounded-md py-2 text-center text-gray-400 hover:text-gray-200">{{ __('Sign Up') }}</a>
+        <span class="rounded-md py-2 text-center bg-white/10 text-white">{{ __('Login') }}</span>
     </div>
 
     <!-- Session Status -->

@@ -116,7 +116,20 @@
                                 class="mt-1 block w-full border-slate-600 bg-slate-700 text-gray-100 rounded-md shadow-sm focus:border-accent-500 focus:ring-accent-500">{{ old('address') }}</textarea>
                         </div>
 
-                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-accent-600 text-white text-sm font-semibold rounded-md hover:bg-accent-700">
+                        <div class="flex items-start gap-2">
+                            <input id="terms" name="terms" type="checkbox" value="1" required @checked(old('terms'))
+                                onchange="document.getElementById('signup-submit').disabled = !this.checked"
+                                class="mt-0.5 rounded border-slate-600 bg-slate-700 text-accent-600 focus:ring-accent-500">
+                            <label for="terms" class="text-sm text-gray-300">
+                                {{ __('I agree to the') }}
+                                <a href="{{ config('app.marketing_url') }}/terms-of-service" target="_blank" rel="noopener" class="text-accent-400 hover:underline">{{ __('Terms of Service') }}</a>
+                                {{ __('and') }}
+                                <a href="{{ config('app.marketing_url') }}/privacy-policy" target="_blank" rel="noopener" class="text-accent-400 hover:underline">{{ __('Privacy Policy') }}</a>.
+                            </label>
+                        </div>
+
+                        <button type="submit" id="signup-submit" @disabled(! old('terms'))
+                            class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-accent-600 text-white text-sm font-semibold rounded-md hover:bg-accent-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-accent-600">
                             {{ __('Submit') }}
                         </button>
                     </form>

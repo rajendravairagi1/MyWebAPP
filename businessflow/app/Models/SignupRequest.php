@@ -19,6 +19,7 @@ class SignupRequest extends Model
     protected $fillable = [
         'name', 'phone', 'email', 'password_hash', 'plan', 'address',
         'status', 'business_id', 'reviewed_at', 'email_verified_at',
+        'terms_accepted_at',
     ];
 
     protected function casts(): array
@@ -26,6 +27,7 @@ class SignupRequest extends Model
         return [
             'reviewed_at' => 'datetime',
             'email_verified_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
         ];
     }
 
