@@ -1,4 +1,4 @@
-package `in`.shramkhata.shram_khata
+package com.shramkhata.app
 
 import io.flutter.embedding.android.FlutterActivity
 

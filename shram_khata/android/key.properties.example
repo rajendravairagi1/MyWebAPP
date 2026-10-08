@@ -1,0 +1,5 @@
+# Copy this file to key.properties (same folder) and fill in your values.
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=upload
+storeFile=C:/Users/YOU/upload-keystore.jks
