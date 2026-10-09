@@ -40,3 +40,8 @@ flutter build apk --release
 ## Not built yet
 - Cloud sync, email verification and password reset (needs a backend; ids are uuids so rows can be merged later).
 - PF / ESI, Hindi UI strings, holidays.
+
+## Play Store
+Icon, store graphics, screenshots, privacy policy, listing text and the step-by-step guide are in `store_assets/`
+(start with `store_assets/PLAY_STORE_STEPS.md`). Release signing reads `android/key.properties`
+(copy `key.properties.example`; the real file is git-ignored).
