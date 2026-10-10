@@ -27,14 +27,14 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
     setState(() => _busy = true);
     try {
       final tmp = await getTemporaryDirectory();
-      final path = p.join(tmp.path, 'labourbook_backup_${D.today()}.sqlite');
+      final path = p.join(tmp.path, 'hazribook_backup_${D.today()}.sqlite');
       final f = File(path);
       if (await f.exists()) await f.delete();
       await ref.read(databaseProvider).customStatement('VACUUM INTO ?', [path]);
       await SharePlus.instance.share(ShareParams(
         files: [XFile(path)],
-        subject: 'LabourBook backup ${D.today()}',
-        text: 'LabourBook backup. Keep this file safe: it contains all labour and payment data.',
+        subject: 'HazriBook backup ${D.today()}',
+        text: 'HazriBook backup. Keep this file safe: it contains all labour and payment data.',
       ));
     } catch (e) {
       if (mounted) showError(context, e);

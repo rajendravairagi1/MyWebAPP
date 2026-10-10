@@ -1,4 +1,4 @@
-package com.oneweblink.labourbook
+package com.oneweblink.hazribook
 
 import io.flutter.embedding.android.FlutterActivity
 

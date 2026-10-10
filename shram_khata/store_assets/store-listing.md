@@ -1,13 +1,13 @@
 # Play Store listing text (copy and paste)
 
 ## App name (max 30)
-LabourBook: Attendance & Pay
+HazriBook: Labour Attendance
 
 ## Short description (max 80)
-Labour attendance, daily payments and company billing for contractor agencies.
+Labour attendance, daily payments and company billing for contractors.
 
 ## Full description (max 4000)
-Run your labour contractor agency from one simple app. LabourBook keeps attendance, daily payments, salary balances and company bills in one place, and works offline on site.
+Hazri (हाज़िरी) means attendance. Run your labour contractor agency from one simple app. HazriBook keeps attendance, daily payments, salary balances and company bills in one place, and works offline on site.
 
 WHAT YOU CAN DO
 
@@ -64,3 +64,8 @@ Business
 
 ## First release notes
 First release: attendance, payments, company billing and PDF statements for labour contractor agencies.
+
+## Optional: Hindi listing for India
+In Play Console go to Grow > Store presence > Store listings > Manage translations > add Hindi (hi-IN).
+- App name (max 30): HazriBook: हाज़िरी और भुगतान
+- Short description: मज़दूर हाज़िरी, रोज़ का भुगतान और कंपनी बिल, ठेकेदारों के लिए।

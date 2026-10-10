@@ -41,7 +41,7 @@ File: `build\app\outputs\bundle\release\app-release.aab`
 Zaroori: ye tabhi Play Store me chalegi jab Step 3 ka `key.properties` bana ho. Warna Play "debug key se signed" bol ke mana kar dega.
 
 ## Step 5: Play Console me app banao
-1. **Create app**: App name `LabourBook: Attendance & Pay`, language English (India), **App**, **Free**, declarations tick karo.
+1. **Create app**: App name `HazriBook: Labour Attendance`, language English (India), **App**, **Free**, declarations tick karo.
 2. Left menu me **Dashboard** ke "Set up your app" ki list ek-ek karke bharo. Saare jawab `store-listing.md` me likhe hain:
    - Privacy policy (Step 2 ka URL)
    - App access, Ads (No), Content rating, Target audience (18+), Data safety
