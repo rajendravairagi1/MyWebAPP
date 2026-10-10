@@ -53,6 +53,8 @@ class DashboardData {
     required this.billing,
     required this.labourCost,
     required this.paidOut,
+    required this.advanceToday,
+    required this.advanceToRecover,
     required this.companies,
     required this.pendingSites,
     required this.activeCompanies,
@@ -84,6 +86,12 @@ class DashboardData {
 
   /// Money actually paid to labour on the day.
   final int paidOut;
+
+  /// Advances handed out on the day (part of [paidOut]).
+  final int advanceToday;
+
+  /// Total workers currently owe the agency (negative balances).
+  final int advanceToRecover;
   final List<CompanyDay> companies;
   final List<PendingSite> pendingSites;
   final int activeCompanies;
@@ -227,6 +235,10 @@ class DashboardService extends Service {
         .where((r) => PayType.isCashOut(r.payment.type))
         .fold<int>(0, (a, r) => a + r.payment.amount);
 
+    final advanceToday = paidRows
+        .where((r) => r.payment.type == PayType.advance)
+        .fold<int>(0, (a, r) => a + r.payment.amount);
+
     final invoices = await BillingService(db).list(branchId: branchId);
     final outstanding = invoices.fold<int>(0, (a, r) => a + r.outstanding);
     final overdue = invoices.where((r) => r.state == InvoiceState.overdue).length;
@@ -235,6 +247,10 @@ class DashboardService extends Service {
     final payable = balances.entries
         .where((e) => labourIds.contains(e.key) && e.value > 0)
         .fold<int>(0, (a, e) => a + e.value);
+
+    final recover = balances.entries
+        .where((e) => labourIds.contains(e.key) && e.value < 0)
+        .fold<int>(0, (a, e) => a - e.value);
 
     final docs = await LabourService(db).expiringDocuments();
     final contracts = await CompanyService(db).expiringContracts(branchId: branchId);
@@ -250,6 +266,8 @@ class DashboardService extends Service {
       billing: billBy[day] ?? 0,
       labourCost: costBy[day] ?? 0,
       paidOut: paidOut,
+      advanceToday: advanceToday,
+      advanceToRecover: recover,
       companies: companyRows,
       pendingSites: pending,
       activeCompanies: companies.length,

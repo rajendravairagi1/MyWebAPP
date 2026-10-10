@@ -103,13 +103,12 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             TextFormField(
               controller: _mobile,
               keyboardType: TextInputType.phone,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(15)],
               decoration: const InputDecoration(
                 labelText: 'Mobile number',
                 prefixIcon: Icon(Icons.phone_outlined),
-                prefixText: '+91  ',
               ),
-              validator: (v) => (v ?? '').length == 10 ? null : 'Enter a 10-digit mobile number',
+              validator: (v) => (v ?? '').length >= 7 ? null : 'Enter your mobile number',
             ),
             const SizedBox(height: 14),
             TextFormField(

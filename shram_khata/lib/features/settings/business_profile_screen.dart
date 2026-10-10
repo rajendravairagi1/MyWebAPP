@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/countries.dart';
 import '../../core/files.dart';
 import '../../core/money.dart';
 import '../../core/theme.dart';
@@ -15,6 +16,18 @@ class BusinessProfileScreen extends ConsumerStatefulWidget {
   @override
   ConsumerState<BusinessProfileScreen> createState() => _BusinessProfileScreenState();
 }
+
+const _swatches = <Color>[
+  Color(0xFF0F766E),
+  Color(0xFF1D4ED8),
+  Color(0xFF4F46E5),
+  Color(0xFF7C3AED),
+  Color(0xFFBE185D),
+  Color(0xFFB91C1C),
+  Color(0xFFEA580C),
+  Color(0xFF15803D),
+  Color(0xFF334155),
+];
 
 class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
   BusinessProfile? _p;
@@ -56,7 +69,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
       city: _t('city'),
       state: _t('state'),
       pincode: _t('pincode'),
-      taxLabel: _t('taxLabel').isEmpty ? 'GST' : _t('taxLabel'),
+      taxLabel: _t('taxLabel').isEmpty ? p.country.taxLabel : _t('taxLabel'),
       taxId: _t('taxId').toUpperCase(),
       taxRate: rate,
       registrationLabel: _t('registrationLabel').isEmpty ? 'Registration No.' : _t('registrationLabel'),
@@ -105,6 +118,62 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
         bottom: FilledButton(onPressed: _save, child: const Text('Save profile')),
         children: [
           _Preview(profile: p, name: _t('name').isEmpty ? p.name : _t('name'), tagline: _t('tagline'), mobile: _t('mobile'), email: _t('email'), website: _t('website'), address: [_t('address'), _t('city')].where((e) => e.isNotEmpty).join(', '), taxLine: p.taxEnabled && _t('taxId').isNotEmpty ? '${_t('taxLabel').isEmpty ? 'GST' : _t('taxLabel')}: ${_t('taxId')}' : ''),
+          const SectionTitle('COUNTRY & CURRENCY', padding: EdgeInsets.fromLTRB(2, 22, 2, 10)),
+          DropdownButtonFormField<String>(
+            key: ValueKey('country-${p.countryCode}'),
+            initialValue: p.countryCode,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Country'),
+            items: [for (final c in Countries.all) DropdownMenuItem(value: c.code, child: Text(c.name))],
+            onChanged: (v) {
+              if (v == null) return;
+              final c = Countries.byCode(v);
+              _ctl('taxLabel', p.taxLabel).text = c.taxLabel;
+              _ctl('taxRate', num1(p.taxRate)).text = num1(c.taxRate);
+              setState(() => _p = p.copyWith(countryCode: v, currencyCode: c.currency, taxLabel: c.taxLabel));
+            },
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            key: ValueKey('currency-${p.currencyCode}'),
+            initialValue: p.currencyCode,
+            isExpanded: true,
+            decoration: const InputDecoration(labelText: 'Currency'),
+            items: [
+              for (final c in Currencies.all) DropdownMenuItem(value: c.code, child: Text('${c.name} (${c.symbol})')),
+            ],
+            onChanged: (v) => setState(() => _p = p.copyWith(currencyCode: v)),
+          ),
+          const SectionTitle('THEME COLOUR', padding: EdgeInsets.fromLTRB(2, 22, 2, 10)),
+          Wrap(spacing: 10, runSpacing: 10, children: [
+            for (final c in _swatches)
+              GestureDetector(
+                onTap: () => setState(() => _p = p.copyWith(themeColor: c.toARGB32())),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: c,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: p.themeColor == c.toARGB32() ? Palette.ink : Colors.transparent, width: 3),
+                  ),
+                  child: p.themeColor == c.toARGB32() ? const Icon(Icons.check, color: Colors.white, size: 20) : null,
+                ),
+              ),
+          ]),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _ctl('themeHex', '#${(p.themeColor & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}'),
+            decoration: const InputDecoration(labelText: 'Custom colour (hex)', hintText: '#0F766E'),
+            onChanged: (v) {
+              final h = v.replaceAll('#', '').trim();
+              if (h.length == 6) {
+                final n = int.tryParse(h, radix: 16);
+                if (n != null) setState(() => _p = p.copyWith(themeColor: 0xFF000000 | n));
+              }
+            },
+          ),
           const SectionTitle('LOGO & IDENTITY', padding: EdgeInsets.fromLTRB(2, 22, 2, 10)),
           Row(children: [
             GestureDetector(
@@ -122,7 +191,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                   image: fileImage(p.logoPath) == null ? null : DecorationImage(image: fileImage(p.logoPath)!, fit: BoxFit.contain),
                 ),
                 child: fileImage(p.logoPath) == null
-                    ? const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    ? Column(mainAxisAlignment: MainAxisAlignment.center, children: [
                         Icon(Icons.add_photo_alternate_outlined, color: Palette.brand),
                         SizedBox(height: 4),
                         Text('Logo', style: TextStyle(fontSize: 12, color: Palette.muted)),
@@ -180,8 +249,10 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
             Expanded(flex: 3, child: _field('registrationId', 'Number', p.registrationId)),
           ]),
           const SectionTitle('PAYMENT DETAILS ON BILLS', padding: EdgeInsets.fromLTRB(2, 12, 2, 10)),
-          _field('upiId', 'UPI ID', p.upiId, hint: 'name@bank', helper: 'A payment QR code is generated from this on every invoice.'),
-          _field('upiName', 'Name shown on UPI (optional)', p.upiName),
+          if (p.country.hasUpi) ...[
+            _field('upiId', 'UPI ID', p.upiId, hint: 'name@bank', helper: 'A payment QR code is generated from this on every invoice.'),
+            _field('upiName', 'Name shown on UPI (optional)', p.upiName),
+          ],
           Row(children: [
             OutlinedButton.icon(
               style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
@@ -199,7 +270,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
           _field('bankName', 'Bank name', p.bankName, cap: TextCapitalization.words),
           _field('accountName', 'Account holder name', p.accountName, cap: TextCapitalization.words),
           _field('accountNumber', 'Account number', p.accountNumber, type: TextInputType.number),
-          _field('ifsc', 'IFSC', p.ifsc, cap: TextCapitalization.characters),
+          _field('ifsc', p.country.bankCodeLabel, p.ifsc, cap: TextCapitalization.characters),
           const SectionTitle('INVOICE SETTINGS', padding: EdgeInsets.fromLTRB(2, 12, 2, 10)),
           Row(children: [
             Expanded(child: _field('invoicePrefix', 'Invoice prefix', p.invoicePrefix)),
@@ -259,14 +330,14 @@ class _Preview extends StatelessWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(name.isEmpty ? 'Your business name' : name,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Palette.brandDark)),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Palette.brandDark)),
               if (tagline.isNotEmpty) Text(tagline, style: const TextStyle(fontSize: 11.5, color: Palette.muted)),
               if (address.isNotEmpty) Text(address, style: const TextStyle(fontSize: 11.5)),
               if (taxLine.isNotEmpty) Text(taxLine, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
               if (contact.isNotEmpty) Text(contact, style: const TextStyle(fontSize: 11.5, color: Palette.muted)),
             ]),
           ),
-          const Text('INVOICE', style: TextStyle(fontWeight: FontWeight.w800, color: Palette.brand, letterSpacing: 1)),
+          Text('INVOICE', style: TextStyle(fontWeight: FontWeight.w800, color: Palette.brand, letterSpacing: 1)),
         ]),
         const SizedBox(height: 10),
         Container(height: 2, color: Palette.brand),

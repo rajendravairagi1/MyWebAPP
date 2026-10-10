@@ -93,13 +93,13 @@ class _Header extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.apartment, size: 16, color: Palette.brandDark),
+                Icon(Icons.apartment, size: 16, color: Palette.brandDark),
                 const SizedBox(width: 6),
                 Text(
                   scope == null ? 'All branches' : allowed.firstWhere((b) => b.id == scope).name,
-                  style: const TextStyle(fontWeight: FontWeight.w700, color: Palette.brandDark, fontSize: 13),
+                  style: TextStyle(fontWeight: FontWeight.w700, color: Palette.brandDark, fontSize: 13),
                 ),
-                const Icon(Icons.arrow_drop_down, color: Palette.brandDark),
+                Icon(Icons.arrow_drop_down, color: Palette.brandDark),
               ]),
             ),
           ),
@@ -205,7 +205,9 @@ class _Body extends ConsumerWidget {
             KpiTile(
               label: 'Paid out',
               value: Money.compact(d.paidOut),
-              hint: 'cash / UPI / bank',
+              hint: d.advanceToday > 0
+                  ? 'incl. ${Money.compact(d.advanceToday)} advance'
+                  : 'cash / UPI / bank',
               icon: Icons.payments_outlined,
               color: Palette.info,
             ),
@@ -249,6 +251,14 @@ class _Body extends ConsumerWidget {
               ),
             ),
           ]),
+          const SizedBox(height: 10),
+          AppCard(
+            child: Stat(
+              label: 'Advance to recover from workers',
+              value: Money.compact(d.advanceToRecover),
+              color: d.advanceToRecover > 0 ? Palette.half : Palette.ink,
+            ),
+          ),
         ],
         const SectionTitle('LAST 7 DAYS', padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
         AppCard(child: WeekChart(points: d.week)),
@@ -376,7 +386,7 @@ class _Hero extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [Palette.brand, Palette.brandDark],

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import '../core/countries.dart';
+
 /// The agency's own details. Printed on every statement and invoice.
 class BusinessProfile {
   const BusinessProfile({
@@ -34,6 +36,10 @@ class BusinessProfile {
     this.invoiceTerms = '',
     this.footerNote = 'Thank you for your business.',
     this.monthDivisor = 26,
+    this.countryCode = 'IN',
+    this.currencyCode = 'INR',
+    this.setupDone = false,
+    this.themeColor = 0xFF0F766E,
   });
 
   final String planId;
@@ -79,6 +85,21 @@ class BusinessProfile {
   /// Days used to convert a monthly salary into a per-day rate.
   final int monthDivisor;
 
+  /// Where the business operates. Sets phone code, tax name, bank labels.
+  final String countryCode;
+
+  /// Currency shown everywhere (can differ from the country default).
+  final String currencyCode;
+
+  /// False until the first-run business setup has been completed or skipped.
+  final bool setupDone;
+
+  /// App accent colour as 0xAARRGGBB.
+  final int themeColor;
+
+  Country get country => Countries.byCode(countryCode);
+  CurrencyInfo get currency => Currencies.byCode(currencyCode);
+
   bool get isSetUp => name.trim().isNotEmpty;
   bool get hasBank => accountNumber.trim().isNotEmpty;
   bool get hasUpi => upiId.trim().isNotEmpty;
@@ -119,6 +140,10 @@ class BusinessProfile {
     String? invoiceTerms,
     String? footerNote,
     int? monthDivisor,
+    String? countryCode,
+    String? currencyCode,
+    bool? setupDone,
+    int? themeColor,
   }) {
     return BusinessProfile(
       planId: planId ?? this.planId,
@@ -153,6 +178,10 @@ class BusinessProfile {
       invoiceTerms: invoiceTerms ?? this.invoiceTerms,
       footerNote: footerNote ?? this.footerNote,
       monthDivisor: monthDivisor ?? this.monthDivisor,
+      countryCode: countryCode ?? this.countryCode,
+      currencyCode: currencyCode ?? this.currencyCode,
+      setupDone: setupDone ?? this.setupDone,
+      themeColor: themeColor ?? this.themeColor,
     );
   }
 
@@ -190,6 +219,10 @@ class BusinessProfile {
         'invoiceTerms': invoiceTerms,
         'footerNote': footerNote,
         'monthDivisor': monthDivisor,
+        'countryCode': countryCode,
+        'currencyCode': currencyCode,
+        'setupDone': setupDone,
+        'themeColor': themeColor,
       };
 
   String encode() => jsonEncode(toJson());
@@ -230,6 +263,10 @@ class BusinessProfile {
       invoiceTerms: s('invoiceTerms', ''),
       footerNote: s('footerNote', 'Thank you for your business.'),
       monthDivisor: (m['monthDivisor'] as num?)?.toInt() ?? 26,
+      countryCode: s('countryCode', 'IN'),
+      currencyCode: s('currencyCode', 'INR'),
+      setupDone: (m['setupDone'] as bool?) ?? false,
+      themeColor: (m['themeColor'] as num?)?.toInt() ?? 0xFF0F766E,
     );
   }
 }

@@ -249,7 +249,7 @@ class _ContractCard extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(color: Palette.brandTint, borderRadius: BorderRadius.circular(10)),
                 child: Text('${r.skill}  ${Money.format(r.perDay)}/day',
-                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5, color: Palette.brandDark)),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5, color: Palette.brandDark)),
               ),
           ]),
         if (k.docPath != null && File(k.docPath!).existsSync())
@@ -260,7 +260,7 @@ class _ContractCard extends StatelessWidget {
                 context: context,
                 builder: (_) => Dialog(clipBehavior: Clip.antiAlias, child: InteractiveViewer(child: Image.file(File(k.docPath!)))),
               ),
-              child: const Row(children: [
+              child: Row(children: [
                 Icon(Icons.attach_file, size: 16, color: Palette.brand),
                 SizedBox(width: 4),
                 Text('View contract copy', style: TextStyle(color: Palette.brand, fontWeight: FontWeight.w700, fontSize: 13)),

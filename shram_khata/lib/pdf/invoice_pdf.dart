@@ -18,6 +18,7 @@ class InvoicePdf {
   static Future<Uint8List> build(InvoiceBundle b) async {
     final p = b.profile;
     final inv = b.detail.invoice;
+    Money.configureCode(p.currencyCode);
     final assets = await PdfAssets.load(p);
     final theme = await PdfKit.theme();
     final doc = pw.Document(theme: theme, title: 'Invoice ${inv.number}', author: p.name);

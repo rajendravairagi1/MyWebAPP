@@ -153,3 +153,55 @@ class PaymentTile extends ConsumerWidget {
     }
   }
 }
+
+/// Plain-language account of one worker: earned minus everything already
+/// given, ending in who owes whom.
+class AccountSummary extends StatelessWidget {
+  const AccountSummary(this.ledger, {super.key, this.color});
+  final Ledger ledger;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = ledger;
+    Widget line(String label, int paise, {bool minus = false, bool bold = false}) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Row(children: [
+            Expanded(
+              child: Text(label,
+                  style: TextStyle(
+                      color: bold ? Palette.ink : Palette.muted,
+                      fontWeight: bold ? FontWeight.w800 : FontWeight.w500)),
+            ),
+            Text('${minus ? '− ' : ''}${Money.format(paise)}',
+                style: TextStyle(fontWeight: bold ? FontWeight.w800 : FontWeight.w600)),
+          ]),
+        );
+    final bal = l.balance;
+    return AppCard(
+      color: color,
+      child: Column(children: [
+        if (l.opening != 0) line('Brought forward', l.opening),
+        line('Earned (${num1(l.paidDays)} days${l.otHours > 0 ? ' + OT' : ''})', l.earned, bold: true),
+        if (l.paidAdvance != 0) line('Advance taken', l.paidAdvance, minus: true),
+        if (l.paidDaily != 0) line('Wages paid', l.paidDaily, minus: true),
+        if (l.paidSettlement != 0) line('Settlements paid', l.paidSettlement, minus: true),
+        if (l.deductions != 0) line('Fines / recoveries', l.deductions, minus: true),
+        const Divider(height: 20),
+        Row(children: [
+          Expanded(
+            child: Text(
+              bal > 0
+                  ? 'Payable to worker'
+                  : bal < 0
+                      ? 'Worker owes you (advance to recover)'
+                      : 'Fully settled',
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
+          BalanceText(bal, size: 22),
+        ]),
+      ]),
+    );
+  }
+}

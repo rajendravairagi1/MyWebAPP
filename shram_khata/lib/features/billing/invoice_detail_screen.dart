@@ -192,7 +192,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                 controller: amount,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-                decoration: InputDecoration(labelText: 'Amount', prefixText: '₹ ', helperText: 'Outstanding ${Money.format(d.outstanding)}'),
+                decoration: InputDecoration(labelText: 'Amount', prefixText: '${Money.symbol} ', helperText: 'Outstanding ${Money.format(d.outstanding)}'),
               ),
               const SizedBox(height: 12),
               SegmentedButton<String>(

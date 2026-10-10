@@ -35,7 +35,7 @@ class BranchesScreen extends ConsumerWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(color: Palette.brandTint, borderRadius: BorderRadius.circular(13)),
-                  child: const Icon(Icons.account_tree_outlined, color: Palette.brand),
+                  child: Icon(Icons.account_tree_outlined, color: Palette.brand),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -52,9 +52,11 @@ class D {
     return out;
   }
 
-  /// Indian financial year label for a date, e.g. 2026-10-07 -> "2026-27".
-  static String financialYear(DateTime d) {
-    final start = d.month >= 4 ? d.year : d.year - 1;
+  /// Financial year label for a date, e.g. 2026-10-07 -> "2026-27" when the
+  /// year starts in April, or "2026" when it starts in January.
+  static String financialYear(DateTime d, {int startMonth = 4}) {
+    if (startMonth == 1) return '${d.year}';
+    final start = d.month >= startMonth ? d.year : d.year - 1;
     final end = (start + 1) % 100;
     return '$start-${end.toString().padLeft(2, '0')}';
   }

@@ -141,7 +141,7 @@ class PlanCard extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Padding(
+                        Padding(
                           padding: EdgeInsets.only(top: 2),
                           child: Icon(Icons.check, size: 16, color: Palette.brand),
                         ),

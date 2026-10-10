@@ -16,6 +16,7 @@ class StatementPdf {
   StatementPdf._();
 
   static Future<Uint8List> build(StatementData d) async {
+    Money.configureCode(d.profile.currencyCode);
     final assets = await PdfAssets.load(d.profile);
     final theme = await PdfKit.theme();
     final doc = pw.Document(

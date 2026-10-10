@@ -42,7 +42,7 @@ class MoreScreen extends ConsumerWidget {
                     ? null
                     : DecorationImage(image: fileImage(profile!.logoPath)!, fit: BoxFit.cover),
               ),
-              child: fileImage(profile?.logoPath) == null ? const Icon(Icons.storefront, color: Palette.brand, size: 28) : null,
+              child: fileImage(profile?.logoPath) == null ? Icon(Icons.storefront, color: Palette.brand, size: 28) : null,
             ),
             const SizedBox(width: 14),
             Expanded(

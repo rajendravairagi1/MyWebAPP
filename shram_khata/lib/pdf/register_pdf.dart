@@ -16,6 +16,7 @@ class RegisterPdf {
   RegisterPdf._();
 
   static Future<(pw.Document, PdfAssets, pw.ThemeData)> _start(BusinessProfile p, String title) async {
+    Money.configureCode(p.currencyCode);
     final assets = await PdfAssets.load(p);
     final theme = await PdfKit.theme();
     return (pw.Document(theme: theme, title: title, author: p.name), assets, theme);

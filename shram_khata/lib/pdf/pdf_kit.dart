@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart' show Color, Colors, HSLColor;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -12,9 +13,19 @@ import '../domain/business_profile.dart';
 class PdfKit {
   PdfKit._();
 
-  static final brand = PdfColor.fromInt(0xFF0F766E);
-  static final brandDark = PdfColor.fromInt(0xFF0B4F4A);
-  static final brandTint = PdfColor.fromInt(0xFFE7F3F1);
+  static PdfColor brand = PdfColor.fromInt(0xFF0F766E);
+  static PdfColor brandDark = PdfColor.fromInt(0xFF0B4F4A);
+  static PdfColor brandTint = PdfColor.fromInt(0xFFE7F3F1);
+  /// Re-derives the brand colours from the colour chosen in Business profile.
+  static void applyBrand(int argb) {
+    final c = PdfColor.fromInt(argb);
+    brand = c;
+    final hsl = HSLColor.fromColor(Color(argb));
+    brandDark = PdfColor.fromInt(
+        hsl.withLightness((hsl.lightness * 0.62).clamp(0.08, 0.5)).toColor().toARGB32());
+    brandTint = PdfColor.fromInt(Color.lerp(Colors.white, Color(argb), 0.10)!.toARGB32());
+  }
+
   static final ink = PdfColor.fromInt(0xFF111827);
   static final muted = PdfColor.fromInt(0xFF6B7280);
   static final line = PdfColor.fromInt(0xFFE5E7EB);
@@ -329,6 +340,7 @@ class PdfAssets {
   final Uint8List? qr;
 
   static Future<PdfAssets> load(BusinessProfile p) async {
+    PdfKit.applyBrand(p.themeColor);
     Future<Uint8List?> read(String? path) async {
       if (path == null || path.isEmpty) return null;
       try {

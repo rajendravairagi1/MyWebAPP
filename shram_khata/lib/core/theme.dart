@@ -4,9 +4,24 @@ import 'package:flutter/material.dart';
 class Palette {
   Palette._();
 
-  static const brand = Color(0xFF0F766E);
-  static const brandDark = Color(0xFF0B4F4A);
-  static const brandTint = Color(0xFFE7F3F1);
+  /// The accent colour is chosen in Business settings. Everything else
+  /// (dark shade, soft tint) is derived from it.
+  static const defaultBrand = Color(0xFF0F766E);
+  static Color _brand = defaultBrand;
+  static Color _brandDark = const Color(0xFF0B4F4A);
+  static Color _brandTint = const Color(0xFFE7F3F1);
+
+  static Color get brand => _brand;
+  static Color get brandDark => _brandDark;
+  static Color get brandTint => _brandTint;
+
+  static void apply(Color c) {
+    _brand = c;
+    final hsl = HSLColor.fromColor(c);
+    _brandDark = hsl.withLightness((hsl.lightness * 0.62).clamp(0.08, 0.5)).toColor();
+    _brandTint = Color.lerp(Colors.white, c, 0.10)!;
+  }
+
   static const accent = Color(0xFFF59E0B);
 
   static const bg = Color(0xFFF4F7F7);
@@ -171,7 +186,7 @@ ThemeData buildTheme() {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
     ),
-    tabBarTheme: const TabBarThemeData(
+    tabBarTheme: TabBarThemeData(
       labelColor: Palette.brandDark,
       unselectedLabelColor: Palette.muted,
       indicatorColor: Palette.brand,

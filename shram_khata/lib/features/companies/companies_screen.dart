@@ -57,7 +57,7 @@ class CompaniesScreen extends ConsumerWidget {
                     width: 46,
                     height: 46,
                     decoration: BoxDecoration(color: Palette.brandTint, borderRadius: BorderRadius.circular(14)),
-                    child: const Icon(Icons.apartment, color: Palette.brand),
+                    child: Icon(Icons.apartment, color: Palette.brand),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

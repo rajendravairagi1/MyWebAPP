@@ -50,7 +50,7 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       body: ListView(padding: const EdgeInsets.all(16), children: [
         AppCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Icon(Icons.cloud_download_outlined, size: 32, color: Palette.brand),
+            Icon(Icons.cloud_download_outlined, size: 32, color: Palette.brand),
             const SizedBox(height: 12),
             const Text('Save a copy of your data', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
             const SizedBox(height: 6),

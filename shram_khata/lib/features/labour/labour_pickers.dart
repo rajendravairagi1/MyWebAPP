@@ -110,16 +110,23 @@ class SiteChecklist extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final branch = ref.watch(scopeBranchProvider);
     final companies = ref.watch(companiesProvider);
+    ref.watch(dbTickProvider);
     return FutureBuilder(
       future: ref.watch(companyServiceProvider).sites(branchId: branch),
       builder: (context, snap) {
         final sites = snap.data ?? const <Site>[];
         final comps = {for (final c in companies.value ?? const <Company>[]) c.id: c};
         if (sites.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Text('No sites yet. Add companies and sites from More → Companies.',
-                style: TextStyle(color: Palette.muted)),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Text('Add the company this worker works for, then pick a site.',
+                    style: TextStyle(color: Palette.muted)),
+              ),
+              _addButton(context, ref, null),
+            ],
           );
         }
         final byCompany = <String, List<Site>>{};
@@ -140,7 +147,7 @@ class SiteChecklist extends ConsumerWidget {
                   FilterChip(
                     label: Text(s.name),
                     selected: selected.contains(s.id),
-                    avatar: selected.contains(s.id) ? const Icon(Icons.check, size: 16, color: Palette.brandDark) : null,
+                    avatar: selected.contains(s.id) ? Icon(Icons.check, size: 16, color: Palette.brandDark) : null,
                     onSelected: (v) {
                       final next = {...selected};
                       v ? next.add(s.id) : next.remove(s.id);
@@ -149,9 +156,102 @@ class SiteChecklist extends ConsumerWidget {
                   ),
               ]),
             ],
+            _addButton(context, ref, null),
           ],
         );
       },
     );
   }
+
+  Widget _addButton(BuildContext context, WidgetRef ref, String? companyId) => Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(
+          onPressed: () async {
+            final id = await quickAddCompanySite(context, ref);
+            if (id != null) onChanged({...selected, id});
+          },
+          icon: const Icon(Icons.add),
+          label: const Text('Add company / site'),
+        ),
+      );
+}
+
+/// Small dialog to add a site to an existing company, or a new company with
+/// its first site. Returns the id of the new site.
+Future<String?> quickAddCompanySite(BuildContext context, WidgetRef ref) async {
+  final branch = ref.read(writeBranchProvider);
+  if (branch == null) return null;
+  final svc = ref.read(companyServiceProvider);
+  final companies = await svc.companies(branchId: ref.read(scopeBranchProvider));
+  if (!context.mounted) return null;
+  final company = TextEditingController();
+  final site = TextEditingController();
+  String? existing = companies.isEmpty ? null : companies.first.id;
+  var isNew = companies.isEmpty;
+  final key = GlobalKey<FormState>();
+  final result = await showDialog<String>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setS) => AlertDialog(
+        title: const Text('Add company / site'),
+        content: Form(
+          key: key,
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              if (!isNew)
+                DropdownButtonFormField<String>(
+                  initialValue: existing,
+                  isExpanded: true,
+                  decoration: const InputDecoration(labelText: 'Company'),
+                  items: [for (final c in companies) DropdownMenuItem(value: c.id, child: Text(c.name))],
+                  onChanged: (v) => existing = v,
+                )
+              else
+                TextFormField(
+                  controller: company,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(labelText: 'Company name *'),
+                  validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the company name' : null,
+                ),
+              if (companies.isNotEmpty)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () => setS(() => isNew = !isNew),
+                    child: Text(isNew ? 'Use existing company' : '+ New company'),
+                  ),
+                ),
+              TextFormField(
+                controller: site,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Site / location *'),
+                validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the site name' : null,
+              ),
+            ]),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          FilledButton(
+            onPressed: () async {
+              if (!key.currentState!.validate()) return;
+              try {
+                final cid = isNew
+                    ? await svc.addCompany(branchId: branch, name: company.text)
+                    : existing!;
+                final sid = await svc.addSite(companyId: cid, name: site.text);
+                if (ctx.mounted) Navigator.pop(ctx, sid);
+              } catch (e) {
+                if (ctx.mounted) showError(ctx, e);
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    ),
+  );
+  company.dispose();
+  site.dispose();
+  return result;
 }

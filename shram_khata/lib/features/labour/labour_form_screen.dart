@@ -3,9 +3,11 @@ import 'package:drift/drift.dart' show Value;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/countries.dart';
 import '../../core/dates.dart';
 import '../../core/files.dart';
 import '../../core/money.dart';
+import '../../core/phone.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
@@ -106,6 +108,9 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
       } else {
         final branch = _branchId ?? ref.read(writeBranchProvider);
         if (branch == null) throw AppException('No branch found.');
+        if (_sites.isEmpty) {
+          throw AppException('Choose the company and site this worker works at.');
+        }
         await svc.add(
           branchId: branch,
           name: _name.text,
@@ -133,6 +138,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
   @override
   Widget build(BuildContext context) {
     if (_loading) return const Scaffold(body: LoadingView());
+    final country = ref.watch(profileProvider).value?.country ?? Countries.india;
     final plan = ref.watch(planProvider);
     final scope = ref.watch(scopeBranchProvider);
     final allowed = ref.watch(allowedBranchesProvider);
@@ -161,7 +167,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
                       bottom: 0,
                       child: Container(
                         padding: const EdgeInsets.all(7),
-                        decoration: const BoxDecoration(color: Palette.brand, shape: BoxShape.circle),
+                        decoration: BoxDecoration(color: Palette.brand, shape: BoxShape.circle),
                         child: const Icon(Icons.photo_camera, size: 16, color: Colors.white),
                       ),
                     ),
@@ -187,9 +193,9 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
             TextFormField(
               controller: _mobile,
               keyboardType: TextInputType.phone,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
-              decoration: const InputDecoration(labelText: 'Mobile number', prefixText: '+91  '),
-              validator: (v) => (v ?? '').isEmpty || v!.length == 10 ? null : 'Enter 10 digits',
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(Phone.maxLength(country))],
+              decoration: InputDecoration(labelText: 'Mobile number', prefixText: Phone.prefix(country)),
+              validator: (v) => Phone.validate(v, country),
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -239,7 +245,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
                   labelText: _payType == 'daily' ? 'Salary per day *' : 'Salary per month *',
-                  prefixText: '₹ ',
+                  prefixText: '${Money.symbol} ',
                   helperText: _payType == 'monthly'
                       ? 'Converted to a daily rate for attendance and overtime.'
                       : null,
@@ -250,9 +256,9 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
               TextFormField(
                 controller: _ot,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'Overtime per hour (optional)',
-                  prefixText: '₹ ',
+                  prefixText: '${Money.symbol} ',
                   helperText: 'Leave empty to use daily rate ÷ 8 hours.',
                 ),
               ),
@@ -276,7 +282,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
                   child: Text(D.showDt(_join)),
                 ),
               ),
-              const SectionTitle('WORKS AT', padding: EdgeInsets.fromLTRB(2, 22, 2, 4)),
+              const SectionTitle('COMPANY & SITE *', padding: EdgeInsets.fromLTRB(2, 22, 2, 4)),
               SiteChecklist(selected: _sites, onChanged: (v) => setState(() => _sites = v)),
             ],
           ],

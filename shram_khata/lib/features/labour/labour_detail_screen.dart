@@ -19,6 +19,7 @@ import '../payments/payment_form_screen.dart';
 import '../payments/payment_widgets.dart';
 import '../reports/pdf_screen.dart';
 import '../reports/period.dart';
+import 'day_edit_sheet.dart';
 import 'labour_form_screen.dart';
 import 'labour_pickers.dart';
 
@@ -194,7 +195,14 @@ class _AttendanceTabState extends ConsumerState<_AttendanceTab> {
           loading: () => const Padding(padding: EdgeInsets.all(40), child: LoadingView()),
           error: (e, _) => ErrorView(e),
           data: (m) => Column(children: [
-            _Calendar(month: _month, entries: m.entries),
+            _Calendar(
+              month: _month,
+              entries: m.entries,
+              onDayTap: (d) => editAttendanceDay(context, ref, widget.labour, d),
+            ),
+            Text('Tap a day to add or correct attendance',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: Palette.muted)),
             const SizedBox(height: 14),
             Row(children: [
               _Tally('P', m.ledger.presentRows),
@@ -274,8 +282,9 @@ class _Tally extends StatelessWidget {
 }
 
 class _Calendar extends StatelessWidget {
-  const _Calendar({required this.month, required this.entries});
+  const _Calendar({required this.month, required this.entries, required this.onDayTap});
   final DateTime month;
+  final ValueChanged<DateTime> onDayTap;
   final List<AttendanceData> entries;
 
   @override
@@ -324,7 +333,9 @@ class _Calendar extends StatelessWidget {
       ot = list.fold<double>(0, (a, e) => a + (e.status == 'A' ? 0 : e.otHours));
     }
     final future = date.isAfter(DateTime.now());
-    return Container(
+    return GestureDetector(
+      onTap: future ? null : () => onDayTap(date),
+      child: Container(
       decoration: BoxDecoration(
         color: letter == null ? (future ? Colors.transparent : const Color(0xFFF6F8F8)) : Palette.statusBg(letter),
         borderRadius: BorderRadius.circular(10),
@@ -352,7 +363,7 @@ class _Calendar extends StatelessWidget {
             child: Text('+${num1(ot)}', style: const TextStyle(fontSize: 9, color: Palette.info, fontWeight: FontWeight.w800)),
           ),
       ]),
-    );
+    ));
   }
 }
 
@@ -382,23 +393,7 @@ class _PaymentsTab extends ConsumerWidget {
       Expanded(
         child: ListView(padding: const EdgeInsets.fromLTRB(16, 12, 16, 24), children: [
           ledger.maybeWhen(
-            data: (l) => AppCard(
-              child: Column(children: [
-                Row(children: [
-                  Expanded(child: Stat(label: 'Total earned', value: Money.format(l.earned))),
-                  Expanded(child: Stat(label: 'Total paid', value: Money.format(l.cashPaid))),
-                  if (l.deductions > 0)
-                    Expanded(child: Stat(label: 'Deductions', value: Money.format(l.deductions))),
-                ]),
-                const Divider(height: 24),
-                Row(children: [
-                  Text(l.balance >= 0 ? 'Payable to labour' : 'Advance to recover',
-                      style: const TextStyle(color: Palette.muted, fontWeight: FontWeight.w600)),
-                  const Spacer(),
-                  BalanceText(l.balance, size: 22),
-                ]),
-              ]),
-            ),
+            data: (l) => AccountSummary(l),
             orElse: () => const SizedBox(height: 90),
           ),
           const SectionTitle('PAYMENT HISTORY', padding: EdgeInsets.fromLTRB(4, 20, 4, 8)),
@@ -520,7 +515,7 @@ class _DetailsTab extends ConsumerWidget {
                 child: Column(children: [
                   for (var i = 0; i < list.length; i++) ...[
                     ListTile(
-                      leading: const Icon(Icons.location_on_outlined, color: Palette.brand),
+                      leading: Icon(Icons.location_on_outlined, color: Palette.brand),
                       title: Text(list[i].site.name, style: const TextStyle(fontWeight: FontWeight.w700)),
                       subtitle: Text('${list[i].company.name} • since ${D.show(list[i].assignment.fromDate)}'),
                       trailing: manage
@@ -765,13 +760,13 @@ class _RateSheetState extends State<_RateSheet> {
           TextField(
             controller: _amount,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'New rate', prefixText: '₹ '),
+            decoration: InputDecoration(labelText: 'New rate', prefixText: '${Money.symbol} '),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _ot,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Overtime per hour (optional)', prefixText: '₹ '),
+            decoration: InputDecoration(labelText: 'Overtime per hour (optional)', prefixText: '${Money.symbol} '),
           ),
           const SizedBox(height: 12),
           InkWell(
@@ -835,7 +830,7 @@ class _DocTile extends ConsumerWidget {
           color: Palette.brandTint,
           child: img != null
               ? Image(image: img, fit: BoxFit.cover)
-              : const Icon(Icons.description_outlined, color: Palette.brand),
+              : Icon(Icons.description_outlined, color: Palette.brand),
         ),
       ),
       title: Text(doc.docType, style: const TextStyle(fontWeight: FontWeight.w700)),

@@ -128,20 +128,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
           ),
           if (_ledger != null) ...[
             const SizedBox(height: 10),
-            AppCard(
-              color: Palette.brandTint,
-              child: Row(children: [
-                Expanded(child: Stat(label: 'Earned', value: Money.format(_ledger!.earned))),
-                Expanded(child: Stat(label: 'Paid', value: Money.format(_ledger!.cashPaid + _ledger!.deductions))),
-                Expanded(
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    const Text('Balance', style: TextStyle(fontSize: 12, color: Palette.muted)),
-                    const SizedBox(height: 2),
-                    BalanceText(_ledger!.balance, size: 17),
-                  ]),
-                ),
-              ]),
-            ),
+            AccountSummary(_ledger!, color: Palette.brandTint),
           ],
           const SectionTitle('TYPE', padding: EdgeInsets.fromLTRB(2, 20, 2, 8)),
           Wrap(spacing: 8, runSpacing: 8, children: [
@@ -170,13 +157,13 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             onChanged: (_) => setState(() {}),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
-            decoration: const InputDecoration(labelText: 'Amount', prefixText: '₹ '),
+            decoration: InputDecoration(labelText: 'Amount', prefixText: '${Money.symbol} '),
           ),
           const SizedBox(height: 8),
           Wrap(spacing: 8, children: [
             for (final v in [100, 200, 500, 1000])
               ActionChip(
-                label: Text('₹$v'),
+                label: Text('${Money.symbol}$v'),
                 onPressed: () => setState(() => _amount.text = '$v'),
               ),
             if (balance != null && balance > 0)

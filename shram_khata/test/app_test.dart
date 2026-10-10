@@ -98,8 +98,19 @@ void main() {
     await t.tap(find.text('Create account'));
     await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 400)));
     await settle(t);
+    expect(find.text('Your business'), findsOneWidget);
+    await shot(t, '04_setup_country');
+    await t.tap(find.text('Next'));
+    await settle(t);
+    expect(find.text('Your first company'), findsOneWidget);
+    await t.enterText(find.byType(TextFormField).at(0), 'Tata Projects');
+    await t.enterText(find.byType(TextFormField).at(2), 'Plant 1');
+    await shot(t, '05_setup_company');
+    await t.tap(find.text('Finish setup'));
+    await t.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 400)));
+    await settle(t);
     expect(find.textContaining('Good'), findsWidgets);
-    await shot(t, '04_dashboard_empty');
+    await shot(t, '06_dashboard_empty');
   });
 
   testWidgets('seeded app: main screens render', (t) async {

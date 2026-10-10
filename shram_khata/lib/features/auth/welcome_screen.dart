@@ -19,7 +19,7 @@ class WelcomeScreen extends StatelessWidget {
           Expanded(
             child: Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -40,7 +40,7 @@ class WelcomeScreen extends StatelessWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Icon(Icons.groups_rounded, size: 36, color: Palette.brand),
+                        child: Icon(Icons.groups_rounded, size: 36, color: Palette.brand),
                       ),
                       const SizedBox(height: 24),
                       const Text(

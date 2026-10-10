@@ -303,3 +303,27 @@ final invoicesProvider = FutureProvider.autoDispose<List<InvoiceRow>>((ref) asyn
 });
 
 String? lastStaffId(SharedPreferences p) => p.getString('session.staffId');
+
+/// Past days (last 7) that still have a site with workers but no submitted
+/// sheet, newest first. Lets the owner catch up on forgotten attendance.
+final pendingDaysProvider = FutureProvider.autoDispose<List<DateTime>>((ref) async {
+  ref.watch(dbTickProvider);
+  final branch = ref.watch(scopeBranchProvider);
+  final limit = ref.watch(sessionProvider).siteLimit;
+  var sites = await ref.watch(companyServiceProvider).sites(branchId: branch);
+  if (limit.isNotEmpty) sites = sites.where((s) => limit.contains(s.id)).toList();
+  final att = ref.watch(attendanceServiceProvider);
+  final out = <DateTime>[];
+  for (var i = 1; i <= 7; i++) {
+    final d = D.addDays(DateTime.now(), -i);
+    final ymd = D.ymd(d);
+    for (final s in sites) {
+      final sheet = await att.loadSheet(s.id, ymd);
+      if (sheet.total > 0 && !sheet.isSubmitted) {
+        out.add(D.dateOnly(d));
+        break;
+      }
+    }
+  }
+  return out;
+});

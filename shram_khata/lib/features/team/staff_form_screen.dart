@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/countries.dart';
 import '../../core/permissions.dart';
+import '../../core/phone.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
@@ -89,6 +91,7 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final country = ref.watch(profileProvider).value?.country ?? Countries.india;
     final plan = ref.watch(planProvider);
     final branches = ref.watch(branchesProvider).value ?? const <Branch>[];
     return Scaffold(
@@ -105,8 +108,8 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
           TextField(
             controller: _mobile,
             keyboardType: TextInputType.phone,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(10)],
-            decoration: const InputDecoration(labelText: 'Mobile (used to sign in)', prefixText: '+91  '),
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(Phone.maxLength(country))],
+            decoration: InputDecoration(labelText: 'Mobile (used to sign in)', prefixText: Phone.prefix(country)),
           ),
           if (!_editing) ...[
             const SizedBox(height: 12),

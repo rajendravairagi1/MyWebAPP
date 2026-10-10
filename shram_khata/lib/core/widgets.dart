@@ -134,7 +134,7 @@ class EmptyState extends StatelessWidget {
             Container(
               width: 76,
               height: 76,
-              decoration: const BoxDecoration(color: Palette.brandTint, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: Palette.brandTint, shape: BoxShape.circle),
               child: Icon(icon, size: 36, color: Palette.brand),
             ),
             const SizedBox(height: 18),
@@ -157,9 +157,11 @@ class EmptyState extends StatelessWidget {
 
 /// Small coloured pill, e.g. status badges.
 class Pill extends StatelessWidget {
-  const Pill(this.text, {super.key, this.color = Palette.brand, this.bg, this.icon});
+  // ignore: prefer_initializing_formals
+  const Pill(this.text, {super.key, Color? color, this.bg, this.icon}) : _color = color;
   final String text;
-  final Color color;
+  final Color? _color;
+  Color get color => _color ?? Palette.brand;
   final Color? bg;
   final IconData? icon;
 
@@ -251,7 +253,7 @@ class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
   @override
   Widget build(BuildContext context) =>
-      const Center(child: CircularProgressIndicator(color: Palette.brand));
+      Center(child: CircularProgressIndicator(color: Palette.brand));
 }
 
 class ErrorView extends StatelessWidget {

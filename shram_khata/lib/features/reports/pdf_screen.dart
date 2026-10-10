@@ -49,7 +49,7 @@ class _PdfScreenState extends State<PdfScreen> {
             canDebug: false,
             maxPageWidth: 700,
             scrollViewDecoration: const BoxDecoration(color: Palette.bg),
-            actionBarTheme: const PdfActionBarTheme(
+            actionBarTheme: PdfActionBarTheme(
               backgroundColor: Palette.brand,
               iconColor: Colors.white,
             ),

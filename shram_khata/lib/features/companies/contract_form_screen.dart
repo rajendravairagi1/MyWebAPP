@@ -213,7 +213,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                       child: TextField(
                         controller: _rows[i].perDay,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: const InputDecoration(labelText: 'Per day', prefixText: '₹ ', isDense: true),
+                        decoration: InputDecoration(labelText: 'Per day', prefixText: '${Money.symbol} ', isDense: true),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -221,7 +221,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                       child: TextField(
                         controller: _rows[i].ot,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: const InputDecoration(labelText: 'OT / hour', prefixText: '₹ ', isDense: true),
+                        decoration: InputDecoration(labelText: 'OT / hour', prefixText: '${Money.symbol} ', isDense: true),
                       ),
                     ),
                   ]),

@@ -25,6 +25,7 @@ class AttendanceScreen extends ConsumerWidget {
             padding: EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: DateBar(),
           ),
+          const _PendingDays(),
           Expanded(
             child: sheets.when(
               loading: () => const LoadingView(),
@@ -148,6 +149,43 @@ class _Count extends StatelessWidget {
       ),
       child: Text('$letter $n',
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 12.5, color: Palette.status(letter))),
+    );
+  }
+}
+
+/// "Not submitted" past days, one tap to jump there and fill them in.
+class _PendingDays extends ConsumerWidget {
+  const _PendingDays();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final days = ref.watch(pendingDaysProvider).value ?? const <DateTime>[];
+    if (days.isEmpty) return const SizedBox.shrink();
+    final selected = ref.watch(selectedDateProvider);
+    return SizedBox(
+      height: 44,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: [
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.only(right: 8),
+              child: Text('Pending:', style: TextStyle(fontSize: 12.5, color: Palette.muted, fontWeight: FontWeight.w700)),
+            ),
+          ),
+          for (final d in days)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ActionChip(
+                avatar: const Icon(Icons.history, size: 16),
+                label: Text(D.showDt(d)),
+                backgroundColor: D.ymd(d) == D.ymd(selected) ? Palette.halfBg : null,
+                onPressed: () => ref.read(selectedDateProvider.notifier).set(d),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

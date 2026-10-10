@@ -184,8 +184,8 @@ class BillingService extends Service {
   }
 
   /// Next number like `INV/2026-27/0007`, counted per financial year.
-  Future<String> _nextNumber(String prefix, DateTime issue) async {
-    final fy = D.financialYear(issue);
+  Future<String> _nextNumber(String prefix, DateTime issue, int fiscalStartMonth) async {
+    final fy = D.financialYear(issue, startMonth: fiscalStartMonth);
     final key = 'invseq_$fy';
     final row = await (db.select(db.keyValues)..where((t) => t.key.equals(key))).getSingleOrNull();
     final next = (int.tryParse(row?.value ?? '') ?? 0) + 1;
@@ -214,7 +214,7 @@ class BillingService extends Service {
     final tax = (subtotal * taxRate / 100).round();
     final id = newId();
     await db.transaction(() async {
-      final number = await _nextNumber(profile.invoicePrefix, issue);
+      final number = await _nextNumber(profile.invoicePrefix, issue, profile.country.fiscalStartMonth);
       await db.into(db.invoices).insert(InvoicesCompanion.insert(
             id: id,
             branchId: branchId,
