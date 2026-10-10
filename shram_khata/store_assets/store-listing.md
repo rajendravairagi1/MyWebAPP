@@ -1,13 +1,13 @@
 # Play Store listing text (copy and paste)
 
 ## App name (max 30)
-Shram Khata: Labour Manager
+LabourBook: Attendance & Pay
 
 ## Short description (max 80)
 Labour attendance, daily payments and company billing for contractor agencies.
 
 ## Full description (max 4000)
-Run your labour contractor agency from one simple app. Shram Khata keeps attendance, daily payments, salary balances and company bills in one place, and works offline on site.
+Run your labour contractor agency from one simple app. LabourBook keeps attendance, daily payments, salary balances and company bills in one place, and works offline on site.
 
 WHAT YOU CAN DO
 

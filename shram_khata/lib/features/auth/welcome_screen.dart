@@ -44,7 +44,7 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
                       const Text(
-                        'Shram Khata',
+                        'LabourBook',
                         style: TextStyle(
                           fontSize: 34,
                           fontWeight: FontWeight.w800,

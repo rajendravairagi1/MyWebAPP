@@ -1,4 +1,4 @@
-package com.shramkhata.app
+package com.oneweblink.labourbook
 
 import io.flutter.embedding.android.FlutterActivity
 

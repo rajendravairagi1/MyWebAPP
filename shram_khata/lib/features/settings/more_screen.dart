@@ -119,7 +119,7 @@ class MoreScreen extends ConsumerWidget {
           ),
         ]),
         const SizedBox(height: 20),
-        const Center(child: Text('Shram Khata  •  v1.0', style: TextStyle(color: Palette.muted, fontSize: 12))),
+        const Center(child: Text('LabourBook  •  v1.0', style: TextStyle(color: Palette.muted, fontSize: 12))),
       ]),
     );
   }

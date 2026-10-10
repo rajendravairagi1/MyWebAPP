@@ -77,7 +77,7 @@ void main() {
     final db = AppDatabase.inMemory();
     addTearDown(() => t.runAsync(db.close));
     await boot(t, db);
-    expect(find.text('Shram Khata'), findsOneWidget);
+    expect(find.text('LabourBook'), findsOneWidget);
     await shot(t, '01_welcome');
 
     await t.tap(find.text('Get started'));

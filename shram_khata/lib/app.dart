@@ -36,7 +36,7 @@ class _ShramKhataAppState extends ConsumerState<ShramKhataApp> {
       home = const Shell();
     }
     return MaterialApp(
-      title: 'Shram Khata',
+      title: 'LabourBook',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       home: AnimatedSwitcher(

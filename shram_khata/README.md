@@ -1,4 +1,4 @@
-# Shram Khata
+# LabourBook
 
 Android app for labour contractor agencies: attendance (P / A / H + overtime),
 daily payments and ledger, company contracts and billing, PDF statements and

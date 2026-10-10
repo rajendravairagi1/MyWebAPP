@@ -1,4 +1,4 @@
-# Shram Khata: chalane aur publish karne ke steps (Windows)
+# LabourBook: chalane aur publish karne ke steps (Windows)
 
 ## A. Computer me taiyari (ek baar)
 1. Zip par right-click > **Extract All**. Ek folder `shram_khata` banega (andar `pubspec.yaml` dikhni chahiye).
@@ -40,5 +40,5 @@
 8. Sab theek hone par **Production > Create release** me wahi AAB upload karke review ke liye bhejo. Review me kuch din lag sakte hain.
 
 ## Dhyan do
-- `applicationId` (`com.shramkhata.app`) Play Store par ek baar chhapne ke baad badal nahi sakta.
+- `applicationId` (`com.oneweblink.labourbook`) Play Store par ek baar chhapne ke baad badal nahi sakta.
 - Abhi data sirf phone me rehta hai. Phone kho gaya to data jayega. More > Backup & export se copy rakho.

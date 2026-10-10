@@ -13,7 +13,7 @@ val keyProps = Properties().apply {
 }
 
 android {
-    namespace = "com.shramkhata.app"
+    namespace = "com.oneweblink.labourbook"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -24,7 +24,7 @@ android {
 
     defaultConfig {
         // Permanent once published on Play Store. Do not change it afterwards.
-        applicationId = "com.shramkhata.app"
+        applicationId = "com.oneweblink.labourbook"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
