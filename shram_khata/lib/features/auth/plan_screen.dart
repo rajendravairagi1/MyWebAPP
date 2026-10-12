@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/plans.dart';
@@ -19,13 +20,13 @@ class _PlanScreenState extends State<PlanScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Choose your plan')),
+      appBar: AppBar(title: Text(tr('Choose your plan'))),
       body: FormBody(
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.fromLTRB(4, 0, 4, 14),
             child: Text(
-              'Pick what fits how you work. You can change it later from Settings.',
+              tr('Pick what fits how you work. You can change it later from Settings.'),
               style: TextStyle(color: Palette.muted, height: 1.4),
             ),
           ),
@@ -119,8 +120,8 @@ class PlanCard extends StatelessWidget {
                             children: [
                               Text(plan.title,
                                   style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
-                              if (recommended) const Pill('Popular', color: Palette.half),
-                              if (current) const Pill('Current'),
+                              if (recommended) Pill(tr('Popular'), color: Palette.half),
+                              if (current) Pill(tr('Current')),
                             ],
                           ),
                           Text(plan.tagline,

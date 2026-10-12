@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,7 +19,7 @@ class AttendanceScreen extends ConsumerWidget {
     final sheets = ref.watch(siteSheetsProvider);
     final date = ref.watch(selectedDateProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Attendance')),
+      appBar: AppBar(title: Text(tr('Attendance'))),
       body: Column(
         children: [
           const Padding(
@@ -32,11 +33,11 @@ class AttendanceScreen extends ConsumerWidget {
               error: (e, _) => ErrorView(e),
               data: (list) {
                 if (list.isEmpty) {
-                  return const EmptyState(
+                  return EmptyState(
                     icon: Icons.location_city_outlined,
-                    title: 'No sites yet',
+                    title: tr('No sites yet'),
                     message:
-                        'Add a company and a site first (More → Companies), then assign labour to it.',
+                        tr('Add a company and a site first (More → Companies), then assign labour to it.'),
                   );
                 }
                 final byCompany = <String, List<Sheet>>{};
@@ -81,13 +82,13 @@ class _SiteCard extends StatelessWidget {
     final progress = sheet.total == 0 ? 0.0 : marked / sheet.total;
     final Widget badge;
     if (sheet.isSubmitted) {
-      badge = const Pill('Submitted', color: Palette.present, icon: Icons.lock_outline);
+      badge = Pill(tr('Submitted'), color: Palette.present, icon: Icons.lock_outline);
     } else if (sheet.total == 0) {
-      badge = const Pill('No labour', color: Palette.muted);
+      badge = Pill(tr('No labour'), color: Palette.muted);
     } else if (marked == 0) {
-      badge = const Pill('Not started', color: Palette.absent);
+      badge = Pill(tr('Not started'), color: Palette.absent);
     } else {
-      badge = const Pill('In progress', color: Palette.half);
+      badge = Pill(tr('In progress'), color: Palette.half);
     }
     return AppCard(
       onTap: () => Navigator.push(
@@ -168,10 +169,10 @@ class _PendingDays extends ConsumerWidget {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
-          const Center(
+          Center(
             child: Padding(
               padding: EdgeInsets.only(right: 8),
-              child: Text('Pending:', style: TextStyle(fontSize: 12.5, color: Palette.muted, fontWeight: FontWeight.w700)),
+              child: Text(tr('Pending:'), style: TextStyle(fontSize: 12.5, color: Palette.muted, fontWeight: FontWeight.w700)),
             ),
           ),
           for (final d in days)

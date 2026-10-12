@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme.dart';
@@ -43,8 +44,8 @@ class WelcomeScreen extends StatelessWidget {
                         child: Icon(Icons.groups_rounded, size: 36, color: Palette.brand),
                       ),
                       const SizedBox(height: 24),
-                      const Text(
-                        'HazriBook',
+                      Text(
+                        tr('HazriBook'),
                         style: TextStyle(
                           fontSize: 34,
                           fontWeight: FontWeight.w800,
@@ -54,7 +55,7 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       Text(
-                        'Attendance, payments and billing for your labour agency. One simple app.',
+                        tr('Attendance, payments and billing for your labour agency. One simple app.'),
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.white.withValues(alpha: 0.85),
@@ -88,14 +89,14 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     onPressed: () => Navigator.push(
                         context, MaterialPageRoute(builder: (_) => const PlanScreen())),
-                    child: const Text('Get started'),
+                    child: Text(tr('Get started')),
                   ),
                   if (canLogin)
                     TextButton(
                       style: TextButton.styleFrom(foregroundColor: Colors.white),
                       onPressed: () => Navigator.push(
                           context, MaterialPageRoute(builder: (_) => const LoginScreen())),
-                      child: const Text('I already have an account'),
+                      child: Text(tr('I already have an account')),
                     ),
                 ],
               ),

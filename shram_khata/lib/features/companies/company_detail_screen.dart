@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -47,7 +48,7 @@ class CompanyDetailScreen extends ConsumerWidget {
       loading: () => const Scaffold(body: LoadingView()),
       error: (e, _) => Scaffold(appBar: AppBar(), body: ErrorView(e)),
       data: (c) {
-        if (c == null) return Scaffold(appBar: AppBar(), body: const EmptyState(icon: Icons.apartment, title: 'Company not found'));
+        if (c == null) return Scaffold(appBar: AppBar(), body: EmptyState(icon: Icons.apartment, title: tr('Company not found')));
         final sites = ref.watch(_sitesProvider(c.id)).value ?? const <Site>[];
         final contracts = ref.watch(_contractsProvider(c.id)).value ?? const <ContractWithRates>[];
         final invoices = ref.watch(_companyInvoicesProvider(c.id)).value ?? const <InvoiceRow>[];
@@ -74,9 +75,9 @@ class CompanyDetailScreen extends ConsumerWidget {
                 if (c.gstin.isNotEmpty) _line(Icons.badge_outlined, c.gstin),
                 const Divider(height: 22),
                 Row(children: [
-                  Expanded(child: Stat(label: 'Outstanding', value: Money.format(due), color: due > 0 ? Palette.info : Palette.ink)),
-                  Expanded(child: Stat(label: 'Sites', value: '${sites.where((s) => s.isActive).length}')),
-                  Expanded(child: Stat(label: 'Invoices', value: '${invoices.length}')),
+                  Expanded(child: Stat(label: tr('Outstanding'), value: Money.format(due), color: due > 0 ? Palette.info : Palette.ink)),
+                  Expanded(child: Stat(label: tr('Sites'), value: '${sites.where((s) => s.isActive).length}')),
+                  Expanded(child: Stat(label: tr('Invoices'), value: '${invoices.length}')),
                 ]),
               ]),
             ),
@@ -84,16 +85,16 @@ class CompanyDetailScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               FilledButton.icon(
                 icon: const Icon(Icons.receipt_long_outlined),
-                label: const Text('Create invoice'),
+                label: Text(tr('Create invoice')),
                 onPressed: () => Navigator.push(
                     context, MaterialPageRoute(builder: (_) => InvoiceCreateScreen(companyId: c.id))),
               ),
             ],
-            SectionTitle('SITES',
+            SectionTitle(tr('SITES'),
                 padding: const EdgeInsets.fromLTRB(4, 22, 4, 8),
-                trailing: manage ? TextButton(onPressed: () => _siteDialog(context, ref, c.id), child: const Text('Add site')) : null),
+                trailing: manage ? TextButton(onPressed: () => _siteDialog(context, ref, c.id), child: Text(tr('Add site'))) : null),
             if (sites.isEmpty)
-              const AppCard(child: Text('Add at least one site to take attendance.', style: TextStyle(color: Palette.muted)))
+              AppCard(child: Text(tr('Add at least one site to take attendance.'), style: TextStyle(color: Palette.muted)))
             else
               AppCard(
                 padding: EdgeInsets.zero,
@@ -105,7 +106,7 @@ class CompanyDetailScreen extends ConsumerWidget {
                           style: TextStyle(fontWeight: FontWeight.w700, color: sites[i].isActive ? null : Palette.muted)),
                       subtitle: sites[i].address.isEmpty ? null : Text(sites[i].address),
                       trailing: !sites[i].isActive
-                          ? const Pill('Inactive', color: Palette.muted)
+                          ? Pill(tr('Inactive'), color: Palette.muted)
                           : (manage ? const Icon(Icons.edit_outlined, size: 18, color: Palette.muted) : null),
                       onTap: manage ? () => _siteDialog(context, ref, c.id, site: sites[i]) : null,
                     ),
@@ -113,17 +114,17 @@ class CompanyDetailScreen extends ConsumerWidget {
                   ],
                 ]),
               ),
-            SectionTitle('CONTRACTS & BILLING RATES',
+            SectionTitle(tr('CONTRACTS & BILLING RATES'),
                 padding: const EdgeInsets.fromLTRB(4, 22, 4, 8),
                 trailing: manage
                     ? TextButton(
                         onPressed: () => Navigator.push(
                             context, MaterialPageRoute(builder: (_) => ContractFormScreen(companyId: c.id))),
-                        child: const Text('Add'))
+                        child: Text(tr('Add')))
                     : null),
             if (contracts.isEmpty)
-              const AppCard(
-                  child: Text('No contract yet. Add one with billing rates per skill, otherwise invoices cannot be priced.',
+              AppCard(
+                  child: Text(tr('No contract yet. Add one with billing rates per skill, otherwise invoices cannot be priced.'),
                       style: TextStyle(color: Palette.muted)))
             else
               for (final k in contracts)
@@ -131,9 +132,9 @@ class CompanyDetailScreen extends ConsumerWidget {
                   padding: const EdgeInsets.only(bottom: 8),
                   child: _ContractCard(c: k, companyId: c.id, manage: manage),
                 ),
-            SectionTitle('INVOICES', padding: const EdgeInsets.fromLTRB(4, 22, 4, 8)),
+            SectionTitle(tr('INVOICES'), padding: const EdgeInsets.fromLTRB(4, 22, 4, 8)),
             if (invoices.isEmpty)
-              const AppCard(child: Text('No invoices yet.', style: TextStyle(color: Palette.muted)))
+              AppCard(child: Text(tr('No invoices yet.'), style: TextStyle(color: Palette.muted)))
             else
               AppCard(
                 padding: EdgeInsets.zero,
@@ -173,21 +174,21 @@ class CompanyDetailScreen extends ConsumerWidget {
               controller: name,
               autofocus: true,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Site / plant name'),
+              decoration: InputDecoration(labelText: tr('Site / plant name')),
             ),
             const SizedBox(height: 10),
-            TextField(controller: addr, decoration: const InputDecoration(labelText: 'Address (optional)')),
+            TextField(controller: addr, decoration: InputDecoration(labelText: tr('Address (optional)'))),
             if (site != null)
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Active'),
+                title: Text(tr('Active')),
                 value: active,
                 onChanged: (v) => setS(() => active = v),
               ),
           ]),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-            TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+            TextButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Save'))),
           ],
         ),
       ),
@@ -226,13 +227,13 @@ class _ContractCard extends StatelessWidget {
         Row(children: [
           Expanded(child: Text(k.title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5))),
           if (!k.isActive)
-            const Pill('Inactive', color: Palette.muted)
+            Pill(tr('Inactive'), color: Palette.muted)
           else if (ended)
-            const Pill('Ended', color: Palette.absent)
+            Pill(tr('Ended'), color: Palette.absent)
           else if (soon)
-            const Pill('Ending soon', color: Palette.half)
+            Pill(tr('Ending soon'), color: Palette.half)
           else
-            const Pill('Active', color: Palette.present),
+            Pill(tr('Active'), color: Palette.present),
         ]),
         const SizedBox(height: 2),
         Text(
@@ -241,7 +242,7 @@ class _ContractCard extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         if (c.rates.isEmpty)
-          const Text('No rates set', style: TextStyle(color: Palette.absent))
+          Text(tr('No rates set'), style: TextStyle(color: Palette.absent))
         else
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final r in c.rates)
@@ -263,7 +264,7 @@ class _ContractCard extends StatelessWidget {
               child: Row(children: [
                 Icon(Icons.attach_file, size: 16, color: Palette.brand),
                 SizedBox(width: 4),
-                Text('View contract copy', style: TextStyle(color: Palette.brand, fontWeight: FontWeight.w700, fontSize: 13)),
+                Text(tr('View contract copy'), style: TextStyle(color: Palette.brand, fontWeight: FontWeight.w700, fontSize: 13)),
               ]),
             ),
           ),

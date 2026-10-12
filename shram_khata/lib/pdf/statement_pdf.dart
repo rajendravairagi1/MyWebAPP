@@ -42,7 +42,6 @@ class StatementPdf {
 
     final l = d.ledger;
     final sites = d.sitesWorked.toList();
-    final qr = PdfKit.qrBlock(d.profile, assets, size: 44, compact: true);
 
     doc.addPage(pw.MultiPage(
       pageTheme: pw.PageTheme(
@@ -57,7 +56,7 @@ class StatementPdf {
               child: pw.Text('${d.labour.name} • ${D.show(d.from)} to ${D.show(d.to)}',
                   style: PdfKit.t(8.5, color: PdfKit.muted)),
             ),
-      footer: (ctx) => PdfKit.footer(ctx, d.profile, assets, qr: qr),
+      footer: (ctx) => PdfKit.footer(ctx, d.profile, assets),
       build: (ctx) => [
         PdfKit.letterhead(
           d.profile,

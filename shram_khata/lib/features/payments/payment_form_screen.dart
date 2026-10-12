@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -95,7 +96,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
     final balance = _ledger?.balance;
     final after = balance == null ? null : balance - entered;
     return Scaffold(
-      appBar: AppBar(title: const Text('Add payment')),
+      appBar: AppBar(title: Text(tr('Add payment'))),
       body: FormBody(
         bottom: FilledButton(
           onPressed: _busy ? null : _save,
@@ -106,7 +107,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             onTap: widget.labourId != null
                 ? null
                 : () async {
-                    final l = await pickLabour(context, title: 'Who is being paid?', includeInactive: true);
+                    final l = await pickLabour(context, title: tr('Who is being paid?'), includeInactive: true);
                     if (l != null) {
                       _amount.clear();
                       await _setLabour(l.id);
@@ -117,7 +118,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: _labour == null
-                    ? const Text('Choose labour', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Palette.muted))
+                    ? Text(tr('Choose labour'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Palette.muted))
                     : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                         Text(_labour!.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
                         Text(_labour!.skill, style: const TextStyle(color: Palette.muted)),
@@ -130,13 +131,13 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             const SizedBox(height: 10),
             AccountSummary(_ledger!, color: Palette.brandTint),
           ],
-          const SectionTitle('TYPE', padding: EdgeInsets.fromLTRB(2, 20, 2, 8)),
+          SectionTitle(tr('TYPE'), padding: EdgeInsets.fromLTRB(2, 20, 2, 8)),
           Wrap(spacing: 8, runSpacing: 8, children: [
             for (final t in PayType.all)
               ChoiceChip(
                 avatar: Icon(t == PayType.deduction ? Icons.remove_circle_outline : Icons.payments_outlined,
                     size: 16, color: _type == t ? typeColor(t) : Palette.muted),
-                label: Text(PayType.label(t)),
+                label: Text(tr(PayType.label(t))),
                 selected: _type == t,
                 onSelected: (_) => setState(() => _type = t),
               ),
@@ -157,7 +158,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             onChanged: (_) => setState(() {}),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
-            decoration: InputDecoration(labelText: 'Amount', prefixText: '${Money.symbol} '),
+            decoration: InputDecoration(labelText: tr('Amount'), prefixText: '${Money.symbol} '),
           ),
           const SizedBox(height: 8),
           Wrap(spacing: 8, children: [
@@ -187,12 +188,12 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             ),
           ],
           if (!deduction) ...[
-            const SectionTitle('PAID BY', padding: EdgeInsets.fromLTRB(2, 20, 2, 8)),
+            SectionTitle(tr('PAID BY'), padding: EdgeInsets.fromLTRB(2, 20, 2, 8)),
             SegmentedButton<String>(
               showSelectedIcon: false,
               segments: [
                 for (final m in PayMode.all)
-                  ButtonSegment(value: m, label: Text(PayMode.label(m)), icon: Icon(modeIcon(m), size: 18)),
+                  ButtonSegment(value: m, label: Text(tr(PayMode.label(m))), icon: Icon(modeIcon(m), size: 18)),
               ],
               selected: {_mode},
               onSelectionChanged: (v) => setState(() => _mode = v.first),
@@ -220,7 +221,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               if (d != null) setState(() => _date = d);
             },
             child: InputDecorator(
-              decoration: const InputDecoration(labelText: 'Date', suffixIcon: Icon(Icons.calendar_today_outlined)),
+              decoration: InputDecoration(labelText: tr('Date'), suffixIcon: Icon(Icons.calendar_today_outlined)),
               child: Text(D.showDt(_date)),
             ),
           ),

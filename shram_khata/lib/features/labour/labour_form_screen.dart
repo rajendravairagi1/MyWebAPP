@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:drift/drift.dart' show Value;
 import 'package:flutter/services.dart';
@@ -87,9 +88,9 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
       if (dup != null && mounted) {
         final go = await confirm(
           context,
-          title: 'Mobile already used',
+          title: tr('Mobile already used'),
           message: '${dup.name} already has this mobile number. Save anyway?',
-          confirmLabel: 'Save anyway',
+          confirmLabel: tr('Save anyway'),
         );
         if (!go) return;
       }
@@ -180,7 +181,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
               controller: _name,
               textCapitalization: TextCapitalization.words,
               onChanged: (_) => setState(() {}),
-              decoration: const InputDecoration(labelText: 'Full name *'),
+              decoration: InputDecoration(labelText: tr('Full name *')),
               validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the name' : null,
             ),
             const SizedBox(height: 12),
@@ -194,14 +195,14 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
               controller: _mobile,
               keyboardType: TextInputType.phone,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(Phone.maxLength(country))],
-              decoration: InputDecoration(labelText: 'Mobile number', prefixText: Phone.prefix(country)),
+              decoration: InputDecoration(labelText: tr('Mobile number'), prefixText: Phone.prefix(country)),
               validator: (v) => Phone.validate(v, country),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _skill,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Skill / trade'),
+              decoration: InputDecoration(labelText: tr('Skill / trade')),
             ),
             const SizedBox(height: 8),
             Wrap(spacing: 6, runSpacing: 6, children: [
@@ -218,23 +219,23 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
               controller: _address,
               maxLines: 2,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Address / village'),
+              decoration: InputDecoration(labelText: tr('Address / village')),
             ),
             if (showBranch) ...[
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _branchId ?? allowed.first.id,
-                decoration: const InputDecoration(labelText: 'Branch'),
+                decoration: InputDecoration(labelText: tr('Branch')),
                 items: [for (final b in allowed) DropdownMenuItem(value: b.id, child: Text(b.name))],
                 onChanged: (v) => _branchId = v,
               ),
             ],
             if (!_editing) ...[
-              const SectionTitle('PAY RATE', padding: EdgeInsets.fromLTRB(2, 22, 2, 8)),
+              SectionTitle(tr('PAY RATE'), padding: EdgeInsets.fromLTRB(2, 22, 2, 8)),
               SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'daily', label: Text('Per day')),
-                  ButtonSegment(value: 'monthly', label: Text('Per month')),
+                segments: [
+                  ButtonSegment(value: 'daily', label: Text(tr('Per day'))),
+                  ButtonSegment(value: 'monthly', label: Text(tr('Per month'))),
                 ],
                 selected: {_payType},
                 onSelectionChanged: (v) => setState(() => _payType = v.first),
@@ -257,9 +258,9 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
                 controller: _ot,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                  labelText: 'Overtime per hour (optional)',
+                  labelText: tr('Overtime per hour (optional)'),
                   prefixText: '${Money.symbol} ',
-                  helperText: 'Leave empty to use daily rate ÷ 8 hours.',
+                  helperText: tr('Leave empty to use daily rate ÷ 8 hours.'),
                 ),
               ),
               const SizedBox(height: 12),
@@ -275,14 +276,14 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
                   if (d != null) setState(() => _join = d);
                 },
                 child: InputDecorator(
-                  decoration: const InputDecoration(
-                    labelText: 'Joining date',
+                  decoration: InputDecoration(
+                    labelText: tr('Joining date'),
                     suffixIcon: Icon(Icons.calendar_today_outlined),
                   ),
                   child: Text(D.showDt(_join)),
                 ),
               ),
-              const SectionTitle('COMPANY & SITE *', padding: EdgeInsets.fromLTRB(2, 22, 2, 4)),
+              SectionTitle(tr('COMPANY & SITE *'), padding: EdgeInsets.fromLTRB(2, 22, 2, 4)),
               SiteChecklist(selected: _sites, onChanged: (v) => setState(() => _sites = v)),
             ],
           ],

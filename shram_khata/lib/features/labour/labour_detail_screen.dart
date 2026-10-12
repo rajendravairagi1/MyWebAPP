@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -40,12 +41,12 @@ class LabourDetailScreen extends ConsumerWidget {
       loading: () => const Scaffold(body: LoadingView()),
       error: (e, _) => Scaffold(appBar: AppBar(), body: ErrorView(e)),
       data: (l) {
-        if (l == null) return Scaffold(appBar: AppBar(), body: const EmptyState(icon: Icons.person_off_outlined, title: 'Labour not found'));
+        if (l == null) return Scaffold(appBar: AppBar(), body: EmptyState(icon: Icons.person_off_outlined, title: tr('Labour not found')));
         final showPay = session.can(Perm.paymentsView);
         final tabs = <Tab>[
-          const Tab(text: 'Attendance'),
-          if (showPay) const Tab(text: 'Payments'),
-          const Tab(text: 'Details'),
+          Tab(text: tr('Attendance')),
+          if (showPay) Tab(text: tr('Payments')),
+          Tab(text: tr('Details')),
         ];
         return DefaultTabController(
           length: tabs.length,
@@ -55,13 +56,13 @@ class LabourDetailScreen extends ConsumerWidget {
               actions: [
                 if (session.can(Perm.reports))
                   IconButton(
-                    tooltip: 'Statement PDF',
+                    tooltip: tr('Statement PDF'),
                     icon: const Icon(Icons.picture_as_pdf_outlined),
                     onPressed: () => _statement(context, ref, l),
                   ),
                 if (session.can(Perm.labourManage))
                   IconButton(
-                    tooltip: 'Edit',
+                    tooltip: tr('Edit'),
                     icon: const Icon(Icons.edit_outlined),
                     onPressed: () => Navigator.push(
                       context,
@@ -88,11 +89,11 @@ class LabourDetailScreen extends ConsumerWidget {
   }
 
   Future<void> _statement(BuildContext context, WidgetRef ref, Labour l) async {
-    final p = await pickPeriod(context, title: 'Statement period');
+    final p = await pickPeriod(context, title: tr('Statement period'));
     if (p == null || !context.mounted) return;
     await openPdf(
       context,
-      title: 'Statement',
+      title: tr('Statement'),
       fileName: 'statement_${l.name.replaceAll(' ', '_')}_${p.from}_${p.to}',
       build: () async => StatementPdf.build(await ref.read(reportServiceProvider).statement(l.id, p.from, p.to)),
     );
@@ -124,7 +125,7 @@ class _Header extends StatelessWidget {
                 style: const TextStyle(color: Palette.muted)),
             const SizedBox(height: 6),
             Wrap(spacing: 6, children: [
-              Pill(LabourStatus.label(l.status), color: c),
+              Pill(tr(LabourStatus.label(l.status)), color: c),
               Pill('Since ${D.show(l.joinDate)}', color: Palette.muted),
             ]),
           ]),
@@ -200,7 +201,7 @@ class _AttendanceTabState extends ConsumerState<_AttendanceTab> {
               entries: m.entries,
               onDayTap: (d) => editAttendanceDay(context, ref, widget.labour, d),
             ),
-            Text('Tap a day to add or correct attendance',
+            Text(tr('Tap a day to add or correct attendance'),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: Palette.muted)),
             const SizedBox(height: 14),
@@ -218,7 +219,7 @@ class _AttendanceTabState extends ConsumerState<_AttendanceTab> {
                   child: Column(children: [
                     Text(num1(m.ledger.otHours),
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Palette.info)),
-                    const Text('OT hours', style: TextStyle(fontSize: 11.5, color: Palette.info, fontWeight: FontWeight.w700)),
+                    Text(tr('OT hours'), style: TextStyle(fontSize: 11.5, color: Palette.info, fontWeight: FontWeight.w700)),
                   ]),
                 ),
               ),
@@ -228,13 +229,13 @@ class _AttendanceTabState extends ConsumerState<_AttendanceTab> {
               AppCard(
                 child: Column(children: [
                   Row(children: [
-                    Expanded(child: Stat(label: 'Paid days', value: num1(m.ledger.paidDays))),
-                    Expanded(child: Stat(label: 'Earned', value: Money.format(m.ledger.earned))),
-                    Expanded(child: Stat(label: 'Paid', value: Money.format(m.ledger.cashPaid + m.ledger.deductions))),
+                    Expanded(child: Stat(label: tr('Paid days'), value: num1(m.ledger.paidDays))),
+                    Expanded(child: Stat(label: tr('Earned'), value: Money.format(m.ledger.earned))),
+                    Expanded(child: Stat(label: tr('Paid'), value: Money.format(m.ledger.cashPaid + m.ledger.deductions))),
                   ]),
                   const Divider(height: 24),
                   Row(children: [
-                    const Text('Balance this month',
+                    Text(tr('Balance this month'),
                         style: TextStyle(color: Palette.muted, fontWeight: FontWeight.w600)),
                     const Spacer(),
                     BalanceText(m.ledger.balance, size: 20),
@@ -243,7 +244,7 @@ class _AttendanceTabState extends ConsumerState<_AttendanceTab> {
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: Row(children: [
-                        const Text('includes brought forward',
+                        Text(tr('includes brought forward'),
                             style: TextStyle(color: Palette.muted, fontSize: 12.5)),
                         const Spacer(),
                         Text(Money.format(m.ledger.opening),
@@ -396,14 +397,14 @@ class _PaymentsTab extends ConsumerWidget {
             data: (l) => AccountSummary(l),
             orElse: () => const SizedBox(height: 90),
           ),
-          const SectionTitle('PAYMENT HISTORY', padding: EdgeInsets.fromLTRB(4, 20, 4, 8)),
+          SectionTitle(tr('PAYMENT HISTORY'), padding: EdgeInsets.fromLTRB(4, 20, 4, 8)),
           rows.when(
             loading: () => const LoadingView(),
             error: (e, _) => ErrorView(e),
             data: (list) {
               if (list.isEmpty) {
-                return const AppCard(
-                  child: Text('No payments yet.', style: TextStyle(color: Palette.muted)),
+                return AppCard(
+                  child: Text(tr('No payments yet.'), style: TextStyle(color: Palette.muted)),
                 );
               }
               return AppCard(
@@ -430,7 +431,7 @@ class _PaymentsTab extends ConsumerWidget {
             ),
             child: FilledButton.icon(
               icon: const Icon(Icons.add),
-              label: const Text('Add payment'),
+              label: Text(tr('Add payment')),
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => PaymentFormScreen(labourId: labour.id)),
@@ -473,10 +474,10 @@ class _DetailsTab extends ConsumerWidget {
 
     return ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 32), children: [
       if (showRates) ...[
-        SectionTitle('PAY RATE',
+        SectionTitle(tr('PAY RATE'),
             padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
             trailing: manage
-                ? TextButton(onPressed: () => _changeRate(context, ref), child: const Text('Change'))
+                ? TextButton(onPressed: () => _changeRate(context, ref), child: Text(tr('Change')))
                 : null),
         rates.maybeWhen(
           data: (list) => AppCard(
@@ -492,7 +493,7 @@ class _DetailsTab extends ConsumerWidget {
                     'From ${D.show(list[i].effectiveFrom)}'
                     '${list[i].otPerHour != null ? ' • OT ${Money.format(list[i].otPerHour!)}/h' : ''}',
                   ),
-                  trailing: i == 0 ? const Pill('Current') : null,
+                  trailing: i == 0 ? Pill(tr('Current')) : null,
                 ),
                 if (i < list.length - 1) const Divider(indent: 16),
               ],
@@ -501,15 +502,15 @@ class _DetailsTab extends ConsumerWidget {
           orElse: () => const SizedBox(height: 60),
         ),
       ],
-      SectionTitle('WORKS AT',
+      SectionTitle(tr('WORKS AT'),
           padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
           trailing: manage
-              ? TextButton(onPressed: () => _addSite(context, ref), child: const Text('Add site'))
+              ? TextButton(onPressed: () => _addSite(context, ref), child: Text(tr('Add site')))
               : null),
       asg.maybeWhen(
         data: (list) => list.isEmpty
-            ? const AppCard(
-                child: Text('Not assigned to any site (on bench).', style: TextStyle(color: Palette.muted)))
+            ? AppCard(
+                child: Text(tr('Not assigned to any site (on bench).'), style: TextStyle(color: Palette.muted)))
             : AppCard(
                 padding: EdgeInsets.zero,
                 child: Column(children: [
@@ -520,13 +521,13 @@ class _DetailsTab extends ConsumerWidget {
                       subtitle: Text('${list[i].company.name} • since ${D.show(list[i].assignment.fromDate)}'),
                       trailing: manage
                           ? IconButton(
-                              tooltip: 'Remove from site',
+                              tooltip: tr('Remove from site'),
                               icon: const Icon(Icons.remove_circle_outline, color: Palette.absent),
                               onPressed: () async {
                                 final ok = await confirm(context,
                                     title: 'Remove from ${list[i].site.name}?',
                                     message: 'They will no longer appear on this site\'s attendance sheet from today. Past attendance stays.',
-                                    confirmLabel: 'Remove',
+                                    confirmLabel: tr('Remove'),
                                     danger: true);
                                 if (ok) await svc.unassign(list[i].assignment.id);
                               },
@@ -540,13 +541,13 @@ class _DetailsTab extends ConsumerWidget {
         orElse: () => const SizedBox(height: 60),
       ),
       if (session.can(Perm.labourDocs)) ...[
-        SectionTitle('DOCUMENTS',
+        SectionTitle(tr('DOCUMENTS'),
             padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
-            trailing: TextButton(onPressed: () => _addDoc(context, ref), child: const Text('Add'))),
+            trailing: TextButton(onPressed: () => _addDoc(context, ref), child: Text(tr('Add')))),
         docs.maybeWhen(
           data: (list) => list.isEmpty
-              ? const AppCard(
-                  child: Text('No documents. Add Aadhaar, bank passbook, police verification, etc.',
+              ? AppCard(
+                  child: Text(tr('No documents. Add Aadhaar, bank passbook, police verification, etc.'),
                       style: TextStyle(color: Palette.muted)))
               : AppCard(
                   padding: EdgeInsets.zero,
@@ -561,7 +562,7 @@ class _DetailsTab extends ConsumerWidget {
         ),
       ],
       if (labour.address.isNotEmpty || labour.fatherName.isNotEmpty) ...[
-        const SectionTitle('PERSONAL', padding: EdgeInsets.fromLTRB(4, 20, 4, 8)),
+        SectionTitle(tr('PERSONAL'), padding: EdgeInsets.fromLTRB(4, 20, 4, 8)),
         AppCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             if (labour.fatherName.isNotEmpty) Text("Father's name: ${labour.fatherName}"),
@@ -571,24 +572,24 @@ class _DetailsTab extends ConsumerWidget {
         ),
       ],
       if (manage) ...[
-        const SectionTitle('STATUS', padding: EdgeInsets.fromLTRB(4, 20, 4, 8)),
+        SectionTitle(tr('STATUS'), padding: EdgeInsets.fromLTRB(4, 20, 4, 8)),
         if (labour.status == LabourStatus.active) ...[
           OutlinedButton.icon(
             icon: const Icon(Icons.pause_circle_outline),
-            label: const Text('Mark inactive (on leave / not needed)'),
+            label: Text(tr('Mark inactive (on leave / not needed)')),
             onPressed: () => _setStatus(context, ref, LabourStatus.inactive),
           ),
           const SizedBox(height: 8),
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(foregroundColor: Palette.absent),
             icon: const Icon(Icons.exit_to_app),
-            label: const Text('Mark as left'),
+            label: Text(tr('Mark as left')),
             onPressed: () => _setStatus(context, ref, LabourStatus.left),
           ),
         ] else
           FilledButton.icon(
             icon: const Icon(Icons.restart_alt),
-            label: const Text('Reactivate'),
+            label: Text(tr('Reactivate')),
             onPressed: () async {
               await svc.setStatus(labour.id, LabourStatus.active, staffId: session.staff?.id);
             },
@@ -601,12 +602,12 @@ class _DetailsTab extends ConsumerWidget {
                   child: TextButton.icon(
                     style: TextButton.styleFrom(foregroundColor: Palette.absent),
                     icon: const Icon(Icons.delete_outline),
-                    label: const Text('Delete (added by mistake)'),
+                    label: Text(tr('Delete (added by mistake)')),
                     onPressed: () async {
                       final ok = await confirm(context,
                           title: 'Delete ${labour.name}?',
-                          message: 'This person has no attendance or payments, so they can be removed completely.',
-                          confirmLabel: 'Delete',
+                          message: tr('This person has no attendance or payments, so they can be removed completely.'),
+                          confirmLabel: tr('Delete'),
                           danger: true);
                       if (!ok) return;
                       await svc.hardDelete(labour.id, staffId: session.staff?.id);
@@ -625,8 +626,8 @@ class _DetailsTab extends ConsumerWidget {
       context,
       title: status == LabourStatus.left ? 'Mark as left?' : 'Mark inactive?',
       message:
-          'They will be removed from attendance sheets from today. All past attendance and payments stay, and you can reactivate later.',
-      confirmLabel: 'Confirm',
+          tr('They will be removed from attendance sheets from today. All past attendance and payments stay, and you can reactivate later.'),
+      confirmLabel: tr('Confirm'),
     );
     if (!ok) return;
     await ref.read(labourServiceProvider).setStatus(labour.id, status, staffId: ref.read(sessionProvider).staff?.id);
@@ -695,14 +696,14 @@ class _SitePickSheetState extends State<_SitePickSheet> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Assign to sites', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          Text(tr('Assign to sites'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
-          const Text('Labour appears on the attendance sheet of every site selected.',
+          Text(tr('Labour appears on the attendance sheet of every site selected.'),
               style: TextStyle(color: Palette.muted, fontSize: 13)),
           const SizedBox(height: 10),
           Consumer(builder: (context, ref, _) => SiteChecklist(selected: _sel, onChanged: (v) => setState(() => _sel = v))),
           const SizedBox(height: 16),
-          FilledButton(onPressed: () => Navigator.pop(context, _sel), child: const Text('Save')),
+          FilledButton(onPressed: () => Navigator.pop(context, _sel), child: Text(tr('Save'))),
         ]),
       ),
     );
@@ -743,15 +744,15 @@ class _RateSheetState extends State<_RateSheet> {
       padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(context).viewInsets.bottom + 20),
       child: SingleChildScrollView(
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Change pay rate', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          Text(tr('Change pay rate'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
-          const Text('Days before the date below keep the old rate.',
+          Text(tr('Days before the date below keep the old rate.'),
               style: TextStyle(color: Palette.muted, fontSize: 13)),
           const SizedBox(height: 14),
           SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'daily', label: Text('Per day')),
-              ButtonSegment(value: 'monthly', label: Text('Per month')),
+            segments: [
+              ButtonSegment(value: 'daily', label: Text(tr('Per day'))),
+              ButtonSegment(value: 'monthly', label: Text(tr('Per month'))),
             ],
             selected: {_type},
             onSelectionChanged: (v) => setState(() => _type = v.first),
@@ -760,13 +761,13 @@ class _RateSheetState extends State<_RateSheet> {
           TextField(
             controller: _amount,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: 'New rate', prefixText: '${Money.symbol} '),
+            decoration: InputDecoration(labelText: tr('New rate'), prefixText: '${Money.symbol} '),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _ot,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: 'Overtime per hour (optional)', prefixText: '${Money.symbol} '),
+            decoration: InputDecoration(labelText: tr('Overtime per hour (optional)'), prefixText: '${Money.symbol} '),
           ),
           const SizedBox(height: 12),
           InkWell(
@@ -781,7 +782,7 @@ class _RateSheetState extends State<_RateSheet> {
               if (d != null) setState(() => _from = d);
             },
             child: InputDecorator(
-              decoration: const InputDecoration(labelText: 'Effective from', suffixIcon: Icon(Icons.calendar_today_outlined)),
+              decoration: InputDecoration(labelText: tr('Effective from'), suffixIcon: Icon(Icons.calendar_today_outlined)),
               child: Text(D.showDt(_from)),
             ),
           ),
@@ -795,7 +796,7 @@ class _RateSheetState extends State<_RateSheet> {
                 _RateResult(D.ymd(_from), _type, a, _ot.text.trim().isEmpty ? null : Money.parse(_ot.text)),
               );
             },
-            child: const Text('Save rate'),
+            child: Text(tr('Save rate')),
           ),
         ]),
       ),
@@ -840,14 +841,14 @@ class _DocTile extends ConsumerWidget {
       ].join(' • ')),
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
         if (expired)
-          const Pill('Expired', color: Palette.absent)
+          Pill(tr('Expired'), color: Palette.absent)
         else if (expiring)
-          const Pill('Expiring', color: Palette.half),
+          Pill(tr('Expiring'), color: Palette.half),
         IconButton(
           icon: const Icon(Icons.delete_outline, color: Palette.muted),
           onPressed: () async {
             final ok = await confirm(context,
-                title: 'Delete ${doc.docType}?', message: 'The document will be removed.', confirmLabel: 'Delete', danger: true);
+                title: 'Delete ${doc.docType}?', message: tr('The document will be removed.'), confirmLabel: tr('Delete'), danger: true);
             if (ok) await ref.read(labourServiceProvider).deleteDocument(doc.id);
           },
         ),
@@ -882,18 +883,18 @@ class _DocSheetState extends ConsumerState<_DocSheet> {
       padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(context).viewInsets.bottom + 20),
       child: SingleChildScrollView(
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          const Text('Add document', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          Text(tr('Add document'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 14),
           DropdownButtonFormField<String>(
             initialValue: _type,
-            decoration: const InputDecoration(labelText: 'Document type'),
+            decoration: InputDecoration(labelText: tr('Document type')),
             items: [for (final t in LabourService.docTypes) DropdownMenuItem(value: t, child: Text(t))],
             onChanged: (v) => setState(() => _type = v!),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _number,
-            decoration: const InputDecoration(labelText: 'Number (optional)'),
+            decoration: InputDecoration(labelText: tr('Number (optional)')),
           ),
           const SizedBox(height: 12),
           InkWell(
@@ -909,7 +910,7 @@ class _DocSheetState extends ConsumerState<_DocSheet> {
             },
             child: InputDecorator(
               decoration: InputDecoration(
-                labelText: 'Expiry date (optional)',
+                labelText: tr('Expiry date (optional)'),
                 suffixIcon: _expiry == null
                     ? const Icon(Icons.calendar_today_outlined)
                     : IconButton(icon: const Icon(Icons.close), onPressed: () => setState(() => _expiry = null)),
@@ -938,7 +939,7 @@ class _DocSheetState extends ConsumerState<_DocSheet> {
                   );
               if (context.mounted) Navigator.pop(context, true);
             },
-            child: const Text('Save document'),
+            child: Text(tr('Save document')),
           ),
         ]),
       ),

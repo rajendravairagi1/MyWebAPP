@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -97,32 +98,32 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(_editing ? 'Edit member' : 'Add member')),
       body: FormBody(
-        bottom: FilledButton(onPressed: _busy ? null : _save, child: const Text('Save')),
+        bottom: FilledButton(onPressed: _busy ? null : _save, child: Text(tr('Save'))),
         children: [
           TextField(
             controller: _name,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(labelText: 'Name'),
+            decoration: InputDecoration(labelText: tr('Name')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _mobile,
             keyboardType: TextInputType.phone,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(Phone.maxLength(country))],
-            decoration: InputDecoration(labelText: 'Mobile (used to sign in)', prefixText: Phone.prefix(country)),
+            decoration: InputDecoration(labelText: tr('Mobile (used to sign in)'), prefixText: Phone.prefix(country)),
           ),
           if (!_editing) ...[
             const SizedBox(height: 12),
             TextField(
               controller: _email,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email (optional)'),
+              decoration: InputDecoration(labelText: tr('Email (optional)')),
             ),
           ],
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _roles.any((r) => r.id == _roleId) ? _roleId : null,
-            decoration: const InputDecoration(labelText: 'Role'),
+            decoration: InputDecoration(labelText: tr('Role')),
             items: [for (final r in _roles) DropdownMenuItem(value: r.id, child: Text(r.name))],
             onChanged: (v) => setState(() => _roleId = v),
           ),
@@ -134,12 +135,12 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
             inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(8)],
             decoration: InputDecoration(
               labelText: _editing ? 'New PIN (leave empty to keep)' : 'PIN (4–8 digits)',
-              helperText: 'They sign in with their mobile number and this PIN.',
+              helperText: tr('They sign in with their mobile number and this PIN.'),
             ),
           ),
           if (plan.multiBranch && branches.length > 1) ...[
-            const SectionTitle('BRANCHES', padding: EdgeInsets.fromLTRB(2, 20, 2, 4)),
-            const Text('Leave all unselected for access to every branch.',
+            SectionTitle(tr('BRANCHES'), padding: EdgeInsets.fromLTRB(2, 20, 2, 4)),
+            Text(tr('Leave all unselected for access to every branch.'),
                 style: TextStyle(color: Palette.muted, fontSize: 12.5)),
             const SizedBox(height: 8),
             Wrap(spacing: 8, runSpacing: 8, children: [
@@ -151,16 +152,16 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
                 ),
             ]),
           ],
-          const SectionTitle('LIMIT TO SITES', padding: EdgeInsets.fromLTRB(2, 20, 2, 4)),
-          const Text('For supervisors: they only see these sites. Leave empty for all sites.',
+          SectionTitle(tr('LIMIT TO SITES'), padding: EdgeInsets.fromLTRB(2, 20, 2, 4)),
+          Text(tr('For supervisors: they only see these sites. Leave empty for all sites.'),
               style: TextStyle(color: Palette.muted, fontSize: 12.5)),
           SiteChecklist(selected: _sites, onChanged: (v) => setState(() => _sites = v)),
           if (_editing) ...[
             const SizedBox(height: 12),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Can sign in'),
-              subtitle: const Text('Turn off when someone leaves. Their past entries stay.'),
+              title: Text(tr('Can sign in')),
+              subtitle: Text(tr('Turn off when someone leaves. Their past entries stay.')),
               value: _active,
               activeThumbColor: Palette.brand,
               onChanged: (v) => setState(() => _active = v),

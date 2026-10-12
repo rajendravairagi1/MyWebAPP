@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -48,13 +49,13 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Payments')),
+      appBar: AppBar(title: Text(tr('Payments'))),
       floatingActionButton: session.can(Perm.paymentsManage)
           ? FloatingActionButton.extended(
               onPressed: () =>
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentFormScreen())),
               icon: const Icon(Icons.add),
-              label: const Text('Add payment'),
+              label: Text(tr('Add payment')),
             )
           : null,
       body: Column(children: [
@@ -62,9 +63,9 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
           child: SegmentedButton<int>(
             showSelectedIcon: false,
-            segments: const [
-              ButtonSegment(value: 0, label: Text('Payments made'), icon: Icon(Icons.receipt_long_outlined)),
-              ButtonSegment(value: 1, label: Text('Who to pay'), icon: Icon(Icons.pending_actions)),
+            segments: [
+              ButtonSegment(value: 0, label: Text(tr('Payments made')), icon: Icon(Icons.receipt_long_outlined)),
+              ButtonSegment(value: 1, label: Text(tr('Who to pay')), icon: Icon(Icons.pending_actions)),
             ],
             selected: {_view},
             onSelectionChanged: (v) => setState(() => _view = v.first),
@@ -103,10 +104,10 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
           error: (e, _) => ErrorView(e),
           data: (list) {
             if (list.isEmpty) {
-              return const EmptyState(
+              return EmptyState(
                 icon: Icons.account_balance_wallet_outlined,
-                title: 'No payments in this period',
-                message: 'Daily payments, advances and settlements you record will show up here.',
+                title: tr('No payments in this period'),
+                message: tr('Daily payments, advances and settlements you record will show up here.'),
               );
             }
             final active = list.where((r) => r.payment.voidedAt == null && PayType.isCashOut(r.payment.type));
@@ -122,7 +123,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
             return ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 96), children: [
               AppCard(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  const Text('Total paid', style: TextStyle(color: Palette.muted, fontWeight: FontWeight.w600)),
+                  Text(tr('Total paid'), style: TextStyle(color: Palette.muted, fontWeight: FontWeight.w600)),
                   Text(Money.format(total), style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 10),
                   Row(children: [
@@ -132,7 +133,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
                           Icon(modeIcon(m), size: 16, color: Palette.muted),
                           const SizedBox(width: 5),
                           Flexible(
-                            child: Text('${PayMode.label(m)} ${Money.compact(byMode[m] ?? 0)}',
+                            child: Text('${tr(PayMode.label(m))} ${Money.compact(byMode[m] ?? 0)}',
                                 style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
                                 overflow: TextOverflow.ellipsis),
                           ),
@@ -185,7 +186,7 @@ class _BalancesState extends ConsumerState<_Balances> {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
         child: TextField(
           onChanged: (v) => setState(() => _q = v),
-          decoration: const InputDecoration(hintText: 'Search labour', prefixIcon: Icon(Icons.search)),
+          decoration: InputDecoration(hintText: tr('Search labour'), prefixIcon: Icon(Icons.search)),
         ),
       ),
       Expanded(
@@ -199,19 +200,19 @@ class _BalancesState extends ConsumerState<_Balances> {
               final rows = list.where((l) => (bal[l.id] ?? 0) != 0).toList()
                 ..sort((a, b) => (bal[b.id] ?? 0).compareTo(bal[a.id] ?? 0));
               if (rows.isEmpty) {
-                return const EmptyState(
+                return EmptyState(
                   icon: Icons.verified_outlined,
-                  title: 'All settled',
-                  message: 'Nobody has a pending balance right now.',
+                  title: tr('All settled'),
+                  message: tr('Nobody has a pending balance right now.'),
                 );
               }
               final owed = rows.fold<int>(0, (a, l) => a + ((bal[l.id] ?? 0) > 0 ? bal[l.id]! : 0));
               final adv = rows.fold<int>(0, (a, l) => a + ((bal[l.id] ?? 0) < 0 ? -bal[l.id]! : 0));
               return ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 96), children: [
                 Row(children: [
-                  Expanded(child: AppCard(child: Stat(label: 'To pay labour', value: Money.format(owed), color: Palette.absent))),
+                  Expanded(child: AppCard(child: Stat(label: tr('To pay labour'), value: Money.format(owed), color: Palette.absent))),
                   const SizedBox(width: 10),
-                  Expanded(child: AppCard(child: Stat(label: 'Advances to recover', value: Money.format(adv), color: Palette.half))),
+                  Expanded(child: AppCard(child: Stat(label: tr('Advances to recover'), value: Money.format(adv), color: Palette.half))),
                 ]),
                 const SizedBox(height: 12),
                 for (final Labour l in rows)

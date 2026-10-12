@@ -1,3 +1,4 @@
+import 'core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +8,7 @@ import 'features/auth/login_screen.dart';
 import 'features/auth/welcome_screen.dart';
 import 'core/money.dart';
 import 'features/home/shell.dart';
+import 'features/language/language_screen.dart';
 import 'features/setup/setup_wizard_screen.dart';
 import 'state/providers.dart';
 
@@ -27,6 +29,8 @@ class _ShramKhataAppState extends ConsumerState<ShramKhataApp> {
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
+    final lang = ref.watch(languageProvider);
+    final langChosen = ref.watch(languageChosenProvider);
     final profile = ref.watch(profileProvider).value;
     final companies = ref.watch(companiesProvider).value;
     if (profile != null) {
@@ -41,6 +45,8 @@ class _ShramKhataAppState extends ConsumerState<ShramKhataApp> {
     final Widget home;
     if (!session.ready) {
       home = const Scaffold(body: LoadingView());
+    } else if (!session.hasWorkspace && !langChosen) {
+      home = const LanguageScreen(first: true);
     } else if (!session.hasWorkspace) {
       home = const WelcomeScreen();
     } else if (!session.signedIn) {
@@ -53,17 +59,21 @@ class _ShramKhataAppState extends ConsumerState<ShramKhataApp> {
       home = const Shell();
     }
     return MaterialApp(
-      title: 'HazriBook',
+      title: tr('HazriBook'),
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
       builder: (context, child) => KeyedSubtree(
-        key: ValueKey('${profile?.themeColor}-${profile?.currencyCode}'),
-        child: child ?? const SizedBox.shrink(),
+        key: ValueKey('${profile?.themeColor}-${profile?.currencyCode}-$lang'),
+        // Phones draw behind the system navigation bar; keep content above it.
+        child: ColoredBox(
+          color: Palette.surface,
+          child: SafeArea(top: false, child: child ?? const SizedBox.shrink()),
+        ),
       ),
       home: AnimatedSwitcher(
         duration: const Duration(milliseconds: 250),
         child: KeyedSubtree(
-          key: ValueKey('${session.ready}-${session.hasWorkspace}-${session.signedIn}'),
+          key: ValueKey('${session.ready}-${session.hasWorkspace}-${session.signedIn}-$langChosen'),
           child: home,
         ),
       ),

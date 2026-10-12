@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -44,7 +45,7 @@ class PaymentTile extends ConsumerWidget {
         child: Icon(deduction ? Icons.remove_circle_outline : modeIcon(p.mode), size: 20, color: color),
       ),
       title: Text(
-        showName ? row.labourName : PayType.label(p.type),
+        showName ? row.labourName : tr(PayType.label(p.type)),
         style: TextStyle(
           fontWeight: FontWeight.w700,
           decoration: voided ? TextDecoration.lineThrough : null,
@@ -52,8 +53,8 @@ class PaymentTile extends ConsumerWidget {
         ),
       ),
       subtitle: Text([
-        if (showName) PayType.label(p.type),
-        if (!deduction) PayMode.label(p.mode),
+        if (showName) tr(PayType.label(p.type)),
+        if (!deduction) tr(PayMode.label(p.mode)),
         D.showShort(p.date),
         if (p.note.isNotEmpty) p.note,
       ].join(' • ')),
@@ -70,7 +71,7 @@ class PaymentTile extends ConsumerWidget {
               decoration: voided ? TextDecoration.lineThrough : null,
             ),
           ),
-          if (voided) const Text('VOID', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Palette.absent)),
+          if (voided) Text(tr('VOID'), style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Palette.absent)),
         ],
       ),
     );
@@ -86,11 +87,11 @@ class PaymentTile extends ConsumerWidget {
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(row.labourName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
-            Text('${PayType.label(p.type)} • ${Money.format(p.amount)}',
+            Text('${tr(PayType.label(p.type))} • ${Money.format(p.amount)}',
                 style: const TextStyle(fontSize: 15, color: Palette.muted)),
             const SizedBox(height: 12),
             _kv('Date', D.show(p.date)),
-            if (p.type != PayType.deduction) _kv('Mode', PayMode.label(p.mode)),
+            if (p.type != PayType.deduction) _kv('Mode', tr(PayMode.label(p.mode))),
             if (p.reference.isNotEmpty) _kv('Reference', p.reference),
             if (p.note.isNotEmpty) _kv('Note', p.note),
             _kv('Entered', '${D.showDt(p.createdAt)} ${TimeOfDay.fromDateTime(p.createdAt).format(ctx)}'),
@@ -103,7 +104,7 @@ class PaymentTile extends ConsumerWidget {
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(foregroundColor: Palette.absent),
                 icon: const Icon(Icons.block),
-                label: const Text('Void this payment'),
+                label: Text(tr('Void this payment')),
                 onPressed: () {
                   Navigator.pop(ctx);
                   _void(context, ref);
@@ -129,18 +130,18 @@ class PaymentTile extends ConsumerWidget {
     final reason = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Void payment?'),
+        title: Text(tr('Void payment?')),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Text('The entry stays in history but stops counting toward the balance.'),
+          Text(tr('The entry stays in history but stops counting toward the balance.')),
           const SizedBox(height: 12),
-          TextField(controller: c, autofocus: true, decoration: const InputDecoration(labelText: 'Reason')),
+          TextField(controller: c, autofocus: true, decoration: InputDecoration(labelText: tr('Reason'))),
         ]),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Cancel'))),
           TextButton(
             onPressed: () => Navigator.pop(ctx, c.text),
             style: TextButton.styleFrom(foregroundColor: Palette.absent),
-            child: const Text('Void'),
+            child: Text(tr('Void')),
           ),
         ],
       ),

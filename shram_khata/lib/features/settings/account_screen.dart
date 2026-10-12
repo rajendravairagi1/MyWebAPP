@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -46,7 +47,7 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     final s = ref.watch(sessionProvider);
     final staff = s.staff!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Account & security')),
+      appBar: AppBar(title: Text(tr('Account & security'))),
       body: ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 32), children: [
         AppCard(
           child: Row(children: [
@@ -67,26 +68,26 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
           AppCard(
             color: Palette.infoBg,
             padding: const EdgeInsets.all(12),
-            child: const Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Icon(Icons.mark_email_unread_outlined, color: Palette.info, size: 20),
               SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  'Email verification is pending. It turns on when cloud sync is connected, which also enables password reset by email and using the app on more than one phone.',
+                  tr('Email verification is pending. It turns on when cloud sync is connected, which also enables password reset by email and using the app on more than one phone.'),
                   style: TextStyle(color: Palette.info, fontSize: 12.5, height: 1.4),
                 ),
               ),
             ]),
           ),
         ],
-        const SectionTitle('CHANGE PASSWORD / PIN', padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
-        TextField(controller: _old, obscureText: true, decoration: const InputDecoration(labelText: 'Current')),
+        SectionTitle(tr('CHANGE PASSWORD / PIN'), padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
+        TextField(controller: _old, obscureText: true, decoration: InputDecoration(labelText: tr('Current'))),
         const SizedBox(height: 10),
-        TextField(controller: _new, obscureText: true, decoration: const InputDecoration(labelText: 'New')),
+        TextField(controller: _new, obscureText: true, decoration: InputDecoration(labelText: tr('New'))),
         const SizedBox(height: 10),
-        TextField(controller: _confirm, obscureText: true, decoration: const InputDecoration(labelText: 'Confirm new')),
+        TextField(controller: _confirm, obscureText: true, decoration: InputDecoration(labelText: tr('Confirm new'))),
         const SizedBox(height: 16),
-        FilledButton(onPressed: _change, child: const Text('Update')),
+        FilledButton(onPressed: _change, child: Text(tr('Update'))),
       ]),
     );
   }

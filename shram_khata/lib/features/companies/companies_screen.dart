@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,12 +24,12 @@ class CompaniesScreen extends ConsumerWidget {
       outstanding[i.invoice.companyId] = (outstanding[i.invoice.companyId] ?? 0) + i.outstanding;
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('Companies')),
+      appBar: AppBar(title: Text(tr('Companies'))),
       floatingActionButton: session.can(Perm.companiesManage)
           ? FloatingActionButton.extended(
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CompanyFormScreen())),
               icon: const Icon(Icons.add_business_outlined),
-              label: const Text('Add company'),
+              label: Text(tr('Add company')),
             )
           : null,
       body: companies.when(
@@ -36,10 +37,10 @@ class CompaniesScreen extends ConsumerWidget {
         error: (e, _) => ErrorView(e),
         data: (list) {
           if (list.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.apartment_outlined,
-              title: 'No companies yet',
-              message: 'Add the companies you supply labour to. Each company can have several sites and a contract with billing rates.',
+              title: tr('No companies yet'),
+              message: tr('Add the companies you supply labour to. Each company can have several sites and a contract with billing rates.'),
             );
           }
           return ListView.separated(
@@ -72,7 +73,7 @@ class CompaniesScreen extends ConsumerWidget {
                   if (due > 0)
                     Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                       Text(Money.compact(due), style: const TextStyle(fontWeight: FontWeight.w800, color: Palette.info)),
-                      const Text('due', style: TextStyle(fontSize: 11, color: Palette.muted)),
+                      Text(tr('due'), style: TextStyle(fontSize: 11, color: Palette.muted)),
                     ]),
                 ]),
               );

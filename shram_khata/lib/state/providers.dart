@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/dates.dart';
+import '../core/i18n.dart';
 import '../core/permissions.dart';
 import '../core/plans.dart';
 import '../data/database.dart';
@@ -327,3 +328,29 @@ final pendingDaysProvider = FutureProvider.autoDispose<List<DateTime>>((ref) asy
   }
   return out;
 });
+
+/// Chosen app language. `chosen` is false until the person picks one on the
+/// first screen.
+class LanguageNotifier extends Notifier<String> {
+  static const key = 'app.lang';
+
+  @override
+  String build() => I18n.current;
+
+  Future<void> set(String code) async {
+    await ref.read(prefsProvider).setString(key, code);
+    await I18n.load(code);
+    ref.read(languageChosenProvider.notifier).markChosen();
+    state = code;
+  }
+}
+
+class LanguageChosen extends Notifier<bool> {
+  @override
+  bool build() => ref.read(prefsProvider).getString(LanguageNotifier.key) != null;
+  void markChosen() => state = true;
+}
+
+final languageChosenProvider = NotifierProvider<LanguageChosen, bool>(LanguageChosen.new);
+
+final languageProvider = NotifierProvider<LanguageNotifier, String>(LanguageNotifier.new);

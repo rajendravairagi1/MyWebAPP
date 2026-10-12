@@ -1,3 +1,4 @@
+import 'i18n.dart';
 import 'package:flutter/material.dart';
 
 import 'money.dart';
@@ -5,7 +6,7 @@ import 'theme.dart';
 
 /// Shows an error from a service call as a snackbar.
 void showError(BuildContext context, Object e) {
-  final msg = e.toString().replaceFirst('Exception: ', '');
+  final msg = tr(e.toString().replaceFirst('Exception: ', ''));
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(
@@ -17,7 +18,7 @@ void showError(BuildContext context, Object e) {
 void showInfo(BuildContext context, String msg) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(msg)));
+    ..showSnackBar(SnackBar(content: Text(tr(msg))));
 }
 
 Future<bool> confirm(
@@ -33,7 +34,7 @@ Future<bool> confirm(
       title: Text(title),
       content: Text(message),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
         TextButton(
           onPressed: () => Navigator.pop(ctx, true),
           style: danger ? TextButton.styleFrom(foregroundColor: Palette.absent) : null,
@@ -262,7 +263,7 @@ class ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => EmptyState(
         icon: Icons.error_outline,
-        title: 'Something went wrong',
+        title: tr('Something went wrong'),
         message: error.toString(),
       );
 }

@@ -77,6 +77,10 @@ void main() {
     final db = AppDatabase.inMemory();
     addTearDown(() => t.runAsync(db.close));
     await boot(t, db);
+    expect(find.text('English'), findsOneWidget);
+    await shot(t, '00_language');
+    await t.tap(find.text('English'));
+    await settle(t);
     expect(find.text('HazriBook'), findsOneWidget);
     await shot(t, '01_welcome');
 

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,7 +23,7 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
     final current = ref.watch(planProvider);
     final sel = _picked ?? current;
     return Scaffold(
-      appBar: AppBar(title: const Text('Plan')),
+      appBar: AppBar(title: Text(tr('Plan'))),
       body: FormBody(
         bottom: FilledButton(
           onPressed: sel == current

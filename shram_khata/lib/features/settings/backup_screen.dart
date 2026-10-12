@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -46,32 +47,32 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Backup & export')),
+      appBar: AppBar(title: Text(tr('Backup & export'))),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         AppCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Icon(Icons.cloud_download_outlined, size: 32, color: Palette.brand),
             const SizedBox(height: 12),
-            const Text('Save a copy of your data', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+            Text(tr('Save a copy of your data'), style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
             const SizedBox(height: 6),
-            const Text(
-              'Creates one backup file with every labourer, attendance, payment, company and invoice. Send it to yourself on WhatsApp or save it to Drive.',
+            Text(
+              tr('Creates one backup file with every labourer, attendance, payment, company and invoice. Send it to yourself on WhatsApp or save it to Drive.'),
               style: TextStyle(color: Palette.muted, height: 1.45),
             ),
             const SizedBox(height: 16),
             FilledButton.icon(
               onPressed: _busy ? null : _export,
               icon: const Icon(Icons.ios_share),
-              label: const Text('Create & share backup'),
+              label: Text(tr('Create & share backup')),
             ),
           ]),
         ),
         const SizedBox(height: 12),
-        const AppCard(
+        AppCard(
           color: Palette.halfBg,
           padding: EdgeInsets.all(12),
           child: Text(
-            'Until cloud sync is connected, this phone holds the only copy. Back up regularly, and before changing or resetting your phone.',
+            tr('Until cloud sync is connected, this phone holds the only copy. Back up regularly, and before changing or resetting your phone.'),
             style: TextStyle(color: Palette.half, fontWeight: FontWeight.w600, fontSize: 13, height: 1.4),
           ),
         ),

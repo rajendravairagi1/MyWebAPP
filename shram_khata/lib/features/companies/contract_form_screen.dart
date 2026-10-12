@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -121,12 +122,12 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(widget.existing == null ? 'New contract' : 'Edit contract')),
       body: FormBody(
-        bottom: FilledButton(onPressed: _busy ? null : _save, child: const Text('Save contract')),
+        bottom: FilledButton(onPressed: _busy ? null : _save, child: Text(tr('Save contract'))),
         children: [
           TextField(
             controller: _title,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(labelText: 'Contract name *', hintText: 'e.g. Manpower supply FY 2026-27'),
+            decoration: InputDecoration(labelText: tr('Contract name *'), hintText: tr('e.g. Manpower supply FY 2026-27')),
           ),
           const SizedBox(height: 12),
           Row(children: [
@@ -138,7 +139,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                   if (d != null) setState(() => _start = d);
                 },
                 child: InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Starts'),
+                  decoration: InputDecoration(labelText: tr('Starts')),
                   child: Text(D.showDt(_start)),
                 ),
               ),
@@ -153,7 +154,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                 },
                 child: InputDecorator(
                   decoration: InputDecoration(
-                    labelText: 'Ends',
+                    labelText: tr('Ends'),
                     suffixIcon: _end == null
                         ? null
                         : IconButton(icon: const Icon(Icons.close, size: 18), onPressed: () => setState(() => _end = null)),
@@ -167,15 +168,15 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
           TextField(
             controller: _terms,
             keyboardType: TextInputType.number,
-            decoration: const InputDecoration(labelText: 'Payment terms', suffixText: 'days'),
+            decoration: InputDecoration(labelText: tr('Payment terms'), suffixText: 'days'),
           ),
-          SectionTitle('BILLING RATES (WHAT THE COMPANY PAYS YOU)',
+          SectionTitle(tr('BILLING RATES (WHAT THE COMPANY PAYS YOU)'),
               padding: const EdgeInsets.fromLTRB(2, 22, 2, 4),
               trailing: null),
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(bottom: 10),
             child: Text(
-              'Per skill, per day. Invoices use these rates, so every skill you supply should be listed.',
+              tr('Per skill, per day. Invoices use these rates, so every skill you supply should be listed.'),
               style: TextStyle(color: Palette.muted, fontSize: 12.5),
             ),
           ),
@@ -197,7 +198,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                           focusNode: f,
                           textCapitalization: TextCapitalization.words,
                           onChanged: (v) => _rows[i].skill.text = v,
-                          decoration: const InputDecoration(labelText: 'Skill', isDense: true),
+                          decoration: InputDecoration(labelText: tr('Skill'), isDense: true),
                         ),
                       ),
                     ),
@@ -213,7 +214,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                       child: TextField(
                         controller: _rows[i].perDay,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: InputDecoration(labelText: 'Per day', prefixText: '${Money.symbol} ', isDense: true),
+                        decoration: InputDecoration(labelText: tr('Per day'), prefixText: '${Money.symbol} ', isDense: true),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -221,7 +222,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                       child: TextField(
                         controller: _rows[i].ot,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        decoration: InputDecoration(labelText: 'OT / hour', prefixText: '${Money.symbol} ', isDense: true),
+                        decoration: InputDecoration(labelText: tr('OT / hour'), prefixText: '${Money.symbol} ', isDense: true),
                       ),
                     ),
                   ]),
@@ -231,13 +232,13 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
           OutlinedButton.icon(
             onPressed: () => setState(() => _rows.add(_RateRow())),
             icon: const Icon(Icons.add),
-            label: const Text('Add skill rate'),
+            label: Text(tr('Add skill rate')),
           ),
           const SizedBox(height: 18),
           TextField(
             controller: _notes,
             maxLines: 3,
-            decoration: const InputDecoration(labelText: 'Notes / special terms'),
+            decoration: InputDecoration(labelText: tr('Notes / special terms')),
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
@@ -252,8 +253,8 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
           if (widget.existing != null)
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Contract is active'),
-              subtitle: const Text('Inactive contracts are not used for billing rates.'),
+              title: Text(tr('Contract is active')),
+              subtitle: Text(tr('Inactive contracts are not used for billing rates.')),
               value: _active,
               onChanged: (v) => setState(() => _active = v),
             ),

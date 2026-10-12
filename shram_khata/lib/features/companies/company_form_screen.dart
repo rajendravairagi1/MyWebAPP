@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -78,38 +79,38 @@ class _CompanyFormScreenState extends ConsumerState<CompanyFormScreen> {
       body: Form(
         key: _form,
         child: FormBody(
-          bottom: FilledButton(onPressed: _busy ? null : _save, child: const Text('Save company')),
+          bottom: FilledButton(onPressed: _busy ? null : _save, child: Text(tr('Save company'))),
           children: [
             TextFormField(
               controller: _name,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Company name *'),
+              decoration: InputDecoration(labelText: tr('Company name *')),
               validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the company name' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _person,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Contact person'),
+              decoration: InputDecoration(labelText: tr('Contact person')),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _mobile,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Mobile'),
+              decoration: InputDecoration(labelText: tr('Mobile')),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _email,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(labelText: tr('Email')),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _address,
               maxLines: 3,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(labelText: 'Billing address'),
+              decoration: InputDecoration(labelText: tr('Billing address')),
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -121,7 +122,7 @@ class _CompanyFormScreenState extends ConsumerState<CompanyFormScreen> {
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _branchId ?? allowed.first.id,
-                decoration: const InputDecoration(labelText: 'Branch'),
+                decoration: InputDecoration(labelText: tr('Branch')),
                 items: [for (final b in allowed) DropdownMenuItem(value: b.id, child: Text(b.name))],
                 onChanged: (v) => _branchId = v,
               ),

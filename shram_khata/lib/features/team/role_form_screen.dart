@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -68,8 +69,8 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
               onPressed: () async {
                 final ok = await confirm(context,
                     title: 'Delete ${widget.role!.name}?',
-                    message: 'Only possible when nobody has this role.',
-                    confirmLabel: 'Delete',
+                    message: tr('Only possible when nobody has this role.'),
+                    confirmLabel: tr('Delete'),
                     danger: true);
                 if (!ok) return;
                 try {
@@ -83,12 +84,12 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
         ],
       ),
       body: FormBody(
-        bottom: FilledButton(onPressed: _save, child: const Text('Save role')),
+        bottom: FilledButton(onPressed: _save, child: Text(tr('Save role'))),
         children: [
           TextField(
             controller: _name,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(labelText: 'Role name', hintText: 'e.g. Site manager'),
+            decoration: InputDecoration(labelText: tr('Role name'), hintText: tr('e.g. Site manager')),
           ),
           for (final g in Perm.groups.entries) ...[
             SectionTitle(g.key.toUpperCase(), padding: const EdgeInsets.fromLTRB(2, 20, 2, 6)),

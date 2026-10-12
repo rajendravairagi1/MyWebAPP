@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,16 +28,16 @@ class TeamScreen extends ConsumerWidget {
     final plan = ref.watch(planProvider);
     if (!plan.hasTeam) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Team & roles')),
+        appBar: AppBar(title: Text(tr('Team & roles'))),
         body: EmptyState(
           icon: Icons.groups_2_outlined,
-          title: 'Teams are on Owner + Team',
+          title: tr('Teams are on Owner + Team'),
           message:
-              'On the Solo plan you work alone. Upgrade to add supervisors who mark attendance, accountants who handle payments, and custom roles.',
+              tr('On the Solo plan you work alone. Upgrade to add supervisors who mark attendance, accountants who handle payments, and custom roles.'),
           action: FilledButton(
             style: FilledButton.styleFrom(minimumSize: const Size(200, 50)),
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlanSettingsScreen())),
-            child: const Text('See plans'),
+            child: Text(tr('See plans')),
           ),
         ),
       );
@@ -45,8 +46,8 @@ class TeamScreen extends ConsumerWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Team & roles'),
-          bottom: const TabBar(tabs: [Tab(text: 'People'), Tab(text: 'Roles')]),
+          title: Text(tr('Team & roles')),
+          bottom: TabBar(tabs: [Tab(text: tr('People')), Tab(text: tr('Roles'))]),
         ),
         body: const TabBarView(children: [_People(), _Roles()]),
       ),
@@ -66,7 +67,7 @@ class _People extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StaffFormScreen())),
         icon: const Icon(Icons.person_add_alt_1),
-        label: const Text('Add member'),
+        label: Text(tr('Add member')),
       ),
       body: staff.when(
         loading: () => const LoadingView(),
@@ -94,7 +95,7 @@ class _People extends ConsumerWidget {
                 ),
                 Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                   Pill(role?.name ?? '—', color: isOwner ? Palette.brand : Palette.info),
-                  if (!s.isActive) const Padding(padding: EdgeInsets.only(top: 4), child: Pill('Disabled', color: Palette.absent)),
+                  if (!s.isActive) Padding(padding: EdgeInsets.only(top: 4), child: Pill(tr('Disabled'), color: Palette.absent)),
                 ]),
               ]),
             );
@@ -117,7 +118,7 @@ class _Roles extends ConsumerWidget {
           ? FloatingActionButton.extended(
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RoleFormScreen())),
               icon: const Icon(Icons.add_moderator_outlined),
-              label: const Text('New role'),
+              label: Text(tr('New role')),
             )
           : null,
       body: roles.when(

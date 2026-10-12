@@ -10,17 +10,34 @@ class Palette {
   static Color _brand = defaultBrand;
   static Color _brandDark = const Color(0xFF0B4F4A);
   static Color _brandTint = const Color(0xFFE7F3F1);
+  static Color _brandSoft = const Color(0xFFCDE6E3);
 
   static Color get brand => _brand;
   static Color get brandDark => _brandDark;
   static Color get brandTint => _brandTint;
+
+  /// Stronger tint for selected chips / segments.
+  static Color get brandSoft => _brandSoft;
 
   static void apply(Color c) {
     _brand = c;
     final hsl = HSLColor.fromColor(c);
     _brandDark = hsl.withLightness((hsl.lightness * 0.62).clamp(0.08, 0.5)).toColor();
     _brandTint = Color.lerp(Colors.white, c, 0.10)!;
+    _brandSoft = Color.lerp(Colors.white, c, 0.22)!;
   }
+
+  static const swatches = <Color>[
+    Color(0xFF0F766E),
+    Color(0xFF1D4ED8),
+    Color(0xFF4F46E5),
+    Color(0xFF7C3AED),
+    Color(0xFFBE185D),
+    Color(0xFFB91C1C),
+    Color(0xFFEA580C),
+    Color(0xFF15803D),
+    Color(0xFF334155),
+  ];
 
   static const accent = Color(0xFFF59E0B);
 
@@ -63,6 +80,9 @@ ThemeData buildTheme() {
     onPrimary: Colors.white,
     primaryContainer: Palette.brandTint,
     onPrimaryContainer: Palette.brandDark,
+    secondaryContainer: Palette.brandSoft,
+    onSecondaryContainer: Palette.brandDark,
+    surfaceTint: Colors.transparent,
     secondary: Palette.accent,
     surface: Palette.surface,
     onSurface: Palette.ink,
@@ -146,12 +166,34 @@ ThemeData buildTheme() {
     ),
     chipTheme: ChipThemeData(
       backgroundColor: Palette.surface,
-      selectedColor: Palette.brandTint,
+      selectedColor: Palette.brandSoft,
       side: const BorderSide(color: Palette.line),
-      labelStyle: const TextStyle(fontFamily: 'NotoSans', fontWeight: FontWeight.w600, fontSize: 13),
+      labelStyle: const TextStyle(
+          fontFamily: 'NotoSans', fontWeight: FontWeight.w600, fontSize: 13, color: Palette.ink),
+      secondaryLabelStyle: TextStyle(
+          fontFamily: 'NotoSans', fontWeight: FontWeight.w700, fontSize: 13, color: Palette.brandDark),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       showCheckmark: false,
     ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? Palette.brandSoft : Palette.surface),
+        foregroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected) ? Palette.brandDark : Palette.ink),
+        side: const WidgetStatePropertyAll(BorderSide(color: Palette.line)),
+        textStyle: const WidgetStatePropertyAll(
+            TextStyle(fontFamily: 'NotoSans', fontWeight: FontWeight.w600, fontSize: 14)),
+      ),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? Colors.white : Palette.muted),
+      trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected) ? Palette.brand : Palette.line),
+      trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(color: Palette.brand),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: Palette.surface,
       indicatorColor: Palette.brandTint,

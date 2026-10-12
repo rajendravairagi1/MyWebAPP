@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -64,7 +65,7 @@ class _Header extends ConsumerWidget {
     final allowed = ref.watch(allowedBranchesProvider);
     final scope = ref.watch(scopeBranchProvider);
     final hour = DateTime.now().hour;
-    final greet = hour < 12 ? 'Good morning' : (hour < 17 ? 'Good afternoon' : 'Good evening');
+    final greet = tr(hour < 12 ? 'Good morning' : (hour < 17 ? 'Good afternoon' : 'Good evening'));
     return Row(
       children: [
         Expanded(
@@ -83,7 +84,7 @@ class _Header extends ConsumerWidget {
             onSelected: (v) => ref.read(sessionProvider.notifier).switchBranch(v == '_all' ? null : v),
             itemBuilder: (_) => [
               if (ref.read(sessionProvider).branchLimit.isEmpty)
-                const PopupMenuItem(value: '_all', child: Text('All branches')),
+                PopupMenuItem(value: '_all', child: Text(tr('All branches'))),
               for (final b in allowed) PopupMenuItem(value: b.id, child: Text(b.name)),
             ],
             child: Container(
@@ -189,21 +190,21 @@ class _Body extends ConsumerWidget {
           childAspectRatio: 1.5,
           children: [
             KpiTile(
-              label: 'Earned',
+              label: tr('Earned'),
               value: Money.compact(d.billing),
-              hint: 'billed to companies',
+              hint: tr('billed to companies'),
               icon: Icons.trending_up,
               color: ChartColors.billing,
             ),
             KpiTile(
-              label: 'Labour cost',
+              label: tr('Labour cost'),
               value: Money.compact(d.labourCost),
-              hint: 'wages for the day',
+              hint: tr('wages for the day'),
               icon: Icons.engineering_outlined,
               color: ChartColors.cost,
             ),
             KpiTile(
-              label: 'Paid out',
+              label: tr('Paid out'),
               value: Money.compact(d.paidOut),
               hint: d.advanceToday > 0
                   ? 'incl. ${Money.compact(d.advanceToday)} advance'
@@ -212,20 +213,20 @@ class _Body extends ConsumerWidget {
               color: Palette.info,
             ),
             KpiTile(
-              label: 'Margin',
+              label: tr('Margin'),
               value: (d.margin < 0 ? '−' : '') + Money.compact(d.margin.abs()),
-              hint: 'earned − labour cost',
+              hint: tr('earned − labour cost'),
               icon: d.margin < 0 ? Icons.trending_down : Icons.savings_outlined,
               color: d.margin < 0 ? Palette.absent : Palette.present,
             ),
           ],
         ),
         if (_alerts(context, ref).isNotEmpty) ...[
-          const SectionTitle('NEEDS ATTENTION', padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
+          SectionTitle(tr('NEEDS ATTENTION'), padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
           ..._alerts(context, ref),
         ],
         if (canMoney) ...[
-          const SectionTitle('MONEY POSITION', padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
+          SectionTitle(tr('MONEY POSITION'), padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
           Row(children: [
             Expanded(
               child: AppCard(
@@ -234,7 +235,7 @@ class _Body extends ConsumerWidget {
                         context, MaterialPageRoute(builder: (_) => const InvoicesScreen()))
                     : null,
                 child: Stat(
-                  label: 'To collect from companies',
+                  label: tr('To collect from companies'),
                   value: Money.compact(d.companyOutstanding),
                   color: d.companyOutstanding > 0 ? Palette.info : Palette.ink,
                 ),
@@ -244,7 +245,7 @@ class _Body extends ConsumerWidget {
             Expanded(
               child: AppCard(
                 child: Stat(
-                  label: 'To pay labour',
+                  label: tr('To pay labour'),
                   value: Money.compact(d.labourPayable),
                   color: d.labourPayable > 0 ? Palette.absent : Palette.ink,
                 ),
@@ -254,18 +255,18 @@ class _Body extends ConsumerWidget {
           const SizedBox(height: 10),
           AppCard(
             child: Stat(
-              label: 'Advance to recover from workers',
+              label: tr('Advance to recover from workers'),
               value: Money.compact(d.advanceToRecover),
               color: d.advanceToRecover > 0 ? Palette.half : Palette.ink,
             ),
           ),
         ],
-        const SectionTitle('LAST 7 DAYS', padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
+        SectionTitle(tr('LAST 7 DAYS'), padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
         AppCard(child: WeekChart(points: d.week)),
-        const SectionTitle('COMPANIES TODAY', padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
+        SectionTitle(tr('COMPANIES TODAY'), padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
         if (d.companies.isEmpty)
-          const AppCard(
-            child: Text('No attendance recorded for this day yet.',
+          AppCard(
+            child: Text(tr('No attendance recorded for this day yet.'),
                 style: TextStyle(color: Palette.muted)),
           )
         else
@@ -397,7 +398,7 @@ class _Hero extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            const Text('ATTENDANCE',
+            Text(tr('ATTENDANCE'),
                 style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1)),
             const Spacer(),
             if (d.otHours > 0) Pill('OT ${num1(d.otHours)}h', color: Colors.white, bg: Colors.white24),
@@ -416,7 +417,7 @@ class _Hero extends StatelessWidget {
                   children: [
                     Text('${d.working}',
                         style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w800, height: 1)),
-                    Text('working', style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
+                    Text(tr('working'), style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 12)),
                   ],
                 ),
               ),

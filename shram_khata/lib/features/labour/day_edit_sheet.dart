@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -114,7 +115,7 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
           DropdownButtonFormField<String>(
             initialValue: _site.id,
             isExpanded: true,
-            decoration: const InputDecoration(labelText: 'Site'),
+            decoration: InputDecoration(labelText: tr('Site')),
             items: [
               for (final e in widget.choices.entries)
                 DropdownMenuItem(value: e.key.id, child: Text('${e.value} • ${e.key.name}')),
@@ -130,7 +131,7 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
         Wrap(spacing: 8, children: [
           for (final s in AttStatus.all)
             ChoiceChip(
-              label: Text(AttStatus.label(s)),
+              label: Text(tr(AttStatus.label(s))),
               selected: _status == s,
               selectedColor: Palette.statusBg(s),
               onSelected: (_) => setState(() => _status = s),
@@ -141,7 +142,7 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
           TextField(
             controller: _ot,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Overtime hours (optional)'),
+            decoration: InputDecoration(labelText: tr('Overtime hours (optional)')),
           ),
         ],
         const SizedBox(height: 16),
@@ -157,7 +158,7 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
                         staffId: session.staff?.id,
                         canEditLocked: canEditLocked,
                       )),
-              child: const Text('Clear'),
+              child: Text(tr('Clear')),
             ),
           const Spacer(),
           FilledButton(
@@ -172,7 +173,7 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
                       staffId: session.staff?.id,
                       canEditLocked: canEditLocked,
                     )),
-            child: const Text('Save'),
+            child: Text(tr('Save')),
           ),
         ]),
       ]),

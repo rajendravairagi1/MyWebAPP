@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,13 +30,13 @@ class _LabourListScreenState extends ConsumerState<LabourListScreen> {
     final list = ref.watch(labourListProvider((query: _q, statuses: _status)));
     final balances = session.can(Perm.paymentsView) ? ref.watch(balancesProvider).value : null;
     return Scaffold(
-      appBar: AppBar(title: const Text('Labour')),
+      appBar: AppBar(title: Text(tr('Labour'))),
       floatingActionButton: session.can(Perm.labourManage)
           ? FloatingActionButton.extended(
               onPressed: () => Navigator.push(
                   context, MaterialPageRoute(builder: (_) => const LabourFormScreen())),
               icon: const Icon(Icons.person_add_alt_1),
-              label: const Text('Add labour'),
+              label: Text(tr('Add labour')),
             )
           : null,
       body: Column(
@@ -44,8 +45,8 @@ class _LabourListScreenState extends ConsumerState<LabourListScreen> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: TextField(
               onChanged: (v) => setState(() => _q = v),
-              decoration: const InputDecoration(
-                hintText: 'Search name, mobile or skill',
+              decoration: InputDecoration(
+                hintText: tr('Search name, mobile or skill'),
                 prefixIcon: Icon(Icons.search),
               ),
             ),
@@ -60,7 +61,7 @@ class _LabourListScreenState extends ConsumerState<LabourListScreen> {
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
-                      label: Text(LabourStatus.label(s)),
+                      label: Text(tr(LabourStatus.label(s))),
                       selected: _status == s,
                       onSelected: (_) => setState(() => _status = s),
                     ),
@@ -83,7 +84,7 @@ class _LabourListScreenState extends ConsumerState<LabourListScreen> {
                 if (all.isEmpty) {
                   return EmptyState(
                     icon: Icons.groups_outlined,
-                    title: _q.isEmpty ? 'No ${LabourStatus.label(_status).toLowerCase()} labour' : 'No match',
+                    title: _q.isEmpty ? 'No ${tr(LabourStatus.label(_status)).toLowerCase()} labour' : 'No match',
                     message: _q.isEmpty && _status == LabourStatus.active
                         ? 'Add your first labourer to start taking attendance.'
                         : null,
@@ -141,7 +142,7 @@ class _LabourListScreenState extends ConsumerState<LabourListScreen> {
                                     style: const TextStyle(fontSize: 11, color: Palette.muted)),
                               ])
                             else if (balances != null)
-                              const Text('settled',
+                              Text(tr('settled'),
                                   style: TextStyle(fontSize: 12, color: Palette.present, fontWeight: FontWeight.w600)),
                           ]),
                         ),

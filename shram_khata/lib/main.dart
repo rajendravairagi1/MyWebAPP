@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
+import 'core/i18n.dart';
 import 'data/database.dart';
 import 'state/providers.dart';
 
@@ -15,6 +16,7 @@ Future<void> main() async {
   ]);
   final db = await AppDatabase.openOnDevice();
   final prefs = await SharedPreferences.getInstance();
+  await I18n.load(prefs.getString('app.lang') ?? 'en');
   runApp(ProviderScope(
     overrides: [
       databaseProvider.overrideWithValue(db),

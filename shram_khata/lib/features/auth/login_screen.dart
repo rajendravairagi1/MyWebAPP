@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,7 +63,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               child: const Icon(Icons.groups_rounded, color: Colors.white, size: 32),
             ),
             const SizedBox(height: 22),
-            const Text('Welcome back', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+            Text(tr('Welcome back'), style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
             const SizedBox(height: 6),
             const Text(
               'Sign in with your email or mobile number.\nOwners use a password, team members use a PIN.',
@@ -74,8 +75,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               keyboardType: TextInputType.emailAddress,
               autocorrect: false,
               textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(
-                labelText: 'Email or mobile',
+              decoration: InputDecoration(
+                labelText: tr('Email or mobile'),
                 prefixIcon: Icon(Icons.person_outline),
               ),
             ),
@@ -85,7 +86,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               obscureText: _hide,
               onSubmitted: (_) => _login(),
               decoration: InputDecoration(
-                labelText: 'Password / PIN',
+                labelText: tr('Password / PIN'),
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(_hide ? Icons.visibility_outlined : Icons.visibility_off_outlined),
@@ -106,24 +107,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       height: 22,
                       child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
                     )
-                  : const Text('Sign in'),
+                  : Text(tr('Sign in')),
             ),
             const SizedBox(height: 8),
             TextButton(
               onPressed: () => showDialog<void>(
                 context: context,
                 builder: (ctx) => AlertDialog(
-                  title: const Text('Forgot password?'),
+                  title: Text(tr('Forgot password?')),
                   content: const Text(
                     'Team members: ask the owner to set a new PIN for you (Team & roles).\n\n'
                     'Owner: password recovery by email works once cloud sync is connected. Until then, keep your password safe.',
                   ),
                   actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+                    TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('OK'))),
                   ],
                 ),
               ),
-              child: const Text('Forgot password?'),
+              child: Text(tr('Forgot password?')),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -107,23 +108,23 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
           Text('${l.skill} • ${num1(l.days)} days${l.otHours > 0 ? ' • ${num1(l.otHours)}h OT' : ''}',
               style: const TextStyle(color: Palette.muted)),
           const SizedBox(height: 4),
-          const Text('This changes only this invoice. To fix it for good, add the skill to the company contract.',
+          Text(tr('This changes only this invoice. To fix it for good, add the skill to the company contract.'),
               style: TextStyle(color: Palette.muted, fontSize: 12.5)),
           const SizedBox(height: 14),
           TextField(
             controller: c,
             autofocus: true,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: 'Rate per day', prefixText: '${Money.symbol} '),
+            decoration: InputDecoration(labelText: tr('Rate per day'), prefixText: '${Money.symbol} '),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: o,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: 'Overtime per hour', prefixText: '${Money.symbol} '),
+            decoration: InputDecoration(labelText: tr('Overtime per hour'), prefixText: '${Money.symbol} '),
           ),
           const SizedBox(height: 16),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Apply')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Apply'))),
         ]),
       ),
     );
@@ -162,7 +163,7 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
     final thisMonth = D.firstOfMonth(now);
     final lastMonth = DateTime(now.year, now.month - 1, 1);
     return Scaffold(
-      appBar: AppBar(title: const Text('New invoice')),
+      appBar: AppBar(title: Text(tr('New invoice'))),
       body: FormBody(
         bottom: d == null
             ? null
@@ -173,7 +174,7 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
         children: [
           DropdownButtonFormField<String>(
             initialValue: _companyId,
-            decoration: const InputDecoration(labelText: 'Company'),
+            decoration: InputDecoration(labelText: tr('Company')),
             items: [for (final c in companies) DropdownMenuItem(value: c.id, child: Text(c.name))],
             onChanged: (v) async {
               setState(() {
@@ -189,9 +190,9 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String?>(
               initialValue: _siteId,
-              decoration: const InputDecoration(labelText: 'Site'),
+              decoration: InputDecoration(labelText: tr('Site')),
               items: [
-                const DropdownMenuItem(value: null, child: Text('All sites')),
+                DropdownMenuItem(value: null, child: Text(tr('All sites'))),
                 for (final s in _sites) DropdownMenuItem(value: s.id, child: Text(s.name)),
               ],
               onChanged: (v) {
@@ -200,10 +201,10 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
               },
             ),
           ],
-          const SectionTitle('PERIOD', padding: EdgeInsets.fromLTRB(2, 20, 2, 8)),
+          SectionTitle(tr('PERIOD'), padding: EdgeInsets.fromLTRB(2, 20, 2, 8)),
           Wrap(spacing: 8, runSpacing: 8, children: [
             ChoiceChip(
-              label: const Text('This month'),
+              label: Text(tr('This month')),
               selected: D.ymd(_from) == D.ymd(thisMonth) && D.ymd(_to) == D.ymd(now),
               onSelected: (_) {
                 setState(() {
@@ -214,7 +215,7 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
               },
             ),
             ChoiceChip(
-              label: const Text('Last month'),
+              label: Text(tr('Last month')),
               selected: D.ymd(_from) == D.ymd(lastMonth) && D.ymd(_to) == D.ymd(D.lastOfMonth(lastMonth)),
               onSelected: (_) {
                 setState(() {
@@ -254,10 +255,10 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
                   ]),
                 ),
               ),
-            const SectionTitle('LINES', padding: EdgeInsets.fromLTRB(2, 20, 2, 8)),
+            SectionTitle(tr('LINES'), padding: EdgeInsets.fromLTRB(2, 20, 2, 8)),
             if (d.lines.isEmpty)
-              const AppCard(
-                child: Text('No attendance found for this company in this period.', style: TextStyle(color: Palette.muted)),
+              AppCard(
+                child: Text(tr('No attendance found for this company in this period.'), style: TextStyle(color: Palette.muted)),
               )
             else ...[
               if (d.missingRates > 0)
@@ -307,7 +308,7 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
               TextField(
                 controller: _notes,
                 maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Note on invoice (optional)'),
+                decoration: InputDecoration(labelText: tr('Note on invoice (optional)')),
               ),
             ],
           ],

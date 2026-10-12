@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -42,12 +43,12 @@ class AttendanceSheetScreen extends ConsumerWidget {
                   style: const TextStyle(fontSize: 12.5, color: Palette.muted, fontWeight: FontWeight.w500)),
             ],
           ),
-          orElse: () => const Text('Attendance'),
+          orElse: () => Text(tr('Attendance')),
         ),
         actions: [
           if (canMark)
             IconButton(
-              tooltip: 'Add labour to this sheet',
+              tooltip: tr('Add labour to this sheet'),
               icon: const Icon(Icons.person_add_alt_1_outlined),
               onPressed: () => _addLabour(context, ref),
             ),
@@ -67,7 +68,7 @@ class AttendanceSheetScreen extends ConsumerWidget {
     final l = await pickLabour(
       context,
       exclude: current.rows.map((r) => r.labour.id).toSet(),
-      title: 'Add to this sheet',
+      title: tr('Add to this sheet'),
     );
     if (l == null) return;
     await ref.read(attendanceServiceProvider).addToSheet(siteId: siteId, labourId: l.id, date: date);
@@ -139,17 +140,17 @@ class _SheetBody extends ConsumerWidget {
         context,
         title: '${sheet.unmarked} not marked',
         message: 'Mark the remaining ${sheet.unmarked} as absent and submit? The sheet will be locked.',
-        confirmLabel: 'Mark absent & submit',
+        confirmLabel: tr('Mark absent & submit'),
       );
       if (!ok) return;
       restAbsent = true;
     } else {
       final ok = await confirm(
         context,
-        title: 'Submit attendance?',
+        title: tr('Submit attendance?'),
         message:
             'Present ${sheet.present} • Half ${sheet.half} • Absent ${sheet.absent}.\nThe sheet will be locked; only the owner can change it afterwards.',
-        confirmLabel: 'Submit',
+        confirmLabel: tr('Submit'),
       );
       if (!ok) return;
     }
@@ -198,16 +199,16 @@ class _SheetBody extends ConsumerWidget {
                         date: sheet.date,
                         staffId: session.staff?.id,
                       ),
-                  child: const Text('Unlock'),
+                  child: Text(tr('Unlock')),
                 ),
             ]),
           ),
         Expanded(
           child: sheet.rows.isEmpty
-              ? const EmptyState(
+              ? EmptyState(
                   icon: Icons.groups_outlined,
-                  title: 'No labour on this site',
-                  message: 'Tap the + person icon to add labour, or assign labour to this site from their profile.',
+                  title: tr('No labour on this site'),
+                  message: tr('Tap the + person icon to add labour, or assign labour to this site from their profile.'),
                 )
               : ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -235,7 +236,7 @@ class _SheetBody extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     onPressed: sheet.unmarked == 0 ? null : () => _markAll(context, ref),
                     icon: const Icon(Icons.done_all),
-                    label: const Text('All present'),
+                    label: Text(tr('All present')),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -244,7 +245,7 @@ class _SheetBody extends ConsumerWidget {
                   child: FilledButton.icon(
                     onPressed: () => _submit(context, ref),
                     icon: const Icon(Icons.lock_outline),
-                    label: const Text('Submit sheet'),
+                    label: Text(tr('Submit sheet')),
                   ),
                 ),
               ]),
@@ -471,7 +472,7 @@ class _OtSheetState extends State<_OtSheet> {
                 ActionChip(label: Text('${num1(h)}h'), onPressed: () => setState(() => _v = h)),
             ]),
             const SizedBox(height: 18),
-            FilledButton(onPressed: () => Navigator.pop(context, _v), child: const Text('Save overtime')),
+            FilledButton(onPressed: () => Navigator.pop(context, _v), child: Text(tr('Save overtime'))),
           ],
         ),
       ),

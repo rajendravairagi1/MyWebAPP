@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,13 +59,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create your account')),
+      appBar: AppBar(title: Text(tr('Create your account'))),
       body: Form(
         key: _form,
         child: FormBody(
           children: [
             Row(children: [
-              const Pill('Plan', color: Palette.muted),
+              Pill(tr('Plan'), color: Palette.muted),
               const SizedBox(width: 8),
               Text(widget.plan.title, style: const TextStyle(fontWeight: FontWeight.w700)),
             ]),
@@ -72,8 +73,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             TextFormField(
               controller: _business,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Agency / business name',
+              decoration: InputDecoration(
+                labelText: tr('Agency / business name'),
                 prefixIcon: Icon(Icons.storefront_outlined),
               ),
               validator: (v) => (v ?? '').trim().isEmpty ? 'Enter your business name' : null,
@@ -82,8 +83,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             TextFormField(
               controller: _owner,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'Your name',
+              decoration: InputDecoration(
+                labelText: tr('Your name'),
                 prefixIcon: Icon(Icons.person_outline),
               ),
               validator: (v) => (v ?? '').trim().isEmpty ? 'Enter your name' : null,
@@ -93,8 +94,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               controller: _email,
               keyboardType: TextInputType.emailAddress,
               autocorrect: false,
-              decoration: const InputDecoration(
-                labelText: 'Email',
+              decoration: InputDecoration(
+                labelText: tr('Email'),
                 prefixIcon: Icon(Icons.mail_outline),
               ),
               validator: (v) => Security.isEmail(v ?? '') ? null : 'Enter a valid email',
@@ -104,8 +105,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               controller: _mobile,
               keyboardType: TextInputType.phone,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(15)],
-              decoration: const InputDecoration(
-                labelText: 'Mobile number',
+              decoration: InputDecoration(
+                labelText: tr('Mobile number'),
                 prefixIcon: Icon(Icons.phone_outlined),
               ),
               validator: (v) => (v ?? '').length >= 7 ? null : 'Enter your mobile number',
@@ -115,7 +116,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
               controller: _password,
               obscureText: _hide,
               decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: tr('Password'),
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(_hide ? Icons.visibility_outlined : Icons.visibility_off_outlined),
@@ -128,8 +129,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             TextFormField(
               controller: _confirm,
               obscureText: _hide,
-              decoration: const InputDecoration(
-                labelText: 'Confirm password',
+              decoration: InputDecoration(
+                labelText: tr('Confirm password'),
                 prefixIcon: Icon(Icons.lock_outline),
               ),
               validator: (v) => v == _password.text ? null : 'Passwords do not match',
@@ -138,14 +139,14 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             AppCard(
               color: Palette.infoBg,
               padding: const EdgeInsets.all(12),
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(Icons.info_outline, size: 18, color: Palette.info),
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Your data is stored on this phone. Email verification, password recovery and backup across phones come with cloud sync. Please remember your password.',
+                      tr('Your data is stored on this phone. Email verification, password recovery and backup across phones come with cloud sync. Please remember your password.'),
                       style: TextStyle(fontSize: 12.5, height: 1.4, color: Palette.info),
                     ),
                   ),
@@ -161,7 +162,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                     height: 22,
                     child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
                   )
-                : const Text('Create account'),
+                : Text(tr('Create account')),
           ),
         ),
       ),

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,8 +63,8 @@ class _LabourPickerState extends ConsumerState<_LabourPicker> {
               child: TextField(
                 autofocus: false,
                 onChanged: (v) => setState(() => _q = v),
-                decoration: const InputDecoration(
-                  hintText: 'Search name, mobile or skill',
+                decoration: InputDecoration(
+                  hintText: tr('Search name, mobile or skill'),
                   prefixIcon: Icon(Icons.search),
                 ),
               ),
@@ -76,7 +77,7 @@ class _LabourPickerState extends ConsumerState<_LabourPicker> {
                 data: (all) {
                   final rows = all.where((l) => !widget.exclude.contains(l.id)).toList();
                   if (rows.isEmpty) {
-                    return const EmptyState(icon: Icons.search_off, title: 'No labour found');
+                    return EmptyState(icon: Icons.search_off, title: tr('No labour found'));
                   }
                   return ListView.builder(
                     itemCount: rows.length,
@@ -120,9 +121,9 @@ class SiteChecklist extends ConsumerWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
+              Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
-                child: Text('Add the company this worker works for, then pick a site.',
+                child: Text(tr('Add the company this worker works for, then pick a site.'),
                     style: TextStyle(color: Palette.muted)),
               ),
               _addButton(context, ref, null),
@@ -171,7 +172,7 @@ class SiteChecklist extends ConsumerWidget {
             if (id != null) onChanged({...selected, id});
           },
           icon: const Icon(Icons.add),
-          label: const Text('Add company / site'),
+          label: Text(tr('Add company / site')),
         ),
       );
 }
@@ -193,7 +194,7 @@ Future<String?> quickAddCompanySite(BuildContext context, WidgetRef ref) async {
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setS) => AlertDialog(
-        title: const Text('Add company / site'),
+        title: Text(tr('Add company / site')),
         content: Form(
           key: key,
           child: SingleChildScrollView(
@@ -202,7 +203,7 @@ Future<String?> quickAddCompanySite(BuildContext context, WidgetRef ref) async {
                 DropdownButtonFormField<String>(
                   initialValue: existing,
                   isExpanded: true,
-                  decoration: const InputDecoration(labelText: 'Company'),
+                  decoration: InputDecoration(labelText: tr('Company')),
                   items: [for (final c in companies) DropdownMenuItem(value: c.id, child: Text(c.name))],
                   onChanged: (v) => existing = v,
                 )
@@ -210,7 +211,7 @@ Future<String?> quickAddCompanySite(BuildContext context, WidgetRef ref) async {
                 TextFormField(
                   controller: company,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(labelText: 'Company name *'),
+                  decoration: InputDecoration(labelText: tr('Company name *')),
                   validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the company name' : null,
                 ),
               if (companies.isNotEmpty)
@@ -224,14 +225,14 @@ Future<String?> quickAddCompanySite(BuildContext context, WidgetRef ref) async {
               TextFormField(
                 controller: site,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Site / location *'),
+                decoration: InputDecoration(labelText: tr('Site / location *')),
                 validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the site name' : null,
               ),
             ]),
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('Cancel'))),
           FilledButton(
             onPressed: () async {
               if (!key.currentState!.validate()) return;
@@ -245,7 +246,7 @@ Future<String?> quickAddCompanySite(BuildContext context, WidgetRef ref) async {
                 if (ctx.mounted) showError(ctx, e);
               }
             },
-            child: const Text('Add'),
+            child: Text(tr('Add')),
           ),
         ],
       ),

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -40,7 +41,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
             title: Text(inv.number),
             actions: [
               IconButton(
-                tooltip: 'PDF / Share',
+                tooltip: tr('PDF / Share'),
                 icon: const Icon(Icons.picture_as_pdf_outlined),
                 onPressed: () => openPdf(
                   context,
@@ -58,7 +59,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                   Expanded(
                     child: Text(d.company.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                   ),
-                  Pill(InvoiceState.label(s), color: stateColor(s)),
+                  Pill(tr(InvoiceState.label(s)), color: stateColor(s)),
                 ]),
                 const SizedBox(height: 2),
                 Text(
@@ -67,8 +68,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
                 ),
                 const Divider(height: 24),
                 Row(children: [
-                  Expanded(child: Stat(label: 'Invoice date', value: D.showShort(inv.issueDate))),
-                  Expanded(child: Stat(label: 'Due date', value: D.showShort(inv.dueDate), color: s == InvoiceState.overdue ? Palette.absent : null)),
+                  Expanded(child: Stat(label: tr('Invoice date'), value: D.showShort(inv.issueDate))),
+                  Expanded(child: Stat(label: tr('Due date'), value: D.showShort(inv.dueDate), color: s == InvoiceState.overdue ? Palette.absent : null)),
                 ]),
                 const Divider(height: 24),
                 _row('Subtotal', Money.format(inv.subtotal)),
@@ -83,13 +84,13 @@ class InvoiceDetailScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               FilledButton.icon(
                 icon: const Icon(Icons.add_card),
-                label: const Text('Record payment received'),
+                label: Text(tr('Record payment received')),
                 onPressed: () => _receipt(context, ref, d),
               ),
             ],
-            const SectionTitle('RECEIPTS', padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
+            SectionTitle(tr('RECEIPTS'), padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
             if (d.payments.isEmpty)
-              const AppCard(child: Text('No payments received yet.', style: TextStyle(color: Palette.muted)))
+              AppCard(child: Text(tr('No payments received yet.'), style: TextStyle(color: Palette.muted)))
             else
               AppCard(
                 padding: EdgeInsets.zero,
@@ -100,7 +101,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                       title: Text(Money.format(d.payments[i].amount), style: const TextStyle(fontWeight: FontWeight.w800)),
                       subtitle: Text([
                         D.show(d.payments[i].date),
-                        PayMode.label(d.payments[i].mode),
+                        tr(PayMode.label(d.payments[i].mode)),
                         if (d.payments[i].reference.isNotEmpty) d.payments[i].reference,
                       ].join(' • ')),
                       trailing: canManage
@@ -108,9 +109,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
                               icon: const Icon(Icons.delete_outline, color: Palette.muted),
                               onPressed: () async {
                                 final ok = await confirm(context,
-                                    title: 'Remove this receipt?',
+                                    title: tr('Remove this receipt?'),
                                     message: 'The invoice balance will go back up by ${Money.format(d.payments[i].amount)}.',
-                                    confirmLabel: 'Remove',
+                                    confirmLabel: tr('Remove'),
                                     danger: true);
                                 if (ok) await ref.read(billingServiceProvider).removeReceipt(d.payments[i].id, staffId: session.staff?.id);
                               },
@@ -142,12 +143,12 @@ class InvoiceDetailScreen extends ConsumerWidget {
               TextButton.icon(
                 style: TextButton.styleFrom(foregroundColor: Palette.absent),
                 icon: const Icon(Icons.cancel_outlined),
-                label: const Text('Cancel this invoice'),
+                label: Text(tr('Cancel this invoice')),
                 onPressed: () async {
                   final ok = await confirm(context,
                       title: 'Cancel ${inv.number}?',
-                      message: 'The invoice number is kept and marked cancelled. You can then create a corrected invoice for the same period.',
-                      confirmLabel: 'Cancel invoice',
+                      message: tr('The invoice number is kept and marked cancelled. You can then create a corrected invoice for the same period.'),
+                      confirmLabel: tr('Cancel invoice'),
                       danger: true);
                   if (!ok) return;
                   try {
@@ -186,25 +187,25 @@ class InvoiceDetailScreen extends ConsumerWidget {
           padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
           child: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Payment received', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              Text(tr('Payment received'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
               const SizedBox(height: 14),
               TextField(
                 controller: amount,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-                decoration: InputDecoration(labelText: 'Amount', prefixText: '${Money.symbol} ', helperText: 'Outstanding ${Money.format(d.outstanding)}'),
+                decoration: InputDecoration(labelText: tr('Amount'), prefixText: '${Money.symbol} ', helperText: 'Outstanding ${Money.format(d.outstanding)}'),
               ),
               const SizedBox(height: 12),
               SegmentedButton<String>(
                 showSelectedIcon: false,
                 segments: [
-                  for (final m in PayMode.all) ButtonSegment(value: m, label: Text(PayMode.label(m)), icon: Icon(modeIcon(m), size: 18)),
+                  for (final m in PayMode.all) ButtonSegment(value: m, label: Text(tr(PayMode.label(m))), icon: Icon(modeIcon(m), size: 18)),
                 ],
                 selected: {mode},
                 onSelectionChanged: (v) => setS(() => mode = v.first),
               ),
               const SizedBox(height: 12),
-              TextField(controller: reference, decoration: const InputDecoration(labelText: 'Reference / UTR / cheque no. (optional)')),
+              TextField(controller: reference, decoration: InputDecoration(labelText: tr('Reference / UTR / cheque no. (optional)'))),
               const SizedBox(height: 12),
               InkWell(
                 borderRadius: BorderRadius.circular(14),
@@ -213,12 +214,12 @@ class InvoiceDetailScreen extends ConsumerWidget {
                   if (p != null) setS(() => date = p);
                 },
                 child: InputDecorator(
-                  decoration: const InputDecoration(labelText: 'Received on', suffixIcon: Icon(Icons.calendar_today_outlined)),
+                  decoration: InputDecoration(labelText: tr('Received on'), suffixIcon: Icon(Icons.calendar_today_outlined)),
                   child: Text(D.showDt(date)),
                 ),
               ),
               const SizedBox(height: 16),
-              FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save receipt')),
+              FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Save receipt'))),
             ]),
           ),
         ),

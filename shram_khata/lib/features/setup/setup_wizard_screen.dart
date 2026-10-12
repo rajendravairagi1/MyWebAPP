@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,6 +23,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
 
   Country _country = Countries.india;
   String _currency = 'INR';
+  Color _theme = Palette.brand;
   bool _taxEnabled = false;
   late final _taxLabel = TextEditingController(text: _country.taxLabel);
   late final _taxRate = TextEditingController(text: _fmtRate(_country.taxRate));
@@ -66,6 +68,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         taxEnabled: _taxEnabled,
         taxLabel: _taxLabel.text.trim().isEmpty ? _country.taxLabel : _taxLabel.text.trim(),
         taxRate: double.tryParse(_taxRate.text.trim()) ?? _country.taxRate,
+        themeColor: _theme.toARGB32(),
         setupDone: true,
       ));
       if (withCompany) {
@@ -94,6 +97,14 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
   @override
   Widget build(BuildContext context) {
     final titles = ['Your business', 'Your first company'];
+    // Live preview: the wizard repaints in the chosen colour straight away.
+    return Theme(
+      data: buildTheme(),
+      child: _scaffold(titles),
+    );
+  }
+
+  Widget _scaffold(List<String> titles) {
     return Scaffold(
       appBar: AppBar(
         title: Text(titles[_step]),
@@ -104,7 +115,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         actions: [
           TextButton(
               onPressed: _busy ? null : () => _finish(withCompany: false),
-              child: const Text('Skip'),
+              child: Text(tr('Skip')),
             ),
         ],
       ),
@@ -127,11 +138,11 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     return FormBody(
       bottom: FilledButton(
         onPressed: () => setState(() => _step = 1),
-        child: const Text('Next'),
+        child: Text(tr('Next')),
       ),
       children: [
-        const Text(
-          'Where is your business? We set your currency, phone code and tax name from this.',
+        Text(
+          tr('Where is your business? We set your currency, phone code and tax name from this.'),
           style: TextStyle(color: Palette.muted),
         ),
         const SizedBox(height: 16),
@@ -139,7 +150,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           key: ValueKey('country-${_country.code}'),
           initialValue: _country.code,
           isExpanded: true,
-          decoration: const InputDecoration(labelText: 'Country'),
+          decoration: InputDecoration(labelText: tr('Country')),
           items: [
             for (final c in Countries.all) DropdownMenuItem(value: c.code, child: Text(c.name)),
           ],
@@ -152,31 +163,54 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           key: ValueKey('currency-$_currency'),
           initialValue: _currency,
           isExpanded: true,
-          decoration: const InputDecoration(labelText: 'Currency'),
+          decoration: InputDecoration(labelText: tr('Currency')),
           items: [
             for (final c in Currencies.all)
               DropdownMenuItem(value: c.code, child: Text('${c.name} (${c.symbol})')),
           ],
           onChanged: (v) => setState(() => _currency = v ?? _currency),
         ),
-        const SizedBox(height: 8),
+        SectionTitle(tr('APP COLOUR'), padding: EdgeInsets.fromLTRB(2, 18, 2, 10)),
+        Wrap(spacing: 10, runSpacing: 10, children: [
+          for (final c in Palette.swatches)
+            GestureDetector(
+              onTap: () => setState(() {
+                _theme = c;
+                Palette.apply(c);
+              }),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: c,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: _theme.toARGB32() == c.toARGB32() ? Palette.ink : Colors.transparent, width: 3),
+                ),
+                child: _theme.toARGB32() == c.toARGB32()
+                    ? const Icon(Icons.check, color: Colors.white, size: 20)
+                    : null,
+              ),
+            ),
+        ]),
+        const SizedBox(height: 14),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: _taxEnabled,
           onChanged: (v) => setState(() => _taxEnabled = v),
-          title: const Text('Add tax on invoices'),
-          subtitle: const Text('Turn on if you are registered for tax'),
+          title: Text(tr('Add tax on invoices')),
+          subtitle: Text(tr('Turn on if you are registered for tax')),
         ),
         if (_taxEnabled) ...[
           TextFormField(
             controller: _taxLabel,
-            decoration: const InputDecoration(labelText: 'Tax name (GST, VAT ...)'),
+            decoration: InputDecoration(labelText: tr('Tax name (GST, VAT ...)')),
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _taxRate,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Tax rate %'),
+            decoration: InputDecoration(labelText: tr('Tax rate %')),
           ),
         ],
       ],
@@ -189,7 +223,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
       child: FormBody(
         bottom: FilledButton(
           onPressed: _busy ? null : () => _finish(withCompany: true),
-          child: const Text('Finish setup'),
+          child: Text(tr('Finish setup')),
         ),
         children: [
           const Text(
@@ -201,17 +235,17 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           TextFormField(
             controller: _company,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(labelText: 'Company name *'),
+            decoration: InputDecoration(labelText: tr('Company name *')),
             validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the company name' : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _contact,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(labelText: 'Contact person (optional)'),
+            decoration: InputDecoration(labelText: tr('Contact person (optional)')),
           ),
           const SizedBox(height: 20),
-          const SectionTitle('Sites / locations'),
+          SectionTitle(tr('Sites / locations')),
           for (var i = 0; i < _siteCtrls.length; i++)
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -235,7 +269,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
             child: TextButton.icon(
               onPressed: () => setState(() => _siteCtrls.add(TextEditingController())),
               icon: const Icon(Icons.add),
-              label: const Text('Add another site'),
+              label: Text(tr('Add another site')),
             ),
           ),
         ],

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -46,7 +47,7 @@ class InvoiceTile extends StatelessWidget {
         children: [
           Text(Money.format(inv.total), style: const TextStyle(fontWeight: FontWeight.w800)),
           const SizedBox(height: 3),
-          Pill(InvoiceState.label(s), color: stateColor(s)),
+          Pill(tr(InvoiceState.label(s)), color: stateColor(s)),
         ],
       ),
     );
@@ -68,12 +69,12 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
     final invoices = ref.watch(invoicesProvider);
     final session = ref.watch(sessionProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Invoices')),
+      appBar: AppBar(title: Text(tr('Invoices'))),
       floatingActionButton: session.can(Perm.billingManage)
           ? FloatingActionButton.extended(
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InvoiceCreateScreen())),
               icon: const Icon(Icons.add),
-              label: const Text('New invoice'),
+              label: Text(tr('New invoice')),
             )
           : null,
       body: invoices.when(
@@ -81,10 +82,10 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
         error: (e, _) => ErrorView(e),
         data: (all) {
           if (all.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.receipt_long_outlined,
-              title: 'No invoices yet',
-              message: 'Bill a company for the attendance of a period. The invoice PDF includes an attendance sheet for the company to verify.',
+              title: tr('No invoices yet'),
+              message: tr('Bill a company for the attendance of a period. The invoice PDF includes an attendance sheet for the company to verify.'),
             );
           }
           final rows = all.where((r) {
@@ -101,9 +102,9 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
               child: Row(children: [
-                Expanded(child: AppCard(child: Stat(label: 'To collect', value: Money.format(due), color: Palette.info))),
+                Expanded(child: AppCard(child: Stat(label: tr('To collect'), value: Money.format(due), color: Palette.info))),
                 const SizedBox(width: 10),
-                Expanded(child: AppCard(child: Stat(label: 'Overdue', value: Money.format(overdue), color: overdue > 0 ? Palette.absent : Palette.ink))),
+                Expanded(child: AppCard(child: Stat(label: tr('Overdue'), value: Money.format(overdue), color: overdue > 0 ? Palette.absent : Palette.ink))),
               ]),
             ),
             SizedBox(
@@ -126,7 +127,7 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
             ),
             Expanded(
               child: rows.isEmpty
-                  ? const EmptyState(icon: Icons.filter_alt_off_outlined, title: 'Nothing here')
+                  ? EmptyState(icon: Icons.filter_alt_off_outlined, title: tr('Nothing here'))
                   : ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 96), children: [
                       AppCard(
                         padding: EdgeInsets.zero,

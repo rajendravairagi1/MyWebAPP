@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -43,16 +44,16 @@ class ReportsScreen extends ConsumerWidget {
         );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Reports')),
+      appBar: AppBar(title: Text(tr('Reports'))),
       body: ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 32), children: [
         card(Icons.person_outline, Palette.brand, 'Labour statement',
             'One person: P / H / A calendar, earnings, payments and balance.', () async {
-          final l = await pickLabour(context, title: 'Statement for', includeInactive: true);
+          final l = await pickLabour(context, title: tr('Statement for'), includeInactive: true);
           if (l == null || !context.mounted) return;
-          final p = await pickPeriod(context, title: 'Statement period');
+          final p = await pickPeriod(context, title: tr('Statement period'));
           if (p == null || !context.mounted) return;
           await openPdf(context,
-              title: 'Statement',
+              title: tr('Statement'),
               fileName: 'statement_${l.name.replaceAll(' ', '_')}_${p.from}_${p.to}',
               build: () async => StatementPdf.build(await ref.read(reportServiceProvider).statement(l.id, p.from, p.to)));
         }),
@@ -64,9 +65,9 @@ class ReportsScreen extends ConsumerWidget {
             builder: (_) => const _CompanySitePicker(),
           );
           if (pick == null || !context.mounted) return;
-          final p = await pickPeriod(context, title: 'Register period');
+          final p = await pickPeriod(context, title: tr('Register period'));
           if (p == null || !context.mounted) return;
-          await openPdf(context, title: 'Attendance register', fileName: 'attendance_${p.from}_${p.to}', build: () async {
+          await openPdf(context, title: tr('Attendance register'), fileName: 'attendance_${p.from}_${p.to}', build: () async {
             final cs = ref.read(companyServiceProvider);
             final reports = ref.read(reportServiceProvider);
             final company = (await cs.company(pick.companyId))!;
@@ -83,9 +84,9 @@ class ReportsScreen extends ConsumerWidget {
         }),
         card(Icons.receipt_long_outlined, Palette.present, 'Payment register',
             'Every payment made in a period, split by cash / UPI / bank.', () async {
-          final p = await pickPeriod(context, title: 'Payment period');
+          final p = await pickPeriod(context, title: tr('Payment period'));
           if (p == null || !context.mounted) return;
-          await openPdf(context, title: 'Payment register', fileName: 'payments_${p.from}_${p.to}', build: () async {
+          await openPdf(context, title: tr('Payment register'), fileName: 'payments_${p.from}_${p.to}', build: () async {
             final reports = ref.read(reportServiceProvider);
             return RegisterPdf.payments(
               profile: await ref.read(workspaceServiceProvider).profile(),
@@ -97,9 +98,9 @@ class ReportsScreen extends ConsumerWidget {
         }),
         card(Icons.account_balance_wallet_outlined, Palette.absent, 'Labour balances',
             'Who is owed money and who has taken advances, with totals.', () async {
-          final p = await pickPeriod(context, title: 'Balances for');
+          final p = await pickPeriod(context, title: tr('Balances for'));
           if (p == null || !context.mounted) return;
-          await openPdf(context, title: 'Labour balances', fileName: 'balances_${p.from}_${p.to}', build: () async {
+          await openPdf(context, title: tr('Labour balances'), fileName: 'balances_${p.from}_${p.to}', build: () async {
             final reports = ref.read(reportServiceProvider);
             return RegisterPdf.balances(
               profile: await ref.read(workspaceServiceProvider).profile(),
@@ -132,11 +133,11 @@ class _CompanySitePickerState extends ConsumerState<_CompanySitePicker> {
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(context).viewInsets.bottom + 20),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text('Which company?', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+        Text(tr('Which company?'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
         const SizedBox(height: 14),
         DropdownButtonFormField<String>(
           initialValue: _company,
-          decoration: const InputDecoration(labelText: 'Company'),
+          decoration: InputDecoration(labelText: tr('Company')),
           items: [for (final c in companies) DropdownMenuItem(value: c.id, child: Text(c.name))],
           onChanged: (v) async {
             final s = await ref.read(companyServiceProvider).sites(companyId: v, activeOnly: false);
@@ -151,9 +152,9 @@ class _CompanySitePickerState extends ConsumerState<_CompanySitePicker> {
           const SizedBox(height: 12),
           DropdownButtonFormField<String?>(
             initialValue: _site,
-            decoration: const InputDecoration(labelText: 'Site'),
+            decoration: InputDecoration(labelText: tr('Site')),
             items: [
-              const DropdownMenuItem(value: null, child: Text('All sites')),
+              DropdownMenuItem(value: null, child: Text(tr('All sites'))),
               for (final s in _sites) DropdownMenuItem(value: s.id, child: Text(s.name)),
             ],
             onChanged: (v) => setState(() => _site = v),
@@ -162,7 +163,7 @@ class _CompanySitePickerState extends ConsumerState<_CompanySitePicker> {
         const SizedBox(height: 18),
         FilledButton(
           onPressed: _company == null ? null : () => Navigator.pop(context, (companyId: _company!, siteId: _site)),
-          child: const Text('Next: choose period'),
+          child: Text(tr('Next: choose period')),
         ),
       ]),
     );

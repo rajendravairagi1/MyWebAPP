@@ -1,4 +1,6 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
+import '../language/language_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/files.dart';
@@ -27,7 +29,7 @@ class MoreScreen extends ConsumerWidget {
     void go(Widget w) => Navigator.push(context, MaterialPageRoute(builder: (_) => w));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('More')),
+      appBar: AppBar(title: Text(tr('More'))),
       body: ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 32), children: [
         AppCard(
           onTap: s.can(Perm.settingsManage) ? () => go(const BusinessProfileScreen()) : null,
@@ -71,55 +73,56 @@ class MoreScreen extends ConsumerWidget {
               color: Palette.halfBg,
               onTap: () => go(const BusinessProfileScreen()),
               padding: const EdgeInsets.all(12),
-              child: const Row(children: [
+              child: Row(children: [
                 Icon(Icons.edit_note, color: Palette.half),
                 SizedBox(width: 10),
                 Expanded(
-                  child: Text('Add your logo, address, tax and payment details so statements and bills look complete.',
+                  child: Text(tr('Add your logo, address, tax and payment details so statements and bills look complete.'),
                       style: TextStyle(color: Palette.half, fontWeight: FontWeight.w600, fontSize: 13)),
                 ),
               ]),
             ),
           ),
-        const SectionTitle('BUSINESS'),
+        SectionTitle(tr('BUSINESS')),
         GroupCard(children: [
           if (s.can(Perm.companiesView))
-            MenuTile(icon: Icons.apartment_outlined, title: 'Companies & contracts', subtitle: 'Sites, billing rates', onTap: () => go(const CompaniesScreen())),
+            MenuTile(icon: Icons.apartment_outlined, title: tr('Companies & contracts'), subtitle: tr('Sites, billing rates'), onTap: () => go(const CompaniesScreen())),
           if (s.can(Perm.billingView))
-            MenuTile(icon: Icons.receipt_long_outlined, title: 'Invoices', subtitle: 'Bills to companies, receipts', color: Palette.info, onTap: () => go(const InvoicesScreen())),
+            MenuTile(icon: Icons.receipt_long_outlined, title: tr('Invoices'), subtitle: tr('Bills to companies, receipts'), color: Palette.info, onTap: () => go(const InvoicesScreen())),
           if (s.can(Perm.reports))
-            MenuTile(icon: Icons.bar_chart_rounded, title: 'Reports', subtitle: 'Statements, registers, balances', color: Palette.present, onTap: () => go(const ReportsScreen())),
+            MenuTile(icon: Icons.bar_chart_rounded, title: tr('Reports'), subtitle: tr('Statements, registers, balances'), color: Palette.present, onTap: () => go(const ReportsScreen())),
         ]),
         if (s.can(Perm.staffManage) || s.can(Perm.settingsManage) || s.can(Perm.branchesManage)) ...[
-          const SectionTitle('ADMINISTRATION'),
+          SectionTitle(tr('ADMINISTRATION')),
           GroupCard(children: [
             if (s.can(Perm.staffManage))
-              MenuTile(icon: Icons.groups_2_outlined, title: 'Team & roles', subtitle: plan.hasTeam ? 'Supervisors, accountants, custom roles' : 'Available on Owner + Team', onTap: () => go(const TeamScreen())),
+              MenuTile(icon: Icons.groups_2_outlined, title: tr('Team & roles'), subtitle: plan.hasTeam ? 'Supervisors, accountants, custom roles' : 'Available on Owner + Team', onTap: () => go(const TeamScreen())),
             if (s.can(Perm.branchesManage) && plan.multiBranch)
-              MenuTile(icon: Icons.account_tree_outlined, title: 'Branches', onTap: () => go(const BranchesScreen())),
+              MenuTile(icon: Icons.account_tree_outlined, title: tr('Branches'), onTap: () => go(const BranchesScreen())),
             if (s.can(Perm.settingsManage))
-              MenuTile(icon: Icons.business_center_outlined, title: 'Business profile', subtitle: 'Logo, tax, bank, UPI, invoice details', onTap: () => go(const BusinessProfileScreen())),
+              MenuTile(icon: Icons.business_center_outlined, title: tr('Business profile'), subtitle: tr('Logo, tax, bank, UPI, invoice details'), onTap: () => go(const BusinessProfileScreen())),
             if (s.can(Perm.settingsManage))
-              MenuTile(icon: Icons.workspace_premium_outlined, title: 'Plan', subtitle: plan.title, color: Palette.half, onTap: () => go(const PlanSettingsScreen())),
+              MenuTile(icon: Icons.workspace_premium_outlined, title: tr('Plan'), subtitle: plan.title, color: Palette.half, onTap: () => go(const PlanSettingsScreen())),
           ]),
         ],
-        const SectionTitle('ACCOUNT'),
+        SectionTitle(tr('ACCOUNT')),
         GroupCard(children: [
-          MenuTile(icon: Icons.lock_outline, title: 'Account & security', onTap: () => go(const AccountScreen())),
+          MenuTile(icon: Icons.language, title: tr('Language'), subtitle: I18n.languages.firstWhere((l) => l.code == I18n.current).native, onTap: () => go(const LanguageScreen())),
+          MenuTile(icon: Icons.lock_outline, title: tr('Account & security'), onTap: () => go(const AccountScreen())),
           if (s.isOwner)
-            MenuTile(icon: Icons.cloud_download_outlined, title: 'Backup & export', subtitle: 'Save a copy of all your data', onTap: () => go(const BackupScreen())),
+            MenuTile(icon: Icons.cloud_download_outlined, title: tr('Backup & export'), subtitle: tr('Save a copy of all your data'), onTap: () => go(const BackupScreen())),
           MenuTile(
             icon: Icons.logout,
-            title: 'Sign out',
+            title: tr('Sign out'),
             color: Palette.absent,
             onTap: () async {
-              final ok = await confirm(context, title: 'Sign out?', message: 'Your data stays on this phone.', confirmLabel: 'Sign out');
+              final ok = await confirm(context, title: tr('Sign out?'), message: tr('Your data stays on this phone.'), confirmLabel: tr('Sign out'));
               if (ok) await ref.read(sessionProvider.notifier).logout();
             },
           ),
         ]),
         const SizedBox(height: 20),
-        const Center(child: Text('HazriBook  •  v1.0', style: TextStyle(color: Palette.muted, fontSize: 12))),
+        Center(child: Text(tr('HazriBook  •  v1.0'), style: TextStyle(color: Palette.muted, fontSize: 12))),
       ]),
     );
   }

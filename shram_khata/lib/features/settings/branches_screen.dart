@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,11 +14,11 @@ class BranchesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final branches = ref.watch(branchesProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Branches')),
+      appBar: AppBar(title: Text(tr('Branches'))),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _edit(context, ref),
         icon: const Icon(Icons.add),
-        label: const Text('Add branch'),
+        label: Text(tr('Add branch')),
       ),
       body: branches.when(
         loading: () => const LoadingView(),
@@ -68,15 +69,15 @@ class BranchesScreen extends ConsumerWidget {
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(branch == null ? 'Add branch' : 'Edit branch', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             const SizedBox(height: 14),
-            TextField(controller: name, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'Branch name')),
+            TextField(controller: name, textCapitalization: TextCapitalization.words, decoration: InputDecoration(labelText: tr('Branch name'))),
             const SizedBox(height: 10),
-            TextField(controller: city, textCapitalization: TextCapitalization.words, decoration: const InputDecoration(labelText: 'City')),
+            TextField(controller: city, textCapitalization: TextCapitalization.words, decoration: InputDecoration(labelText: tr('City'))),
             const SizedBox(height: 10),
-            TextField(controller: address, decoration: const InputDecoration(labelText: 'Address')),
+            TextField(controller: address, decoration: InputDecoration(labelText: tr('Address'))),
             const SizedBox(height: 10),
-            TextField(controller: mobile, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'Mobile')),
+            TextField(controller: mobile, keyboardType: TextInputType.phone, decoration: InputDecoration(labelText: tr('Mobile'))),
             const SizedBox(height: 16),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('Save'))),
           ]),
         ),
       ),
