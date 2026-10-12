@@ -201,6 +201,15 @@ void main() {
     await open(CompanyDetailScreen(companyId: s.companyA), '31_company');
     await open(const PaymentFormScreen(), '32_payment_form');
     await open(const BusinessProfileScreen(), '33_profile');
+    // Tap a day on the worker's calendar: the editor must show a Save button.
+    await open(LabourDetailScreen(labourId: s.labourIds.first), '34_labour_calendar');
+    await t.tap(find.text('${DateTime.now().day}').first);
+    await settle(t);
+    expect(find.text('Save'), findsOneWidget);
+    await shot(t, '35_day_editor');
+    await t.tap(find.text('Save'));
+    await settle(t);
+    expect(find.text('Save'), findsNothing);
     expect(D.today(), isNotEmpty);
   });
 }

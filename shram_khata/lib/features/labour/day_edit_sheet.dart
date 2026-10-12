@@ -107,7 +107,7 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
     final canEditLocked = session.can(Perm.attendanceEditLocked);
     return Padding(
       padding: EdgeInsets.fromLTRB(20, 4, 20, 16 + MediaQuery.of(context).viewInsets.bottom),
-      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+      child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('${widget.labour.name} • ${D.show(widget.ymd)}',
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
         const SizedBox(height: 12),
@@ -160,8 +160,8 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
                       )),
               child: Text(tr('Clear')),
             ),
-          const Spacer(),
-          FilledButton(
+          Expanded(
+              child: FilledButton(
             onPressed: _busy || _status == null
                 ? null
                 : () => _run(() => svc.mark(
@@ -174,9 +174,9 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
                       canEditLocked: canEditLocked,
                     )),
             child: Text(tr('Save')),
-          ),
+          )),
         ]),
-      ]),
+      ])),
     );
   }
 }
