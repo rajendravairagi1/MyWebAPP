@@ -44,7 +44,19 @@ class I18n {
     }
   }
 
-  static String tr(String s) => _table[s] ?? s;
+  /// Texts shown while a non-English language was active but not translated.
+  /// Only filled in debug builds and tests, to find gaps.
+  static final Set<String> misses = {};
+
+  static String tr(String s) {
+    final t = _table[s];
+    if (t != null) return t;
+    assert(() {
+      if (current != 'en' && RegExp(r'[A-Za-z]{2}').hasMatch(s)) misses.add(s);
+      return true;
+    }());
+    return s;
+  }
 }
 
 /// Translate a piece of screen text.
