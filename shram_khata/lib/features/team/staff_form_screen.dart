@@ -9,6 +9,8 @@ import '../../core/phone.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../../data/database.dart';
+import '../../data/sync/api_client.dart';
+import '../../state/cloud.dart';
 import '../../state/providers.dart';
 import '../labour/labour_pickers.dart';
 
@@ -25,6 +27,7 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
   late final _mobile = TextEditingController(text: widget.staff?.mobile);
   late final _email = TextEditingController(text: widget.staff?.email);
   final _pin = TextEditingController();
+  final _cloudPass = TextEditingController();
   String? _roleId;
   late final Set<String> _branches = (widget.staff?.branchIds ?? '').split(',').where((e) => e.isNotEmpty).toSet();
   late Set<String> _sites = (widget.staff?.siteIds ?? '').split(',').where((e) => e.isNotEmpty).toSet();
@@ -49,7 +52,7 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
 
   @override
   void dispose() {
-    for (final c in [_name, _mobile, _email, _pin]) {
+    for (final c in [_name, _mobile, _email, _pin, _cloudPass]) {
       c.dispose();
     }
     super.dispose();
@@ -59,7 +62,17 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
     setState(() => _busy = true);
     try {
       final svc = ref.read(workspaceServiceProvider);
+      final cloud = ref.read(cloudProvider).session;
+      final wantsCloud = cloud?.isOwner == true;
+      if (wantsCloud && _cloudPass.text.isNotEmpty && _cloudPass.text.length < 8) {
+        throw Exception(tr('Cloud password must be at least 8 characters.'));
+      }
+      if (wantsCloud && !_editing && _cloudPass.text.isEmpty) {
+        throw Exception(tr('Set a cloud password so this person can sign in on their phone.'));
+      }
+      String staffId;
       if (_editing) {
+        staffId = widget.staff!.id;
         await svc.updateStaff(
           widget.staff!.id,
           name: _name.text,
@@ -71,7 +84,7 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
           siteIds: _sites.toList(),
         );
       } else {
-        await svc.addStaff(
+        staffId = await svc.addStaff(
           name: _name.text,
           mobile: _mobile.text,
           email: _email.text,
@@ -80,6 +93,33 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
           branchIds: _branches.toList(),
           siteIds: _sites.toList(),
         );
+      }
+      if (wantsCloud) {
+        final api = ref.read(syncServiceProvider);
+        try {
+          if (_cloudPass.text.isNotEmpty) {
+            try {
+              await api.createPerson(
+                id: staffId,
+                name: _name.text.trim(),
+                kind: 'staff',
+                password: _cloudPass.text,
+                email: _email.text.isNotEmpty ? _email.text.trim() : (widget.staff?.email ?? ''),
+                mobile: _mobile.text.trim(),
+              );
+            } on ApiException catch (e) {
+              if (e.code != 'exists') rethrow;
+              await api.updatePerson(staffId, password: _cloudPass.text, isActive: _active);
+            }
+          } else if (_editing) {
+            await api.updatePerson(staffId, isActive: _active);
+          }
+        } on ApiException catch (e) {
+          if (e.code != 'not_found' && mounted) showError(context, e);
+        } on OfflineException catch (e) {
+          if (mounted) showError(context, e);
+        }
+        await ref.read(cloudProvider.notifier).syncNow();
       }
       await ref.read(sessionProvider.notifier).reload();
       if (mounted) Navigator.pop(context);
@@ -138,6 +178,17 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
               helperText: tr('They sign in with their mobile number and this PIN.'),
             ),
           ),
+          if (ref.watch(cloudProvider).session?.isOwner == true) ...[
+            const SizedBox(height: 12),
+            TextField(
+              controller: _cloudPass,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: _editing ? tr('New cloud password (leave empty to keep)') : tr('Cloud password (8+ characters)'),
+                helperText: tr('They sign in on their own phone with their mobile number and this password.'),
+              ),
+            ),
+          ],
           if (plan.multiBranch && branches.length > 1) ...[
             SectionTitle(tr('BRANCHES'), padding: EdgeInsets.fromLTRB(2, 20, 2, 4)),
             Text(tr('Leave all unselected for access to every branch.'),

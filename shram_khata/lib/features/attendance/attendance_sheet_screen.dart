@@ -230,6 +230,7 @@ class _SheetBody extends ConsumerWidget {
               ),
               child: Row(children: [
                 Expanded(
+                  flex: 3,
                   child: OutlinedButton.icon(
                     onPressed: sheet.unmarked == 0 ? null : () => _markAll(context, ref),
                     icon: const Icon(Icons.done_all),
@@ -238,7 +239,7 @@ class _SheetBody extends ConsumerWidget {
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  flex: 2,
+                  flex: 4,
                   child: FilledButton.icon(
                     onPressed: () => _submit(context, ref),
                     icon: const Icon(Icons.lock_outline),

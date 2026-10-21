@@ -19,6 +19,13 @@ Do hisse hain:
    Aisa dikhna chahiye: `{"ok":true,"service":"hazribook",...,"db":true}`
    - `"db":false` aaye to config.php ka password/db naam galat hai, ya user ko database par ALL PRIVILEGES nahi mile.
 
+## Update 2 (agar pehle wali files upload kar chuke ho)
+
+1. phpMyAdmin → database chuno → **Import** → `database/update_2_feedback.sql` (sirf 2 naye tables banate hain).
+2. `upload` folder ki files dobara upload karo (purani files replace hongi): `index.php`, `lib/sync.php`, `lib/util.php`,
+   `lib/feedback.php` (nayi file). **`config.php` ko mat chhedo.**
+3. Test: `https://hazribook.oneweblink.com/v1/health` → `"db":true`.
+
 ## API (app ke liye)
 
 | Endpoint | Kaam |
@@ -31,6 +38,8 @@ Do hisse hain:
 | `POST /v1/sync/push` | phone ke badlaav server par |
 | `GET /v1/sync/pull?since=N` | server ke naye badlaav phone par |
 | `GET/POST /v1/users`, `POST /v1/users/{id}` | owner staff / manager banata hai, band karta hai |
+| `POST /v1/feedback`, `GET /v1/feedback`, `POST /v1/feedback/read` | company manager ka message, owner/supervisor ko dikhta hai |
+| `POST /v1/account/delete` | owner poora cloud data mita sakta hai (password + DELETE) |
 
 Safety: password bcrypt se hash hota hai, token sirf hash ke roop mein rakha jaata hai, login par 8 galat koshish ke baad
 15 minute ka rok, sirf https, har agency ka data alag, manager account ko sync nahi milta.

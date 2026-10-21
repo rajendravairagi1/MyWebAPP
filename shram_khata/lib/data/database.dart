@@ -43,7 +43,7 @@ class AppDatabase extends _$AppDatabase {
   static AppDatabase inMemory() => AppDatabase(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -55,6 +55,7 @@ class AppDatabase extends _$AppDatabase {
               'CREATE INDEX idx_att_labour ON attendance (labour_id, date)');
           await customStatement(
               'CREATE INDEX idx_pay_labour ON payments (labour_id, date)');
+          await _createSyncObjects();
         },
         onUpgrade: (m, from, to) async {
           if (from < 2) {
@@ -65,9 +66,31 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(invoices, invoices.serviceFeePercent);
             await m.addColumn(invoices, invoices.serviceFeeAmount);
           }
+          if (from < 3) await _createSyncObjects();
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');
         },
       );
+
+  /// Cloud sync bookkeeping: a queue of changed rows and triggers that fill it.
+  /// The queue only collects while sync is switched on, and never for rows
+  /// that were just downloaded.
+  Future<void> _createSyncObjects() async {
+    await customStatement('CREATE TABLE IF NOT EXISTS sync_outbox ('
+        'id INTEGER PRIMARY KEY AUTOINCREMENT, tbl TEXT NOT NULL, rid TEXT NOT NULL, op TEXT NOT NULL)');
+    await customStatement('CREATE TABLE IF NOT EXISTS sync_meta (k TEXT PRIMARY KEY, v TEXT NOT NULL)');
+    await customStatement("INSERT OR IGNORE INTO sync_meta (k, v) VALUES ('applying', '0')");
+    await customStatement("INSERT OR IGNORE INTO sync_meta (k, v) VALUES ('enabled', '0')");
+    const when = "WHEN (SELECT v FROM sync_meta WHERE k = 'enabled') = '1' "
+        "AND (SELECT v FROM sync_meta WHERE k = 'applying') = '0'";
+    for (final t in allTables) {
+      final n = t.actualTableName;
+      final pk = t.$primaryKey.length == 1 ? t.$primaryKey.first.name : 'id';
+      for (final e in [('ins', 'INSERT', 'NEW', 'u'), ('upd', 'UPDATE', 'NEW', 'u'), ('del', 'DELETE', 'OLD', 'd')]) {
+        await customStatement('CREATE TRIGGER IF NOT EXISTS sync_${n}_${e.$1} AFTER ${e.$2} ON $n $when BEGIN '
+            "INSERT INTO sync_outbox (tbl, rid, op) VALUES ('$n', ${e.$3}.$pk, '${e.$4}'); END");
+      }
+    }
+  }
 }

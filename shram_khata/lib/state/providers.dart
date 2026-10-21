@@ -159,6 +159,15 @@ class SessionNotifier extends Notifier<SessionState> {
     await _enter(staff);
   }
 
+  /// After a cloud sign-in on a phone that downloaded the workspace: enter as
+  /// that person. Returns false when their record did not arrive.
+  Future<bool> enterCloud(String staffId) async {
+    final staff = await _ws.staffById(staffId);
+    if (staff == null || !staff.isActive) return false;
+    await _enter(staff);
+    return true;
+  }
+
   /// Returns false when the credentials are wrong.
   Future<bool> login(String identifier, String secret) async {
     final staff = await _ws.login(identifier, secret);

@@ -7,7 +7,9 @@ import '../../core/files.dart';
 import '../../core/permissions.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../../state/cloud.dart';
 import '../../state/providers.dart';
+import '../cloud/cloud_screen.dart';
 import '../billing/invoices_screen.dart';
 import '../companies/companies_screen.dart';
 import '../reports/reports_screen.dart';
@@ -26,6 +28,7 @@ class MoreScreen extends ConsumerWidget {
     final s = ref.watch(sessionProvider);
     final profile = ref.watch(profileProvider).value;
     final plan = ref.watch(planProvider);
+    final cloud = ref.watch(cloudProvider);
     void go(Widget w) => Navigator.push(context, MaterialPageRoute(builder: (_) => w));
 
     return Scaffold(
@@ -107,6 +110,19 @@ class MoreScreen extends ConsumerWidget {
         ],
         SectionTitle(tr('ACCOUNT')),
         GroupCard(children: [
+          MenuTile(
+            icon: cloud.connected ? Icons.cloud_done_outlined : Icons.cloud_upload_outlined,
+            title: tr('Cloud sync'),
+            subtitle: !cloud.connected
+                ? tr('Use on more than one phone, keep data safe online')
+                : cloud.error != null
+                    ? tr('Not connected right now')
+                    : cloud.unread > 0
+                        ? trf('{n} new messages from companies', {'n': cloud.unread})
+                        : tr('Connected'),
+            color: cloud.unread > 0 ? Palette.absent : Palette.info,
+            onTap: () => go(const CloudScreen()),
+          ),
           MenuTile(icon: Icons.language, title: tr('Language'), subtitle: I18n.languages.firstWhere((l) => l.code == I18n.current).native, onTap: () => go(const LanguageScreen())),
           MenuTile(icon: Icons.lock_outline, title: tr('Account & security'), onTap: () => go(const AccountScreen())),
           if (s.isOwner)

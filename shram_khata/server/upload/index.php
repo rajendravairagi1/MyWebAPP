@@ -151,6 +151,34 @@ if ($path === '/v1/auth/password' && $method === 'POST') {
     ok();
 }
 
+// Owner deletes the whole cloud copy of the agency (the phones keep their own data).
+if ($path === '/v1/account/delete' && $method === 'POST') {
+    require_owner($user);
+    $b = body();
+    $st = db()->prepare('SELECT password_hash FROM users WHERE id = ?');
+    $st->execute([$user['id']]);
+    if (!password_verify((string) ($b['password'] ?? ''), (string) $st->fetchColumn())) {
+        throw new ApiError(403, 'Password is wrong.', 'bad_credentials');
+    }
+    if (($b['confirm'] ?? '') !== 'DELETE') throw new ApiError(422, 'Type DELETE to confirm.', 'invalid');
+    $pdo = db();
+    $a = $user['agency_id'];
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare('DELETE FROM feedback_reads WHERE feedback_id IN (SELECT id FROM feedback WHERE agency_id = ?)')->execute([$a]);
+        $pdo->prepare('DELETE FROM feedback WHERE agency_id = ?')->execute([$a]);
+        $pdo->prepare('DELETE FROM records WHERE agency_id = ?')->execute([$a]);
+        $pdo->prepare('DELETE FROM tokens WHERE agency_id = ?')->execute([$a]);
+        $pdo->prepare('DELETE FROM users WHERE agency_id = ?')->execute([$a]);
+        $pdo->prepare('DELETE FROM agencies WHERE id = ?')->execute([$a]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        throw $e;
+    }
+    ok();
+}
+
 if ($path === '/v1/sync/push' && $method === 'POST') ok(sync_push($user));
 if ($path === '/v1/sync/pull' && $method === 'GET') ok(sync_pull($user));
 

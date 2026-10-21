@@ -9,7 +9,9 @@ import 'features/auth/welcome_screen.dart';
 import 'core/money.dart';
 import 'features/home/shell.dart';
 import 'features/language/language_screen.dart';
+import 'features/manager/manager_shell.dart';
 import 'features/setup/setup_wizard_screen.dart';
+import 'state/cloud.dart';
 import 'state/providers.dart';
 
 class ShramKhataApp extends ConsumerStatefulWidget {
@@ -19,16 +21,30 @@ class ShramKhataApp extends ConsumerStatefulWidget {
   ConsumerState<ShramKhataApp> createState() => _ShramKhataAppState();
 }
 
-class _ShramKhataAppState extends ConsumerState<ShramKhataApp> {
+class _ShramKhataAppState extends ConsumerState<ShramKhataApp> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Future.microtask(() => ref.read(sessionProvider.notifier).bootstrap());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// Catch up with the cloud whenever the app comes back to the screen.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) ref.read(cloudProvider.notifier).syncNow();
   }
 
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
+    final cloud = ref.watch(cloudProvider);
     final lang = ref.watch(languageProvider);
     final langChosen = ref.watch(languageChosenProvider);
     final profile = ref.watch(profileProvider).value;
@@ -45,6 +61,8 @@ class _ShramKhataAppState extends ConsumerState<ShramKhataApp> {
     final Widget home;
     if (!session.ready) {
       home = const Scaffold(body: LoadingView());
+    } else if (cloud.session?.isManager == true) {
+      home = const ManagerShell();
     } else if (!session.hasWorkspace && !langChosen) {
       home = const LanguageScreen(first: true);
     } else if (!session.hasWorkspace) {
@@ -73,7 +91,7 @@ class _ShramKhataAppState extends ConsumerState<ShramKhataApp> {
       home: AnimatedSwitcher(
         duration: const Duration(milliseconds: 250),
         child: KeyedSubtree(
-          key: ValueKey('${session.ready}-${session.hasWorkspace}-${session.signedIn}-$langChosen'),
+          key: ValueKey('${session.ready}-${session.hasWorkspace}-${session.signedIn}-$langChosen-${cloud.session?.isManager}'),
           child: home,
         ),
       ),

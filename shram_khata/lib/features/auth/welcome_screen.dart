@@ -1,5 +1,6 @@
 import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
+import '../cloud/cloud_login_screen.dart';
 
 import '../../core/theme.dart';
 import 'login_screen.dart';
@@ -97,6 +98,13 @@ class WelcomeScreen extends StatelessWidget {
                       onPressed: () => Navigator.push(
                           context, MaterialPageRoute(builder: (_) => const LoginScreen())),
                       child: Text(tr('I already have an account')),
+                    )
+                  else
+                    TextButton(
+                      style: TextButton.styleFrom(foregroundColor: Colors.white),
+                      onPressed: () => Navigator.push(
+                          context, MaterialPageRoute(builder: (_) => const CloudLoginScreen())),
+                      child: Text(tr('Sign in to my cloud account')),
                     ),
                 ],
               ),

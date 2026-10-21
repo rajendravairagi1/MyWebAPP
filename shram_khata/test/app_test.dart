@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -138,7 +139,15 @@ void main() {
     await settle(t);
     expect(find.byType(AttendanceSheetScreen), findsOneWidget);
     await shot(t, '13_sheet');
-    // Mark someone present then back.
+    // Overtime is entered right inside the card once someone is present.
+    if (find.text('Overtime hours').evaluate().isEmpty) {
+      await t.tap(find.text('P Present').first);
+      await settle(t);
+    }
+    expect(find.text('Overtime hours'), findsWidgets);
+    await t.tap(find.byIcon(Icons.add_circle_outline).first);
+    await settle(t);
+    await shot(t, '13b_sheet_overtime');
     await t.pageBack();
     await settle(t);
 
@@ -211,5 +220,45 @@ void main() {
     await settle(t);
     expect(find.text('Save'), findsNothing);
     expect(D.today(), isNotEmpty);
+  });
+
+  testWidgets('company manager sees only the manager app', (t) async {
+    final db = AppDatabase.inMemory();
+    addTearDown(() => t.runAsync(db.close));
+    late Seeded s;
+    await t.runAsync(() async => s = await seed(db));
+    SharedPreferences.setMockInitialValues({
+      'app.lang': 'en',
+      'cloud.session': jsonEncode({
+        'token': 'x',
+        'userId': 'm1',
+        'agencyId': 'a1',
+        'kind': 'manager',
+        'name': 'Mr. Verma',
+        'agencyName': 'Shree Ganesh Manpower',
+        'scopeCompanyId': s.companyA,
+      }),
+    });
+    final prefs = await t.runAsync(SharedPreferences.getInstance);
+    t.view.physicalSize = const Size(1170, 2532);
+    t.view.devicePixelRatio = 3;
+    addTearDown(t.view.reset);
+    await t.pumpWidget(ProviderScope(
+      overrides: [databaseProvider.overrideWithValue(db), prefsProvider.overrideWithValue(prefs!)],
+      child: const ShramKhataApp(),
+    ));
+    await settle(t);
+    expect(find.text('Overview'), findsOneWidget);
+    expect(find.text('Payments'), findsNothing);
+    await shot(t, '40_manager_overview');
+    await t.tap(find.text('Workers').last);
+    await settle(t);
+    await shot(t, '41_manager_workers');
+    await t.tap(find.text('Bills').last);
+    await settle(t);
+    await shot(t, '42_manager_bills');
+    await t.tap(find.text('Feedback').last);
+    await settle(t);
+    await shot(t, '43_manager_feedback');
   });
 }

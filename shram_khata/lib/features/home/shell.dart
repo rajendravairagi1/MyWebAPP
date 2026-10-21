@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/permissions.dart';
+import '../../state/cloud.dart';
 import '../../state/providers.dart';
 import '../attendance/attendance_screen.dart';
 import '../labour/labour_list_screen.dart';
@@ -63,13 +64,20 @@ class _ShellState extends ConsumerState<Shell> {
         destinations: [
           for (final t in tabs)
             NavigationDestination(
-              icon: Icon(t.icon),
-              selectedIcon: Icon(t.selectedIcon),
+              icon: _badged(t.label, Icon(t.icon)),
+              selectedIcon: _badged(t.label, Icon(t.selectedIcon)),
               label: tr(t.label),
             ),
         ],
       ),
     );
+  }
+
+  /// A red dot on "More" when company managers have written to the agency.
+  Widget _badged(String label, Widget icon) {
+    final unread = ref.watch(cloudProvider).unread;
+    if (label != 'More' || unread <= 0) return icon;
+    return Badge(label: Text('$unread'), child: icon);
   }
 
   final _visited = <int>{0};

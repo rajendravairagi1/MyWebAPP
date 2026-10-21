@@ -1,5 +1,6 @@
 import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
+import '../cloud/cloud_login_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme.dart';
@@ -108,6 +109,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
                     )
                   : Text(tr('Sign in')),
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CloudLoginScreen())),
+              icon: const Icon(Icons.cloud_outlined),
+              label: Text(tr('Sign in with cloud account')),
             ),
             const SizedBox(height: 8),
             TextButton(
