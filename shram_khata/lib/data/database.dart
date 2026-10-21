@@ -43,7 +43,7 @@ class AppDatabase extends _$AppDatabase {
   static AppDatabase inMemory() => AppDatabase(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -55,6 +55,16 @@ class AppDatabase extends _$AppDatabase {
               'CREATE INDEX idx_att_labour ON attendance (labour_id, date)');
           await customStatement(
               'CREATE INDEX idx_pay_labour ON payments (labour_id, date)');
+        },
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.addColumn(contracts, contracts.serviceFeeType);
+            await m.addColumn(contracts, contracts.serviceFeePercent);
+            await m.addColumn(contracts, contracts.serviceFeeFixed);
+            await m.addColumn(invoices, invoices.serviceFeeType);
+            await m.addColumn(invoices, invoices.serviceFeePercent);
+            await m.addColumn(invoices, invoices.serviceFeeAmount);
+          }
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

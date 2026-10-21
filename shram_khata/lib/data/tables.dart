@@ -77,6 +77,12 @@ class Contracts extends Table with PkId {
   TextColumn get notes => text().withDefault(const Constant(''))();
   TextColumn get docPath => text().nullable()();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+
+  /// Agency service fee on top of the labour charges: none | percent | fixed.
+  /// A fixed fee is charged once per invoice.
+  TextColumn get serviceFeeType => text().withDefault(const Constant('none'))();
+  RealColumn get serviceFeePercent => real().withDefault(const Constant(0))();
+  IntColumn get serviceFeeFixed => integer().withDefault(const Constant(0))();
 }
 
 /// What the agency bills the company per skill under a contract.
@@ -199,6 +205,11 @@ class Invoices extends Table with PkId {
   TextColumn get periodFrom => text()();
   TextColumn get periodTo => text()();
   IntColumn get subtotal => integer()();
+
+  /// Service fee snapshot (type none | percent | fixed) and its amount.
+  TextColumn get serviceFeeType => text().withDefault(const Constant('none'))();
+  RealColumn get serviceFeePercent => real().withDefault(const Constant(0))();
+  IntColumn get serviceFeeAmount => integer().withDefault(const Constant(0))();
   RealColumn get taxRate => real().withDefault(const Constant(0))();
   TextColumn get taxLabel => text().withDefault(const Constant('GST'))();
   IntColumn get taxAmount => integer().withDefault(const Constant(0))();

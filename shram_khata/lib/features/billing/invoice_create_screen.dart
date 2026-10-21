@@ -1,5 +1,6 @@
 import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
+import 'service_fee_editor.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/dates.dart';
@@ -158,7 +159,8 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
     final profile = ref.watch(profileProvider).value ?? const BusinessProfile();
     final d = _draft;
     final taxRate = profile.taxEnabled ? profile.taxRate : 0.0;
-    final tax = d == null ? 0 : (d.subtotal * taxRate / 100).round();
+    final fee = d?.feeAmount ?? 0;
+    final tax = d == null ? 0 : ((d.subtotal + fee) * taxRate / 100).round();
     final now = DateTime.now();
     final thisMonth = D.firstOfMonth(now);
     final lastMonth = DateTime(now.year, now.month - 1, 1);
@@ -169,7 +171,7 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
             ? null
             : FilledButton(
                 onPressed: _busy || d.lines.isEmpty ? null : () => _save(profile),
-                child: Text('Create invoice • ${Money.format(d.subtotal + tax)}'),
+                child: Text('Create invoice • ${Money.format(d.subtotal + fee + tax)}'),
               ),
         children: [
           DropdownButtonFormField<String>(
@@ -295,13 +297,28 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
                 ]),
               ),
               const SizedBox(height: 12),
+              SectionTitle(tr('SERVICE FEE (YOUR CHARGE ON TOP)'), padding: const EdgeInsets.fromLTRB(2, 8, 2, 10)),
+              AppCard(
+                child: ServiceFeeEditor(
+                  key: ValueKey('fee-$_companyId-${d.from}-${d.to}-$_siteId'),
+                  fee: d.fee,
+                  onChanged: (f) => setState(() => d.fee = f),
+                ),
+              ),
+              const SizedBox(height: 12),
               AppCard(
                 child: Column(children: [
-                  _total('Man-days', num1(d.totalDays)),
-                  _total('Subtotal', Money.format(d.subtotal)),
+                  _total(tr('Man-days'), num1(d.totalDays)),
+                  _total(tr('Labour charges'), Money.format(d.subtotal)),
+                  if (fee > 0)
+                    _total(
+                        d.fee.type == ServiceFee.percentOf
+                            ? trf('Service fee ({pct}%)', {'pct': num1(d.fee.percent)})
+                            : tr('Service fee'),
+                        Money.format(fee)),
                   if (taxRate > 0) _total('${profile.taxLabel} @ ${num1(taxRate)}%', Money.format(tax)),
                   const Divider(height: 18),
-                  _total('Total', Money.format(d.subtotal + tax), big: true),
+                  _total(tr('Total'), Money.format(d.subtotal + fee + tax), big: true),
                 ]),
               ),
               const SizedBox(height: 12),

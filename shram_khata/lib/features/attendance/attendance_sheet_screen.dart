@@ -110,14 +110,8 @@ class _SheetBody extends ConsumerWidget {
     }
   }
 
-  Future<void> _ot(BuildContext context, WidgetRef ref, SheetRow r) async {
-    final v = await showModalBottomSheet<double>(
-      context: context,
-      builder: (_) => _OtSheet(name: r.labour.name, initial: r.otHours),
-    );
-    if (v == null || !context.mounted) return;
-    await _mark(context, ref, r, r.status ?? AttStatus.present, ot: v);
-  }
+  Future<void> _setOt(BuildContext context, WidgetRef ref, SheetRow r, double hours) =>
+      _mark(context, ref, r, r.status ?? AttStatus.present, ot: hours.clamp(0, 16).toDouble());
 
   Future<void> _markAll(BuildContext context, WidgetRef ref) async {
     try {
@@ -218,7 +212,7 @@ class _SheetBody extends ConsumerWidget {
                     row: sheet.rows[i],
                     editable: editable,
                     onMark: (st) => _mark(context, ref, sheet.rows[i], st),
-                    onOt: () => _ot(context, ref, sheet.rows[i]),
+                    onOt: (h) => _setOt(context, ref, sheet.rows[i], h),
                   ),
                 ),
         ),
@@ -290,7 +284,7 @@ class _Row extends StatelessWidget {
   final SheetRow row;
   final bool editable;
   final void Function(String status) onMark;
-  final VoidCallback onOt;
+  final void Function(double hours) onOt;
 
   @override
   Widget build(BuildContext context) {
@@ -320,30 +314,6 @@ class _Row extends StatelessWidget {
                 ),
               ]),
             ),
-            if (st != null && st != AttStatus.absent)
-              InkWell(
-                onTap: editable ? onOt : null,
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: row.otHours > 0 ? Palette.infoBg : const Color(0xFFF1F3F4),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.schedule, size: 14, color: row.otHours > 0 ? Palette.info : Palette.muted),
-                    const SizedBox(width: 4),
-                    Text(
-                      row.otHours > 0 ? '+${num1(row.otHours)}h' : 'OT',
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w800,
-                        color: row.otHours > 0 ? Palette.info : Palette.muted,
-                      ),
-                    ),
-                  ]),
-                ),
-              ),
           ]),
           const SizedBox(height: 10),
           Row(children: [
@@ -359,8 +329,69 @@ class _Row extends StatelessWidget {
               if (s != 'A') const SizedBox(width: 8),
             ],
           ]),
+          if (st != null && st != AttStatus.absent) _OtRow(hours: row.otHours, editable: editable, onChanged: onOt),
         ],
       ),
+    );
+  }
+}
+
+/// Overtime hours for someone marked present / half, right inside the card.
+class _OtRow extends StatelessWidget {
+  const _OtRow({required this.hours, required this.editable, required this.onChanged});
+  final double hours;
+  final bool editable;
+  final void Function(double hours) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final has = hours > 0;
+    return Container(
+      margin: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.fromLTRB(10, 6, 6, 6),
+      decoration: BoxDecoration(
+        color: has ? Palette.infoBg : const Color(0xFFF4F6F7),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [
+          Icon(Icons.schedule, size: 16, color: has ? Palette.info : Palette.muted),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(tr('Overtime hours'),
+                style: TextStyle(
+                    fontSize: 13, fontWeight: FontWeight.w700, color: has ? Palette.info : Palette.muted)),
+          ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            onPressed: editable && hours > 0 ? () => onChanged(hours - 0.5) : null,
+            icon: const Icon(Icons.remove_circle_outline),
+          ),
+          SizedBox(
+            width: 52,
+            child: Text('${num1(hours)} h',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: has ? Palette.info : Palette.ink)),
+          ),
+          IconButton(
+            visualDensity: VisualDensity.compact,
+            onPressed: editable && hours < 16 ? () => onChanged(hours + 0.5) : null,
+            icon: const Icon(Icons.add_circle_outline),
+          ),
+        ]),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Wrap(spacing: 8, children: [
+            for (final h in const [1.0, 2.0, 3.0, 4.0])
+              ChoiceChip(
+                visualDensity: VisualDensity.compact,
+                label: Text('${num1(h)}h'),
+                selected: hours == h,
+                onSelected: editable ? (_) => onChanged(hours == h ? 0 : h) : null,
+              ),
+          ]),
+        ),
+      ]),
     );
   }
 }
@@ -416,64 +447,6 @@ class _StatusButton extends StatelessWidget {
               ]),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OtSheet extends StatefulWidget {
-  const _OtSheet({required this.name, required this.initial});
-  final String name;
-  final double initial;
-
-  @override
-  State<_OtSheet> createState() => _OtSheetState();
-}
-
-class _OtSheetState extends State<_OtSheet> {
-  late double _v = widget.initial;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Overtime for ${widget.name}',
-                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton.filledTonal(
-                  iconSize: 28,
-                  onPressed: _v <= 0 ? null : () => setState(() => _v = (_v - 0.5).clamp(0, 16)),
-                  icon: const Icon(Icons.remove),
-                ),
-                SizedBox(
-                  width: 120,
-                  child: Text('${num1(_v)} h',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800)),
-                ),
-                IconButton.filledTonal(
-                  iconSize: 28,
-                  onPressed: _v >= 16 ? null : () => setState(() => _v = (_v + 0.5).clamp(0, 16)),
-                  icon: const Icon(Icons.add),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Wrap(spacing: 8, children: [
-              for (final h in [1.0, 2.0, 3.0, 4.0])
-                ActionChip(label: Text('${num1(h)}h'), onPressed: () => setState(() => _v = h)),
-            ]),
-            const SizedBox(height: 18),
-            FilledButton(onPressed: () => Navigator.pop(context, _v), child: Text(tr('Save overtime'))),
-          ],
         ),
       ),
     );

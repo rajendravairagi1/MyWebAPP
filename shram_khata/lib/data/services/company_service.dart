@@ -120,8 +120,15 @@ class CompanyService extends Service {
     String notes = '',
     String? docPath,
     bool isActive = true,
+    String serviceFeeType = 'none',
+    double serviceFeePercent = 0,
+    int serviceFeeFixed = 0,
     required List<({String skill, int perDay, int otPerHour})> rates,
   }) async {
+    if (serviceFeePercent < 0 || serviceFeePercent > 100) {
+      throw AppException('Service fee percentage must be between 0 and 100.');
+    }
+    if (serviceFeeFixed < 0) throw AppException('Service fee cannot be negative.');
     if (title.trim().isEmpty) throw AppException('Contract title is required.');
     if (endDate != null && endDate.compareTo(startDate) < 0) {
       throw AppException('End date is before the start date.');
@@ -146,6 +153,9 @@ class CompanyService extends Service {
             notes: Value(notes.trim()),
             docPath: Value(docPath),
             isActive: Value(isActive),
+            serviceFeeType: Value(serviceFeeType),
+            serviceFeePercent: Value(serviceFeePercent),
+            serviceFeeFixed: Value(serviceFeeFixed),
           ));
       await (db.delete(db.contractRates)..where((t) => t.contractId.equals(cid))).go();
       for (final r in cleaned) {

@@ -278,6 +278,49 @@ void main() {
       await BillingService(db).create(draft: d, branchId: branchId, issueDate: '2026-10-31', paymentTermsDays: 30);
     });
 
+    test('service fee: percentage or fixed, tax applies on top of both', () async {
+      await work();
+      final ws = WorkspaceService(db);
+      await ws.saveProfile((await ws.profile()).copyWith(taxEnabled: true, taxRate: 18));
+      final bill = BillingService(db);
+
+      final pct = await bill.preview(companyId: companyA, from: '2026-10-01', to: '2026-10-31');
+      pct.fee = ServiceFee(type: ServiceFee.percentOf, percent: 10);
+      expect(pct.feeAmount, (pct.subtotal * 0.10).round());
+      final id = await bill.create(draft: pct, branchId: branchId, issueDate: '2026-10-31', paymentTermsDays: 30);
+      final d = await bill.detail(id);
+      expect(d.invoice.serviceFeeType, 'percent');
+      expect(d.invoice.serviceFeeAmount, pct.feeAmount);
+      final taxable = pct.subtotal + pct.feeAmount;
+      expect(d.invoice.taxAmount, (taxable * 0.18).round());
+      expect(d.invoice.total, taxable + d.invoice.taxAmount);
+
+      final fixed = await bill.preview(companyId: companyB, from: '2026-10-01', to: '2026-10-31');
+      fixed.fee = ServiceFee(type: ServiceFee.fixedAmount, fixed: 100000);
+      final id2 = await bill.create(draft: fixed, branchId: branchId, issueDate: '2026-10-31', paymentTermsDays: 30);
+      expect((await bill.detail(id2)).invoice.serviceFeeAmount, 100000);
+
+      pct.fee = ServiceFee(type: ServiceFee.percentOf, percent: 150);
+      await expectLater(
+          bill.create(draft: pct, branchId: branchId, issueDate: '2026-10-31', paymentTermsDays: 30),
+          throwsA(isA<AppException>()));
+    });
+
+    test('contract fee is the default on new invoices', () async {
+      await work();
+      await CompanyService(db).saveContract(
+        companyId: companyA,
+        title: 'Fee contract',
+        startDate: '2026-09-01',
+        serviceFeeType: 'percent',
+        serviceFeePercent: 8,
+        rates: [(skill: 'Helper', perDay: 70000, otPerHour: 10000)],
+      );
+      final d = await BillingService(db).preview(companyId: companyA, from: '2026-10-01', to: '2026-10-31');
+      expect(d.fee.type, 'percent');
+      expect(d.fee.percent, 8);
+    });
+
     test('creates numbered invoices with tax, receipts and overlap warning', () async {
       await work();
       final ws = WorkspaceService(db);

@@ -49,3 +49,12 @@ class I18n {
 
 /// Translate a piece of screen text.
 String tr(String s) => I18n.tr(s);
+
+/// Translate a sentence that contains values. Write the English with named
+/// `{placeholders}`; the translation keeps the same names, so word order can
+/// change per language: `trf('{n} marked present', {'n': '3'})`.
+String trf(String template, Map<String, Object?> values) {
+  var out = I18n.tr(template);
+  values.forEach((k, v) => out = out.replaceAll('{$k}', '$v'));
+  return out;
+}

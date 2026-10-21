@@ -7,7 +7,9 @@ import '../../core/files.dart';
 import '../../core/money.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../../data/services/billing_service.dart' show ServiceFee;
 import '../../data/services/company_service.dart';
+import '../billing/service_fee_editor.dart';
 import '../../data/services/labour_service.dart';
 import '../../state/providers.dart';
 
@@ -48,6 +50,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
   String? _doc;
   bool _active = true;
   final _rows = <_RateRow>[];
+  ServiceFee _fee = ServiceFee();
   bool _busy = false;
 
   @override
@@ -58,6 +61,10 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
       _end = D.tryParse(c.contract.endDate);
       _doc = c.contract.docPath;
       _active = c.contract.isActive;
+      _fee = ServiceFee(
+          type: c.contract.serviceFeeType,
+          percent: c.contract.serviceFeePercent,
+          fixed: c.contract.serviceFeeFixed);
       for (final r in c.rates) {
         _rows.add(_RateRow(
           skill: r.skill,
@@ -93,6 +100,9 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
             notes: _notes.text,
             docPath: _doc,
             isActive: _active,
+            serviceFeeType: _fee.type,
+            serviceFeePercent: _fee.percent,
+            serviceFeeFixed: _fee.fixed,
             rates: [
               for (final r in _rows)
                 (
@@ -234,6 +244,8 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
             icon: const Icon(Icons.add),
             label: Text(tr('Add skill rate')),
           ),
+          SectionTitle(tr('SERVICE FEE (YOUR CHARGE ON TOP)'), padding: const EdgeInsets.fromLTRB(2, 22, 2, 10)),
+          ServiceFeeEditor(fee: _fee, onChanged: (f) => setState(() => _fee = f)),
           const SizedBox(height: 18),
           TextField(
             controller: _notes,

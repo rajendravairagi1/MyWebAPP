@@ -2527,6 +2527,43 @@ class $ContractsTable extends Contracts
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _serviceFeeTypeMeta = const VerificationMeta(
+    'serviceFeeType',
+  );
+  @override
+  late final GeneratedColumn<String> serviceFeeType = GeneratedColumn<String>(
+    'service_fee_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('none'),
+  );
+  static const VerificationMeta _serviceFeePercentMeta = const VerificationMeta(
+    'serviceFeePercent',
+  );
+  @override
+  late final GeneratedColumn<double> serviceFeePercent =
+      GeneratedColumn<double>(
+        'service_fee_percent',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      );
+  static const VerificationMeta _serviceFeeFixedMeta = const VerificationMeta(
+    'serviceFeeFixed',
+  );
+  @override
+  late final GeneratedColumn<int> serviceFeeFixed = GeneratedColumn<int>(
+    'service_fee_fixed',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2538,6 +2575,9 @@ class $ContractsTable extends Contracts
     notes,
     docPath,
     isActive,
+    serviceFeeType,
+    serviceFeePercent,
+    serviceFeeFixed,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2613,6 +2653,33 @@ class $ContractsTable extends Contracts
         isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
       );
     }
+    if (data.containsKey('service_fee_type')) {
+      context.handle(
+        _serviceFeeTypeMeta,
+        serviceFeeType.isAcceptableOrUnknown(
+          data['service_fee_type']!,
+          _serviceFeeTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('service_fee_percent')) {
+      context.handle(
+        _serviceFeePercentMeta,
+        serviceFeePercent.isAcceptableOrUnknown(
+          data['service_fee_percent']!,
+          _serviceFeePercentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('service_fee_fixed')) {
+      context.handle(
+        _serviceFeeFixedMeta,
+        serviceFeeFixed.isAcceptableOrUnknown(
+          data['service_fee_fixed']!,
+          _serviceFeeFixedMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2658,6 +2725,18 @@ class $ContractsTable extends Contracts
         DriftSqlType.bool,
         data['${effectivePrefix}is_active'],
       )!,
+      serviceFeeType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}service_fee_type'],
+      )!,
+      serviceFeePercent: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}service_fee_percent'],
+      )!,
+      serviceFeeFixed: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}service_fee_fixed'],
+      )!,
     );
   }
 
@@ -2677,6 +2756,12 @@ class Contract extends DataClass implements Insertable<Contract> {
   final String notes;
   final String? docPath;
   final bool isActive;
+
+  /// Agency service fee on top of the labour charges: none | percent | fixed.
+  /// A fixed fee is charged once per invoice.
+  final String serviceFeeType;
+  final double serviceFeePercent;
+  final int serviceFeeFixed;
   const Contract({
     required this.id,
     required this.companyId,
@@ -2687,6 +2772,9 @@ class Contract extends DataClass implements Insertable<Contract> {
     required this.notes,
     this.docPath,
     required this.isActive,
+    required this.serviceFeeType,
+    required this.serviceFeePercent,
+    required this.serviceFeeFixed,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2704,6 +2792,9 @@ class Contract extends DataClass implements Insertable<Contract> {
       map['doc_path'] = Variable<String>(docPath);
     }
     map['is_active'] = Variable<bool>(isActive);
+    map['service_fee_type'] = Variable<String>(serviceFeeType);
+    map['service_fee_percent'] = Variable<double>(serviceFeePercent);
+    map['service_fee_fixed'] = Variable<int>(serviceFeeFixed);
     return map;
   }
 
@@ -2722,6 +2813,9 @@ class Contract extends DataClass implements Insertable<Contract> {
           ? const Value.absent()
           : Value(docPath),
       isActive: Value(isActive),
+      serviceFeeType: Value(serviceFeeType),
+      serviceFeePercent: Value(serviceFeePercent),
+      serviceFeeFixed: Value(serviceFeeFixed),
     );
   }
 
@@ -2740,6 +2834,9 @@ class Contract extends DataClass implements Insertable<Contract> {
       notes: serializer.fromJson<String>(json['notes']),
       docPath: serializer.fromJson<String?>(json['docPath']),
       isActive: serializer.fromJson<bool>(json['isActive']),
+      serviceFeeType: serializer.fromJson<String>(json['serviceFeeType']),
+      serviceFeePercent: serializer.fromJson<double>(json['serviceFeePercent']),
+      serviceFeeFixed: serializer.fromJson<int>(json['serviceFeeFixed']),
     );
   }
   @override
@@ -2755,6 +2852,9 @@ class Contract extends DataClass implements Insertable<Contract> {
       'notes': serializer.toJson<String>(notes),
       'docPath': serializer.toJson<String?>(docPath),
       'isActive': serializer.toJson<bool>(isActive),
+      'serviceFeeType': serializer.toJson<String>(serviceFeeType),
+      'serviceFeePercent': serializer.toJson<double>(serviceFeePercent),
+      'serviceFeeFixed': serializer.toJson<int>(serviceFeeFixed),
     };
   }
 
@@ -2768,6 +2868,9 @@ class Contract extends DataClass implements Insertable<Contract> {
     String? notes,
     Value<String?> docPath = const Value.absent(),
     bool? isActive,
+    String? serviceFeeType,
+    double? serviceFeePercent,
+    int? serviceFeeFixed,
   }) => Contract(
     id: id ?? this.id,
     companyId: companyId ?? this.companyId,
@@ -2778,6 +2881,9 @@ class Contract extends DataClass implements Insertable<Contract> {
     notes: notes ?? this.notes,
     docPath: docPath.present ? docPath.value : this.docPath,
     isActive: isActive ?? this.isActive,
+    serviceFeeType: serviceFeeType ?? this.serviceFeeType,
+    serviceFeePercent: serviceFeePercent ?? this.serviceFeePercent,
+    serviceFeeFixed: serviceFeeFixed ?? this.serviceFeeFixed,
   );
   Contract copyWithCompanion(ContractsCompanion data) {
     return Contract(
@@ -2792,6 +2898,15 @@ class Contract extends DataClass implements Insertable<Contract> {
       notes: data.notes.present ? data.notes.value : this.notes,
       docPath: data.docPath.present ? data.docPath.value : this.docPath,
       isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      serviceFeeType: data.serviceFeeType.present
+          ? data.serviceFeeType.value
+          : this.serviceFeeType,
+      serviceFeePercent: data.serviceFeePercent.present
+          ? data.serviceFeePercent.value
+          : this.serviceFeePercent,
+      serviceFeeFixed: data.serviceFeeFixed.present
+          ? data.serviceFeeFixed.value
+          : this.serviceFeeFixed,
     );
   }
 
@@ -2806,7 +2921,10 @@ class Contract extends DataClass implements Insertable<Contract> {
           ..write('paymentTermsDays: $paymentTermsDays, ')
           ..write('notes: $notes, ')
           ..write('docPath: $docPath, ')
-          ..write('isActive: $isActive')
+          ..write('isActive: $isActive, ')
+          ..write('serviceFeeType: $serviceFeeType, ')
+          ..write('serviceFeePercent: $serviceFeePercent, ')
+          ..write('serviceFeeFixed: $serviceFeeFixed')
           ..write(')'))
         .toString();
   }
@@ -2822,6 +2940,9 @@ class Contract extends DataClass implements Insertable<Contract> {
     notes,
     docPath,
     isActive,
+    serviceFeeType,
+    serviceFeePercent,
+    serviceFeeFixed,
   );
   @override
   bool operator ==(Object other) =>
@@ -2835,7 +2956,10 @@ class Contract extends DataClass implements Insertable<Contract> {
           other.paymentTermsDays == this.paymentTermsDays &&
           other.notes == this.notes &&
           other.docPath == this.docPath &&
-          other.isActive == this.isActive);
+          other.isActive == this.isActive &&
+          other.serviceFeeType == this.serviceFeeType &&
+          other.serviceFeePercent == this.serviceFeePercent &&
+          other.serviceFeeFixed == this.serviceFeeFixed);
 }
 
 class ContractsCompanion extends UpdateCompanion<Contract> {
@@ -2848,6 +2972,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
   final Value<String> notes;
   final Value<String?> docPath;
   final Value<bool> isActive;
+  final Value<String> serviceFeeType;
+  final Value<double> serviceFeePercent;
+  final Value<int> serviceFeeFixed;
   final Value<int> rowid;
   const ContractsCompanion({
     this.id = const Value.absent(),
@@ -2859,6 +2986,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     this.notes = const Value.absent(),
     this.docPath = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.serviceFeeType = const Value.absent(),
+    this.serviceFeePercent = const Value.absent(),
+    this.serviceFeeFixed = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ContractsCompanion.insert({
@@ -2871,6 +3001,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     this.notes = const Value.absent(),
     this.docPath = const Value.absent(),
     this.isActive = const Value.absent(),
+    this.serviceFeeType = const Value.absent(),
+    this.serviceFeePercent = const Value.absent(),
+    this.serviceFeeFixed = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        companyId = Value(companyId),
@@ -2886,6 +3019,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     Expression<String>? notes,
     Expression<String>? docPath,
     Expression<bool>? isActive,
+    Expression<String>? serviceFeeType,
+    Expression<double>? serviceFeePercent,
+    Expression<int>? serviceFeeFixed,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2898,6 +3034,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
       if (notes != null) 'notes': notes,
       if (docPath != null) 'doc_path': docPath,
       if (isActive != null) 'is_active': isActive,
+      if (serviceFeeType != null) 'service_fee_type': serviceFeeType,
+      if (serviceFeePercent != null) 'service_fee_percent': serviceFeePercent,
+      if (serviceFeeFixed != null) 'service_fee_fixed': serviceFeeFixed,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2912,6 +3051,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     Value<String>? notes,
     Value<String?>? docPath,
     Value<bool>? isActive,
+    Value<String>? serviceFeeType,
+    Value<double>? serviceFeePercent,
+    Value<int>? serviceFeeFixed,
     Value<int>? rowid,
   }) {
     return ContractsCompanion(
@@ -2924,6 +3066,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
       notes: notes ?? this.notes,
       docPath: docPath ?? this.docPath,
       isActive: isActive ?? this.isActive,
+      serviceFeeType: serviceFeeType ?? this.serviceFeeType,
+      serviceFeePercent: serviceFeePercent ?? this.serviceFeePercent,
+      serviceFeeFixed: serviceFeeFixed ?? this.serviceFeeFixed,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2958,6 +3103,15 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
     if (isActive.present) {
       map['is_active'] = Variable<bool>(isActive.value);
     }
+    if (serviceFeeType.present) {
+      map['service_fee_type'] = Variable<String>(serviceFeeType.value);
+    }
+    if (serviceFeePercent.present) {
+      map['service_fee_percent'] = Variable<double>(serviceFeePercent.value);
+    }
+    if (serviceFeeFixed.present) {
+      map['service_fee_fixed'] = Variable<int>(serviceFeeFixed.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2976,6 +3130,9 @@ class ContractsCompanion extends UpdateCompanion<Contract> {
           ..write('notes: $notes, ')
           ..write('docPath: $docPath, ')
           ..write('isActive: $isActive, ')
+          ..write('serviceFeeType: $serviceFeeType, ')
+          ..write('serviceFeePercent: $serviceFeePercent, ')
+          ..write('serviceFeeFixed: $serviceFeeFixed, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -7178,6 +7335,43 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _serviceFeeTypeMeta = const VerificationMeta(
+    'serviceFeeType',
+  );
+  @override
+  late final GeneratedColumn<String> serviceFeeType = GeneratedColumn<String>(
+    'service_fee_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('none'),
+  );
+  static const VerificationMeta _serviceFeePercentMeta = const VerificationMeta(
+    'serviceFeePercent',
+  );
+  @override
+  late final GeneratedColumn<double> serviceFeePercent =
+      GeneratedColumn<double>(
+        'service_fee_percent',
+        aliasedName,
+        false,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      );
+  static const VerificationMeta _serviceFeeAmountMeta = const VerificationMeta(
+    'serviceFeeAmount',
+  );
+  @override
+  late final GeneratedColumn<int> serviceFeeAmount = GeneratedColumn<int>(
+    'service_fee_amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _taxRateMeta = const VerificationMeta(
     'taxRate',
   );
@@ -7267,6 +7461,9 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
     periodFrom,
     periodTo,
     subtotal,
+    serviceFeeType,
+    serviceFeePercent,
+    serviceFeeAmount,
     taxRate,
     taxLabel,
     taxAmount,
@@ -7362,6 +7559,33 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
     } else if (isInserting) {
       context.missing(_subtotalMeta);
     }
+    if (data.containsKey('service_fee_type')) {
+      context.handle(
+        _serviceFeeTypeMeta,
+        serviceFeeType.isAcceptableOrUnknown(
+          data['service_fee_type']!,
+          _serviceFeeTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('service_fee_percent')) {
+      context.handle(
+        _serviceFeePercentMeta,
+        serviceFeePercent.isAcceptableOrUnknown(
+          data['service_fee_percent']!,
+          _serviceFeePercentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('service_fee_amount')) {
+      context.handle(
+        _serviceFeeAmountMeta,
+        serviceFeeAmount.isAcceptableOrUnknown(
+          data['service_fee_amount']!,
+          _serviceFeeAmountMeta,
+        ),
+      );
+    }
     if (data.containsKey('tax_rate')) {
       context.handle(
         _taxRateMeta,
@@ -7455,6 +7679,18 @@ class $InvoicesTable extends Invoices with TableInfo<$InvoicesTable, Invoice> {
         DriftSqlType.int,
         data['${effectivePrefix}subtotal'],
       )!,
+      serviceFeeType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}service_fee_type'],
+      )!,
+      serviceFeePercent: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}service_fee_percent'],
+      )!,
+      serviceFeeAmount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}service_fee_amount'],
+      )!,
       taxRate: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}tax_rate'],
@@ -7503,6 +7739,11 @@ class Invoice extends DataClass implements Insertable<Invoice> {
   final String periodFrom;
   final String periodTo;
   final int subtotal;
+
+  /// Service fee snapshot (type none | percent | fixed) and its amount.
+  final String serviceFeeType;
+  final double serviceFeePercent;
+  final int serviceFeeAmount;
   final double taxRate;
   final String taxLabel;
   final int taxAmount;
@@ -7523,6 +7764,9 @@ class Invoice extends DataClass implements Insertable<Invoice> {
     required this.periodFrom,
     required this.periodTo,
     required this.subtotal,
+    required this.serviceFeeType,
+    required this.serviceFeePercent,
+    required this.serviceFeeAmount,
     required this.taxRate,
     required this.taxLabel,
     required this.taxAmount,
@@ -7546,6 +7790,9 @@ class Invoice extends DataClass implements Insertable<Invoice> {
     map['period_from'] = Variable<String>(periodFrom);
     map['period_to'] = Variable<String>(periodTo);
     map['subtotal'] = Variable<int>(subtotal);
+    map['service_fee_type'] = Variable<String>(serviceFeeType);
+    map['service_fee_percent'] = Variable<double>(serviceFeePercent);
+    map['service_fee_amount'] = Variable<int>(serviceFeeAmount);
     map['tax_rate'] = Variable<double>(taxRate);
     map['tax_label'] = Variable<String>(taxLabel);
     map['tax_amount'] = Variable<int>(taxAmount);
@@ -7570,6 +7817,9 @@ class Invoice extends DataClass implements Insertable<Invoice> {
       periodFrom: Value(periodFrom),
       periodTo: Value(periodTo),
       subtotal: Value(subtotal),
+      serviceFeeType: Value(serviceFeeType),
+      serviceFeePercent: Value(serviceFeePercent),
+      serviceFeeAmount: Value(serviceFeeAmount),
       taxRate: Value(taxRate),
       taxLabel: Value(taxLabel),
       taxAmount: Value(taxAmount),
@@ -7596,6 +7846,9 @@ class Invoice extends DataClass implements Insertable<Invoice> {
       periodFrom: serializer.fromJson<String>(json['periodFrom']),
       periodTo: serializer.fromJson<String>(json['periodTo']),
       subtotal: serializer.fromJson<int>(json['subtotal']),
+      serviceFeeType: serializer.fromJson<String>(json['serviceFeeType']),
+      serviceFeePercent: serializer.fromJson<double>(json['serviceFeePercent']),
+      serviceFeeAmount: serializer.fromJson<int>(json['serviceFeeAmount']),
       taxRate: serializer.fromJson<double>(json['taxRate']),
       taxLabel: serializer.fromJson<String>(json['taxLabel']),
       taxAmount: serializer.fromJson<int>(json['taxAmount']),
@@ -7619,6 +7872,9 @@ class Invoice extends DataClass implements Insertable<Invoice> {
       'periodFrom': serializer.toJson<String>(periodFrom),
       'periodTo': serializer.toJson<String>(periodTo),
       'subtotal': serializer.toJson<int>(subtotal),
+      'serviceFeeType': serializer.toJson<String>(serviceFeeType),
+      'serviceFeePercent': serializer.toJson<double>(serviceFeePercent),
+      'serviceFeeAmount': serializer.toJson<int>(serviceFeeAmount),
       'taxRate': serializer.toJson<double>(taxRate),
       'taxLabel': serializer.toJson<String>(taxLabel),
       'taxAmount': serializer.toJson<int>(taxAmount),
@@ -7640,6 +7896,9 @@ class Invoice extends DataClass implements Insertable<Invoice> {
     String? periodFrom,
     String? periodTo,
     int? subtotal,
+    String? serviceFeeType,
+    double? serviceFeePercent,
+    int? serviceFeeAmount,
     double? taxRate,
     String? taxLabel,
     int? taxAmount,
@@ -7658,6 +7917,9 @@ class Invoice extends DataClass implements Insertable<Invoice> {
     periodFrom: periodFrom ?? this.periodFrom,
     periodTo: periodTo ?? this.periodTo,
     subtotal: subtotal ?? this.subtotal,
+    serviceFeeType: serviceFeeType ?? this.serviceFeeType,
+    serviceFeePercent: serviceFeePercent ?? this.serviceFeePercent,
+    serviceFeeAmount: serviceFeeAmount ?? this.serviceFeeAmount,
     taxRate: taxRate ?? this.taxRate,
     taxLabel: taxLabel ?? this.taxLabel,
     taxAmount: taxAmount ?? this.taxAmount,
@@ -7680,6 +7942,15 @@ class Invoice extends DataClass implements Insertable<Invoice> {
           : this.periodFrom,
       periodTo: data.periodTo.present ? data.periodTo.value : this.periodTo,
       subtotal: data.subtotal.present ? data.subtotal.value : this.subtotal,
+      serviceFeeType: data.serviceFeeType.present
+          ? data.serviceFeeType.value
+          : this.serviceFeeType,
+      serviceFeePercent: data.serviceFeePercent.present
+          ? data.serviceFeePercent.value
+          : this.serviceFeePercent,
+      serviceFeeAmount: data.serviceFeeAmount.present
+          ? data.serviceFeeAmount.value
+          : this.serviceFeeAmount,
       taxRate: data.taxRate.present ? data.taxRate.value : this.taxRate,
       taxLabel: data.taxLabel.present ? data.taxLabel.value : this.taxLabel,
       taxAmount: data.taxAmount.present ? data.taxAmount.value : this.taxAmount,
@@ -7703,6 +7974,9 @@ class Invoice extends DataClass implements Insertable<Invoice> {
           ..write('periodFrom: $periodFrom, ')
           ..write('periodTo: $periodTo, ')
           ..write('subtotal: $subtotal, ')
+          ..write('serviceFeeType: $serviceFeeType, ')
+          ..write('serviceFeePercent: $serviceFeePercent, ')
+          ..write('serviceFeeAmount: $serviceFeeAmount, ')
           ..write('taxRate: $taxRate, ')
           ..write('taxLabel: $taxLabel, ')
           ..write('taxAmount: $taxAmount, ')
@@ -7726,6 +8000,9 @@ class Invoice extends DataClass implements Insertable<Invoice> {
     periodFrom,
     periodTo,
     subtotal,
+    serviceFeeType,
+    serviceFeePercent,
+    serviceFeeAmount,
     taxRate,
     taxLabel,
     taxAmount,
@@ -7748,6 +8025,9 @@ class Invoice extends DataClass implements Insertable<Invoice> {
           other.periodFrom == this.periodFrom &&
           other.periodTo == this.periodTo &&
           other.subtotal == this.subtotal &&
+          other.serviceFeeType == this.serviceFeeType &&
+          other.serviceFeePercent == this.serviceFeePercent &&
+          other.serviceFeeAmount == this.serviceFeeAmount &&
           other.taxRate == this.taxRate &&
           other.taxLabel == this.taxLabel &&
           other.taxAmount == this.taxAmount &&
@@ -7768,6 +8048,9 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
   final Value<String> periodFrom;
   final Value<String> periodTo;
   final Value<int> subtotal;
+  final Value<String> serviceFeeType;
+  final Value<double> serviceFeePercent;
+  final Value<int> serviceFeeAmount;
   final Value<double> taxRate;
   final Value<String> taxLabel;
   final Value<int> taxAmount;
@@ -7787,6 +8070,9 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     this.periodFrom = const Value.absent(),
     this.periodTo = const Value.absent(),
     this.subtotal = const Value.absent(),
+    this.serviceFeeType = const Value.absent(),
+    this.serviceFeePercent = const Value.absent(),
+    this.serviceFeeAmount = const Value.absent(),
     this.taxRate = const Value.absent(),
     this.taxLabel = const Value.absent(),
     this.taxAmount = const Value.absent(),
@@ -7807,6 +8093,9 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     required String periodFrom,
     required String periodTo,
     required int subtotal,
+    this.serviceFeeType = const Value.absent(),
+    this.serviceFeePercent = const Value.absent(),
+    this.serviceFeeAmount = const Value.absent(),
     this.taxRate = const Value.absent(),
     this.taxLabel = const Value.absent(),
     this.taxAmount = const Value.absent(),
@@ -7836,6 +8125,9 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     Expression<String>? periodFrom,
     Expression<String>? periodTo,
     Expression<int>? subtotal,
+    Expression<String>? serviceFeeType,
+    Expression<double>? serviceFeePercent,
+    Expression<int>? serviceFeeAmount,
     Expression<double>? taxRate,
     Expression<String>? taxLabel,
     Expression<int>? taxAmount,
@@ -7856,6 +8148,9 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
       if (periodFrom != null) 'period_from': periodFrom,
       if (periodTo != null) 'period_to': periodTo,
       if (subtotal != null) 'subtotal': subtotal,
+      if (serviceFeeType != null) 'service_fee_type': serviceFeeType,
+      if (serviceFeePercent != null) 'service_fee_percent': serviceFeePercent,
+      if (serviceFeeAmount != null) 'service_fee_amount': serviceFeeAmount,
       if (taxRate != null) 'tax_rate': taxRate,
       if (taxLabel != null) 'tax_label': taxLabel,
       if (taxAmount != null) 'tax_amount': taxAmount,
@@ -7878,6 +8173,9 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     Value<String>? periodFrom,
     Value<String>? periodTo,
     Value<int>? subtotal,
+    Value<String>? serviceFeeType,
+    Value<double>? serviceFeePercent,
+    Value<int>? serviceFeeAmount,
     Value<double>? taxRate,
     Value<String>? taxLabel,
     Value<int>? taxAmount,
@@ -7898,6 +8196,9 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
       periodFrom: periodFrom ?? this.periodFrom,
       periodTo: periodTo ?? this.periodTo,
       subtotal: subtotal ?? this.subtotal,
+      serviceFeeType: serviceFeeType ?? this.serviceFeeType,
+      serviceFeePercent: serviceFeePercent ?? this.serviceFeePercent,
+      serviceFeeAmount: serviceFeeAmount ?? this.serviceFeeAmount,
       taxRate: taxRate ?? this.taxRate,
       taxLabel: taxLabel ?? this.taxLabel,
       taxAmount: taxAmount ?? this.taxAmount,
@@ -7942,6 +8243,15 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
     if (subtotal.present) {
       map['subtotal'] = Variable<int>(subtotal.value);
     }
+    if (serviceFeeType.present) {
+      map['service_fee_type'] = Variable<String>(serviceFeeType.value);
+    }
+    if (serviceFeePercent.present) {
+      map['service_fee_percent'] = Variable<double>(serviceFeePercent.value);
+    }
+    if (serviceFeeAmount.present) {
+      map['service_fee_amount'] = Variable<int>(serviceFeeAmount.value);
+    }
     if (taxRate.present) {
       map['tax_rate'] = Variable<double>(taxRate.value);
     }
@@ -7982,6 +8292,9 @@ class InvoicesCompanion extends UpdateCompanion<Invoice> {
           ..write('periodFrom: $periodFrom, ')
           ..write('periodTo: $periodTo, ')
           ..write('subtotal: $subtotal, ')
+          ..write('serviceFeeType: $serviceFeeType, ')
+          ..write('serviceFeePercent: $serviceFeePercent, ')
+          ..write('serviceFeeAmount: $serviceFeeAmount, ')
           ..write('taxRate: $taxRate, ')
           ..write('taxLabel: $taxLabel, ')
           ..write('taxAmount: $taxAmount, ')
@@ -12560,6 +12873,9 @@ typedef $$ContractsTableCreateCompanionBuilder = ContractsCompanion Function({
   Value<String> notes,
   Value<String?> docPath,
   Value<bool> isActive,
+  Value<String> serviceFeeType,
+  Value<double> serviceFeePercent,
+  Value<int> serviceFeeFixed,
   Value<int> rowid,
 });
 typedef $$ContractsTableUpdateCompanionBuilder = ContractsCompanion Function({
@@ -12572,6 +12888,9 @@ typedef $$ContractsTableUpdateCompanionBuilder = ContractsCompanion Function({
   Value<String> notes,
   Value<String?> docPath,
   Value<bool> isActive,
+  Value<String> serviceFeeType,
+  Value<double> serviceFeePercent,
+  Value<int> serviceFeeFixed,
   Value<int> rowid,
 });
 
@@ -12661,6 +12980,21 @@ class $$ContractsTableFilterComposer
 
   ColumnFilters<bool> get isActive => $composableBuilder(
     column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serviceFeeType => $composableBuilder(
+    column: $table.serviceFeeType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get serviceFeePercent => $composableBuilder(
+    column: $table.serviceFeePercent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get serviceFeeFixed => $composableBuilder(
+    column: $table.serviceFeeFixed,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12762,6 +13096,21 @@ class $$ContractsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get serviceFeeType => $composableBuilder(
+    column: $table.serviceFeeType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get serviceFeePercent => $composableBuilder(
+    column: $table.serviceFeePercent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get serviceFeeFixed => $composableBuilder(
+    column: $table.serviceFeeFixed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CompaniesTableOrderingComposer get companyId {
     final $$CompaniesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -12820,6 +13169,21 @@ class $$ContractsTableAnnotationComposer
 
   GeneratedColumn<bool> get isActive =>
       $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<String> get serviceFeeType => $composableBuilder(
+    column: $table.serviceFeeType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get serviceFeePercent => $composableBuilder(
+    column: $table.serviceFeePercent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get serviceFeeFixed => $composableBuilder(
+    column: $table.serviceFeeFixed,
+    builder: (column) => column,
+  );
 
   $$CompaniesTableAnnotationComposer get companyId {
     final $$CompaniesTableAnnotationComposer composer = $composerBuilder(
@@ -12907,6 +13271,9 @@ class $$ContractsTableTableManager
                 Value<String> notes = const Value.absent(),
                 Value<String?> docPath = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<String> serviceFeeType = const Value.absent(),
+                Value<double> serviceFeePercent = const Value.absent(),
+                Value<int> serviceFeeFixed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ContractsCompanion(
                 id: id,
@@ -12918,6 +13285,9 @@ class $$ContractsTableTableManager
                 notes: notes,
                 docPath: docPath,
                 isActive: isActive,
+                serviceFeeType: serviceFeeType,
+                serviceFeePercent: serviceFeePercent,
+                serviceFeeFixed: serviceFeeFixed,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -12931,6 +13301,9 @@ class $$ContractsTableTableManager
                 Value<String> notes = const Value.absent(),
                 Value<String?> docPath = const Value.absent(),
                 Value<bool> isActive = const Value.absent(),
+                Value<String> serviceFeeType = const Value.absent(),
+                Value<double> serviceFeePercent = const Value.absent(),
+                Value<int> serviceFeeFixed = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ContractsCompanion.insert(
                 id: id,
@@ -12942,6 +13315,9 @@ class $$ContractsTableTableManager
                 notes: notes,
                 docPath: docPath,
                 isActive: isActive,
+                serviceFeeType: serviceFeeType,
+                serviceFeePercent: serviceFeePercent,
+                serviceFeeFixed: serviceFeeFixed,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
@@ -16867,6 +17243,9 @@ typedef $$InvoicesTableCreateCompanionBuilder = InvoicesCompanion Function({
   required String periodFrom,
   required String periodTo,
   required int subtotal,
+  Value<String> serviceFeeType,
+  Value<double> serviceFeePercent,
+  Value<int> serviceFeeAmount,
   Value<double> taxRate,
   Value<String> taxLabel,
   Value<int> taxAmount,
@@ -16887,6 +17266,9 @@ typedef $$InvoicesTableUpdateCompanionBuilder = InvoicesCompanion Function({
   Value<String> periodFrom,
   Value<String> periodTo,
   Value<int> subtotal,
+  Value<String> serviceFeeType,
+  Value<double> serviceFeePercent,
+  Value<int> serviceFeeAmount,
   Value<double> taxRate,
   Value<String> taxLabel,
   Value<int> taxAmount,
@@ -17032,6 +17414,21 @@ class $$InvoicesTableFilterComposer
 
   ColumnFilters<int> get subtotal => $composableBuilder(
     column: $table.subtotal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get serviceFeeType => $composableBuilder(
+    column: $table.serviceFeeType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get serviceFeePercent => $composableBuilder(
+    column: $table.serviceFeePercent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get serviceFeeAmount => $composableBuilder(
+    column: $table.serviceFeeAmount,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -17234,6 +17631,21 @@ class $$InvoicesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get serviceFeeType => $composableBuilder(
+    column: $table.serviceFeeType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get serviceFeePercent => $composableBuilder(
+    column: $table.serviceFeePercent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get serviceFeeAmount => $composableBuilder(
+    column: $table.serviceFeeAmount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get taxRate => $composableBuilder(
     column: $table.taxRate,
     builder: (column) => ColumnOrderings(column),
@@ -17370,6 +17782,21 @@ class $$InvoicesTableAnnotationComposer
 
   GeneratedColumn<int> get subtotal =>
       $composableBuilder(column: $table.subtotal, builder: (column) => column);
+
+  GeneratedColumn<String> get serviceFeeType => $composableBuilder(
+    column: $table.serviceFeeType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get serviceFeePercent => $composableBuilder(
+    column: $table.serviceFeePercent,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get serviceFeeAmount => $composableBuilder(
+    column: $table.serviceFeeAmount,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get taxRate =>
       $composableBuilder(column: $table.taxRate, builder: (column) => column);
@@ -17556,6 +17983,9 @@ class $$InvoicesTableTableManager
                 Value<String> periodFrom = const Value.absent(),
                 Value<String> periodTo = const Value.absent(),
                 Value<int> subtotal = const Value.absent(),
+                Value<String> serviceFeeType = const Value.absent(),
+                Value<double> serviceFeePercent = const Value.absent(),
+                Value<int> serviceFeeAmount = const Value.absent(),
                 Value<double> taxRate = const Value.absent(),
                 Value<String> taxLabel = const Value.absent(),
                 Value<int> taxAmount = const Value.absent(),
@@ -17575,6 +18005,9 @@ class $$InvoicesTableTableManager
                 periodFrom: periodFrom,
                 periodTo: periodTo,
                 subtotal: subtotal,
+                serviceFeeType: serviceFeeType,
+                serviceFeePercent: serviceFeePercent,
+                serviceFeeAmount: serviceFeeAmount,
                 taxRate: taxRate,
                 taxLabel: taxLabel,
                 taxAmount: taxAmount,
@@ -17596,6 +18029,9 @@ class $$InvoicesTableTableManager
                 required String periodFrom,
                 required String periodTo,
                 required int subtotal,
+                Value<String> serviceFeeType = const Value.absent(),
+                Value<double> serviceFeePercent = const Value.absent(),
+                Value<int> serviceFeeAmount = const Value.absent(),
                 Value<double> taxRate = const Value.absent(),
                 Value<String> taxLabel = const Value.absent(),
                 Value<int> taxAmount = const Value.absent(),
@@ -17615,6 +18051,9 @@ class $$InvoicesTableTableManager
                 periodFrom: periodFrom,
                 periodTo: periodTo,
                 subtotal: subtotal,
+                serviceFeeType: serviceFeeType,
+                serviceFeePercent: serviceFeePercent,
+                serviceFeeAmount: serviceFeeAmount,
                 taxRate: taxRate,
                 taxLabel: taxLabel,
                 taxAmount: taxAmount,

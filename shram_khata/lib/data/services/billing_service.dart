@@ -29,6 +29,30 @@ class DraftLine {
   bool get missingRate => rate <= 0;
 }
 
+/// The agency's own charge on top of the labour bill.
+class ServiceFee {
+  ServiceFee({this.type = none, this.percent = 0, this.fixed = 0});
+  static const none = 'none';
+  static const percentOf = 'percent';
+  static const fixedAmount = 'fixed';
+
+  String type;
+
+  /// Used when [type] is percent: share of the labour charges, e.g. 10.
+  double percent;
+
+  /// Used when [type] is fixed: one amount per invoice, in minor units.
+  int fixed;
+
+  int amountFor(int labourCharges) => switch (type) {
+        percentOf => (labourCharges * percent / 100).round(),
+        fixedAmount => fixed,
+        _ => 0,
+      };
+
+  ServiceFee copy() => ServiceFee(type: type, percent: percent, fixed: fixed);
+}
+
 class InvoiceDraft {
   InvoiceDraft({
     required this.companyId,
@@ -37,7 +61,8 @@ class InvoiceDraft {
     required this.to,
     required this.lines,
     required this.overlapping,
-  });
+    ServiceFee? fee,
+  }) : fee = fee ?? ServiceFee();
 
   final String companyId;
   final String? siteId;
@@ -48,7 +73,12 @@ class InvoiceDraft {
   /// An existing invoice already covering part of this period, if any.
   final Invoice? overlapping;
 
+  /// Service fee for this invoice (editable before saving).
+  ServiceFee fee;
+
+  /// Labour charges: what the attendance is worth at the contract rates.
   int get subtotal => lines.fold(0, (a, l) => a + l.amount);
+  int get feeAmount => fee.amountFor(subtotal);
   int get missingRates => lines.where((l) => l.missingRate).length;
   double get totalDays => lines.fold(0.0, (a, l) => a + l.days);
 }
@@ -173,6 +203,16 @@ class BillingService extends Service {
         break;
       }
     }
+    // Default service fee: the newest active contract covering the period.
+    final contracts = await (db.select(db.contracts)
+          ..where((t) =>
+              t.companyId.equals(companyId) &
+              t.isActive.equals(true) &
+              t.startDate.isSmallerOrEqualValue(to))
+          ..orderBy([(t) => OrderingTerm.desc(t.startDate)]))
+        .get();
+    final covering = contracts.where((c) => c.endDate == null || c.endDate!.compareTo(from) >= 0);
+    final c = covering.isEmpty ? null : covering.first;
     return InvoiceDraft(
       companyId: companyId,
       siteId: siteId,
@@ -180,6 +220,9 @@ class BillingService extends Service {
       to: to,
       lines: lines,
       overlapping: overlap,
+      fee: c == null
+          ? ServiceFee()
+          : ServiceFee(type: c.serviceFeeType, percent: c.serviceFeePercent, fixed: c.serviceFeeFixed),
     );
   }
 
@@ -203,6 +246,12 @@ class BillingService extends Service {
     String? staffId,
   }) async {
     if (draft.lines.isEmpty) throw AppException('There is no attendance to bill in this period.');
+    if (draft.fee.type == ServiceFee.percentOf && (draft.fee.percent < 0 || draft.fee.percent > 100)) {
+      throw AppException('Service fee percentage must be between 0 and 100.');
+    }
+    if (draft.fee.type == ServiceFee.fixedAmount && draft.fee.fixed < 0) {
+      throw AppException('Service fee cannot be negative.');
+    }
     if (draft.lines.any((l) => l.missingRate)) {
       throw AppException('Set a billing rate for every line before saving.');
     }
@@ -211,7 +260,8 @@ class BillingService extends Service {
     final due = D.ymd(D.addDays(issue, paymentTermsDays));
     final taxRate = profile.taxEnabled ? profile.taxRate : 0.0;
     final subtotal = draft.subtotal;
-    final tax = (subtotal * taxRate / 100).round();
+    final feeAmount = draft.feeAmount;
+    final tax = ((subtotal + feeAmount) * taxRate / 100).round();
     final id = newId();
     await db.transaction(() async {
       final number = await _nextNumber(profile.invoicePrefix, issue, profile.country.fiscalStartMonth);
@@ -226,10 +276,13 @@ class BillingService extends Service {
             periodFrom: draft.from,
             periodTo: draft.to,
             subtotal: subtotal,
+            serviceFeeType: Value(draft.fee.type),
+            serviceFeePercent: Value(draft.fee.percent),
+            serviceFeeAmount: Value(feeAmount),
             taxRate: Value(taxRate),
             taxLabel: Value(profile.taxLabel),
             taxAmount: Value(tax),
-            total: subtotal + tax,
+            total: subtotal + feeAmount + tax,
             notes: Value(notes.trim()),
           ));
       for (final l in draft.lines) {
@@ -246,7 +299,7 @@ class BillingService extends Service {
               amount: l.amount,
             ));
       }
-      await audit(staffId, 'create', 'invoice', id, '$subtotal + $tax');
+      await audit(staffId, 'create', 'invoice', id, '$subtotal + $feeAmount + $tax');
     });
     return id;
   }

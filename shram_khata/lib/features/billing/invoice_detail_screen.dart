@@ -72,7 +72,13 @@ class InvoiceDetailScreen extends ConsumerWidget {
                   Expanded(child: Stat(label: tr('Due date'), value: D.showShort(inv.dueDate), color: s == InvoiceState.overdue ? Palette.absent : null)),
                 ]),
                 const Divider(height: 24),
-                _row('Subtotal', Money.format(inv.subtotal)),
+                _row('Labour charges', Money.format(inv.subtotal)),
+                if (inv.serviceFeeAmount > 0)
+                  _row(
+                      inv.serviceFeeType == 'percent'
+                          ? trf('Service fee ({pct}%)', {'pct': num1(inv.serviceFeePercent)})
+                          : tr('Service fee'),
+                      Money.format(inv.serviceFeeAmount)),
                 if (inv.taxAmount > 0) _row('${inv.taxLabel} @ ${num1(inv.taxRate)}%', Money.format(inv.taxAmount)),
                 _row('Total', Money.format(inv.total), bold: true),
                 if (d.paid > 0) _row('Received', '− ${Money.format(d.paid)}'),

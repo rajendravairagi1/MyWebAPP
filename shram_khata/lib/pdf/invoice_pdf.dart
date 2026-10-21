@@ -251,7 +251,13 @@ class InvoicePdf {
           width: 215,
           child: pw.Column(
             children: [
-              PdfKit.kv('Subtotal', Money.format(inv.subtotal)),
+              PdfKit.kv('Labour charges', Money.format(inv.subtotal)),
+              if (inv.serviceFeeAmount > 0)
+                PdfKit.kv(
+                    inv.serviceFeeType == 'percent'
+                        ? 'Service fee (${num1(inv.serviceFeePercent)}%)'
+                        : 'Service fee',
+                    Money.format(inv.serviceFeeAmount)),
               if (inv.taxAmount > 0)
                 PdfKit.kv('${inv.taxLabel} @ ${num1(inv.taxRate)}%', Money.format(inv.taxAmount)),
               pw.SizedBox(height: 3),
@@ -356,11 +362,13 @@ class InvoicePdf {
   }
 
   static pw.Widget _grid(AttendanceMatrix m, List<DateTime> days) {
-    final dayW = days.length > 31 ? 11.0 : 12.5;
+    final dayW = days.length > 31 ? 10.0 : 11.5;
     final widths = <int, pw.TableColumnWidth>{
-      0: const pw.FixedColumnWidth(96),
+      0: const pw.FixedColumnWidth(84),
       for (var i = 0; i < days.length; i++) i + 1: pw.FixedColumnWidth(dayW),
-      days.length + 1: const pw.FixedColumnWidth(30),
+      days.length + 1: const pw.FixedColumnWidth(24),
+      days.length + 2: const pw.FixedColumnWidth(24),
+      days.length + 3: const pw.FixedColumnWidth(24),
     };
     pw.Widget small(String s, {bool bold = false, PdfColor? color, PdfColor? bg}) => pw.Container(
           height: 15,
@@ -385,6 +393,8 @@ class InvoicePdf {
               small('${d.day}', bold: true, color: PdfColors.white,
                   bg: d.weekday == DateTime.sunday ? PdfKit.brandDark : null),
             small('Days', bold: true, color: PdfColors.white),
+            small('Abs', bold: true, color: PdfColors.white),
+            small('OT h', bold: true, color: PdfColors.white),
           ],
         ),
         for (final r in m.rows)
@@ -409,6 +419,15 @@ class InvoicePdf {
               small(
                 num1(days.fold(0.0, (a, d) => a + (r.cells[D.ymd(d)]?.value ?? 0))),
                 bold: true,
+              ),
+              small(
+                '${days.where((d) => (r.cells[D.ymd(d)]?.value ?? 1) == 0).length}',
+                color: PdfKit.absent,
+                bold: true,
+              ),
+              small(
+                num1(days.fold(0.0, (a, d) => a + (r.cells[D.ymd(d)]?.ot ?? 0))),
+                color: PdfKit.muted,
               ),
             ],
           ),
