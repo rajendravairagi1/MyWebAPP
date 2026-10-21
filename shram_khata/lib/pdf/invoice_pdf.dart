@@ -59,9 +59,9 @@ class InvoicePdf {
           branchLine: b.branch != null && b.branch!.name != 'Main' ? b.branch!.name : null,
           meta: [
             ('Invoice no.', inv.number),
-            ('Date', D.show(inv.issueDate)),
-            ('Due date', D.show(inv.dueDate)),
-            ('Period', '${D.showShort(inv.periodFrom)} – ${D.show(inv.periodTo)}'),
+            ('Date', D.showEn(inv.issueDate)),
+            ('Due date', D.showEn(inv.dueDate)),
+            ('Period', '${D.showShortEn(inv.periodFrom)} – ${D.showEn(inv.periodTo)}'),
           ],
         ),
         pw.SizedBox(height: 12),
@@ -104,7 +104,7 @@ class InvoicePdf {
               style: PdfKit.t(13, bold: true, color: PdfKit.brandDark)),
           pw.SizedBox(height: 2),
           pw.Text(
-            '${b.detail.company.name}${b.detail.site != null ? ' • ${b.detail.site!.name}' : ''}   |   ${D.show(inv.periodFrom)} – ${D.show(inv.periodTo)}',
+            '${b.detail.company.name}${b.detail.site != null ? ' • ${b.detail.site!.name}' : ''}   |   ${D.showEn(inv.periodFrom)} – ${D.showEn(inv.periodTo)}',
             style: PdfKit.t(9, color: PdfKit.muted),
           ),
           pw.SizedBox(height: 8),
@@ -161,7 +161,7 @@ class InvoicePdf {
               children: [
                 PdfKit.kv('Service', 'Manpower supply', size: 8.5),
                 if (site != null) PdfKit.kv('Site', site.name, size: 8.5),
-                PdfKit.kv('Period', '${D.showShort(b.detail.invoice.periodFrom)} – ${D.show(b.detail.invoice.periodTo)}', size: 8.5),
+                PdfKit.kv('Period', '${D.showShortEn(b.detail.invoice.periodFrom)} – ${D.showEn(b.detail.invoice.periodTo)}', size: 8.5),
                 PdfKit.kv('Total man-days', num1(b.detail.lines.fold(0.0, (a, l) => a + l.days)), size: 8.5),
               ],
             ),
@@ -351,7 +351,7 @@ class InvoicePdf {
     while (!month.isAfter(DateTime(to.year, to.month))) {
       final first = month.isBefore(from) ? from : month;
       final last = D.lastOfMonth(month).isAfter(to) ? to : D.lastOfMonth(month);
-      out.add(pw.Text(D.monthTitle(month),
+      out.add(pw.Text(D.monthTitleEn(month),
           style: PdfKit.t(10, bold: true, color: PdfKit.brandDark)));
       out.add(pw.SizedBox(height: 3));
       out.add(_grid(m, D.range(first, last)));

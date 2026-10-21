@@ -63,7 +63,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                 ]),
                 const SizedBox(height: 2),
                 Text(
-                  '${d.site?.name ?? 'All sites'} • ${D.showShort(inv.periodFrom)} – ${D.show(inv.periodTo)}',
+                  trf('{site} • {from} – {to}', {'site': d.site?.name ?? tr('All sites'), 'from': D.showShort(inv.periodFrom), 'to': D.show(inv.periodTo)}),
                   style: const TextStyle(color: Palette.muted),
                 ),
                 const Divider(height: 24),
@@ -72,18 +72,18 @@ class InvoiceDetailScreen extends ConsumerWidget {
                   Expanded(child: Stat(label: tr('Due date'), value: D.showShort(inv.dueDate), color: s == InvoiceState.overdue ? Palette.absent : null)),
                 ]),
                 const Divider(height: 24),
-                _row('Labour charges', Money.format(inv.subtotal)),
+                _row(tr('Labour charges'), Money.format(inv.subtotal)),
                 if (inv.serviceFeeAmount > 0)
                   _row(
                       inv.serviceFeeType == 'percent'
                           ? trf('Service fee ({pct}%)', {'pct': num1(inv.serviceFeePercent)})
                           : tr('Service fee'),
                       Money.format(inv.serviceFeeAmount)),
-                if (inv.taxAmount > 0) _row('${inv.taxLabel} @ ${num1(inv.taxRate)}%', Money.format(inv.taxAmount)),
-                _row('Total', Money.format(inv.total), bold: true),
-                if (d.paid > 0) _row('Received', '− ${Money.format(d.paid)}'),
+                if (inv.taxAmount > 0) _row(trf('{tax} @ {rate}%', {'tax': inv.taxLabel, 'rate': num1(inv.taxRate)}), Money.format(inv.taxAmount)),
+                _row(tr('Total'), Money.format(inv.total), bold: true),
+                if (d.paid > 0) _row(tr('Received'), '− ${Money.format(d.paid)}'),
                 if (s != InvoiceState.cancelled)
-                  _row('Balance due', Money.format(d.outstanding), bold: true, color: d.outstanding > 0 ? Palette.absent : Palette.present),
+                  _row(tr('Balance due'), Money.format(d.outstanding), bold: true, color: d.outstanding > 0 ? Palette.absent : Palette.present),
               ]),
             ),
             if (canManage && d.outstanding > 0 && s != InvoiceState.cancelled) ...[
@@ -116,7 +116,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                               onPressed: () async {
                                 final ok = await confirm(context,
                                     title: tr('Remove this receipt?'),
-                                    message: 'The invoice balance will go back up by ${Money.format(d.payments[i].amount)}.',
+                                    message: trf('The invoice balance will go back up by {amount}.', {'amount': Money.format(d.payments[i].amount)}),
                                     confirmLabel: tr('Remove'),
                                     danger: true);
                                 if (ok) await ref.read(billingServiceProvider).removeReceipt(d.payments[i].id, staffId: session.staff?.id);
@@ -128,7 +128,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                   ],
                 ]),
               ),
-            SectionTitle('LINES (${d.lines.length})', padding: const EdgeInsets.fromLTRB(4, 22, 4, 8)),
+            SectionTitle(trf('LINES ({n})', {'n': d.lines.length}), padding: const EdgeInsets.fromLTRB(4, 22, 4, 8)),
             AppCard(
               padding: EdgeInsets.zero,
               child: Column(children: [
@@ -136,8 +136,18 @@ class InvoiceDetailScreen extends ConsumerWidget {
                   ListTile(
                     dense: true,
                     title: Text(d.lines[i].description, style: const TextStyle(fontWeight: FontWeight.w700)),
-                    subtitle: Text('${d.lines[i].skill} • ${num1(d.lines[i].days)} d × ${Money.format(d.lines[i].rate)}'
-                        '${d.lines[i].otHours > 0 ? ' + ${num1(d.lines[i].otHours)}h OT' : ''}'),
+                    subtitle: Text(d.lines[i].otHours > 0
+                        ? trf('{skill} • {days} d × {rate} + {ot}h OT', {
+                            'skill': d.lines[i].skill,
+                            'days': num1(d.lines[i].days),
+                            'rate': Money.format(d.lines[i].rate),
+                            'ot': num1(d.lines[i].otHours)
+                          })
+                        : trf('{skill} • {days} d × {rate}', {
+                            'skill': d.lines[i].skill,
+                            'days': num1(d.lines[i].days),
+                            'rate': Money.format(d.lines[i].rate)
+                          })),
                     trailing: Text(Money.format(d.lines[i].amount), style: const TextStyle(fontWeight: FontWeight.w800)),
                   ),
                   if (i < d.lines.length - 1) const Divider(indent: 16),
@@ -152,7 +162,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                 label: Text(tr('Cancel this invoice')),
                 onPressed: () async {
                   final ok = await confirm(context,
-                      title: 'Cancel ${inv.number}?',
+                      title: trf('Cancel {number}?', {'number': inv.number}),
                       message: tr('The invoice number is kept and marked cancelled. You can then create a corrected invoice for the same period.'),
                       confirmLabel: tr('Cancel invoice'),
                       danger: true);
@@ -199,7 +209,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                 controller: amount,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
-                decoration: InputDecoration(labelText: tr('Amount'), prefixText: '${Money.symbol} ', helperText: 'Outstanding ${Money.format(d.outstanding)}'),
+                decoration: InputDecoration(labelText: tr('Amount'), prefixText: '${Money.symbol} ', helperText: trf('Outstanding {amount}', {'amount': Money.format(d.outstanding)})),
               ),
               const SizedBox(height: 12),
               SegmentedButton<String>(

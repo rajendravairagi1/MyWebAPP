@@ -31,14 +31,14 @@ Future<bool> confirm(
   final r = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: Text(title),
-      content: Text(message),
+      title: Text(tr(title)),
+      content: Text(tr(message)),
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
         TextButton(
           onPressed: () => Navigator.pop(ctx, true),
           style: danger ? TextButton.styleFrom(foregroundColor: Palette.absent) : null,
-          child: Text(confirmLabel),
+          child: Text(tr(confirmLabel)),
         ),
       ],
     ),
@@ -94,7 +94,7 @@ class SectionTitle extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              text,
+              tr(text),
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -139,12 +139,12 @@ class EmptyState extends StatelessWidget {
               child: Icon(icon, size: 36, color: Palette.brand),
             ),
             const SizedBox(height: 18),
-            Text(title,
+            Text(tr(title),
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
             if (message != null) ...[
               const SizedBox(height: 6),
-              Text(message!,
+              Text(tr(message!),
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Palette.muted, height: 1.4)),
             ],
@@ -178,7 +178,7 @@ class Pill extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[Icon(icon, size: 13, color: color), const SizedBox(width: 4)],
-          Text(text,
+          Text(tr(text),
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color)),
         ],
       ),
@@ -225,7 +225,7 @@ class Stat extends StatelessWidget {
     return Column(
       crossAxisAlignment: align ?? CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Palette.muted)),
+        Text(tr(label), style: const TextStyle(fontSize: 12, color: Palette.muted)),
         const SizedBox(height: 2),
         Text(value,
             style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: color ?? Palette.ink)),
@@ -355,8 +355,8 @@ class MenuTile extends StatelessWidget {
         ),
         child: Icon(icon, size: 21, color: color ?? Palette.brand),
       ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: subtitle == null ? null : Text(subtitle!),
+      title: Text(tr(title), style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: subtitle == null ? null : Text(tr(subtitle!)),
       trailing: trailing ?? (onTap != null ? const Icon(Icons.chevron_right, color: Palette.muted) : null),
     );
   }

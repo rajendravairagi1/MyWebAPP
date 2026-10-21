@@ -41,8 +41,8 @@ class RegisterPdf {
         final to = D.parse(matrix.to);
         final out = <pw.Widget>[
           PdfKit.letterhead(profile, assets, title: 'ATTENDANCE REGISTER', meta: [
-            ('Period', '${D.show(matrix.from)} – ${D.show(matrix.to)}'),
-            ('Generated', D.showDt(DateTime.now())),
+            ('Period', '${D.showEn(matrix.from)} – ${D.showEn(matrix.to)}'),
+            ('Generated', D.showDtEn(DateTime.now())),
           ]),
           pw.SizedBox(height: 8),
           pw.Text(heading, style: PdfKit.t(12, bold: true, color: PdfKit.brandDark)),
@@ -52,7 +52,7 @@ class RegisterPdf {
         while (!month.isAfter(DateTime(to.year, to.month))) {
           final first = month.isBefore(from) ? from : month;
           final last = D.lastOfMonth(month).isAfter(to) ? to : D.lastOfMonth(month);
-          out.add(pw.Text(D.monthTitle(month), style: PdfKit.t(10, bold: true)));
+          out.add(pw.Text(D.monthTitleEn(month), style: PdfKit.t(10, bold: true)));
           out.add(pw.SizedBox(height: 3));
           out.add(_grid(matrix, D.range(first, last)));
           out.add(pw.SizedBox(height: 10));
@@ -142,8 +142,8 @@ class RegisterPdf {
       footer: (ctx) => PdfKit.footer(ctx, profile, assets),
       build: (ctx) => [
         PdfKit.letterhead(profile, assets, title: 'PAYMENT REGISTER', meta: [
-          ('Period', '${D.show(from)} – ${D.show(to)}'),
-          ('Generated', D.showDt(DateTime.now())),
+          ('Period', '${D.showEn(from)} – ${D.showEn(to)}'),
+          ('Generated', D.showDtEn(DateTime.now())),
         ]),
         pw.SizedBox(height: 10),
         pw.Row(children: [
@@ -208,7 +208,7 @@ class RegisterPdf {
                   border: pw.Border(bottom: pw.BorderSide(color: PdfKit.line, width: 0.5)),
                 ),
                 children: [
-                  PdfKit.cell(D.showShort(rows[i].payment.date), size: 8),
+                  PdfKit.cell(D.showShortEn(rows[i].payment.date), size: 8),
                   PdfKit.cell(rows[i].labourName, size: 8),
                   PdfKit.cell(PayType.label(rows[i].payment.type), size: 8),
                   PdfKit.cell(PayMode.label(rows[i].payment.mode), size: 8),
@@ -249,8 +249,8 @@ class RegisterPdf {
       footer: (ctx) => PdfKit.footer(ctx, profile, assets),
       build: (ctx) => [
         PdfKit.letterhead(profile, assets, title: 'LABOUR BALANCES', meta: [
-          ('Period', '${D.show(from)} – ${D.show(to)}'),
-          ('Generated', D.showDt(DateTime.now())),
+          ('Period', '${D.showEn(from)} – ${D.showEn(to)}'),
+          ('Generated', D.showDtEn(DateTime.now())),
         ]),
         pw.SizedBox(height: 10),
         pw.Row(children: [

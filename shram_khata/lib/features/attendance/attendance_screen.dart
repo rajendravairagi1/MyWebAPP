@@ -118,7 +118,7 @@ class _SiteCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(children: [
             Expanded(
-              child: Text('$marked of ${sheet.total} marked',
+              child: Text(trf('{marked} of {total} marked', {'marked': marked, 'total': sheet.total}),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Palette.muted, fontSize: 13, fontWeight: FontWeight.w500)),

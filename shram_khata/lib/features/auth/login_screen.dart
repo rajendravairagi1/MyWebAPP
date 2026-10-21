@@ -29,7 +29,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _login() async {
     if (_id.text.trim().isEmpty || _secret.text.isEmpty) {
-      setState(() => _error = 'Enter your email or mobile and password / PIN.');
+      setState(() => _error = tr('Enter your email or mobile and password / PIN.'));
       return;
     }
     setState(() {
@@ -38,7 +38,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
     try {
       final ok = await ref.read(sessionProvider.notifier).login(_id.text, _secret.text);
-      if (!ok && mounted) setState(() => _error = 'Wrong email / mobile or password / PIN.');
+      if (!ok && mounted) setState(() => _error = tr('Wrong email / mobile or password / PIN.'));
     } catch (e) {
       if (mounted) showError(context, e);
     } finally {
@@ -65,9 +65,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const SizedBox(height: 22),
             Text(tr('Welcome back'), style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
             const SizedBox(height: 6),
-            const Text(
-              'Sign in with your email or mobile number.\nOwners use a password, team members use a PIN.',
-              style: TextStyle(color: Palette.muted, height: 1.45),
+            Text(
+              tr('Sign in with your email or mobile number.\nOwners use a password, team members use a PIN.'),
+              style: const TextStyle(color: Palette.muted, height: 1.45),
             ),
             const SizedBox(height: 28),
             TextField(
@@ -115,9 +115,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 context: context,
                 builder: (ctx) => AlertDialog(
                   title: Text(tr('Forgot password?')),
-                  content: const Text(
-                    'Team members: ask the owner to set a new PIN for you (Team & roles).\n\n'
-                    'Owner: password recovery by email works once cloud sync is connected. Until then, keep your password safe.',
+                  content: Text(
+                    tr('Team members: ask the owner to set a new PIN for you (Team & roles).\n\n'
+                    'Owner: password recovery by email works once cloud sync is connected. Until then, keep your password safe.'),
                   ),
                   actions: [
                     TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('OK'))),

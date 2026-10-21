@@ -126,7 +126,7 @@ class _Header extends StatelessWidget {
             const SizedBox(height: 6),
             Wrap(spacing: 6, children: [
               Pill(tr(LabourStatus.label(l.status)), color: c),
-              Pill('Since ${D.show(l.joinDate)}', color: Palette.muted),
+              Pill(trf('Since {date}', {'date': D.show(l.joinDate)}), color: Palette.muted),
             ]),
           ]),
         ),
@@ -274,7 +274,7 @@ class _Tally extends StatelessWidget {
         decoration: BoxDecoration(color: Palette.statusBg(letter), borderRadius: BorderRadius.circular(12)),
         child: Column(children: [
           Text('$n', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Palette.status(letter))),
-          Text(switch (letter) { 'P' => 'Present', 'H' => 'Half', _ => 'Absent' },
+          Text(switch (letter) { 'P' => tr('Present'), 'H' => tr('Half'), _ => tr('Absent') },
               style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Palette.status(letter))),
         ]),
       ),
@@ -486,12 +486,16 @@ class _DetailsTab extends ConsumerWidget {
               for (var i = 0; i < list.length; i++) ...[
                 ListTile(
                   title: Text(
-                    '${Money.format(list[i].amount)} ${list[i].payType == 'monthly' ? 'per month' : 'per day'}',
+                    list[i].payType == 'monthly'
+                        ? trf('{amount} per month', {'amount': Money.format(list[i].amount)})
+                        : trf('{amount} per day', {'amount': Money.format(list[i].amount)}),
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   subtitle: Text(
-                    'From ${D.show(list[i].effectiveFrom)}'
-                    '${list[i].otPerHour != null ? ' • OT ${Money.format(list[i].otPerHour!)}/h' : ''}',
+                    trf('From {date}', {'date': D.show(list[i].effectiveFrom)}) +
+                        (list[i].otPerHour != null
+                            ? trf(' • OT {amount}/h', {'amount': Money.format(list[i].otPerHour!)})
+                            : ''),
                   ),
                   trailing: i == 0 ? Pill(tr('Current')) : null,
                 ),
@@ -518,15 +522,15 @@ class _DetailsTab extends ConsumerWidget {
                     ListTile(
                       leading: Icon(Icons.location_on_outlined, color: Palette.brand),
                       title: Text(list[i].site.name, style: const TextStyle(fontWeight: FontWeight.w700)),
-                      subtitle: Text('${list[i].company.name} • since ${D.show(list[i].assignment.fromDate)}'),
+                      subtitle: Text(trf('{company} • since {date}', {'company': list[i].company.name, 'date': D.show(list[i].assignment.fromDate)})),
                       trailing: manage
                           ? IconButton(
                               tooltip: tr('Remove from site'),
                               icon: const Icon(Icons.remove_circle_outline, color: Palette.absent),
                               onPressed: () async {
                                 final ok = await confirm(context,
-                                    title: 'Remove from ${list[i].site.name}?',
-                                    message: 'They will no longer appear on this site\'s attendance sheet from today. Past attendance stays.',
+                                    title: trf('Remove from {site}?', {'site': list[i].site.name}),
+                                    message: tr('They will no longer appear on this site\'s attendance sheet from today. Past attendance stays.'),
                                     confirmLabel: tr('Remove'),
                                     danger: true);
                                 if (ok) await svc.unassign(list[i].assignment.id);
@@ -565,9 +569,9 @@ class _DetailsTab extends ConsumerWidget {
         SectionTitle(tr('PERSONAL'), padding: EdgeInsets.fromLTRB(4, 20, 4, 8)),
         AppCard(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (labour.fatherName.isNotEmpty) Text("Father's name: ${labour.fatherName}"),
+            if (labour.fatherName.isNotEmpty) Text(trf("Father's name: {name}", {'name': labour.fatherName})),
             if (labour.address.isNotEmpty)
-              Padding(padding: const EdgeInsets.only(top: 6), child: Text('Address: ${labour.address}')),
+              Padding(padding: const EdgeInsets.only(top: 6), child: Text(trf('Address: {address}', {'address': labour.address}))),
           ]),
         ),
       ],
@@ -605,7 +609,7 @@ class _DetailsTab extends ConsumerWidget {
                     label: Text(tr('Delete (added by mistake)')),
                     onPressed: () async {
                       final ok = await confirm(context,
-                          title: 'Delete ${labour.name}?',
+                          title: trf('Delete {name}?', {'name': labour.name}),
                           message: tr('This person has no attendance or payments, so they can be removed completely.'),
                           confirmLabel: tr('Delete'),
                           danger: true);
@@ -624,7 +628,7 @@ class _DetailsTab extends ConsumerWidget {
   Future<void> _setStatus(BuildContext context, WidgetRef ref, String status) async {
     final ok = await confirm(
       context,
-      title: status == LabourStatus.left ? 'Mark as left?' : 'Mark inactive?',
+      title: status == LabourStatus.left ? tr('Mark as left?') : tr('Mark inactive?'),
       message:
           tr('They will be removed from attendance sheets from today. All past attendance and payments stay, and you can reactivate later.'),
       confirmLabel: tr('Confirm'),
@@ -675,7 +679,7 @@ class _DetailsTab extends ConsumerWidget {
       isScrollControlled: true,
       builder: (_) => _DocSheet(labourId: labour.id),
     );
-    if (r == true && context.mounted) showInfo(context, 'Document saved');
+    if (r == true && context.mounted) showInfo(context, tr('Document saved'));
   }
 }
 
@@ -790,7 +794,7 @@ class _RateSheetState extends State<_RateSheet> {
           FilledButton(
             onPressed: () {
               final a = Money.parse(_amount.text);
-              if (a == null || a <= 0) return showError(context, 'Enter the new rate');
+              if (a == null || a <= 0) return showError(context, tr('Enter the new rate'));
               Navigator.pop(
                 context,
                 _RateResult(D.ymd(_from), _type, a, _ot.text.trim().isEmpty ? null : Money.parse(_ot.text)),
@@ -834,10 +838,10 @@ class _DocTile extends ConsumerWidget {
               : Icon(Icons.description_outlined, color: Palette.brand),
         ),
       ),
-      title: Text(doc.docType, style: const TextStyle(fontWeight: FontWeight.w700)),
+      title: Text(tr(doc.docType), style: const TextStyle(fontWeight: FontWeight.w700)),
       subtitle: Text([
         if (doc.docNumber.isNotEmpty) doc.docNumber,
-        if (doc.expiryDate != null) 'expires ${D.show(doc.expiryDate!)}',
+        if (doc.expiryDate != null) trf('expires {date}', {'date': D.show(doc.expiryDate!)}),
       ].join(' • ')),
       trailing: Row(mainAxisSize: MainAxisSize.min, children: [
         if (expired)
@@ -848,7 +852,7 @@ class _DocTile extends ConsumerWidget {
           icon: const Icon(Icons.delete_outline, color: Palette.muted),
           onPressed: () async {
             final ok = await confirm(context,
-                title: 'Delete ${doc.docType}?', message: tr('The document will be removed.'), confirmLabel: tr('Delete'), danger: true);
+                title: trf('Delete {type}?', {'type': tr(doc.docType)}), message: tr('The document will be removed.'), confirmLabel: tr('Delete'), danger: true);
             if (ok) await ref.read(labourServiceProvider).deleteDocument(doc.id);
           },
         ),
@@ -888,7 +892,7 @@ class _DocSheetState extends ConsumerState<_DocSheet> {
           DropdownButtonFormField<String>(
             initialValue: _type,
             decoration: InputDecoration(labelText: tr('Document type')),
-            items: [for (final t in LabourService.docTypes) DropdownMenuItem(value: t, child: Text(t))],
+            items: [for (final t in LabourService.docTypes) DropdownMenuItem(value: t, child: Text(tr(t)))],
             onChanged: (v) => setState(() => _type = v!),
           ),
           const SizedBox(height: 12),
@@ -925,7 +929,7 @@ class _DocSheetState extends ConsumerState<_DocSheet> {
               if (p != null) setState(() => _path = p);
             },
             icon: Icon(_path == null ? Icons.add_a_photo_outlined : Icons.check_circle, color: _path == null ? null : Palette.present),
-            label: Text(_path == null ? 'Take photo / choose image' : 'Image attached'),
+            label: Text(_path == null ? tr('Take photo / choose image') : tr('Image attached')),
           ),
           const SizedBox(height: 16),
           FilledButton(

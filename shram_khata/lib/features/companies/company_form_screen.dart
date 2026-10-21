@@ -75,7 +75,7 @@ class _CompanyFormScreenState extends ConsumerState<CompanyFormScreen> {
     final showBranch = widget.company == null && plan.multiBranch && scope == null && allowed.length > 1;
     final taxLabel = ref.watch(profileProvider).value?.taxLabel ?? 'GST';
     return Scaffold(
-      appBar: AppBar(title: Text(widget.company == null ? 'Add company' : 'Edit company')),
+      appBar: AppBar(title: Text(widget.company == null ? tr('Add company') : tr('Edit company'))),
       body: Form(
         key: _form,
         child: FormBody(
@@ -85,7 +85,7 @@ class _CompanyFormScreenState extends ConsumerState<CompanyFormScreen> {
               controller: _name,
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(labelText: tr('Company name *')),
-              validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the company name' : null,
+              validator: (v) => (v ?? '').trim().isEmpty ? tr('Enter the company name') : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -116,7 +116,7 @@ class _CompanyFormScreenState extends ConsumerState<CompanyFormScreen> {
             TextFormField(
               controller: _gstin,
               textCapitalization: TextCapitalization.characters,
-              decoration: InputDecoration(labelText: '$taxLabel number (optional)'),
+              decoration: InputDecoration(labelText: trf('{tax} number (optional)', {'tax': taxLabel})),
             ),
             if (showBranch) ...[
               const SizedBox(height: 12),

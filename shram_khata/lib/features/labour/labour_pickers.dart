@@ -53,7 +53,7 @@ class _LabourPickerState extends ConsumerState<_LabourPicker> {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
               child: Row(children: [
                 Expanded(
-                  child: Text(widget.title,
+                  child: Text(tr(widget.title),
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                 ),
               ]),
@@ -212,21 +212,21 @@ Future<String?> quickAddCompanySite(BuildContext context, WidgetRef ref) async {
                   controller: company,
                   textCapitalization: TextCapitalization.words,
                   decoration: InputDecoration(labelText: tr('Company name *')),
-                  validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the company name' : null,
+                  validator: (v) => (v ?? '').trim().isEmpty ? tr('Enter the company name') : null,
                 ),
               if (companies.isNotEmpty)
                 Align(
                   alignment: Alignment.centerLeft,
                   child: TextButton(
                     onPressed: () => setS(() => isNew = !isNew),
-                    child: Text(isNew ? 'Use existing company' : '+ New company'),
+                    child: Text(isNew ? tr('Use existing company') : tr('+ New company')),
                   ),
                 ),
               TextFormField(
                 controller: site,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(labelText: tr('Site / location *')),
-                validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the site name' : null,
+                validator: (v) => (v ?? '').trim().isEmpty ? tr('Enter the site name') : null,
               ),
             ]),
           ),

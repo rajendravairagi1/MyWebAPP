@@ -90,14 +90,14 @@ class PaymentTile extends ConsumerWidget {
             Text('${tr(PayType.label(p.type))} • ${Money.format(p.amount)}',
                 style: const TextStyle(fontSize: 15, color: Palette.muted)),
             const SizedBox(height: 12),
-            _kv('Date', D.show(p.date)),
-            if (p.type != PayType.deduction) _kv('Mode', tr(PayMode.label(p.mode))),
-            if (p.reference.isNotEmpty) _kv('Reference', p.reference),
-            if (p.note.isNotEmpty) _kv('Note', p.note),
-            _kv('Entered', '${D.showDt(p.createdAt)} ${TimeOfDay.fromDateTime(p.createdAt).format(ctx)}'),
+            _kv(tr('Date'), D.show(p.date)),
+            if (p.type != PayType.deduction) _kv(tr('Mode'), tr(PayMode.label(p.mode))),
+            if (p.reference.isNotEmpty) _kv(tr('Reference'), p.reference),
+            if (p.note.isNotEmpty) _kv(tr('Note'), p.note),
+            _kv(tr('Entered'), '${D.showDt(p.createdAt)} ${TimeOfDay.fromDateTime(p.createdAt).format(ctx)}'),
             if (p.voidedAt != null) ...[
-              _kv('Voided', D.showDt(p.voidedAt!)),
-              _kv('Reason', p.voidReason ?? ''),
+              _kv(tr('Voided'), D.showDt(p.voidedAt!)),
+              _kv(tr('Reason'), p.voidReason ?? ''),
             ],
             if (canVoid && p.voidedAt == null) ...[
               const SizedBox(height: 14),
@@ -169,7 +169,7 @@ class AccountSummary extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 3),
           child: Row(children: [
             Expanded(
-              child: Text(label,
+              child: Text(tr(label),
                   style: TextStyle(
                       color: bold ? Palette.ink : Palette.muted,
                       fontWeight: bold ? FontWeight.w800 : FontWeight.w500)),
@@ -182,21 +182,21 @@ class AccountSummary extends StatelessWidget {
     return AppCard(
       color: color,
       child: Column(children: [
-        if (l.opening != 0) line('Brought forward', l.opening),
-        line('Earned (${num1(l.paidDays)} days${l.otHours > 0 ? ' + OT' : ''})', l.earned, bold: true),
-        if (l.paidAdvance != 0) line('Advance taken', l.paidAdvance, minus: true),
-        if (l.paidDaily != 0) line('Wages paid', l.paidDaily, minus: true),
-        if (l.paidSettlement != 0) line('Settlements paid', l.paidSettlement, minus: true),
-        if (l.deductions != 0) line('Fines / recoveries', l.deductions, minus: true),
+        if (l.opening != 0) line(tr('Brought forward'), l.opening),
+        line(l.otHours > 0 ? trf('Earned ({days} days + OT)', {'days': num1(l.paidDays)}) : trf('Earned ({days} days)', {'days': num1(l.paidDays)}), l.earned, bold: true),
+        if (l.paidAdvance != 0) line(tr('Advance taken'), l.paidAdvance, minus: true),
+        if (l.paidDaily != 0) line(tr('Wages paid'), l.paidDaily, minus: true),
+        if (l.paidSettlement != 0) line(tr('Settlements paid'), l.paidSettlement, minus: true),
+        if (l.deductions != 0) line(tr('Fines / recoveries'), l.deductions, minus: true),
         const Divider(height: 20),
         Row(children: [
           Expanded(
             child: Text(
               bal > 0
-                  ? 'Payable to worker'
+                  ? tr('Payable to worker')
                   : bal < 0
-                      ? 'Worker owes you (advance to recover)'
-                      : 'Fully settled',
+                      ? tr('Worker owes you (advance to recover)')
+                      : tr('Fully settled'),
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ),

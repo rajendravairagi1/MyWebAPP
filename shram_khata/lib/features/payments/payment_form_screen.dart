@@ -63,8 +63,8 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
 
   Future<void> _save() async {
     final amount = Money.parse(_amount.text) ?? 0;
-    if (_labour == null) return showError(context, 'Choose a labourer');
-    if (amount <= 0) return showError(context, 'Enter the amount');
+    if (_labour == null) return showError(context, tr('Choose a labourer'));
+    if (amount <= 0) return showError(context, tr('Enter the amount'));
     setState(() => _busy = true);
     try {
       await ref.read(paymentServiceProvider).add(
@@ -79,7 +79,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             staffId: ref.read(sessionProvider).staff?.id,
           );
       if (mounted) {
-        showInfo(context, '${Money.format(amount)} recorded for ${_labour!.name}');
+        showInfo(context, trf('{amount} recorded for {name}', {'amount': Money.format(amount), 'name': _labour!.name}));
         Navigator.pop(context);
       }
     } catch (e) {
@@ -100,7 +100,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
       body: FormBody(
         bottom: FilledButton(
           onPressed: _busy ? null : _save,
-          child: Text(entered > 0 ? 'Save ${Money.format(entered)}' : 'Save payment'),
+          child: Text(entered > 0 ? trf('Save {amount}', {'amount': Money.format(entered)}) : tr('Save payment')),
         ),
         children: [
           AppCard(
@@ -145,10 +145,10 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
           const SizedBox(height: 4),
           Text(
             switch (_type) {
-              PayType.daily => 'Wages given for working days.',
-              PayType.advance => 'Money given before it is earned. It is cut from future salary.',
-              PayType.settlement => 'Final / periodic clearing of the balance.',
-              _ => 'A fine or recovery. Reduces what is owed, no cash is paid.',
+              PayType.daily => tr('Wages given for working days.'),
+              PayType.advance => tr('Money given before it is earned. It is cut from future salary.'),
+              PayType.settlement => tr('Final / periodic clearing of the balance.'),
+              _ => tr('A fine or recovery. Reduces what is owed, no cash is paid.'),
             },
             style: const TextStyle(fontSize: 12.5, color: Palette.muted),
           ),
@@ -170,7 +170,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             if (balance != null && balance > 0)
               ActionChip(
                 backgroundColor: Palette.brandTint,
-                label: Text('Full ${Money.format(balance)}'),
+                label: Text(trf('Full {amount}', {'amount': Money.format(balance)})),
                 onPressed: () => setState(() => _amount.text = Money.toInput(balance)),
               ),
           ]),
@@ -178,8 +178,8 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
             const SizedBox(height: 8),
             Text(
               after >= 0
-                  ? 'Balance after this: ${Money.format(after)} still to pay'
-                  : 'This is ${Money.format(-after)} more than earned — recorded as advance',
+                  ? trf('Balance after this: {amount} still to pay', {'amount': Money.format(after)})
+                  : trf('This is {amount} more than earned — recorded as advance', {'amount': Money.format(-after)}),
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
@@ -203,7 +203,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
               TextField(
                 controller: _ref,
                 decoration: InputDecoration(
-                  labelText: _mode == PayMode.upi ? 'UPI reference / UTR (optional)' : 'Bank reference (optional)',
+                  labelText: _mode == PayMode.upi ? tr('UPI reference / UTR (optional)') : tr('Bank reference (optional)'),
                 ),
               ),
             ],
@@ -228,7 +228,7 @@ class _PaymentFormScreenState extends ConsumerState<PaymentFormScreen> {
           const SizedBox(height: 12),
           TextField(
             controller: _note,
-            decoration: InputDecoration(labelText: deduction ? 'Reason (fine, damage...)' : 'Note (optional)'),
+            decoration: InputDecoration(labelText: deduction ? tr('Reason (fine, damage...)') : tr('Note (optional)')),
           ),
         ],
       ),

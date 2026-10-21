@@ -130,7 +130,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.existing == null ? 'New contract' : 'Edit contract')),
+      appBar: AppBar(title: Text(widget.existing == null ? tr('New contract') : tr('Edit contract'))),
       body: FormBody(
         bottom: FilledButton(onPressed: _busy ? null : _save, child: Text(tr('Save contract'))),
         children: [
@@ -169,7 +169,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
                         ? null
                         : IconButton(icon: const Icon(Icons.close, size: 18), onPressed: () => setState(() => _end = null)),
                   ),
-                  child: Text(_end == null ? 'Open ended' : D.showDt(_end!)),
+                  child: Text(_end == null ? tr('Open ended') : D.showDt(_end!)),
                 ),
               ),
             ),
@@ -178,7 +178,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
           TextField(
             controller: _terms,
             keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: tr('Payment terms'), suffixText: 'days'),
+            decoration: InputDecoration(labelText: tr('Payment terms'), suffixText: tr('days')),
           ),
           SectionTitle(tr('BILLING RATES (WHAT THE COMPANY PAYS YOU)'),
               padding: const EdgeInsets.fromLTRB(2, 22, 2, 4),
@@ -260,7 +260,7 @@ class _ContractFormScreenState extends ConsumerState<ContractFormScreen> {
             },
             icon: Icon(_doc == null ? Icons.document_scanner_outlined : Icons.check_circle,
                 color: _doc == null ? null : Palette.present),
-            label: Text(_doc == null ? 'Scan / attach contract copy' : 'Contract copy attached'),
+            label: Text(_doc == null ? tr('Scan / attach contract copy') : tr('Contract copy attached')),
           ),
           if (widget.existing != null)
             SwitchListTile(

@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 
+import 'i18n.dart';
+
 /// Date-only values are persisted as `yyyy-MM-dd` text.
 class D {
   D._();
@@ -24,12 +26,31 @@ class D {
   static DateTime dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
   static String today() => ymd(DateTime.now());
 
-  /// 07 Oct 2026
-  static String show(String ymdStr) => _show.format(parse(ymdStr));
-  static String showDt(DateTime d) => _show.format(d);
-  static String showShort(String ymdStr) => _showShort.format(parse(ymdStr));
-  static String monthTitle(DateTime d) => _month.format(d);
-  static String weekday(DateTime d) => _weekday.format(d);
+  static const _monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  static const _monthsLong = [
+    'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  static const _days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+  static String _dd(DateTime d) => d.day.toString().padLeft(2, '0');
+
+  /// 07 Oct 2026, with the month in the chosen app language.
+  static String show(String ymdStr) => showDt(parse(ymdStr));
+  static String showDt(DateTime d) => '${_dd(d)} ${tr(_monthsShort[d.month - 1])} ${d.year}';
+  static String showShort(String ymdStr) {
+    final d = parse(ymdStr);
+    return '${_dd(d)} ${tr(_monthsShort[d.month - 1])}';
+  }
+
+  static String monthTitle(DateTime d) => '${tr(_monthsLong[d.month - 1])} ${d.year}';
+  static String weekday(DateTime d) => tr(_days[d.weekday - 1]);
+
+  /// The same formats in English only. PDFs use these.
+  static String showEn(String ymdStr) => _show.format(parse(ymdStr));
+  static String showDtEn(DateTime d) => _show.format(d);
+  static String showShortEn(String ymdStr) => _showShort.format(parse(ymdStr));
+  static String monthTitleEn(DateTime d) => _month.format(d);
+  static String weekdayEn(DateTime d) => _weekday.format(d);
 
   static DateTime firstOfMonth(DateTime d) => DateTime(d.year, d.month, 1);
   static DateTime lastOfMonth(DateTime d) => DateTime(d.year, d.month + 1, 0);

@@ -61,14 +61,14 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.role == null ? 'New role' : 'Edit role'),
+        title: Text(widget.role == null ? tr('New role') : tr('Edit role')),
         actions: [
           if (widget.role != null)
             IconButton(
               icon: const Icon(Icons.delete_outline),
               onPressed: () async {
                 final ok = await confirm(context,
-                    title: 'Delete ${widget.role!.name}?',
+                    title: trf('Delete {name}?', {'name': widget.role!.name}),
                     message: tr('Only possible when nobody has this role.'),
                     confirmLabel: tr('Delete'),
                     danger: true);
@@ -92,13 +92,13 @@ class _RoleFormScreenState extends ConsumerState<RoleFormScreen> {
             decoration: InputDecoration(labelText: tr('Role name'), hintText: tr('e.g. Site manager')),
           ),
           for (final g in Perm.groups.entries) ...[
-            SectionTitle(g.key.toUpperCase(), padding: const EdgeInsets.fromLTRB(2, 20, 2, 6)),
+            SectionTitle(tr(g.key).toUpperCase(), padding: const EdgeInsets.fromLTRB(2, 20, 2, 6)),
             AppCard(
               padding: EdgeInsets.zero,
               child: Column(children: [
                 for (var i = 0; i < g.value.length; i++) ...[
                   SwitchListTile(
-                    title: Text(g.value[i].$2),
+                    title: Text(tr(g.value[i].$2)),
                     value: _perms.contains(g.value[i].$1),
                     activeThumbColor: Palette.brand,
                     onChanged: (v) => _toggle(g.value[i].$1, v),

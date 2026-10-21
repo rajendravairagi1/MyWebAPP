@@ -49,11 +49,11 @@ class MoreScreen extends ConsumerWidget {
             const SizedBox(width: 14),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(profile?.name.isNotEmpty == true ? profile!.name : 'Set up your business',
+                Text(profile?.name.isNotEmpty == true ? profile!.name : tr('Set up your business'),
                     style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 3),
                 Row(children: [
-                  Pill(plan.title),
+                  Pill(tr(plan.title)),
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text('${s.staff?.name ?? ''} • ${s.role?.name ?? ''}',
@@ -96,13 +96,13 @@ class MoreScreen extends ConsumerWidget {
           SectionTitle(tr('ADMINISTRATION')),
           GroupCard(children: [
             if (s.can(Perm.staffManage))
-              MenuTile(icon: Icons.groups_2_outlined, title: tr('Team & roles'), subtitle: plan.hasTeam ? 'Supervisors, accountants, custom roles' : 'Available on Owner + Team', onTap: () => go(const TeamScreen())),
+              MenuTile(icon: Icons.groups_2_outlined, title: tr('Team & roles'), subtitle: plan.hasTeam ? tr('Supervisors, accountants, custom roles') : tr('Available on Owner + Team'), onTap: () => go(const TeamScreen())),
             if (s.can(Perm.branchesManage) && plan.multiBranch)
               MenuTile(icon: Icons.account_tree_outlined, title: tr('Branches'), onTap: () => go(const BranchesScreen())),
             if (s.can(Perm.settingsManage))
               MenuTile(icon: Icons.business_center_outlined, title: tr('Business profile'), subtitle: tr('Logo, tax, bank, UPI, invoice details'), onTap: () => go(const BusinessProfileScreen())),
             if (s.can(Perm.settingsManage))
-              MenuTile(icon: Icons.workspace_premium_outlined, title: tr('Plan'), subtitle: plan.title, color: Palette.half, onTap: () => go(const PlanSettingsScreen())),
+              MenuTile(icon: Icons.workspace_premium_outlined, title: tr('Plan'), subtitle: tr(plan.title), color: Palette.half, onTap: () => go(const PlanSettingsScreen())),
           ]),
         ],
         SectionTitle(tr('ACCOUNT')),

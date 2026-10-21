@@ -130,7 +130,7 @@ class _Feature extends StatelessWidget {
           ),
           const SizedBox(width: 14),
           Expanded(
-            child: Text(text, style: const TextStyle(color: Colors.white, fontSize: 14.5, height: 1.3)),
+            child: Text(tr(text), style: const TextStyle(color: Colors.white, fontSize: 14.5, height: 1.3)),
           ),
         ],
       ),

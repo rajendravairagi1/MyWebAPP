@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../core/i18n.dart';
+
 import '../../core/dates.dart';
 import '../../core/money.dart';
 import '../../core/theme.dart';
@@ -114,7 +116,7 @@ class _WeekChartState extends State<WeekChart> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Wrap(
+        Wrap(
           spacing: 16,
           runSpacing: 4,
           children: [
@@ -170,7 +172,7 @@ class _Legend extends StatelessWidget {
           decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
         ),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 12, color: Palette.muted, fontWeight: FontWeight.w600)),
+        Text(tr(label), style: const TextStyle(fontSize: 12, color: Palette.muted, fontWeight: FontWeight.w600)),
       ]);
 }
 

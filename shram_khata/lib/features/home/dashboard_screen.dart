@@ -97,7 +97,7 @@ class _Header extends ConsumerWidget {
                 Icon(Icons.apartment, size: 16, color: Palette.brandDark),
                 const SizedBox(width: 6),
                 Text(
-                  scope == null ? 'All branches' : allowed.firstWhere((b) => b.id == scope).name,
+                  scope == null ? tr('All branches') : allowed.firstWhere((b) => b.id == scope).name,
                   style: TextStyle(fontWeight: FontWeight.w700, color: Palette.brandDark, fontSize: 13),
                 ),
                 Icon(Icons.arrow_drop_down, color: Palette.brandDark),
@@ -119,7 +119,7 @@ class DateBar extends ConsumerWidget {
     final notifier = ref.read(selectedDateProvider.notifier);
     final today = D.isToday(date);
     final yesterday = D.ymd(date) == D.ymd(D.addDays(DateTime.now(), -1));
-    final label = today ? 'Today' : (yesterday ? 'Yesterday' : D.weekday(date));
+    final label = today ? tr('Today') : (yesterday ? tr('Yesterday') : D.weekday(date));
     return Container(
       decoration: BoxDecoration(
         color: Palette.surface,
@@ -207,8 +207,8 @@ class _Body extends ConsumerWidget {
               label: tr('Paid out'),
               value: Money.compact(d.paidOut),
               hint: d.advanceToday > 0
-                  ? 'incl. ${Money.compact(d.advanceToday)} advance'
-                  : 'cash / UPI / bank',
+                  ? trf('incl. {amount} advance', {'amount': Money.compact(d.advanceToday)})
+                  : tr('cash / UPI / bank'),
               icon: Icons.payments_outlined,
               color: Palette.info,
             ),
@@ -282,7 +282,8 @@ class _Body extends ConsumerWidget {
         const SizedBox(height: 8),
         Center(
           child: Text(
-            '${d.activeCompanies} companies • ${d.activeSites} sites • ${d.totalLabour} active labour',
+            trf('{companies} companies • {sites} sites • {labour} active labour',
+                {'companies': d.activeCompanies, 'sites': d.activeSites, 'labour': d.totalLabour}),
             style: const TextStyle(fontSize: 12, color: Palette.muted),
           ),
         ),
@@ -325,8 +326,8 @@ class _Body extends ConsumerWidget {
       out.add(alert(
         Icons.pending_actions,
         Palette.half,
-        '${p.site.name} not submitted',
-        '${p.company.name} • ${p.headcount} labour',
+        trf('{site} not submitted', {'site': p.site.name}),
+        trf('{company} • {n} labour', {'company': p.company.name, 'n': p.headcount}),
         onTap: session.can(Perm.attendanceMark)
             ? () => Navigator.push(
                   context,
@@ -339,30 +340,41 @@ class _Body extends ConsumerWidget {
     }
     if (d.pendingSites.length > 4) {
       out.add(alert(Icons.more_horiz, Palette.muted,
-          '${d.pendingSites.length - 4} more sites pending', isToday ? 'Open Attendance tab' : ''));
+          trf('{n} more sites pending', {'n': d.pendingSites.length - 4}), isToday ? tr('Open Attendance tab') : ''));
     }
     if (d.overdueInvoices > 0) {
       out.add(alert(Icons.warning_amber_rounded, Palette.absent,
-          '${d.overdueInvoices} overdue invoice${d.overdueInvoices == 1 ? '' : 's'}', 'Follow up with the company',
+          d.overdueInvoices == 1
+              ? trf('{n} overdue invoice', {'n': d.overdueInvoices})
+              : trf('{n} overdue invoices', {'n': d.overdueInvoices}),
+          tr('Follow up with the company'),
           onTap: session.can(Perm.billingView)
               ? () => Navigator.push(context, MaterialPageRoute(builder: (_) => const InvoicesScreen()))
               : null));
     }
     if (d.missingRateEntries > 0) {
       out.add(alert(Icons.currency_rupee, Palette.half,
-          '${d.missingRateEntries} entries have no billing rate',
-          'Add the skill to the company contract so it is billed'));
+          d.missingRateEntries == 1
+              ? trf('{n} entry has no billing rate', {'n': d.missingRateEntries})
+              : trf('{n} entries have no billing rate', {'n': d.missingRateEntries}),
+          tr('Add the skill to the company contract so it is billed')));
     }
     if (d.expiringDocs > 0) {
       out.add(alert(Icons.badge_outlined, Palette.info,
-          '${d.expiringDocs} document${d.expiringDocs == 1 ? '' : 's'} expiring soon', 'Check labour documents',
+          d.expiringDocs == 1
+              ? trf('{n} document expiring soon', {'n': d.expiringDocs})
+              : trf('{n} documents expiring soon', {'n': d.expiringDocs}),
+          tr('Check labour documents'),
           onTap: session.can(Perm.labourView)
               ? () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LabourListScreen(standalone: true)))
               : null));
     }
     if (d.expiringContracts > 0) {
       out.add(alert(Icons.event_busy_outlined, Palette.info,
-          '${d.expiringContracts} contract${d.expiringContracts == 1 ? '' : 's'} ending within 30 days', 'Renew with the company'));
+          d.expiringContracts == 1
+              ? trf('{n} contract ending within 30 days', {'n': d.expiringContracts})
+              : trf('{n} contracts ending within 30 days', {'n': d.expiringContracts}),
+          tr('Renew with the company')));
     }
     return out;
   }
@@ -401,7 +413,7 @@ class _Hero extends StatelessWidget {
             Text(tr('ATTENDANCE'),
                 style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700, letterSpacing: 1)),
             const Spacer(),
-            if (d.otHours > 0) Pill('OT ${num1(d.otHours)}h', color: Colors.white, bg: Colors.white24),
+            if (d.otHours > 0) Pill(trf('OT {h}h', {'h': num1(d.otHours)}), color: Colors.white, bg: Colors.white24),
           ]),
           const SizedBox(height: 12),
           Row(
@@ -424,10 +436,10 @@ class _Hero extends StatelessWidget {
               const SizedBox(width: 20),
               Expanded(
                 child: Column(children: [
-                  legend(const Color(0xFF4ADE80), 'Present', d.present),
-                  legend(const Color(0xFFFBBF24), 'Half day', d.half),
-                  legend(const Color(0xFFF87171), 'Absent', d.absent),
-                  legend(const Color(0x66FFFFFF), 'Not marked', d.notMarked),
+                  legend(const Color(0xFF4ADE80), tr('Present'), d.present),
+                  legend(const Color(0xFFFBBF24), tr('Half day'), d.half),
+                  legend(const Color(0xFFF87171), tr('Absent'), d.absent),
+                  legend(const Color(0x66FFFFFF), tr('Not marked'), d.notMarked),
                 ]),
               ),
             ],
@@ -440,9 +452,9 @@ class _Hero extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(children: [
-              Expanded(child: _HeroStat('Total labour', '${d.totalLabour}')),
-              Expanded(child: _HeroStat('Deployed', '${d.deployed}')),
-              Expanded(child: _HeroStat('On bench', '${(d.totalLabour - d.deployed).clamp(0, 1 << 30)}')),
+              Expanded(child: _HeroStat(tr('Total labour'), '${d.totalLabour}')),
+              Expanded(child: _HeroStat(tr('Deployed'), '${d.deployed}')),
+              Expanded(child: _HeroStat(tr('On bench'), '${(d.totalLabour - d.deployed).clamp(0, 1 << 30)}')),
             ]),
           ),
         ],
@@ -509,10 +521,10 @@ class _CompanyRow extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Row(children: [
-            Text('${row.present}P  ${row.half}H  ${row.absent}A',
+            Text(trf('{p}P  {h}H  {a}A', {'p': row.present, 'h': row.half, 'a': row.absent}),
                 style: const TextStyle(fontSize: 12, color: Palette.muted, fontWeight: FontWeight.w600)),
             const Spacer(),
-            Text('${Money.compact(row.billing)} earned',
+            Text(trf('{amount} earned', {'amount': Money.compact(row.billing)}),
                 style: const TextStyle(fontSize: 12, color: Palette.muted)),
           ]),
         ],

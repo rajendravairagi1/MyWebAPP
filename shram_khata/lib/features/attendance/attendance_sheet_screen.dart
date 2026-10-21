@@ -72,7 +72,7 @@ class AttendanceSheetScreen extends ConsumerWidget {
     );
     if (l == null) return;
     await ref.read(attendanceServiceProvider).addToSheet(siteId: siteId, labourId: l.id, date: date);
-    if (context.mounted) showInfo(context, '${l.name} added to ${current.site.name}');
+    if (context.mounted) showInfo(context, trf('{name} added to {site}', {'name': l.name, 'site': current.site.name}));
   }
 }
 
@@ -121,7 +121,7 @@ class _SheetBody extends ConsumerWidget {
             staffId: session.staff?.id,
             canEditLocked: session.can(Perm.attendanceEditLocked),
           );
-      if (context.mounted) showInfo(context, n == 0 ? 'Everyone is already marked' : '$n marked present');
+      if (context.mounted) showInfo(context, n == 0 ? tr('Everyone is already marked') : trf('{n} marked present', {'n': n}));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -132,8 +132,8 @@ class _SheetBody extends ConsumerWidget {
     if (sheet.unmarked > 0) {
       final ok = await confirm(
         context,
-        title: '${sheet.unmarked} not marked',
-        message: 'Mark the remaining ${sheet.unmarked} as absent and submit? The sheet will be locked.',
+        title: trf('{n} not marked', {'n': sheet.unmarked}),
+        message: trf('Mark the remaining {n} as absent and submit? The sheet will be locked.', {'n': sheet.unmarked}),
         confirmLabel: tr('Mark absent & submit'),
       );
       if (!ok) return;
@@ -143,7 +143,8 @@ class _SheetBody extends ConsumerWidget {
         context,
         title: tr('Submit attendance?'),
         message:
-            'Present ${sheet.present} • Half ${sheet.half} • Absent ${sheet.absent}.\nThe sheet will be locked; only the owner can change it afterwards.',
+            trf('Present {present} • Half {half} • Absent {absent}.\nThe sheet will be locked; only the owner can change it afterwards.',
+                {'present': sheet.present, 'half': sheet.half, 'absent': sheet.absent}),
         confirmLabel: tr('Submit'),
       );
       if (!ok) return;
@@ -155,7 +156,7 @@ class _SheetBody extends ConsumerWidget {
             staffId: session.staff?.id,
             markRestAbsent: restAbsent,
           );
-      if (context.mounted) showInfo(context, 'Attendance submitted');
+      if (context.mounted) showInfo(context, tr('Attendance submitted'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -181,8 +182,10 @@ class _SheetBody extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Submitted at ${TimeOfDay.fromDateTime(sheet.submitted!.submittedAt).format(context)}. '
-                  '${locked ? 'Locked.' : 'You can still edit or unlock.'}',
+                  trf('Submitted at {time}. {note}', {
+                    'time': TimeOfDay.fromDateTime(sheet.submitted!.submittedAt).format(context),
+                    'note': locked ? tr('Locked.') : tr('You can still edit or unlock.'),
+                  }),
                   style: const TextStyle(color: Palette.present, fontWeight: FontWeight.w600, fontSize: 13),
                 ),
               ),
@@ -263,7 +266,7 @@ class _Summary extends StatelessWidget {
             decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(12)),
             child: Column(children: [
               Text('$n', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: color)),
-              Text(label, style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: color)),
+              Text(tr(label), style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: color)),
             ]),
           ),
         );
@@ -307,7 +310,7 @@ class _Row extends StatelessWidget {
                 Text(
                   row.otherSites.isEmpty
                       ? l.skill
-                      : '${l.skill} • also at ${row.otherSites.join(', ')}',
+                      : trf('{skill} • also at {sites}', {'skill': l.skill, 'sites': row.otherSites.join(', ')}),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Palette.muted, fontSize: 12.5),
@@ -369,7 +372,7 @@ class _OtRow extends StatelessWidget {
           ),
           SizedBox(
             width: 52,
-            child: Text('${num1(hours)} h',
+            child: Text(trf('{h} h', {'h': num1(hours)}),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: has ? Palette.info : Palette.ink)),
           ),
@@ -385,7 +388,7 @@ class _OtRow extends StatelessWidget {
             for (final h in const [1.0, 2.0, 3.0, 4.0])
               ChoiceChip(
                 visualDensity: VisualDensity.compact,
-                label: Text('${num1(h)}h'),
+                label: Text(trf('{h}h', {'h': num1(h)})),
                 selected: hours == h,
                 onSelected: editable ? (_) => onChanged(hours == h ? 0 : h) : null,
               ),
@@ -412,7 +415,7 @@ class _StatusButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = Palette.status(letter);
-    final label = switch (letter) { 'P' => 'Present', 'H' => 'Half', _ => 'Absent' };
+    final label = switch (letter) { 'P' => tr('Present'), 'H' => tr('Half'), _ => tr('Absent') };
     return Opacity(
       opacity: enabled || selected ? 1 : 0.35,
       child: Material(

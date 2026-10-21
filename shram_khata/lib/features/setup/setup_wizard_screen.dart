@@ -96,7 +96,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final titles = ['Your business', 'Your first company'];
+    final titles = [tr('Your business'), tr('Your first company')];
     // Live preview: the wizard repaints in the chosen colour straight away.
     return Theme(
       data: buildTheme(),
@@ -226,17 +226,17 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           child: Text(tr('Finish setup')),
         ),
         children: [
-          const Text(
-            'Which company do your workers work for? You can add more companies later. '
-            'Each worker is attached to a company and a site.',
-            style: TextStyle(color: Palette.muted),
+          Text(
+            tr('Which company do your workers work for? You can add more companies later. '
+            'Each worker is attached to a company and a site.'),
+            style: const TextStyle(color: Palette.muted),
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _company,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(labelText: tr('Company name *')),
-            validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the company name' : null,
+            validator: (v) => (v ?? '').trim().isEmpty ? tr('Enter the company name') : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
@@ -254,7 +254,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                   child: TextFormField(
                     controller: _siteCtrls[i],
                     textCapitalization: TextCapitalization.words,
-                    decoration: InputDecoration(labelText: 'Site ${i + 1} (e.g. Plant 1)'),
+                    decoration: InputDecoration(labelText: trf('Site {n} (e.g. Plant 1)', {'n': i + 1})),
                   ),
                 ),
                 if (_siteCtrls.length > 1)

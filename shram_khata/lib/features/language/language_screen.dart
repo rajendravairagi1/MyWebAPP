@@ -18,7 +18,7 @@ class LanguageScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: !first,
-        title: const Text('Choose language / भाषा चुनें'),
+        title: Text(tr('Choose language / भाषा चुनें')),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),

@@ -67,7 +67,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             Row(children: [
               Pill(tr('Plan'), color: Palette.muted),
               const SizedBox(width: 8),
-              Text(widget.plan.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+              Text(tr(widget.plan.title), style: const TextStyle(fontWeight: FontWeight.w700)),
             ]),
             const SizedBox(height: 16),
             TextFormField(
@@ -77,7 +77,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 labelText: tr('Agency / business name'),
                 prefixIcon: Icon(Icons.storefront_outlined),
               ),
-              validator: (v) => (v ?? '').trim().isEmpty ? 'Enter your business name' : null,
+              validator: (v) => (v ?? '').trim().isEmpty ? tr('Enter your business name') : null,
             ),
             const SizedBox(height: 14),
             TextFormField(
@@ -87,7 +87,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 labelText: tr('Your name'),
                 prefixIcon: Icon(Icons.person_outline),
               ),
-              validator: (v) => (v ?? '').trim().isEmpty ? 'Enter your name' : null,
+              validator: (v) => (v ?? '').trim().isEmpty ? tr('Enter your name') : null,
             ),
             const SizedBox(height: 14),
             TextFormField(
@@ -98,7 +98,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 labelText: tr('Email'),
                 prefixIcon: Icon(Icons.mail_outline),
               ),
-              validator: (v) => Security.isEmail(v ?? '') ? null : 'Enter a valid email',
+              validator: (v) => Security.isEmail(v ?? '') ? null : tr('Enter a valid email'),
             ),
             const SizedBox(height: 14),
             TextFormField(
@@ -109,7 +109,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 labelText: tr('Mobile number'),
                 prefixIcon: Icon(Icons.phone_outlined),
               ),
-              validator: (v) => (v ?? '').length >= 7 ? null : 'Enter your mobile number',
+              validator: (v) => (v ?? '').length >= 7 ? null : tr('Enter your mobile number'),
             ),
             const SizedBox(height: 14),
             TextFormField(
@@ -123,7 +123,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   onPressed: () => setState(() => _hide = !_hide),
                 ),
               ),
-              validator: (v) => (v ?? '').length < 6 ? 'Use at least 6 characters' : null,
+              validator: (v) => (v ?? '').length < 6 ? tr('Use at least 6 characters') : null,
             ),
             const SizedBox(height: 14),
             TextFormField(
@@ -133,7 +133,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 labelText: tr('Confirm password'),
                 prefixIcon: Icon(Icons.lock_outline),
               ),
-              validator: (v) => v == _password.text ? null : 'Passwords do not match',
+              validator: (v) => v == _password.text ? null : tr('Passwords do not match'),
             ),
             const SizedBox(height: 18),
             AppCard(

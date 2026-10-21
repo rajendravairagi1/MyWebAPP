@@ -90,7 +90,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
-                  label: Text(e.$2),
+                  label: Text(tr(e.$2)),
                   selected: _range == e.$1,
                   onSelected: (_) => setState(() => _range = e.$1),
                 ),
@@ -144,7 +144,7 @@ class _PaymentsScreenState extends ConsumerState<PaymentsScreen> {
               ),
               for (final e in byDate.entries) ...[
                 SectionTitle(
-                  D.isToday(D.parse(e.key)) ? 'TODAY' : D.show(e.key).toUpperCase(),
+                  D.isToday(D.parse(e.key)) ? tr('TODAY') : D.show(e.key).toUpperCase(),
                   padding: const EdgeInsets.fromLTRB(4, 18, 4, 8),
                 ),
                 AppCard(
@@ -237,7 +237,7 @@ class _BalancesState extends ConsumerState<_Balances> {
                         ),
                         Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                           BalanceText(bal[l.id]!, size: 16),
-                          Text(bal[l.id]! > 0 ? 'to pay' : 'advance',
+                          Text(bal[l.id]! > 0 ? tr('to pay') : tr('advance'),
                               style: const TextStyle(fontSize: 11, color: Palette.muted)),
                         ]),
                       ]),

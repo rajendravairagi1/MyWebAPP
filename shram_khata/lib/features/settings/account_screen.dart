@@ -28,15 +28,15 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
 
   Future<void> _change() async {
     final s = ref.read(sessionProvider);
-    if (_new.text != _confirm.text) return showError(context, 'New entries do not match');
+    if (_new.text != _confirm.text) return showError(context, tr('New entries do not match'));
     try {
       final ok = await ref.read(workspaceServiceProvider).changeOwnSecret(s.staff!.id, _old.text, _new.text);
       if (!mounted) return;
-      if (!ok) return showError(context, 'Current password / PIN is wrong');
+      if (!ok) return showError(context, tr('Current password / PIN is wrong'));
       _old.clear();
       _new.clear();
       _confirm.clear();
-      showInfo(context, 'Updated');
+      showInfo(context, tr('Updated'));
     } catch (e) {
       if (mounted) showError(context, e);
     }

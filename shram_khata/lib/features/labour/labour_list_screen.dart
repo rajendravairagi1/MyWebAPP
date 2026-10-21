@@ -84,9 +84,11 @@ class _LabourListScreenState extends ConsumerState<LabourListScreen> {
                 if (all.isEmpty) {
                   return EmptyState(
                     icon: Icons.groups_outlined,
-                    title: _q.isEmpty ? 'No ${tr(LabourStatus.label(_status)).toLowerCase()} labour' : 'No match',
+                    title: _q.isEmpty
+                        ? trf('No {status} labour', {'status': tr(LabourStatus.label(_status)).toLowerCase()})
+                        : tr('No match'),
                     message: _q.isEmpty && _status == LabourStatus.active
-                        ? 'Add your first labourer to start taking attendance.'
+                        ? tr('Add your first labourer to start taking attendance.')
                         : null,
                   );
                 }
@@ -108,7 +110,7 @@ class _LabourListScreenState extends ConsumerState<LabourListScreen> {
                       ),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 6, left: 4),
-                      child: Text('${rows.length} ${rows.length == 1 ? 'person' : 'people'}',
+                      child: Text(rows.length == 1 ? trf('{n} person', {'n': rows.length}) : trf('{n} people', {'n': rows.length}),
                           style: const TextStyle(color: Palette.muted, fontSize: 12.5)),
                     ),
                     for (final l in rows)
@@ -138,7 +140,7 @@ class _LabourListScreenState extends ConsumerState<LabourListScreen> {
                             if (balances != null && balances[l.id] != null && balances[l.id] != 0)
                               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                                 BalanceText(balances[l.id]!),
-                                Text(balances[l.id]! > 0 ? 'to pay' : 'advance',
+                                Text(balances[l.id]! > 0 ? tr('to pay') : tr('advance'),
                                     style: const TextStyle(fontSize: 11, color: Palette.muted)),
                               ])
                             else if (balances != null)

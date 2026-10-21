@@ -168,7 +168,7 @@ class CompanyDetailScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setS) => AlertDialog(
-          title: Text(site == null ? 'Add site' : 'Edit site'),
+          title: Text(site == null ? tr('Add site') : tr('Edit site')),
           content: Column(mainAxisSize: MainAxisSize.min, children: [
             TextField(
               controller: name,
@@ -237,7 +237,9 @@ class _ContractCard extends StatelessWidget {
         ]),
         const SizedBox(height: 2),
         Text(
-          '${D.show(k.startDate)} – ${k.endDate == null ? 'open ended' : D.show(k.endDate!)} • ${k.paymentTermsDays} day terms',
+          k.endDate == null
+              ? trf('{from} – open ended • {days} day terms', {'from': D.show(k.startDate), 'days': k.paymentTermsDays})
+              : trf('{from} – {to} • {days} day terms', {'from': D.show(k.startDate), 'to': D.show(k.endDate!), 'days': k.paymentTermsDays}),
           style: const TextStyle(color: Palette.muted, fontSize: 12.5),
         ),
         const SizedBox(height: 10),
@@ -249,7 +251,7 @@ class _ContractCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(color: Palette.brandTint, borderRadius: BorderRadius.circular(10)),
-                child: Text('${r.skill}  ${Money.format(r.perDay)}/day',
+                child: Text(trf('{skill}  {amount}/day', {'skill': r.skill, 'amount': Money.format(r.perDay)}),
                     style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5, color: Palette.brandDark)),
               ),
           ]),

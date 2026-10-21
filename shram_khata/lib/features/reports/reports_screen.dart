@@ -33,9 +33,9 @@ class ReportsScreen extends ConsumerWidget {
               const SizedBox(width: 14),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5)),
+                  Text(tr(title), style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5)),
                   const SizedBox(height: 2),
-                  Text(sub, style: const TextStyle(color: Palette.muted, fontSize: 12.5, height: 1.3)),
+                  Text(tr(sub), style: const TextStyle(color: Palette.muted, fontSize: 12.5, height: 1.3)),
                 ]),
               ),
               const Icon(Icons.chevron_right, color: Palette.muted),

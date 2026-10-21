@@ -67,7 +67,7 @@ class BranchesScreen extends ConsumerWidget {
         padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
         child: SingleChildScrollView(
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(branch == null ? 'Add branch' : 'Edit branch', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            Text(branch == null ? tr('Add branch') : tr('Edit branch'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             const SizedBox(height: 14),
             TextField(controller: name, textCapitalization: TextCapitalization.words, decoration: InputDecoration(labelText: tr('Branch name'))),
             const SizedBox(height: 10),

@@ -89,7 +89,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
         final go = await confirm(
           context,
           title: tr('Mobile already used'),
-          message: '${dup.name} already has this mobile number. Save anyway?',
+          message: trf('{name} already has this mobile number. Save anyway?', {'name': dup.name}),
           confirmLabel: tr('Save anyway'),
         );
         if (!go) return;
@@ -108,9 +108,9 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
         );
       } else {
         final branch = _branchId ?? ref.read(writeBranchProvider);
-        if (branch == null) throw AppException('No branch found.');
+        if (branch == null) throw AppException(tr('No branch found.'));
         if (_sites.isEmpty) {
-          throw AppException('Choose the company and site this worker works at.');
+          throw AppException(tr('Choose the company and site this worker works at.'));
         }
         await svc.add(
           branchId: branch,
@@ -145,13 +145,13 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
     final allowed = ref.watch(allowedBranchesProvider);
     final showBranch = !_editing && plan.multiBranch && scope == null && allowed.length > 1;
     return Scaffold(
-      appBar: AppBar(title: Text(_editing ? 'Edit labour' : 'Add labour')),
+      appBar: AppBar(title: Text(_editing ? tr('Edit labour') : tr('Add labour'))),
       body: Form(
         key: _form,
         child: FormBody(
           bottom: FilledButton(
             onPressed: _busy ? null : _save,
-            child: Text(_editing ? 'Save changes' : 'Add labour'),
+            child: Text(_editing ? tr('Save changes') : tr('Add labour')),
           ),
           children: [
             Center(
@@ -182,13 +182,13 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
               textCapitalization: TextCapitalization.words,
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(labelText: tr('Full name *')),
-              validator: (v) => (v ?? '').trim().isEmpty ? 'Enter the name' : null,
+              validator: (v) => (v ?? '').trim().isEmpty ? tr('Enter the name') : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _father,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: "Father's / husband's name"),
+              decoration: InputDecoration(labelText: tr("Father's / husband's name")),
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -208,7 +208,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
             Wrap(spacing: 6, runSpacing: 6, children: [
               for (final s in LabourService.defaultSkills)
                 ActionChip(
-                  label: Text(s, style: const TextStyle(fontSize: 12)),
+                  label: Text(tr(s), style: const TextStyle(fontSize: 12)),
                   visualDensity: VisualDensity.compact,
                   backgroundColor: _skill.text == s ? Palette.brandTint : null,
                   onPressed: () => setState(() => _skill.text = s),
@@ -245,13 +245,13 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
                 controller: _amount,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
-                  labelText: _payType == 'daily' ? 'Salary per day *' : 'Salary per month *',
+                  labelText: _payType == 'daily' ? tr('Salary per day *') : tr('Salary per month *'),
                   prefixText: '${Money.symbol} ',
                   helperText: _payType == 'monthly'
-                      ? 'Converted to a daily rate for attendance and overtime.'
+                      ? tr('Converted to a daily rate for attendance and overtime.')
                       : null,
                 ),
-                validator: (v) => (Money.parse(v ?? '') ?? 0) <= 0 ? 'Enter the rate' : null,
+                validator: (v) => (Money.parse(v ?? '') ?? 0) <= 0 ? tr('Enter the rate') : null,
               ),
               const SizedBox(height: 12),
               TextFormField(

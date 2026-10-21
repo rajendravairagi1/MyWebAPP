@@ -87,7 +87,7 @@ class _People extends ConsumerWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text('${s.name}${s.id == me.staff?.id ? ' (you)' : ''}',
+                    Text('${s.name}${s.id == me.staff?.id ? ' ${tr('(you)')}' : ''}',
                         style: const TextStyle(fontWeight: FontWeight.w800)),
                     Text([if (s.mobile.isNotEmpty) s.mobile, if (s.email.isNotEmpty) s.email].join(' • '),
                         style: const TextStyle(color: Palette.muted, fontSize: 12.5)),
@@ -144,7 +144,7 @@ class _Roles extends ConsumerWidget {
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(r.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15.5)),
-                    Text(r.isSystem ? 'Built-in • $count permissions' : 'Custom • $count permissions',
+                    Text(r.isSystem ? trf('Built-in • {count} permissions', {'count': count}) : trf('Custom • {count} permissions', {'count': count}),
                         style: const TextStyle(color: Palette.muted, fontSize: 12.5)),
                   ]),
                 ),

@@ -53,7 +53,7 @@ class StatementPdf {
           ? pw.SizedBox()
           : pw.Padding(
               padding: const pw.EdgeInsets.only(bottom: 8),
-              child: pw.Text('${d.labour.name} • ${D.show(d.from)} to ${D.show(d.to)}',
+              child: pw.Text('${d.labour.name} • ${D.showEn(d.from)} to ${D.showEn(d.to)}',
                   style: PdfKit.t(8.5, color: PdfKit.muted)),
             ),
       footer: (ctx) => PdfKit.footer(ctx, d.profile, assets),
@@ -63,8 +63,8 @@ class StatementPdf {
           assets,
           title: 'LABOUR STATEMENT',
           meta: [
-            ('Period', '${D.show(d.from)} – ${D.show(d.to)}'),
-            ('Generated', D.showDt(DateTime.now())),
+            ('Period', '${D.showEn(d.from)} – ${D.showEn(d.to)}'),
+            ('Generated', D.showDtEn(DateTime.now())),
           ],
         ),
         pw.SizedBox(height: 10),
@@ -146,7 +146,7 @@ class StatementPdf {
                 PdfKit.kv('Pay rate', rateText, size: 8.5),
                 if (rate != null)
                   PdfKit.kv('Overtime', '${Money.format(rate.otPerHourPaise)} / hour', size: 8.5),
-                PdfKit.kv('Joined', D.show(lb.joinDate), size: 8.5),
+                PdfKit.kv('Joined', D.showEn(lb.joinDate), size: 8.5),
                 PdfKit.kv('Status', lb.status[0].toUpperCase() + lb.status.substring(1), size: 8.5),
               ],
             ),
@@ -194,7 +194,7 @@ class StatementPdf {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        pw.Text(D.monthTitle(month), style: PdfKit.t(10.5, bold: true, color: PdfKit.brandDark)),
+        pw.Text(D.monthTitleEn(month), style: PdfKit.t(10.5, bold: true, color: PdfKit.brandDark)),
         pw.SizedBox(height: 4),
         pw.Table(
           border: pw.TableBorder.all(color: PdfKit.line, width: 0.6),
@@ -376,7 +376,7 @@ class StatementPdf {
                   border: pw.Border(bottom: pw.BorderSide(color: PdfKit.line, width: 0.5)),
                 ),
                 children: [
-                  PdfKit.cell(D.showShort(d.payments[i].date)),
+                  PdfKit.cell(D.showShortEn(d.payments[i].date)),
                   PdfKit.cell(PayType.label(d.payments[i].type)),
                   PdfKit.cell(d.payments[i].type == PayType.deduction
                       ? '—'

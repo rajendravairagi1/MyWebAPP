@@ -96,7 +96,7 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
     final plan = ref.watch(planProvider);
     final branches = ref.watch(branchesProvider).value ?? const <Branch>[];
     return Scaffold(
-      appBar: AppBar(title: Text(_editing ? 'Edit member' : 'Add member')),
+      appBar: AppBar(title: Text(_editing ? tr('Edit member') : tr('Add member'))),
       body: FormBody(
         bottom: FilledButton(onPressed: _busy ? null : _save, child: Text(tr('Save'))),
         children: [
@@ -134,7 +134,7 @@ class _StaffFormScreenState extends ConsumerState<StaffFormScreen> {
             obscureText: true,
             inputFormatters: [FilteringTextInputFormatter.digitsOnly, LengthLimitingTextInputFormatter(8)],
             decoration: InputDecoration(
-              labelText: _editing ? 'New PIN (leave empty to keep)' : 'PIN (4–8 digits)',
+              labelText: _editing ? tr('New PIN (leave empty to keep)') : tr('PIN (4–8 digits)'),
               helperText: tr('They sign in with their mobile number and this PIN.'),
             ),
           ),

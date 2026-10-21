@@ -32,14 +32,14 @@ class _PlanSettingsScreenState extends ConsumerState<PlanSettingsScreen> {
                   try {
                     await ref.read(workspaceServiceProvider).changePlan(sel, staffId: ref.read(sessionProvider).staff?.id);
                     if (context.mounted) {
-                      showInfo(context, 'Switched to ${sel.title}');
+                      showInfo(context, trf('Switched to {plan}', {'plan': tr(sel.title)}));
                       setState(() => _picked = null);
                     }
                   } catch (e) {
                     if (context.mounted) showError(context, e);
                   }
                 },
-          child: Text(sel == current ? 'Current plan' : 'Switch to ${sel.title}'),
+          child: Text(sel == current ? tr('Current plan') : trf('Switch to {plan}', {'plan': tr(sel.title)})),
         ),
         children: [
           for (final p in Plan.values)

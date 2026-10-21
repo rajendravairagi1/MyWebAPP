@@ -5,6 +5,7 @@ require __DIR__ . '/lib/util.php';
 require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/sync.php';
+require __DIR__ . '/lib/feedback.php';
 
 const API_VERSION = '1.0.0';
 
@@ -67,8 +68,13 @@ if ($path === '/v1/auth/register' && $method === 'POST') {
     $dup->execute([$email, $mobile]);
     if ($dup->fetchColumn()) throw new ApiError(409, 'An account with this email or mobile already exists.', 'exists');
 
-    $agencyId = uuid4();
-    $userId = uuid4();
+    // The app may bring its own ids so that the person's id on the server matches
+    // the id of their row inside the synced data.
+    $agencyId = valid_uuid($b['agencyId'] ?? null) ? $b['agencyId'] : uuid4();
+    $userId = valid_uuid($b['userId'] ?? null) ? $b['userId'] : uuid4();
+    $taken = $pdo->prepare('SELECT 1 FROM agencies WHERE id = ? UNION SELECT 1 FROM users WHERE id = ?');
+    $taken->execute([$agencyId, $userId]);
+    if ($taken->fetchColumn()) throw new ApiError(409, 'This workspace is already registered. Sign in instead.', 'exists');
     $pdo->beginTransaction();
     try {
         $pdo->prepare('INSERT INTO agencies (id, name, plan_id, seq, is_active, created_at) VALUES (?, ?, ?, 0, 1, ?)')
@@ -181,7 +187,10 @@ if ($path === '/v1/users' && $method === 'POST') {
     $dup = db()->prepare('SELECT 1 FROM users WHERE (email IS NOT NULL AND email = ?) OR (mobile IS NOT NULL AND mobile = ?) LIMIT 1');
     $dup->execute([$email, $mobile]);
     if ($dup->fetchColumn()) throw new ApiError(409, 'An account with this email or mobile already exists.', 'exists');
-    $id = uuid4();
+    $id = valid_uuid($b['id'] ?? null) ? $b['id'] : uuid4();
+    $idTaken = db()->prepare('SELECT 1 FROM users WHERE id = ?');
+    $idTaken->execute([$id]);
+    if ($idTaken->fetchColumn()) throw new ApiError(409, 'This person already has an account.', 'exists');
     db()->prepare('INSERT INTO users (id, agency_id, name, email, mobile, password_hash, kind, scope_company_id, is_active, created_at)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)')
         ->execute([$id, $user['agency_id'], $name, $email, $mobile, password_hash($password, PASSWORD_DEFAULT), $kind, $scope, now()]);
@@ -209,5 +218,9 @@ if (preg_match('#^/v1/users/([0-9a-f\-]{36})$#', $path, $m) && $method === 'POST
     }
     ok();
 }
+
+if ($path === '/v1/feedback' && $method === 'POST') ok(feedback_create($user));
+if ($path === '/v1/feedback' && $method === 'GET') ok(feedback_list($user));
+if ($path === '/v1/feedback/read' && $method === 'POST') ok(feedback_mark_read($user));
 
 throw new ApiError(404, 'Unknown endpoint.', 'not_found');

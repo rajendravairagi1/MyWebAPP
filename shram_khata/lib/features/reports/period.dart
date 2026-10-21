@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/dates.dart';
+import '../../core/i18n.dart';
 import '../../core/theme.dart';
 
 typedef Period = ({String from, String to});
@@ -17,8 +18,8 @@ Future<Period?> pickPeriod(BuildContext context, {String title = 'Choose period'
       Period p(DateTime a, DateTime b) => (from: D.ymd(a), to: D.ymd(b));
       Widget tile(IconData icon, String label, String sub, Period? v) => ListTile(
             leading: Icon(icon, color: Palette.brand),
-            title: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-            subtitle: Text(sub),
+            title: Text(tr(label), style: const TextStyle(fontWeight: FontWeight.w700)),
+            subtitle: Text(tr(sub)),
             onTap: () async {
               if (v != null) return Navigator.pop(ctx, v);
               final r = await showDateRangePicker(
@@ -38,7 +39,7 @@ Future<Period?> pickPeriod(BuildContext context, {String title = 'Choose period'
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                child: Text(tr(title), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
               ),
             ),
             tile(Icons.calendar_month, 'This month', D.monthTitle(now), p(thisFrom, now)),

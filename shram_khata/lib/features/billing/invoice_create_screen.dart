@@ -104,9 +104,11 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
       builder: (ctx) => Padding(
         padding: EdgeInsets.fromLTRB(20, 0, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('Billing rate for ${l.name}', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          Text(trf('Billing rate for {name}', {'name': l.name}), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
-          Text('${l.skill} • ${num1(l.days)} days${l.otHours > 0 ? ' • ${num1(l.otHours)}h OT' : ''}',
+          Text(l.otHours > 0
+              ? trf('{skill} • {days} days • {ot}h OT', {'skill': l.skill, 'days': num1(l.days), 'ot': num1(l.otHours)})
+              : trf('{skill} • {days} days', {'skill': l.skill, 'days': num1(l.days)}),
               style: const TextStyle(color: Palette.muted)),
           const SizedBox(height: 4),
           Text(tr('This changes only this invoice. To fix it for good, add the skill to the company contract.'),
@@ -171,7 +173,7 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
             ? null
             : FilledButton(
                 onPressed: _busy || d.lines.isEmpty ? null : () => _save(profile),
-                child: Text('Create invoice • ${Money.format(d.subtotal + fee + tax)}'),
+                child: Text(trf('Create invoice • {amount}', {'amount': Money.format(d.subtotal + fee + tax)})),
               ),
         children: [
           DropdownButtonFormField<String>(
@@ -229,14 +231,14 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
             ),
             ActionChip(
               avatar: const Icon(Icons.edit_calendar_outlined, size: 16),
-              label: Text('${D.showShort(D.ymd(_from))} – ${D.show(D.ymd(_to))}'),
+              label: Text(trf('{from} – {to}', {'from': D.showShort(D.ymd(_from)), 'to': D.show(D.ymd(_to))})),
               onPressed: _range,
             ),
           ]),
           if (_error != null)
             Padding(
               padding: const EdgeInsets.only(top: 12),
-              child: Text(_error!, style: const TextStyle(color: Palette.absent)),
+              child: Text(tr(_error!), style: const TextStyle(color: Palette.absent)),
             ),
           if (d != null) ...[
             if (d.overlapping != null)
@@ -250,7 +252,7 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Invoice ${d.overlapping!.number} already covers part of this period. Check you are not billing the same days twice.',
+                        trf('Invoice {number} already covers part of this period. Check you are not billing the same days twice.', {'number': d.overlapping!.number}),
                         style: const TextStyle(color: Palette.half, fontWeight: FontWeight.w600, fontSize: 13),
                       ),
                     ),
@@ -270,7 +272,9 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
                     color: Palette.absentBg,
                     padding: const EdgeInsets.all(12),
                     child: Text(
-                      '${d.missingRates} line${d.missingRates == 1 ? ' has' : 's have'} no billing rate. Tap a line to set it, or add the skill to the contract.',
+                      d.missingRates == 1
+                          ? trf('{n} line has no billing rate. Tap a line to set it, or add the skill to the contract.', {'n': d.missingRates})
+                          : trf('{n} lines have no billing rate. Tap a line to set it, or add the skill to the contract.', {'n': d.missingRates}),
                       style: const TextStyle(color: Palette.absent, fontWeight: FontWeight.w600, fontSize: 13),
                     ),
                   ),
@@ -284,9 +288,20 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
                       title: Text(d.lines[i].name, style: const TextStyle(fontWeight: FontWeight.w700)),
                       subtitle: Text(
                         d.lines[i].missingRate
-                            ? '${d.lines[i].skill} • ${num1(d.lines[i].days)} days • rate missing'
-                            : '${d.lines[i].skill} • ${num1(d.lines[i].days)} d × ${Money.format(d.lines[i].rate)}'
-                                '${d.lines[i].otHours > 0 ? ' + ${num1(d.lines[i].otHours)}h OT' : ''}',
+                            ? trf('{skill} • {days} days • rate missing',
+                                {'skill': d.lines[i].skill, 'days': num1(d.lines[i].days)})
+                            : d.lines[i].otHours > 0
+                                ? trf('{skill} • {days} d × {rate} + {ot}h OT', {
+                                    'skill': d.lines[i].skill,
+                                    'days': num1(d.lines[i].days),
+                                    'rate': Money.format(d.lines[i].rate),
+                                    'ot': num1(d.lines[i].otHours)
+                                  })
+                                : trf('{skill} • {days} d × {rate}', {
+                                    'skill': d.lines[i].skill,
+                                    'days': num1(d.lines[i].days),
+                                    'rate': Money.format(d.lines[i].rate)
+                                  }),
                         style: TextStyle(color: d.lines[i].missingRate ? Palette.absent : null),
                       ),
                       trailing: Text(Money.format(d.lines[i].amount),
@@ -316,7 +331,7 @@ class _InvoiceCreateScreenState extends ConsumerState<InvoiceCreateScreen> {
                             ? trf('Service fee ({pct}%)', {'pct': num1(d.fee.percent)})
                             : tr('Service fee'),
                         Money.format(fee)),
-                  if (taxRate > 0) _total('${profile.taxLabel} @ ${num1(taxRate)}%', Money.format(tax)),
+                  if (taxRate > 0) _total(trf('{tax} @ {rate}%', {'tax': profile.taxLabel, 'rate': num1(taxRate)}), Money.format(tax)),
                   const Divider(height: 18),
                   _total(tr('Total'), Money.format(d.subtotal + fee + tax), big: true),
                 ]),

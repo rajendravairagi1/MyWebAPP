@@ -34,8 +34,8 @@ class _BackupScreenState extends ConsumerState<BackupScreen> {
       await ref.read(databaseProvider).customStatement('VACUUM INTO ?', [path]);
       await SharePlus.instance.share(ShareParams(
         files: [XFile(path)],
-        subject: 'HazriBook backup ${D.today()}',
-        text: 'HazriBook backup. Keep this file safe: it contains all labour and payment data.',
+        subject: trf('HazriBook backup {date}', {'date': D.today()}),
+        text: tr('HazriBook backup. Keep this file safe: it contains all labour and payment data.'),
       ));
     } catch (e) {
       if (mounted) showError(context, e);

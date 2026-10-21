@@ -117,7 +117,7 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(
-                        label: Text(f.$2),
+                        label: Text(tr(f.$2)),
                         selected: _filter == f.$1,
                         onSelected: (_) => setState(() => _filter = f.$1),
                       ),

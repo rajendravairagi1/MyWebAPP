@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -64,7 +65,7 @@ class _ShellState extends ConsumerState<Shell> {
             NavigationDestination(
               icon: Icon(t.icon),
               selectedIcon: Icon(t.selectedIcon),
-              label: t.label,
+              label: tr(t.label),
             ),
         ],
       ),

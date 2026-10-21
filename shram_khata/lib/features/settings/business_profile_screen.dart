@@ -44,7 +44,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
 
   Future<void> _save() async {
     final p = _p!;
-    if (_t('name').isEmpty) return showError(context, 'Business name is required');
+    if (_t('name').isEmpty) return showError(context, tr('Business name is required'));
     final rate = double.tryParse(_t('taxRate')) ?? p.taxRate;
     final next = p.copyWith(
       name: _t('name'),
@@ -77,7 +77,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
     );
     await ref.read(workspaceServiceProvider).saveProfile(next);
     if (mounted) {
-      showInfo(context, 'Saved');
+      showInfo(context, tr('Saved'));
       Navigator.pop(context);
     }
   }
@@ -92,7 +92,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
         maxLines: lines,
         textCapitalization: cap,
         onChanged: (_) => setState(() {}),
-        decoration: InputDecoration(labelText: label, hintText: hint, helperText: helper),
+        decoration: InputDecoration(labelText: tr(label), hintText: hint, helperText: helper == null ? null : tr(helper)),
       ),
     );
   }
@@ -230,7 +230,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
               const SizedBox(width: 10),
               Expanded(child: _field('taxRate', 'Rate %', num1(p.taxRate), type: const TextInputType.numberWithOptions(decimal: true))),
             ]),
-            _field('taxId', '${p.taxLabel} registration number', p.taxId, cap: TextCapitalization.characters),
+            _field('taxId', trf('{tax} registration number', {'tax': p.taxLabel}), p.taxId, cap: TextCapitalization.characters),
           ],
           Row(children: [
             Expanded(flex: 2, child: _field('registrationLabel', 'Other ID name', p.registrationLabel, hint: tr('Udyam / PAN / Labour licence'))),
@@ -250,7 +250,7 @@ class _BusinessProfileScreenState extends ConsumerState<BusinessProfileScreen> {
                 if (path != null) setState(() => _p = p.copyWith(qrImagePath: path));
               },
               icon: Icon(p.qrImagePath == null ? Icons.qr_code_2 : Icons.check_circle, color: p.qrImagePath == null ? null : Palette.present),
-              label: Text(p.qrImagePath == null ? 'Upload your own QR image' : 'QR image set'),
+              label: Text(p.qrImagePath == null ? tr('Upload your own QR image') : tr('QR image set')),
             ),
             if (p.qrImagePath != null)
               TextButton(onPressed: () => setState(() => _p = p.copyWith(qrImagePath: null)), child: Text(tr('Remove'))),
@@ -318,7 +318,7 @@ class _Preview extends StatelessWidget {
           ],
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(name.isEmpty ? 'Your business name' : name,
+              Text(name.isEmpty ? tr('Your business name') : name,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Palette.brandDark)),
               if (tagline.isNotEmpty) Text(tagline, style: const TextStyle(fontSize: 11.5, color: Palette.muted)),
               if (address.isNotEmpty) Text(address, style: const TextStyle(fontSize: 11.5)),

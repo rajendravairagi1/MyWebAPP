@@ -15,11 +15,11 @@ import '../../state/providers.dart';
 Future<void> editAttendanceDay(BuildContext context, WidgetRef ref, Labour labour, DateTime date) async {
   final session = ref.read(sessionProvider);
   if (!session.can(Perm.attendanceMark)) {
-    showInfo(context, 'You do not have permission to change attendance.');
+    showInfo(context, tr('You do not have permission to change attendance.'));
     return;
   }
   if (date.isAfter(DateTime.now())) {
-    showInfo(context, 'Attendance cannot be marked for a future date.');
+    showInfo(context, tr('Attendance cannot be marked for a future date.'));
     return;
   }
   final ymd = D.ymd(date);
@@ -33,7 +33,7 @@ Future<void> editAttendanceDay(BuildContext context, WidgetRef ref, Labour labou
   }
   if (!context.mounted) return;
   if (choices.isEmpty) {
-    showInfo(context, 'This worker was not assigned to any site on ${D.show(ymd)}.');
+    showInfo(context, trf('This worker was not assigned to any site on {date}.', {'date': D.show(ymd)}));
     return;
   }
   await showModalBottomSheet<void>(

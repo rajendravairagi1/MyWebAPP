@@ -79,3 +79,7 @@ function normalize_email(string $e): ?string {
     }
     return $e;
 }
+
+function valid_uuid(?string $v): bool {
+    return is_string($v) && preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $v) === 1;
+}
