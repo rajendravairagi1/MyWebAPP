@@ -6,6 +6,8 @@ require __DIR__ . '/lib/db.php';
 require __DIR__ . '/lib/auth.php';
 require __DIR__ . '/lib/sync.php';
 require __DIR__ . '/lib/feedback.php';
+require __DIR__ . '/lib/mail.php';
+require __DIR__ . '/lib/reset.php';
 
 const API_VERSION = '1.0.0';
 
@@ -124,6 +126,9 @@ if ($path === '/v1/auth/login' && $method === 'POST') {
     ok(['token' => $token, 'user' => user_json($u)]);
 }
 
+if ($path === '/v1/auth/forgot' && $method === 'POST') ok(forgot_password());
+if ($path === '/v1/auth/reset' && $method === 'POST') ok(reset_password());
+
 // ---- signed in --------------------------------------------------------------
 
 $user = require_user();
@@ -161,10 +166,13 @@ if ($path === '/v1/account/delete' && $method === 'POST') {
         throw new ApiError(403, 'Password is wrong.', 'bad_credentials');
     }
     if (($b['confirm'] ?? '') !== 'DELETE') throw new ApiError(422, 'Type DELETE to confirm.', 'invalid');
+    ensure_feedback_tables();
+    ensure_reset_table();
     $pdo = db();
     $a = $user['agency_id'];
     $pdo->beginTransaction();
     try {
+        $pdo->prepare('DELETE FROM password_resets WHERE user_id IN (SELECT id FROM users WHERE agency_id = ?)')->execute([$a]);
         $pdo->prepare('DELETE FROM feedback_reads WHERE feedback_id IN (SELECT id FROM feedback WHERE agency_id = ?)')->execute([$a]);
         $pdo->prepare('DELETE FROM feedback WHERE agency_id = ?')->execute([$a]);
         $pdo->prepare('DELETE FROM records WHERE agency_id = ?')->execute([$a]);

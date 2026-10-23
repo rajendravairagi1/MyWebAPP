@@ -1,8 +1,26 @@
 <?php
 declare(strict_types=1);
 
+/** Creates the message tables on first use, so no manual database step is needed. */
+function ensure_feedback_tables(): void {
+    static $done = false;
+    if ($done) return;
+    $pdo = db();
+    $pdo->exec('CREATE TABLE IF NOT EXISTS feedback (
+        id CHAR(36) NOT NULL PRIMARY KEY, agency_id CHAR(36) NOT NULL, user_id CHAR(36) NOT NULL,
+        company_id CHAR(36) NULL, labour_id CHAR(36) NULL, message TEXT NOT NULL, created_at DATETIME NOT NULL,
+        KEY ix_fb_agency (agency_id, created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
+    $pdo->exec('CREATE TABLE IF NOT EXISTS feedback_reads (
+        feedback_id CHAR(36) NOT NULL, user_id CHAR(36) NOT NULL, read_at DATETIME NOT NULL,
+        PRIMARY KEY (feedback_id, user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci');
+    $done = true;
+}
+
 /** POST /v1/feedback  { "message": "...", "labourId": "optional" } — managers only. */
 function feedback_create(array $u): array {
+    ensure_feedback_tables();
     if ($u['kind'] !== 'manager') throw new ApiError(403, 'Only company managers can send feedback.', 'forbidden');
     $b = body();
     $message = str_field($b, 'message', 2000);
@@ -26,6 +44,7 @@ function feedback_create(array $u): array {
  * Owner and staff see every message of the agency; a manager sees only their own.
  */
 function feedback_list(array $u): array {
+    ensure_feedback_tables();
     $args = [$u['agency_id'], $u['id']];
     $sql = 'SELECT f.id, f.user_id, f.company_id, f.labour_id, f.message, f.created_at, m.name AS from_name,
                    (r.feedback_id IS NOT NULL) AS is_read
@@ -52,6 +71,7 @@ function feedback_list(array $u): array {
 
 /** POST /v1/feedback/read  { "ids": [...] } — marks messages as seen by this person. */
 function feedback_mark_read(array $u): array {
+    ensure_feedback_tables();
     $ids = body()['ids'] ?? [];
     if (!is_array($ids) || count($ids) > 200) throw new ApiError(422, 'ids must be a short list.', 'invalid');
     $ins = db()->prepare('INSERT IGNORE INTO feedback_reads (feedback_id, user_id, read_at)

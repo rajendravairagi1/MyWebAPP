@@ -1,6 +1,7 @@
 import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import '../cloud/cloud_login_screen.dart';
+import '../cloud/forgot_password_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme.dart';
@@ -118,19 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => showDialog<void>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: Text(tr('Forgot password?')),
-                  content: Text(
-                    tr('Team members: ask the owner to set a new PIN for you (Team & roles).\n\n'
-                    'Owner: password recovery by email works once cloud sync is connected. Until then, keep your password safe.'),
-                  ),
-                  actions: [
-                    TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('OK'))),
-                  ],
-                ),
-              ),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
               child: Text(tr('Forgot password?')),
             ),
           ],

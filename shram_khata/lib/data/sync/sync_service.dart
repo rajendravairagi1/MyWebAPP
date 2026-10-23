@@ -268,6 +268,23 @@ class SyncService {
     }
   }
 
+  // ---- password ----------------------------------------------------------------
+
+  /// Asks the server to email a reset code. Always succeeds, so nobody can
+  /// find out which accounts exist.
+  Future<void> forgotPassword(String identifier) async {
+    await _api(auth: false).post('/v1/auth/forgot', {'identifier': identifier});
+  }
+
+  Future<void> resetPassword(String identifier, String code, String password) async {
+    await _api(auth: false).post('/v1/auth/reset', {'identifier': identifier, 'code': code, 'password': password});
+  }
+
+  /// Keeps the cloud password in step when it is changed on the phone.
+  Future<void> changePassword(String current, String next) async {
+    await _api().post('/v1/auth/password', {'current': current, 'new': next});
+  }
+
   // ---- people ---------------------------------------------------------------------
 
   Future<List<CloudPerson>> people() async {

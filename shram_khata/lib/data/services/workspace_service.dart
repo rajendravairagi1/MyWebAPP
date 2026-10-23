@@ -259,6 +259,18 @@ class WorkspaceService extends Service {
     return true;
   }
 
+  /// Sets someone's password / PIN without asking for the old one. Used after
+  /// they proved who they are with their cloud account.
+  Future<void> setSecret(String staffId, String newSecret) async {
+    final s = await staffById(staffId);
+    if (s == null) return;
+    if (newSecret.length < 4) throw AppException('Use at least 4 characters.');
+    final salt = Security.newSalt();
+    await (db.update(db.staffMembers)..where((t) => t.id.equals(staffId))).write(
+      StaffMembersCompanion(salt: Value(salt), secretHash: Value(Security.hash(newSecret, salt))),
+    );
+  }
+
   Future<String> saveRole({String? id, required String name, required List<String> permissions}) async {
     final plan = Plan.fromId((await profile()).planId);
     if (!plan.customRoles) {

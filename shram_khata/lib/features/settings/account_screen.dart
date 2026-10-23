@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../../state/cloud.dart';
 import '../../state/providers.dart';
 
 class AccountScreen extends ConsumerStatefulWidget {
@@ -33,6 +34,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
       final ok = await ref.read(workspaceServiceProvider).changeOwnSecret(s.staff!.id, _old.text, _new.text);
       if (!mounted) return;
       if (!ok) return showError(context, tr('Current password / PIN is wrong'));
+      final cloud = ref.read(cloudProvider).session;
+      if (cloud != null && !cloud.isManager) {
+        // Best effort: keep the cloud password the same as the one on this phone.
+        try {
+          await ref.read(syncServiceProvider).changePassword(_old.text, _new.text);
+        } catch (_) {}
+      }
+      if (!mounted) return;
       _old.clear();
       _new.clear();
       _confirm.clear();

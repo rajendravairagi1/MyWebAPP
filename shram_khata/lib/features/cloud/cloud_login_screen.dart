@@ -5,6 +5,7 @@ import '../../core/i18n.dart';
 import '../../core/theme.dart';
 import '../../state/cloud.dart';
 import '../../state/providers.dart';
+import 'forgot_password_screen.dart';
 
 /// Sign in to an existing cloud account: owner on a new phone, a supervisor,
 /// or a company manager.
@@ -40,22 +41,10 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
       _error = null;
       _step = tr('Signing in...');
     });
-    final svc = ref.read(syncServiceProvider);
     try {
-      final s = await svc.login(_id.text.trim(), _secret.text);
-      if (mounted) setState(() => _step = tr('Downloading your data...'));
-      await svc.sync();
-      ref.read(cloudProvider.notifier).refreshSession();
-      if (s.isManager) {
-        if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
-        return;
-      }
-      final ok = await ref.read(sessionProvider.notifier).enterCloud(s.userId);
-      if (!ok) {
-        await svc.signOut();
-        ref.read(cloudProvider.notifier).refreshSession();
-        throw Exception(tr('This phone already has a different workspace, or your account is not set up yet.'));
-      }
+      await completeCloudLogin(ref, _id.text.trim(), _secret.text, onStep: (m) {
+        if (mounted) setState(() => _step = m);
+      });
       if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
@@ -117,7 +106,12 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
                 ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white))
                 : Text(tr('Sign in')),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
+          TextButton(
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
+            child: Text(tr('Forgot password?')),
+          ),
+          const SizedBox(height: 8),
           Text(
             tr('You need an internet connection for this step.'),
             textAlign: TextAlign.center,
@@ -127,4 +121,27 @@ class _CloudLoginScreenState extends ConsumerState<CloudLoginScreen> {
       ),
     );
   }
+}
+
+/// Signs in to the cloud, downloads the workspace and enters the app. Managers
+/// go to their own app. Shared by the sign-in and the password-reset screens.
+Future<void> completeCloudLogin(WidgetRef ref, String identifier, String password,
+    {void Function(String message)? onStep}) async {
+  final svc = ref.read(syncServiceProvider);
+  final s = await svc.login(identifier, password);
+  onStep?.call(tr('Downloading your data...'));
+  await svc.sync();
+  ref.read(cloudProvider.notifier).refreshSession();
+  if (s.isManager) return;
+  final ws = ref.read(workspaceServiceProvider);
+  final ok = await ref.read(sessionProvider.notifier).enterCloud(s.userId);
+  if (!ok) {
+    await svc.signOut();
+    ref.read(cloudProvider.notifier).refreshSession();
+    throw Exception(tr('This phone already has a different workspace, or your account is not set up yet.'));
+  }
+  // Use the same password on this phone, so it also works without internet.
+  try {
+    await ws.setSecret(s.userId, password);
+  } catch (_) {}
 }
