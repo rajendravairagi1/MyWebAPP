@@ -853,5 +853,6 @@
 "Repeat new password": "नवीन पासवर्ड पुन्हा टाका",
 "Reset password and sign in": "पासवर्ड रीसेट करा आणि साइन इन करा",
 "Send a new code": "नवीन कोड पाठवा",
-"We email you a code. This works for accounts that use cloud sync. If you never turned on cloud sync, the password cannot be recovered.": "आम्ही तुम्हाला ईमेलवर कोड पाठवतो. हे क्लाउड सिंक वापरणाऱ्या खात्यांसाठी चालते. क्लाउड सिंक कधीच चालू केले नसेल तर पासवर्ड परत मिळवता येत नाही."
+"We email you a code. This works for accounts that use cloud sync. If you never turned on cloud sync, the password cannot be recovered.": "आम्ही तुम्हाला ईमेलवर कोड पाठवतो. हे क्लाउड सिंक वापरणाऱ्या खात्यांसाठी चालते. क्लाउड सिंक कधीच चालू केले नसेल तर पासवर्ड परत मिळवता येत नाही.",
+"Erase all data on this phone": "या फोनवरील सर्व डेटा पुसून टाका"
 }

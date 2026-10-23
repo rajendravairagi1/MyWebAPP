@@ -14,6 +14,8 @@ import 'package:shram_khata/features/attendance/attendance_sheet_screen.dart';
 import 'package:shram_khata/features/billing/invoice_detail_screen.dart';
 import 'package:shram_khata/features/companies/company_detail_screen.dart';
 import 'package:shram_khata/features/labour/labour_detail_screen.dart';
+import 'package:shram_khata/features/labour/labour_form_screen.dart';
+import 'package:shram_khata/features/settings/account_screen.dart';
 import 'package:shram_khata/features/payments/payment_form_screen.dart';
 import 'package:shram_khata/features/settings/business_profile_screen.dart';
 import 'package:shram_khata/state/providers.dart';
@@ -212,6 +214,8 @@ void main() {
     await open(CompanyDetailScreen(companyId: s.companyA), '31_company');
     await open(const PaymentFormScreen(), '32_payment_form');
     await open(const BusinessProfileScreen(), '33_profile');
+    await open(const LabourFormScreen(), '36_labour_form');
+    await open(const AccountScreen(), '37_account');
     // Tap a day on the worker's calendar: the editor must show a Save button.
     await open(LabourDetailScreen(labourId: s.labourIds.first), '34_labour_calendar');
     await t.tap(find.text('${DateTime.now().day}').first);
