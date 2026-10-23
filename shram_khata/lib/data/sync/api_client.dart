@@ -42,10 +42,16 @@ class ApiClient {
     try {
       final req = await client.openUrl(method, uri).timeout(const Duration(seconds: 15));
       req.headers.set('Accept', 'application/json');
+      req.headers.set('User-Agent', 'HazriBook/1.0 (Android)');
       if (token != null) req.headers.set('Authorization', 'Bearer $token');
       if (body != null) {
+        // Send a Content-Length: some hosts refuse "chunked" request bodies.
+        final bytes = utf8.encode(jsonEncode(body));
         req.headers.contentType = ContentType.json;
-        req.add(utf8.encode(jsonEncode(body)));
+        req.contentLength = bytes.length;
+        req.add(bytes);
+      } else if (method != 'GET') {
+        req.contentLength = 0;
       }
       final res = await req.close().timeout(const Duration(seconds: 45));
       final text = await res.transform(utf8.decoder).join().timeout(const Duration(seconds: 45));
@@ -53,7 +59,11 @@ class ApiClient {
       try {
         json = (jsonDecode(text) as Map).cast<String, dynamic>();
       } catch (_) {
-        throw ApiException(res.statusCode, 'bad_response', 'The server sent an unexpected answer. Try again later.');
+        // Say what came back, so a problem on the host can be found quickly.
+        final snippet = text.replaceAll(RegExp(r'<[^>]*>'), ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
+        final shown = snippet.length > 140 ? '${snippet.substring(0, 140)}...' : snippet;
+        throw ApiException(res.statusCode, 'bad_response',
+            'The server sent an unexpected answer (HTTP ${res.statusCode}${shown.isEmpty ? '' : ': $shown'}). Try again later.');
       }
       if (json['ok'] != true) {
         final e = (json['error'] as Map?)?.cast<String, dynamic>() ?? const {};
