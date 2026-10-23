@@ -26,6 +26,19 @@ Do hisse hain:
    `lib/feedback.php` (nayi file). **`config.php` ko mat chhedo.**
 3. Test: `https://hazribook.oneweblink.com/v1/health` → `"db":true`.
 
+## Forgot password (email se code)
+
+1. cPanel → Email Accounts mein `noreply@oneweblink.com` ban chuka hona chahiye.
+2. `config.php` kholo (Edit) aur `'mail_from' => 'noreply@oneweblink.com'` line ke saath neeche wala `smtp` block dalo
+   (config.sample.php mein example hai, `//` hata do) aur apne **email ka password** likho:
+   ```php
+   'smtp' => ['host' => 'mail.oneweblink.com', 'port' => 465, 'secure' => 'ssl',
+              'user' => 'noreply@oneweblink.com', 'pass' => 'YAHAN-EMAIL-KA-PASSWORD'],
+   ```
+   (Agar `smtp` nahi daloge to server PHP ka `mail()` use karega, jo aksar chal jaata hai par kabhi spam mein jaata hai.)
+3. Test: app mein Login → Forgot password → apna cloud email → code email par aana chahiye (Spam bhi dekho).
+4. Naye tables apne aap ban jaate hain (`feedback`, `password_resets`), alag SQL import ki zarurat nahi.
+
 ## API (app ke liye)
 
 | Endpoint | Kaam |
@@ -34,6 +47,7 @@ Do hisse hain:
 | `POST /v1/auth/register` | nayi agency + owner (businessName, ownerName, email/mobile, password, planId) |
 | `POST /v1/auth/login` | identifier (email ya mobile) + password → token |
 | `POST /v1/auth/logout`, `/v1/auth/password` | |
+| `POST /v1/auth/forgot`, `/v1/auth/reset` | email se 6 ank ka code, naya password |
 | `GET /v1/me` | |
 | `POST /v1/sync/push` | phone ke badlaav server par |
 | `GET /v1/sync/pull?since=N` | server ke naye badlaav phone par |

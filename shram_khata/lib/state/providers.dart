@@ -188,6 +188,17 @@ class SessionNotifier extends Notifier<SessionState> {
     );
   }
 
+  /// Wipes this phone: all records, the sign-in, the cloud link. The chosen
+  /// language stays.
+  Future<void> eraseEverything() async {
+    await ref.read(databaseProvider).eraseAll();
+    for (final k in _prefs.getKeys().toList()) {
+      if (k != 'app.lang') await _prefs.remove(k);
+    }
+    ref.invalidate(appLockProvider);
+    state = const SessionState(ready: true, hasWorkspace: false);
+  }
+
   Future<void> logout() async {
     await _prefs.remove(_kStaff);
     state = const SessionState(ready: true, hasWorkspace: true);
@@ -346,6 +357,12 @@ class LanguageNotifier extends Notifier<String> {
   @override
   String build() => I18n.current;
 
+  /// Shows a language without saving it yet (first screen, before Continue).
+  Future<void> preview(String code) async {
+    await I18n.load(code);
+    state = code;
+  }
+
   Future<void> set(String code) async {
     await ref.read(prefsProvider).setString(key, code);
     await I18n.load(code);
@@ -363,3 +380,43 @@ class LanguageChosen extends Notifier<bool> {
 final languageChosenProvider = NotifierProvider<LanguageChosen, bool>(LanguageChosen.new);
 
 final languageProvider = NotifierProvider<LanguageNotifier, String>(LanguageNotifier.new);
+
+/// "Ask for the password when the app opens". The setting is per phone.
+class LockState {
+  const LockState({this.enabled = false, this.locked = false});
+  final bool enabled;
+  final bool locked;
+}
+
+class AppLock extends Notifier<LockState> {
+  static const key = 'lock.enabled';
+  static const grace = Duration(minutes: 2);
+  DateTime? _leftAt;
+
+  @override
+  LockState build() {
+    final on = ref.read(prefsProvider).getBool(key) ?? false;
+    // Starting the app counts as opening it.
+    return LockState(enabled: on, locked: on);
+  }
+
+  Future<void> setEnabled(bool on) async {
+    await ref.read(prefsProvider).setBool(key, on);
+    state = LockState(enabled: on, locked: false);
+  }
+
+  void unlock() => state = LockState(enabled: state.enabled, locked: false);
+
+  /// Called when the app goes to the background / comes back.
+  void leftApp() => _leftAt = DateTime.now();
+
+  void returned() {
+    final at = _leftAt;
+    _leftAt = null;
+    if (state.enabled && at != null && DateTime.now().difference(at) >= grace) {
+      state = const LockState(enabled: true, locked: true);
+    }
+  }
+}
+
+final appLockProvider = NotifierProvider<AppLock, LockState>(AppLock.new);

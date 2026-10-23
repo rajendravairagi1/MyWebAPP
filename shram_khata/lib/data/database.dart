@@ -74,6 +74,23 @@ class AppDatabase extends _$AppDatabase {
         },
       );
 
+  /// Deletes every record on this phone (used by "Erase all data").
+  Future<void> eraseAll() async {
+    await customStatement('PRAGMA foreign_keys = OFF');
+    try {
+      await transaction(() async {
+        for (final t in allTables) {
+          await customStatement('DELETE FROM ${t.actualTableName}');
+        }
+        await customStatement('DELETE FROM sync_outbox');
+        await customStatement("UPDATE sync_meta SET v = '0' WHERE k = 'enabled'");
+      });
+    } finally {
+      await customStatement('PRAGMA foreign_keys = ON');
+    }
+    markTablesUpdated(allTables);
+  }
+
   /// Cloud sync bookkeeping: a queue of changed rows and triggers that fill it.
   /// The queue only collects while sync is switched on, and never for rows
   /// that were just downloaded.

@@ -109,5 +109,31 @@ void main() {
     await expectLater(svcB.login('owner@example.com', 'cloudpass1'), throwsA(isA<ApiException>()));
     await expectLater(svcC.sync(), throwsA(isA<ApiException>()));
   }, skip: url == null ? 'set HAZRIBOOK_TEST_URL to run' : false, timeout: const Timeout(Duration(minutes: 3)));
-}
 
+  test('forgot password: the emailed code resets it', () async {
+    final mailFile = File(Platform.environment['HAZRIBOOK_MAIL_FILE'] ?? '/tmp/none');
+    SharedPreferences.setMockInitialValues({});
+    final db = AppDatabase.inMemory();
+    final svc = SyncService(db, await SharedPreferences.getInstance(), baseUrl: url!);
+    final s = await seed(db);
+    await svc.register(
+      businessName: 'Reset Co',
+      ownerName: 'Owner',
+      email: 'reset@example.com',
+      mobile: '',
+      password: 'firstpass1',
+      ownerId: s.ownerId,
+      agencyId: '99999999-2222-4333-8444-555555555555',
+    );
+    await svc.signOut();
+    if (mailFile.existsSync()) mailFile.deleteSync();
+    await svc.forgotPassword('reset@example.com');
+    await svc.forgotPassword('nobody@example.com'); // same answer, nothing revealed
+    final mail = mailFile.readAsStringSync();
+    final code = RegExp(r'code is: (\d{6})').allMatches(mail).last.group(1)!;
+    await expectLater(svc.resetPassword('reset@example.com', '000000', 'secondpass1'), throwsA(isA<ApiException>()));
+    await svc.resetPassword('reset@example.com', code, 'secondpass1');
+    await expectLater(svc.login('reset@example.com', 'firstpass1'), throwsA(isA<ApiException>()));
+    expect((await svc.login('reset@example.com', 'secondpass1')).isOwner, isTrue);
+  }, skip: url == null || Platform.environment['HAZRIBOOK_MAIL_FILE'] == null ? 'needs a test server with a mail catcher' : false);
+}

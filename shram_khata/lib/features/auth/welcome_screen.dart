@@ -1,6 +1,7 @@
 import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import '../cloud/cloud_login_screen.dart';
+import '../language/language_button.dart';
 
 import '../../core/theme.dart';
 import 'login_screen.dart';
@@ -35,6 +36,10 @@ class WelcomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const Align(
+                        alignment: Alignment.centerRight,
+                        child: LanguageButton(color: Colors.white),
+                      ),
                       Container(
                         width: 64,
                         height: 64,

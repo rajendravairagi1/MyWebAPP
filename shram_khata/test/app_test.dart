@@ -80,9 +80,11 @@ void main() {
     await boot(t, db);
     expect(find.text('English'), findsOneWidget);
     await shot(t, '00_language');
-    await t.tap(find.text('English'));
+    // English is already selected: just continue.
+    expect(find.text('Continue'), findsOneWidget);
+    await t.tap(find.text('Continue'));
     await settle(t);
-    expect(find.text('HazriBook'), findsOneWidget);
+    expect(find.text('HazriBook'), findsWidgets);
     await shot(t, '01_welcome');
 
     await t.tap(find.text('Get started'));

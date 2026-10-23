@@ -18,7 +18,10 @@ import 'package:shram_khata/features/auth/welcome_screen.dart';
 import 'package:shram_khata/features/billing/invoice_create_screen.dart';
 import 'package:shram_khata/features/billing/invoice_detail_screen.dart';
 import 'package:shram_khata/features/billing/invoices_screen.dart';
+import 'package:shram_khata/features/auth/lock_screen.dart';
 import 'package:shram_khata/features/cloud/cloud_login_screen.dart';
+import 'package:shram_khata/features/cloud/forgot_password_screen.dart';
+import 'package:shram_khata/features/labour/duty_hours.dart';
 import 'package:shram_khata/features/cloud/cloud_screen.dart';
 import 'package:shram_khata/features/cloud/feedback_screen.dart';
 import 'package:shram_khata/features/companies/companies_screen.dart';
@@ -118,6 +121,9 @@ void main() {
       const StaffFormScreen(),
       const CloudScreen(),
       const CloudLoginScreen(),
+      const ForgotPasswordScreen(),
+      const LockScreen(),
+      Scaffold(body: DutyHoursPicker(hours: 12, onChanged: (_) {}, dailyPaise: 55000)),
       const FeedbackScreen(),
       const LanguageScreen(),
       const SetupWizardScreen(),

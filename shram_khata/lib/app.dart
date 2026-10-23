@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/theme.dart';
 import 'core/widgets.dart';
+import 'features/auth/lock_screen.dart';
 import 'features/auth/login_screen.dart';
 import 'features/auth/welcome_screen.dart';
 import 'core/money.dart';
@@ -35,16 +36,23 @@ class _ShramKhataAppState extends ConsumerState<ShramKhataApp> with WidgetsBindi
     super.dispose();
   }
 
-  /// Catch up with the cloud whenever the app comes back to the screen.
+  /// Catch up with the cloud whenever the app comes back to the screen, and
+  /// lock again if the app was away for a while.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) ref.read(cloudProvider.notifier).syncNow();
+    final lock = ref.read(appLockProvider.notifier);
+    if (state == AppLifecycleState.paused) lock.leftApp();
+    if (state == AppLifecycleState.resumed) {
+      lock.returned();
+      ref.read(cloudProvider.notifier).syncNow();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
     final cloud = ref.watch(cloudProvider);
+    final lock = ref.watch(appLockProvider);
     final lang = ref.watch(languageProvider);
     final langChosen = ref.watch(languageChosenProvider);
     final profile = ref.watch(profileProvider).value;
@@ -69,6 +77,8 @@ class _ShramKhataAppState extends ConsumerState<ShramKhataApp> with WidgetsBindi
       home = const WelcomeScreen();
     } else if (!session.signedIn) {
       home = const LoginScreen();
+    } else if (lock.locked) {
+      home = const LockScreen();
     } else if (session.isOwner && (profile == null || companies == null)) {
       home = const Scaffold(body: LoadingView());
     } else if (needsSetup) {
@@ -91,7 +101,7 @@ class _ShramKhataAppState extends ConsumerState<ShramKhataApp> with WidgetsBindi
       home: AnimatedSwitcher(
         duration: const Duration(milliseconds: 250),
         child: KeyedSubtree(
-          key: ValueKey('${session.ready}-${session.hasWorkspace}-${session.signedIn}-$langChosen-${cloud.session?.isManager}'),
+          key: ValueKey('${session.ready}-${session.hasWorkspace}-${session.signedIn}-$langChosen-${cloud.session?.isManager}-${lock.locked}'),
           child: home,
         ),
       ),

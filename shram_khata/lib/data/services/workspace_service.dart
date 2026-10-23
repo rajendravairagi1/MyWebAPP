@@ -259,6 +259,12 @@ class WorkspaceService extends Service {
     return true;
   }
 
+  /// True when [secret] is this person's current password / PIN.
+  Future<bool> verifySecret(String staffId, String secret) async {
+    final s = await staffById(staffId);
+    return s != null && Security.verify(secret, s.salt, s.secretHash);
+  }
+
   /// Sets someone's password / PIN without asking for the old one. Used after
   /// they proved who they are with their cloud account.
   Future<void> setSecret(String staffId, String newSecret) async {

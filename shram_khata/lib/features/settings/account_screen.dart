@@ -51,6 +51,43 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
     }
   }
 
+  /// Wipes the phone after the owner types ERASE.
+  Future<void> _erase(BuildContext context) async {
+    final word = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr('Erase all data on this phone?')),
+        content: Column(mainAxisSize: MainAxisSize.min, children: [
+          Text(tr('Every worker, attendance, payment and bill on this phone is deleted and you are signed out. '
+              'If cloud sync is on, the online copy stays and you can sign in again to get it back. '
+              'To delete the online copy too, use More → Cloud sync first.')),
+          const SizedBox(height: 12),
+          TextField(controller: word, decoration: InputDecoration(labelText: tr('Type ERASE to confirm'))),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel'))),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, word.text.trim().toUpperCase() == 'ERASE'),
+            style: TextButton.styleFrom(foregroundColor: Palette.absent),
+            child: Text(tr('Erase everything')),
+          ),
+        ],
+      ),
+    );
+    word.dispose();
+    if (ok != true) return;
+    final cloud = ref.read(syncServiceProvider);
+    if (cloud.session != null) {
+      try {
+        await cloud.signOut();
+      } catch (_) {}
+      ref.read(cloudProvider.notifier).refreshSession();
+    }
+    await ref.read(sessionProvider.notifier).eraseEverything();
+    if (context.mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = ref.watch(sessionProvider);
@@ -72,23 +109,14 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
             ),
           ]),
         ),
-        if (staff.email.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          AppCard(
-            color: Palette.infoBg,
-            padding: const EdgeInsets.all(12),
-            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Icon(Icons.mark_email_unread_outlined, color: Palette.info, size: 20),
-              SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  tr('Email verification is pending. It turns on when cloud sync is connected, which also enables password reset by email and using the app on more than one phone.'),
-                  style: TextStyle(color: Palette.info, fontSize: 12.5, height: 1.4),
-                ),
-              ),
-            ]),
-          ),
-        ],
+        SectionTitle(tr('APP LOCK'), padding: const EdgeInsets.fromLTRB(4, 22, 4, 4)),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(tr('Ask password when the app opens')),
+          subtitle: Text(tr('Also after the app was left for 2 minutes. Keeps your data private if someone picks up your phone.')),
+          value: ref.watch(appLockProvider).enabled,
+          onChanged: (v) => ref.read(appLockProvider.notifier).setEnabled(v),
+        ),
         SectionTitle(tr('CHANGE PASSWORD / PIN'), padding: EdgeInsets.fromLTRB(4, 22, 4, 8)),
         TextField(controller: _old, obscureText: true, decoration: InputDecoration(labelText: tr('Current'))),
         const SizedBox(height: 10),
@@ -97,6 +125,22 @@ class _AccountScreenState extends ConsumerState<AccountScreen> {
         TextField(controller: _confirm, obscureText: true, decoration: InputDecoration(labelText: tr('Confirm new'))),
         const SizedBox(height: 16),
         FilledButton(onPressed: _change, child: Text(tr('Update'))),
+        SectionTitle(tr('SIGN OUT'), padding: const EdgeInsets.fromLTRB(4, 28, 4, 8)),
+        OutlinedButton.icon(
+          onPressed: () => ref.read(sessionProvider.notifier).logout().then((_) {
+            if (context.mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+          }),
+          icon: const Icon(Icons.logout),
+          label: Text(tr('Sign out of this phone')),
+        ),
+        if (s.isOwner) ...[
+          const SizedBox(height: 10),
+          TextButton.icon(
+            onPressed: () => _erase(context),
+            icon: const Icon(Icons.delete_forever_outlined, color: Palette.absent),
+            label: Text(tr('Erase all data on this phone'), style: const TextStyle(color: Palette.absent)),
+          ),
+        ],
       ]),
     );
   }

@@ -1,6 +1,7 @@
 import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import '../cloud/cloud_login_screen.dart';
+import '../language/language_button.dart';
 import '../cloud/forgot_password_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -55,6 +56,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 48, 24, 24),
           children: [
+            const Align(alignment: Alignment.centerRight, child: LanguageButton()),
             Container(
               width: 60,
               height: 60,

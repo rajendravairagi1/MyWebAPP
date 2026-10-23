@@ -20,6 +20,17 @@ class LanguageScreen extends ConsumerWidget {
         automaticallyImplyLeading: !first,
         title: Text(tr('Choose language / भाषा चुनें')),
       ),
+      bottomNavigationBar: first
+          ? SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: FilledButton(
+                  onPressed: () => ref.read(languageProvider.notifier).set(current),
+                  child: Text(tr('Continue')),
+                ),
+              ),
+            )
+          : null,
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
@@ -32,8 +43,13 @@ class LanguageScreen extends ConsumerWidget {
                 child: InkWell(
                   borderRadius: BorderRadius.circular(14),
                   onTap: () async {
-                    await ref.read(languageProvider.notifier).set(l.code);
-                    if (!first && context.mounted) Navigator.pop(context);
+                    if (first) {
+                      // Pick, see the screen change, then press Continue.
+                      await ref.read(languageProvider.notifier).preview(l.code);
+                    } else {
+                      await ref.read(languageProvider.notifier).set(l.code);
+                      if (context.mounted) Navigator.pop(context);
+                    }
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
