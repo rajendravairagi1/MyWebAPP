@@ -120,8 +120,11 @@ class LabourRates extends Table with PkId {
   TextColumn get payType => text().withDefault(const Constant('daily'))();
   IntColumn get amount => integer()();
 
-  /// Overtime paise per hour. Null = derived from the daily rate.
+  /// Overtime paise per hour. Null = daily rate ÷ [dutyHours].
   IntColumn get otPerHour => integer().nullable()();
+
+  /// Hours of a normal duty day (6, 8, 10, 12). Overtime counts beyond these.
+  IntColumn get dutyHours => integer().withDefault(const Constant(8))();
 }
 
 class LabourDocuments extends Table with PkId {

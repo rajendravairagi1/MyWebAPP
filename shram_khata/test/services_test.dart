@@ -93,10 +93,22 @@ void main() {
     });
     test('monthly salary converts to a daily rate', () {
       final r = LabourRate(
-          id: '1', labourId: 'l', effectiveFrom: '2026-01-01', payType: 'monthly', amount: 1300000, otPerHour: null);
+          id: '1', labourId: 'l', effectiveFrom: '2026-01-01', payType: 'monthly', amount: 1300000, otPerHour: null, dutyHours: 8);
       final p = resolveRate(r);
       expect(p.dailyPaise, 50000);
       expect(p.otPerHourPaise, 6250);
+    });
+    test('overtime is the day rate divided by the duty hours', () {
+      LabourRate rate(int hours, {int? ot}) => LabourRate(
+          id: '1', labourId: 'l', effectiveFrom: '2026-01-01', payType: 'daily', amount: 55000, otPerHour: ot, dutyHours: hours);
+      expect(resolveRate(rate(6)).otPerHourPaise, (55000 / 6).round());
+      expect(resolveRate(rate(8)).otPerHourPaise, (55000 / 8).round());
+      expect(resolveRate(rate(10)).otPerHourPaise, 5500);
+      expect(resolveRate(rate(12)).otPerHourPaise, (55000 / 12).round());
+      // an old explicit overtime rate still wins
+      expect(resolveRate(rate(12, ot: 9000)).otPerHourPaise, 9000);
+      // 2 hours of overtime on a 12 hour duty
+      expect(wageFor(resolveRate(rate(12)), 'P', 2), 55000 + (55000 / 12).round() * 2);
     });
   });
 

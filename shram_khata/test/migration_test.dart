@@ -28,6 +28,7 @@ void main() {
     for (final c in ['service_fee_type', 'service_fee_percent', 'service_fee_amount']) {
       raw.execute('ALTER TABLE invoices DROP COLUMN $c');
     }
+    raw.execute('ALTER TABLE labour_rates DROP COLUMN duty_hours');
     final triggers = raw.select("SELECT name FROM sqlite_master WHERE type = 'trigger' AND name LIKE 'sync_%'");
     for (final r in triggers) {
       raw.execute('DROP TRIGGER ${r['name']}');

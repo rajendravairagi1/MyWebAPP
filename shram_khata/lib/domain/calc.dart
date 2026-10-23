@@ -78,7 +78,8 @@ class BillRate {
 PayRate resolveRate(LabourRate r, {int monthDivisor = defaultMonthDivisor}) {
   final daily =
       r.payType == 'monthly' ? (r.amount / monthDivisor).round() : r.amount;
-  final ot = r.otPerHour ?? (daily / hoursPerDay).round();
+  final hours = r.dutyHours > 0 ? r.dutyHours : hoursPerDay;
+  final ot = r.otPerHour ?? (daily / hours).round();
   return PayRate(daily, ot);
 }
 

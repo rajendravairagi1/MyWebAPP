@@ -15,6 +15,7 @@ import '../../data/database.dart';
 import '../../data/services/base.dart' show AppException;
 import '../../data/services/labour_service.dart';
 import '../../state/providers.dart';
+import 'duty_hours.dart';
 import 'labour_pickers.dart';
 
 /// Add a labourer, or edit their basic details when [labourId] is given.
@@ -34,7 +35,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
   final _skill = TextEditingController(text: 'Helper');
   final _address = TextEditingController();
   final _amount = TextEditingController();
-  final _ot = TextEditingController();
+  int _duty = 8;
   String _payType = 'daily';
   DateTime _join = DateTime.now();
   String? _photo;
@@ -43,6 +44,15 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
   Labour? _existing;
   bool _loading = true;
   bool _busy = false;
+
+  /// The day rate typed so far (a monthly salary is converted to a day rate).
+  int? _dailyPaise() {
+    final a = Money.parse(_amount.text);
+    if (a == null || a <= 0) return null;
+    if (_payType == 'daily') return a;
+    final divisor = ref.read(profileProvider).value?.monthDivisor ?? 26;
+    return (a / divisor).round();
+  }
 
   bool get _editing => widget.labourId != null;
 
@@ -72,7 +82,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
 
   @override
   void dispose() {
-    for (final c in [_name, _father, _mobile, _skill, _address, _amount, _ot]) {
+    for (final c in [_name, _father, _mobile, _skill, _address, _amount]) {
       c.dispose();
     }
     super.dispose();
@@ -123,7 +133,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
           joinDate: D.ymd(_join),
           payType: _payType,
           amount: Money.parse(_amount.text) ?? 0,
-          otPerHour: _ot.text.trim().isEmpty ? null : Money.parse(_ot.text),
+          dutyHours: _duty,
           siteIds: _sites.toList(),
           staffId: staffId,
         );
@@ -243,6 +253,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
               const SizedBox(height: 12),
               TextFormField(
                 controller: _amount,
+                onChanged: (_) => setState(() {}),
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 decoration: InputDecoration(
                   labelText: _payType == 'daily' ? tr('Salary per day *') : tr('Salary per month *'),
@@ -254,14 +265,10 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
                 validator: (v) => (Money.parse(v ?? '') ?? 0) <= 0 ? tr('Enter the rate') : null,
               ),
               const SizedBox(height: 12),
-              TextFormField(
-                controller: _ot,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  labelText: tr('Overtime per hour (optional)'),
-                  prefixText: '${Money.symbol} ',
-                  helperText: tr('Leave empty to use daily rate ÷ 8 hours.'),
-                ),
+              DutyHoursPicker(
+                hours: _duty,
+                onChanged: (v) => setState(() => _duty = v),
+                dailyPaise: _dailyPaise(),
               ),
               const SizedBox(height: 12),
               InkWell(

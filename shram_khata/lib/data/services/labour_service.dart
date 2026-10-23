@@ -110,11 +110,13 @@ class LabourService extends Service {
     required String payType,
     required int amount,
     int? otPerHour,
+    int dutyHours = 8,
     List<String> siteIds = const [],
     String? staffId,
   }) async {
     if (name.trim().isEmpty) throw AppException('Name is required.');
     if (amount <= 0) throw AppException('Enter the pay rate.');
+    if (dutyHours < 1 || dutyHours > 24) throw AppException('Duty hours must be between 1 and 24.');
     final id = newId();
     await db.transaction(() async {
       await db.into(db.labours).insert(LaboursCompanion.insert(
@@ -135,6 +137,7 @@ class LabourService extends Service {
             payType: Value(payType),
             amount: amount,
             otPerHour: Value(otPerHour),
+            dutyHours: Value(dutyHours),
           ));
       for (final s in siteIds) {
         await db.into(db.assignments).insert(AssignmentsCompanion.insert(
@@ -212,9 +215,11 @@ class LabourService extends Service {
     required String payType,
     required int amount,
     int? otPerHour,
+    int dutyHours = 8,
     String? staffId,
   }) async {
     if (amount <= 0) throw AppException('Enter the pay rate.');
+    if (dutyHours < 1 || dutyHours > 24) throw AppException('Duty hours must be between 1 and 24.');
     await db.transaction(() async {
       await (db.delete(db.labourRates)
             ..where((t) => t.labourId.equals(labourId) & t.effectiveFrom.equals(from)))
@@ -226,6 +231,7 @@ class LabourService extends Service {
             payType: Value(payType),
             amount: amount,
             otPerHour: Value(otPerHour),
+            dutyHours: Value(dutyHours),
           ));
       await audit(staffId, 'rate', 'labour', labourId, '$payType $amount from $from');
     });

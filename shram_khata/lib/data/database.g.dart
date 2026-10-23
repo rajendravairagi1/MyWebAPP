@@ -4308,6 +4308,18 @@ class $LabourRatesTable extends LabourRates
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _dutyHoursMeta = const VerificationMeta(
+    'dutyHours',
+  );
+  @override
+  late final GeneratedColumn<int> dutyHours = GeneratedColumn<int>(
+    'duty_hours',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(8),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -4316,6 +4328,7 @@ class $LabourRatesTable extends LabourRates
     payType,
     amount,
     otPerHour,
+    dutyHours,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -4373,6 +4386,12 @@ class $LabourRatesTable extends LabourRates
         otPerHour.isAcceptableOrUnknown(data['ot_per_hour']!, _otPerHourMeta),
       );
     }
+    if (data.containsKey('duty_hours')) {
+      context.handle(
+        _dutyHoursMeta,
+        dutyHours.isAcceptableOrUnknown(data['duty_hours']!, _dutyHoursMeta),
+      );
+    }
     return context;
   }
 
@@ -4406,6 +4425,10 @@ class $LabourRatesTable extends LabourRates
         DriftSqlType.int,
         data['${effectivePrefix}ot_per_hour'],
       ),
+      dutyHours: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duty_hours'],
+      )!,
     );
   }
 
@@ -4424,8 +4447,11 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
   final String payType;
   final int amount;
 
-  /// Overtime paise per hour. Null = derived from the daily rate.
+  /// Overtime paise per hour. Null = daily rate ÷ [dutyHours].
   final int? otPerHour;
+
+  /// Hours of a normal duty day (6, 8, 10, 12). Overtime counts beyond these.
+  final int dutyHours;
   const LabourRate({
     required this.id,
     required this.labourId,
@@ -4433,6 +4459,7 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
     required this.payType,
     required this.amount,
     this.otPerHour,
+    required this.dutyHours,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -4445,6 +4472,7 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
     if (!nullToAbsent || otPerHour != null) {
       map['ot_per_hour'] = Variable<int>(otPerHour);
     }
+    map['duty_hours'] = Variable<int>(dutyHours);
     return map;
   }
 
@@ -4458,6 +4486,7 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
       otPerHour: otPerHour == null && nullToAbsent
           ? const Value.absent()
           : Value(otPerHour),
+      dutyHours: Value(dutyHours),
     );
   }
 
@@ -4473,6 +4502,7 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
       payType: serializer.fromJson<String>(json['payType']),
       amount: serializer.fromJson<int>(json['amount']),
       otPerHour: serializer.fromJson<int?>(json['otPerHour']),
+      dutyHours: serializer.fromJson<int>(json['dutyHours']),
     );
   }
   @override
@@ -4485,6 +4515,7 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
       'payType': serializer.toJson<String>(payType),
       'amount': serializer.toJson<int>(amount),
       'otPerHour': serializer.toJson<int?>(otPerHour),
+      'dutyHours': serializer.toJson<int>(dutyHours),
     };
   }
 
@@ -4495,6 +4526,7 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
     String? payType,
     int? amount,
     Value<int?> otPerHour = const Value.absent(),
+    int? dutyHours,
   }) => LabourRate(
     id: id ?? this.id,
     labourId: labourId ?? this.labourId,
@@ -4502,6 +4534,7 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
     payType: payType ?? this.payType,
     amount: amount ?? this.amount,
     otPerHour: otPerHour.present ? otPerHour.value : this.otPerHour,
+    dutyHours: dutyHours ?? this.dutyHours,
   );
   LabourRate copyWithCompanion(LabourRatesCompanion data) {
     return LabourRate(
@@ -4513,6 +4546,7 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
       payType: data.payType.present ? data.payType.value : this.payType,
       amount: data.amount.present ? data.amount.value : this.amount,
       otPerHour: data.otPerHour.present ? data.otPerHour.value : this.otPerHour,
+      dutyHours: data.dutyHours.present ? data.dutyHours.value : this.dutyHours,
     );
   }
 
@@ -4524,14 +4558,22 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
           ..write('effectiveFrom: $effectiveFrom, ')
           ..write('payType: $payType, ')
           ..write('amount: $amount, ')
-          ..write('otPerHour: $otPerHour')
+          ..write('otPerHour: $otPerHour, ')
+          ..write('dutyHours: $dutyHours')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, labourId, effectiveFrom, payType, amount, otPerHour);
+  int get hashCode => Object.hash(
+    id,
+    labourId,
+    effectiveFrom,
+    payType,
+    amount,
+    otPerHour,
+    dutyHours,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4541,7 +4583,8 @@ class LabourRate extends DataClass implements Insertable<LabourRate> {
           other.effectiveFrom == this.effectiveFrom &&
           other.payType == this.payType &&
           other.amount == this.amount &&
-          other.otPerHour == this.otPerHour);
+          other.otPerHour == this.otPerHour &&
+          other.dutyHours == this.dutyHours);
 }
 
 class LabourRatesCompanion extends UpdateCompanion<LabourRate> {
@@ -4551,6 +4594,7 @@ class LabourRatesCompanion extends UpdateCompanion<LabourRate> {
   final Value<String> payType;
   final Value<int> amount;
   final Value<int?> otPerHour;
+  final Value<int> dutyHours;
   final Value<int> rowid;
   const LabourRatesCompanion({
     this.id = const Value.absent(),
@@ -4559,6 +4603,7 @@ class LabourRatesCompanion extends UpdateCompanion<LabourRate> {
     this.payType = const Value.absent(),
     this.amount = const Value.absent(),
     this.otPerHour = const Value.absent(),
+    this.dutyHours = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   LabourRatesCompanion.insert({
@@ -4568,6 +4613,7 @@ class LabourRatesCompanion extends UpdateCompanion<LabourRate> {
     this.payType = const Value.absent(),
     required int amount,
     this.otPerHour = const Value.absent(),
+    this.dutyHours = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        labourId = Value(labourId),
@@ -4580,6 +4626,7 @@ class LabourRatesCompanion extends UpdateCompanion<LabourRate> {
     Expression<String>? payType,
     Expression<int>? amount,
     Expression<int>? otPerHour,
+    Expression<int>? dutyHours,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -4589,6 +4636,7 @@ class LabourRatesCompanion extends UpdateCompanion<LabourRate> {
       if (payType != null) 'pay_type': payType,
       if (amount != null) 'amount': amount,
       if (otPerHour != null) 'ot_per_hour': otPerHour,
+      if (dutyHours != null) 'duty_hours': dutyHours,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -4600,6 +4648,7 @@ class LabourRatesCompanion extends UpdateCompanion<LabourRate> {
     Value<String>? payType,
     Value<int>? amount,
     Value<int?>? otPerHour,
+    Value<int>? dutyHours,
     Value<int>? rowid,
   }) {
     return LabourRatesCompanion(
@@ -4609,6 +4658,7 @@ class LabourRatesCompanion extends UpdateCompanion<LabourRate> {
       payType: payType ?? this.payType,
       amount: amount ?? this.amount,
       otPerHour: otPerHour ?? this.otPerHour,
+      dutyHours: dutyHours ?? this.dutyHours,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -4634,6 +4684,9 @@ class LabourRatesCompanion extends UpdateCompanion<LabourRate> {
     if (otPerHour.present) {
       map['ot_per_hour'] = Variable<int>(otPerHour.value);
     }
+    if (dutyHours.present) {
+      map['duty_hours'] = Variable<int>(dutyHours.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -4649,6 +4702,7 @@ class LabourRatesCompanion extends UpdateCompanion<LabourRate> {
           ..write('payType: $payType, ')
           ..write('amount: $amount, ')
           ..write('otPerHour: $otPerHour, ')
+          ..write('dutyHours: $dutyHours, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -14774,6 +14828,7 @@ typedef $$LabourRatesTableCreateCompanionBuilder =
       Value<String> payType,
       required int amount,
       Value<int?> otPerHour,
+      Value<int> dutyHours,
       Value<int> rowid,
     });
 typedef $$LabourRatesTableUpdateCompanionBuilder =
@@ -14784,6 +14839,7 @@ typedef $$LabourRatesTableUpdateCompanionBuilder =
       Value<String> payType,
       Value<int> amount,
       Value<int?> otPerHour,
+      Value<int> dutyHours,
       Value<int> rowid,
     });
 
@@ -14840,6 +14896,11 @@ class $$LabourRatesTableFilterComposer
 
   ColumnFilters<int> get otPerHour => $composableBuilder(
     column: $table.otPerHour,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get dutyHours => $composableBuilder(
+    column: $table.dutyHours,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -14901,6 +14962,11 @@ class $$LabourRatesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get dutyHours => $composableBuilder(
+    column: $table.dutyHours,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$LaboursTableOrderingComposer get labourId {
     final $$LaboursTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -14950,6 +15016,9 @@ class $$LabourRatesTableAnnotationComposer
 
   GeneratedColumn<int> get otPerHour =>
       $composableBuilder(column: $table.otPerHour, builder: (column) => column);
+
+  GeneratedColumn<int> get dutyHours =>
+      $composableBuilder(column: $table.dutyHours, builder: (column) => column);
 
   $$LaboursTableAnnotationComposer get labourId {
     final $$LaboursTableAnnotationComposer composer = $composerBuilder(
@@ -15009,6 +15078,7 @@ class $$LabourRatesTableTableManager
                 Value<String> payType = const Value.absent(),
                 Value<int> amount = const Value.absent(),
                 Value<int?> otPerHour = const Value.absent(),
+                Value<int> dutyHours = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LabourRatesCompanion(
                 id: id,
@@ -15017,6 +15087,7 @@ class $$LabourRatesTableTableManager
                 payType: payType,
                 amount: amount,
                 otPerHour: otPerHour,
+                dutyHours: dutyHours,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -15027,6 +15098,7 @@ class $$LabourRatesTableTableManager
                 Value<String> payType = const Value.absent(),
                 required int amount,
                 Value<int?> otPerHour = const Value.absent(),
+                Value<int> dutyHours = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LabourRatesCompanion.insert(
                 id: id,
@@ -15035,6 +15107,7 @@ class $$LabourRatesTableTableManager
                 payType: payType,
                 amount: amount,
                 otPerHour: otPerHour,
+                dutyHours: dutyHours,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

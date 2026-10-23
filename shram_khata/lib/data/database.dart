@@ -43,7 +43,7 @@ class AppDatabase extends _$AppDatabase {
   static AppDatabase inMemory() => AppDatabase(NativeDatabase.memory());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -67,6 +67,7 @@ class AppDatabase extends _$AppDatabase {
             await m.addColumn(invoices, invoices.serviceFeeAmount);
           }
           if (from < 3) await _createSyncObjects();
+          if (from < 4) await m.addColumn(labourRates, labourRates.dutyHours);
         },
         beforeOpen: (details) async {
           await customStatement('PRAGMA foreign_keys = ON');

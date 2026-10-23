@@ -21,6 +21,7 @@ import '../payments/payment_widgets.dart';
 import '../reports/pdf_screen.dart';
 import '../reports/period.dart';
 import 'day_edit_sheet.dart';
+import 'duty_hours.dart';
 import 'labour_form_screen.dart';
 import 'labour_pickers.dart';
 
@@ -493,6 +494,7 @@ class _DetailsTab extends ConsumerWidget {
                   ),
                   subtitle: Text(
                     trf('From {date}', {'date': D.show(list[i].effectiveFrom)}) +
+                        trf(' • {n} h duty', {'n': list[i].dutyHours}) +
                         (list[i].otPerHour != null
                             ? trf(' • OT {amount}/h', {'amount': Money.format(list[i].otPerHour!)})
                             : ''),
@@ -665,7 +667,7 @@ class _DetailsTab extends ConsumerWidget {
             from: r.from,
             payType: r.payType,
             amount: r.amount,
-            otPerHour: r.ot,
+            dutyHours: r.duty,
             staffId: ref.read(sessionProvider).staff?.id,
           );
     } catch (e) {
@@ -715,11 +717,11 @@ class _SitePickSheetState extends State<_SitePickSheet> {
 }
 
 class _RateResult {
-  _RateResult(this.from, this.payType, this.amount, this.ot);
+  _RateResult(this.from, this.payType, this.amount, this.duty);
   final String from;
   final String payType;
   final int amount;
-  final int? ot;
+  final int duty;
 }
 
 class _RateSheet extends StatefulWidget {
@@ -732,13 +734,12 @@ class _RateSheet extends StatefulWidget {
 class _RateSheetState extends State<_RateSheet> {
   String _type = 'daily';
   final _amount = TextEditingController();
-  final _ot = TextEditingController();
+  int _duty = 8;
   DateTime _from = DateTime.now();
 
   @override
   void dispose() {
     _amount.dispose();
-    _ot.dispose();
     super.dispose();
   }
 
@@ -764,14 +765,15 @@ class _RateSheetState extends State<_RateSheet> {
           const SizedBox(height: 12),
           TextField(
             controller: _amount,
+            onChanged: (_) => setState(() {}),
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(labelText: tr('New rate'), prefixText: '${Money.symbol} '),
           ),
           const SizedBox(height: 12),
-          TextField(
-            controller: _ot,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: tr('Overtime per hour (optional)'), prefixText: '${Money.symbol} '),
+          DutyHoursPicker(
+            hours: _duty,
+            onChanged: (v) => setState(() => _duty = v),
+            dailyPaise: _type == 'daily' ? Money.parse(_amount.text) : null,
           ),
           const SizedBox(height: 12),
           InkWell(
@@ -797,7 +799,7 @@ class _RateSheetState extends State<_RateSheet> {
               if (a == null || a <= 0) return showError(context, tr('Enter the new rate'));
               Navigator.pop(
                 context,
-                _RateResult(D.ymd(_from), _type, a, _ot.text.trim().isEmpty ? null : Money.parse(_ot.text)),
+                _RateResult(D.ymd(_from), _type, a, _duty),
               );
             },
             child: Text(tr('Save rate')),
