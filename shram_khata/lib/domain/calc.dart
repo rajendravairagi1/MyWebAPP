@@ -58,6 +58,14 @@ double dayValue(String status) => switch (status) {
       _ => 0.0,
     };
 
+class Shift {
+  Shift._();
+  static const day = 'day';
+  static const night = 'night';
+  static const all = [day, night];
+  static String label(String s) => s == night ? 'Night shift' : 'Day shift';
+}
+
 const hoursPerDay = 8;
 const defaultMonthDivisor = 26;
 

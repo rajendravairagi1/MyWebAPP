@@ -103,8 +103,11 @@ class _LabourPickerState extends ConsumerState<_LabourPicker> {
 
 /// Checklist of every site, grouped by company, for assigning labour.
 class SiteChecklist extends ConsumerWidget {
-  const SiteChecklist({super.key, required this.selected, required this.onChanged});
+  const SiteChecklist(
+      {super.key, required this.selected, required this.onChanged, this.single = false});
   final Set<String> selected;
+  /// Exactly one site may be chosen (a worker belongs to one company/site).
+  final bool single;
   final ValueChanged<Set<String>> onChanged;
 
   @override
@@ -150,6 +153,10 @@ class SiteChecklist extends ConsumerWidget {
                     selected: selected.contains(s.id),
                     avatar: selected.contains(s.id) ? Icon(Icons.check, size: 16, color: Palette.brandDark) : null,
                     onSelected: (v) {
+                      if (single) {
+                        onChanged(v ? {s.id} : <String>{});
+                        return;
+                      }
                       final next = {...selected};
                       v ? next.add(s.id) : next.remove(s.id);
                       onChanged(next);
@@ -169,7 +176,7 @@ class SiteChecklist extends ConsumerWidget {
         child: TextButton.icon(
           onPressed: () async {
             final id = await quickAddCompanySite(context, ref);
-            if (id != null) onChanged({...selected, id});
+            if (id != null) onChanged(single ? {id} : {...selected, id});
           },
           icon: const Icon(Icons.add),
           label: Text(tr('Add company / site')),

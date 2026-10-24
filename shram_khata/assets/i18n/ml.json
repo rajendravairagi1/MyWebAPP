@@ -854,5 +854,15 @@
 "Reset password and sign in": "പാസ്‌വേഡ് റീസെറ്റ് ചെയ്ത് സൈൻ ഇൻ ചെയ്യുക",
 "Send a new code": "പുതിയ കോഡ് അയയ്ക്കുക",
 "We email you a code. This works for accounts that use cloud sync. If you never turned on cloud sync, the password cannot be recovered.": "ഞങ്ങൾ നിങ്ങൾക്ക് ഇമെയിലിൽ കോഡ് അയയ്ക്കും. ക്ലൗഡ് സിങ്ക് ഉപയോഗിക്കുന്ന അക്കൗണ്ടുകൾക്കാണ് ഇത് പ്രവർത്തിക്കുക. ക്ലൗഡ് സിങ്ക് ഒരിക്കലും ഓണാക്കിയിട്ടില്ലെങ്കിൽ പാസ്‌വേഡ് തിരികെ ലഭിക്കില്ല.",
-"Erase all data on this phone": "ഈ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുക"
+"Erase all data on this phone": "ഈ ഫോണിലെ എല്ലാ ഡാറ്റയും മായ്ക്കുക",
+"Day shift": "പകൽ ഷിഫ്റ്റ്",
+"Night shift": "രാത്രി ഷിഫ്റ്റ്",
+"Change site": "സൈറ്റ് മാറ്റുക",
+"SHIFT": "ഷിഫ്റ്റ്",
+"Move to day shift": "പകൽ ഷിഫ്റ്റിലേക്ക് മാറ്റുക",
+"Move to night shift": "രാത്രി ഷിഫ്റ്റിലേക്ക് മാറ്റുക",
+"No labour in this shift": "ഈ ഷിഫ്റ്റിൽ തൊഴിലാളികളില്ല",
+"Same pay in both shifts. Change it when the worker moves from day to night or back.": "രണ്ട് ഷിഫ്റ്റിലും കൂലി ഒന്നുതന്നെ. തൊഴിലാളി പകലിൽ നിന്ന് രാത്രിയിലേക്കോ രാത്രിയിൽ നിന്ന് പകലിലേക്കോ മാറുമ്പോൾ ഇത് മാറ്റുക.",
+"A worker works at one company / site at a time. Past attendance stays where it was.": "ഒരു തൊഴിലാളി ഒരു സമയം ഒരു കമ്പനി / സൈറ്റിൽ മാത്രമേ ജോലി ചെയ്യൂ. മുൻ ഹാജർ അതുപോലെ തുടരും.",
+"{name} moved to {shift}": "{name} നെ {shift} ലേക്ക് മാറ്റി"
 }

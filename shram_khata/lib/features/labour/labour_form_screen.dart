@@ -17,6 +17,8 @@ import '../../data/services/labour_service.dart';
 import '../../state/providers.dart';
 import 'duty_hours.dart';
 import 'labour_pickers.dart';
+import 'shift_picker.dart';
+import '../../domain/calc.dart' show Shift;
 
 /// Add a labourer, or edit their basic details when [labourId] is given.
 class LabourFormScreen extends ConsumerStatefulWidget {
@@ -36,6 +38,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
   final _address = TextEditingController();
   final _amount = TextEditingController();
   int _duty = 8;
+  String _shift = Shift.day;
   String _payType = 'daily';
   DateTime _join = DateTime.now();
   String? _photo;
@@ -75,6 +78,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
         _photo = l.photoPath;
         _join = D.parse(l.joinDate);
         _branchId = l.branchId;
+        _shift = l.shift;
       }
     }
     if (mounted) setState(() => _loading = false);
@@ -113,6 +117,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
             skill: _skill.text.trim().isEmpty ? 'Helper' : _skill.text.trim(),
             address: _address.text.trim(),
             photoPath: Value.absentIfNull(_photo),
+            shift: _shift,
           ),
           staffId: staffId,
         );
@@ -134,6 +139,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
           payType: _payType,
           amount: Money.parse(_amount.text) ?? 0,
           dutyHours: _duty,
+          shift: _shift,
           siteIds: _sites.toList(),
           staffId: staffId,
         );
@@ -231,6 +237,8 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(labelText: tr('Address / village')),
             ),
+            SectionTitle(tr('SHIFT'), padding: EdgeInsets.fromLTRB(2, 18, 2, 8)),
+            ShiftPicker(shift: _shift, onChanged: (v) => setState(() => _shift = v)),
             if (showBranch) ...[
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
@@ -291,7 +299,7 @@ class _LabourFormScreenState extends ConsumerState<LabourFormScreen> {
                 ),
               ),
               SectionTitle(tr('COMPANY & SITE *'), padding: EdgeInsets.fromLTRB(2, 22, 2, 4)),
-              SiteChecklist(selected: _sites, onChanged: (v) => setState(() => _sites = v)),
+              SiteChecklist(single: true, selected: _sites, onChanged: (v) => setState(() => _sites = v)),
             ],
           ],
         ),

@@ -176,6 +176,47 @@ void main() {
     });
   });
 
+  group('shifts and sites', () {
+    test('a worker can alternate day and night; each day keeps its own shift', () async {
+      final id = await helper();
+      final svc = AttendanceService(db);
+      var sheet = await svc.loadSheet(siteA, '2026-10-05');
+      expect(sheet.rows.single.shift, Shift.day);
+      await svc.mark(siteId: siteA, date: '2026-10-05', labourId: id, status: 'P');
+      await svc.changeShift(siteId: siteA, date: '2026-10-06', labourId: id, shift: Shift.night);
+      sheet = await svc.loadSheet(siteA, '2026-10-06');
+      expect(sheet.rows.single.shift, Shift.night);
+      await svc.mark(siteId: siteA, date: '2026-10-06', labourId: id, status: 'P');
+      sheet = await svc.loadSheet(siteA, '2026-10-05');
+      expect(sheet.rows.single.shift, Shift.day);
+      await expectLater(
+          svc.changeShift(siteId: siteA, date: '2026-10-06', labourId: id, shift: 'x'),
+          throwsA(isA<AppException>()));
+    });
+
+    test('markAllPresent only touches the chosen shift', () async {
+      final day = await helper();
+      final night = await LabourService(db).add(
+          branchId: branchId, name: 'Night Guy', skill: 'Helper', payType: 'daily', amount: 50000,
+          joinDate: '2026-01-01', siteIds: [siteA], shift: Shift.night);
+      final svc = AttendanceService(db);
+      expect(await svc.markAllPresent(siteId: siteA, date: '2026-10-05', shift: Shift.night), 1);
+      final sheet = await svc.loadSheet(siteA, '2026-10-05');
+      expect(sheet.rows.firstWhere((r) => r.labour.id == night).status, 'P');
+      expect(sheet.rows.firstWhere((r) => r.labour.id == day).status, isNull);
+    });
+
+    test('moveToSite keeps a worker on exactly one site', () async {
+      final id = await helper();
+      final svc = LabourService(db);
+      await svc.moveToSite(id, siteB);
+      final open = (await svc.assignments(id));
+      expect(open.map((a) => a.site.id), [siteB]);
+      await svc.moveToSite(id, siteB);
+      expect((await svc.assignments(id)).length, 1);
+    });
+  });
+
   group('ledger', () {
     test('earned, paid and balance with rate change', () async {
       final id = await helper(rate: 60000);

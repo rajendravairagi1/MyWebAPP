@@ -3634,6 +3634,16 @@ class $LaboursTable extends Labours with TableInfo<$LaboursTable, Labour> {
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _shiftMeta = const VerificationMeta('shift');
+  @override
+  late final GeneratedColumn<String> shift = GeneratedColumn<String>(
+    'shift',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('day'),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -3660,6 +3670,7 @@ class $LaboursTable extends Labours with TableInfo<$LaboursTable, Labour> {
     leaveDate,
     status,
     note,
+    shift,
     createdAt,
   ];
   @override
@@ -3751,6 +3762,12 @@ class $LaboursTable extends Labours with TableInfo<$LaboursTable, Labour> {
         note.isAcceptableOrUnknown(data['note']!, _noteMeta),
       );
     }
+    if (data.containsKey('shift')) {
+      context.handle(
+        _shiftMeta,
+        shift.isAcceptableOrUnknown(data['shift']!, _shiftMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -3814,6 +3831,10 @@ class $LaboursTable extends Labours with TableInfo<$LaboursTable, Labour> {
         DriftSqlType.string,
         data['${effectivePrefix}note'],
       )!,
+      shift: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shift'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -3842,6 +3863,9 @@ class Labour extends DataClass implements Insertable<Labour> {
   /// active | inactive | left
   final String status;
   final String note;
+
+  /// The shift this person works now: day | night. Changeable any time.
+  final String shift;
   final DateTime createdAt;
   const Labour({
     required this.id,
@@ -3856,6 +3880,7 @@ class Labour extends DataClass implements Insertable<Labour> {
     this.leaveDate,
     required this.status,
     required this.note,
+    required this.shift,
     required this.createdAt,
   });
   @override
@@ -3877,6 +3902,7 @@ class Labour extends DataClass implements Insertable<Labour> {
     }
     map['status'] = Variable<String>(status);
     map['note'] = Variable<String>(note);
+    map['shift'] = Variable<String>(shift);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -3899,6 +3925,7 @@ class Labour extends DataClass implements Insertable<Labour> {
           : Value(leaveDate),
       status: Value(status),
       note: Value(note),
+      shift: Value(shift),
       createdAt: Value(createdAt),
     );
   }
@@ -3921,6 +3948,7 @@ class Labour extends DataClass implements Insertable<Labour> {
       leaveDate: serializer.fromJson<String?>(json['leaveDate']),
       status: serializer.fromJson<String>(json['status']),
       note: serializer.fromJson<String>(json['note']),
+      shift: serializer.fromJson<String>(json['shift']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -3940,6 +3968,7 @@ class Labour extends DataClass implements Insertable<Labour> {
       'leaveDate': serializer.toJson<String?>(leaveDate),
       'status': serializer.toJson<String>(status),
       'note': serializer.toJson<String>(note),
+      'shift': serializer.toJson<String>(shift),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -3957,6 +3986,7 @@ class Labour extends DataClass implements Insertable<Labour> {
     Value<String?> leaveDate = const Value.absent(),
     String? status,
     String? note,
+    String? shift,
     DateTime? createdAt,
   }) => Labour(
     id: id ?? this.id,
@@ -3971,6 +4001,7 @@ class Labour extends DataClass implements Insertable<Labour> {
     leaveDate: leaveDate.present ? leaveDate.value : this.leaveDate,
     status: status ?? this.status,
     note: note ?? this.note,
+    shift: shift ?? this.shift,
     createdAt: createdAt ?? this.createdAt,
   );
   Labour copyWithCompanion(LaboursCompanion data) {
@@ -3989,6 +4020,7 @@ class Labour extends DataClass implements Insertable<Labour> {
       leaveDate: data.leaveDate.present ? data.leaveDate.value : this.leaveDate,
       status: data.status.present ? data.status.value : this.status,
       note: data.note.present ? data.note.value : this.note,
+      shift: data.shift.present ? data.shift.value : this.shift,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -4008,6 +4040,7 @@ class Labour extends DataClass implements Insertable<Labour> {
           ..write('leaveDate: $leaveDate, ')
           ..write('status: $status, ')
           ..write('note: $note, ')
+          ..write('shift: $shift, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -4027,6 +4060,7 @@ class Labour extends DataClass implements Insertable<Labour> {
     leaveDate,
     status,
     note,
+    shift,
     createdAt,
   );
   @override
@@ -4045,6 +4079,7 @@ class Labour extends DataClass implements Insertable<Labour> {
           other.leaveDate == this.leaveDate &&
           other.status == this.status &&
           other.note == this.note &&
+          other.shift == this.shift &&
           other.createdAt == this.createdAt);
 }
 
@@ -4061,6 +4096,7 @@ class LaboursCompanion extends UpdateCompanion<Labour> {
   final Value<String?> leaveDate;
   final Value<String> status;
   final Value<String> note;
+  final Value<String> shift;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const LaboursCompanion({
@@ -4076,6 +4112,7 @@ class LaboursCompanion extends UpdateCompanion<Labour> {
     this.leaveDate = const Value.absent(),
     this.status = const Value.absent(),
     this.note = const Value.absent(),
+    this.shift = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -4092,6 +4129,7 @@ class LaboursCompanion extends UpdateCompanion<Labour> {
     this.leaveDate = const Value.absent(),
     this.status = const Value.absent(),
     this.note = const Value.absent(),
+    this.shift = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -4111,6 +4149,7 @@ class LaboursCompanion extends UpdateCompanion<Labour> {
     Expression<String>? leaveDate,
     Expression<String>? status,
     Expression<String>? note,
+    Expression<String>? shift,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -4127,6 +4166,7 @@ class LaboursCompanion extends UpdateCompanion<Labour> {
       if (leaveDate != null) 'leave_date': leaveDate,
       if (status != null) 'status': status,
       if (note != null) 'note': note,
+      if (shift != null) 'shift': shift,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -4145,6 +4185,7 @@ class LaboursCompanion extends UpdateCompanion<Labour> {
     Value<String?>? leaveDate,
     Value<String>? status,
     Value<String>? note,
+    Value<String>? shift,
     Value<DateTime>? createdAt,
     Value<int>? rowid,
   }) {
@@ -4161,6 +4202,7 @@ class LaboursCompanion extends UpdateCompanion<Labour> {
       leaveDate: leaveDate ?? this.leaveDate,
       status: status ?? this.status,
       note: note ?? this.note,
+      shift: shift ?? this.shift,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -4205,6 +4247,9 @@ class LaboursCompanion extends UpdateCompanion<Labour> {
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
+    if (shift.present) {
+      map['shift'] = Variable<String>(shift.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -4229,6 +4274,7 @@ class LaboursCompanion extends UpdateCompanion<Labour> {
           ..write('leaveDate: $leaveDate, ')
           ..write('status: $status, ')
           ..write('note: $note, ')
+          ..write('shift: $shift, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -5658,6 +5704,16 @@ class $AttendanceTable extends Attendance
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _shiftMeta = const VerificationMeta('shift');
+  @override
+  late final GeneratedColumn<String> shift = GeneratedColumn<String>(
+    'shift',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('day'),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -5670,6 +5726,7 @@ class $AttendanceTable extends Attendance
     markedBy,
     markedAt,
     isLate,
+    shift,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -5750,6 +5807,12 @@ class $AttendanceTable extends Attendance
         isLate.isAcceptableOrUnknown(data['is_late']!, _isLateMeta),
       );
     }
+    if (data.containsKey('shift')) {
+      context.handle(
+        _shiftMeta,
+        shift.isAcceptableOrUnknown(data['shift']!, _shiftMeta),
+      );
+    }
     return context;
   }
 
@@ -5803,6 +5866,10 @@ class $AttendanceTable extends Attendance
         DriftSqlType.bool,
         data['${effectivePrefix}is_late'],
       )!,
+      shift: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}shift'],
+      )!,
     );
   }
 
@@ -5825,6 +5892,9 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
   final String? markedBy;
   final DateTime markedAt;
   final bool isLate;
+
+  /// day | night: the shift worked that day (a night shift counts on the date it starts).
+  final String shift;
   const AttendanceData({
     required this.id,
     required this.labourId,
@@ -5836,6 +5906,7 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
     this.markedBy,
     required this.markedAt,
     required this.isLate,
+    required this.shift,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -5852,6 +5923,7 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
     }
     map['marked_at'] = Variable<DateTime>(markedAt);
     map['is_late'] = Variable<bool>(isLate);
+    map['shift'] = Variable<String>(shift);
     return map;
   }
 
@@ -5869,6 +5941,7 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
           : Value(markedBy),
       markedAt: Value(markedAt),
       isLate: Value(isLate),
+      shift: Value(shift),
     );
   }
 
@@ -5888,6 +5961,7 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
       markedBy: serializer.fromJson<String?>(json['markedBy']),
       markedAt: serializer.fromJson<DateTime>(json['markedAt']),
       isLate: serializer.fromJson<bool>(json['isLate']),
+      shift: serializer.fromJson<String>(json['shift']),
     );
   }
   @override
@@ -5904,6 +5978,7 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
       'markedBy': serializer.toJson<String?>(markedBy),
       'markedAt': serializer.toJson<DateTime>(markedAt),
       'isLate': serializer.toJson<bool>(isLate),
+      'shift': serializer.toJson<String>(shift),
     };
   }
 
@@ -5918,6 +5993,7 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
     Value<String?> markedBy = const Value.absent(),
     DateTime? markedAt,
     bool? isLate,
+    String? shift,
   }) => AttendanceData(
     id: id ?? this.id,
     labourId: labourId ?? this.labourId,
@@ -5929,6 +6005,7 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
     markedBy: markedBy.present ? markedBy.value : this.markedBy,
     markedAt: markedAt ?? this.markedAt,
     isLate: isLate ?? this.isLate,
+    shift: shift ?? this.shift,
   );
   AttendanceData copyWithCompanion(AttendanceCompanion data) {
     return AttendanceData(
@@ -5942,6 +6019,7 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
       markedBy: data.markedBy.present ? data.markedBy.value : this.markedBy,
       markedAt: data.markedAt.present ? data.markedAt.value : this.markedAt,
       isLate: data.isLate.present ? data.isLate.value : this.isLate,
+      shift: data.shift.present ? data.shift.value : this.shift,
     );
   }
 
@@ -5957,7 +6035,8 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
           ..write('note: $note, ')
           ..write('markedBy: $markedBy, ')
           ..write('markedAt: $markedAt, ')
-          ..write('isLate: $isLate')
+          ..write('isLate: $isLate, ')
+          ..write('shift: $shift')
           ..write(')'))
         .toString();
   }
@@ -5974,6 +6053,7 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
     markedBy,
     markedAt,
     isLate,
+    shift,
   );
   @override
   bool operator ==(Object other) =>
@@ -5988,7 +6068,8 @@ class AttendanceData extends DataClass implements Insertable<AttendanceData> {
           other.note == this.note &&
           other.markedBy == this.markedBy &&
           other.markedAt == this.markedAt &&
-          other.isLate == this.isLate);
+          other.isLate == this.isLate &&
+          other.shift == this.shift);
 }
 
 class AttendanceCompanion extends UpdateCompanion<AttendanceData> {
@@ -6002,6 +6083,7 @@ class AttendanceCompanion extends UpdateCompanion<AttendanceData> {
   final Value<String?> markedBy;
   final Value<DateTime> markedAt;
   final Value<bool> isLate;
+  final Value<String> shift;
   final Value<int> rowid;
   const AttendanceCompanion({
     this.id = const Value.absent(),
@@ -6014,6 +6096,7 @@ class AttendanceCompanion extends UpdateCompanion<AttendanceData> {
     this.markedBy = const Value.absent(),
     this.markedAt = const Value.absent(),
     this.isLate = const Value.absent(),
+    this.shift = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   AttendanceCompanion.insert({
@@ -6027,6 +6110,7 @@ class AttendanceCompanion extends UpdateCompanion<AttendanceData> {
     this.markedBy = const Value.absent(),
     this.markedAt = const Value.absent(),
     this.isLate = const Value.absent(),
+    this.shift = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        labourId = Value(labourId),
@@ -6044,6 +6128,7 @@ class AttendanceCompanion extends UpdateCompanion<AttendanceData> {
     Expression<String>? markedBy,
     Expression<DateTime>? markedAt,
     Expression<bool>? isLate,
+    Expression<String>? shift,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -6057,6 +6142,7 @@ class AttendanceCompanion extends UpdateCompanion<AttendanceData> {
       if (markedBy != null) 'marked_by': markedBy,
       if (markedAt != null) 'marked_at': markedAt,
       if (isLate != null) 'is_late': isLate,
+      if (shift != null) 'shift': shift,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -6072,6 +6158,7 @@ class AttendanceCompanion extends UpdateCompanion<AttendanceData> {
     Value<String?>? markedBy,
     Value<DateTime>? markedAt,
     Value<bool>? isLate,
+    Value<String>? shift,
     Value<int>? rowid,
   }) {
     return AttendanceCompanion(
@@ -6085,6 +6172,7 @@ class AttendanceCompanion extends UpdateCompanion<AttendanceData> {
       markedBy: markedBy ?? this.markedBy,
       markedAt: markedAt ?? this.markedAt,
       isLate: isLate ?? this.isLate,
+      shift: shift ?? this.shift,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -6122,6 +6210,9 @@ class AttendanceCompanion extends UpdateCompanion<AttendanceData> {
     if (isLate.present) {
       map['is_late'] = Variable<bool>(isLate.value);
     }
+    if (shift.present) {
+      map['shift'] = Variable<String>(shift.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -6141,6 +6232,7 @@ class AttendanceCompanion extends UpdateCompanion<AttendanceData> {
           ..write('markedBy: $markedBy, ')
           ..write('markedAt: $markedAt, ')
           ..write('isLate: $isLate, ')
+          ..write('shift: $shift, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -13796,6 +13888,7 @@ typedef $$LaboursTableCreateCompanionBuilder = LaboursCompanion Function({
   Value<String?> leaveDate,
   Value<String> status,
   Value<String> note,
+  Value<String> shift,
   Value<DateTime> createdAt,
   Value<int> rowid,
 });
@@ -13812,6 +13905,7 @@ typedef $$LaboursTableUpdateCompanionBuilder = LaboursCompanion Function({
   Value<String?> leaveDate,
   Value<String> status,
   Value<String> note,
+  Value<String> shift,
   Value<DateTime> createdAt,
   Value<int> rowid,
 });
@@ -14010,6 +14104,11 @@ class $$LaboursTableFilterComposer
 
   ColumnFilters<String> get note => $composableBuilder(
     column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shift => $composableBuilder(
+    column: $table.shift,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -14256,6 +14355,11 @@ class $$LaboursTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get shift => $composableBuilder(
+    column: $table.shift,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -14328,6 +14432,9 @@ class $$LaboursTableAnnotationComposer
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get shift =>
+      $composableBuilder(column: $table.shift, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -14554,6 +14661,7 @@ class $$LaboursTableTableManager
                 Value<String?> leaveDate = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String> note = const Value.absent(),
+                Value<String> shift = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LaboursCompanion(
@@ -14569,6 +14677,7 @@ class $$LaboursTableTableManager
                 leaveDate: leaveDate,
                 status: status,
                 note: note,
+                shift: shift,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -14586,6 +14695,7 @@ class $$LaboursTableTableManager
                 Value<String?> leaveDate = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String> note = const Value.absent(),
+                Value<String> shift = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => LaboursCompanion.insert(
@@ -14601,6 +14711,7 @@ class $$LaboursTableTableManager
                 leaveDate: leaveDate,
                 status: status,
                 note: note,
+                shift: shift,
                 createdAt: createdAt,
                 rowid: rowid,
               ),
@@ -15947,6 +16058,7 @@ typedef $$AttendanceTableCreateCompanionBuilder = AttendanceCompanion Function({
   Value<String?> markedBy,
   Value<DateTime> markedAt,
   Value<bool> isLate,
+  Value<String> shift,
   Value<int> rowid,
 });
 typedef $$AttendanceTableUpdateCompanionBuilder = AttendanceCompanion Function({
@@ -15960,6 +16072,7 @@ typedef $$AttendanceTableUpdateCompanionBuilder = AttendanceCompanion Function({
   Value<String?> markedBy,
   Value<DateTime> markedAt,
   Value<bool> isLate,
+  Value<String> shift,
   Value<int> rowid,
 });
 
@@ -16048,6 +16161,11 @@ class $$AttendanceTableFilterComposer
 
   ColumnFilters<bool> get isLate => $composableBuilder(
     column: $table.isLate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shift => $composableBuilder(
+    column: $table.shift,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -16147,6 +16265,11 @@ class $$AttendanceTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get shift => $composableBuilder(
+    column: $table.shift,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$LaboursTableOrderingComposer get labourId {
     final $$LaboursTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -16226,6 +16349,9 @@ class $$AttendanceTableAnnotationComposer
 
   GeneratedColumn<bool> get isLate =>
       $composableBuilder(column: $table.isLate, builder: (column) => column);
+
+  GeneratedColumn<String> get shift =>
+      $composableBuilder(column: $table.shift, builder: (column) => column);
 
   $$LaboursTableAnnotationComposer get labourId {
     final $$LaboursTableAnnotationComposer composer = $composerBuilder(
@@ -16312,6 +16438,7 @@ class $$AttendanceTableTableManager
                 Value<String?> markedBy = const Value.absent(),
                 Value<DateTime> markedAt = const Value.absent(),
                 Value<bool> isLate = const Value.absent(),
+                Value<String> shift = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AttendanceCompanion(
                 id: id,
@@ -16324,6 +16451,7 @@ class $$AttendanceTableTableManager
                 markedBy: markedBy,
                 markedAt: markedAt,
                 isLate: isLate,
+                shift: shift,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -16338,6 +16466,7 @@ class $$AttendanceTableTableManager
                 Value<String?> markedBy = const Value.absent(),
                 Value<DateTime> markedAt = const Value.absent(),
                 Value<bool> isLate = const Value.absent(),
+                Value<String> shift = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => AttendanceCompanion.insert(
                 id: id,
@@ -16350,6 +16479,7 @@ class $$AttendanceTableTableManager
                 markedBy: markedBy,
                 markedAt: markedAt,
                 isLate: isLate,
+                shift: shift,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

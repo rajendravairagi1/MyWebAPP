@@ -110,14 +110,34 @@ class _SheetBody extends ConsumerWidget {
     }
   }
 
+  Future<void> _changeShift(BuildContext context, WidgetRef ref, SheetRow r, String shift) async {
+    HapticFeedback.selectionClick();
+    try {
+      await ref.read(attendanceServiceProvider).changeShift(
+            siteId: sheet.site.id,
+            date: sheet.date,
+            labourId: r.labour.id,
+            shift: shift,
+            staffId: session.staff?.id,
+            canEditLocked: session.can(Perm.attendanceEditLocked),
+          );
+      if (context.mounted) {
+        showInfo(context, trf('{name} moved to {shift}', {'name': r.labour.name, 'shift': tr(Shift.label(shift))}));
+      }
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
+  }
+
   Future<void> _setOt(BuildContext context, WidgetRef ref, SheetRow r, double hours) =>
       _mark(context, ref, r, r.status ?? AttStatus.present, ot: hours.clamp(0, 16).toDouble());
 
-  Future<void> _markAll(BuildContext context, WidgetRef ref) async {
+  Future<void> _markAll(BuildContext context, WidgetRef ref, String shift) async {
     try {
       final n = await ref.read(attendanceServiceProvider).markAllPresent(
             siteId: sheet.site.id,
             date: sheet.date,
+            shift: shift,
             staffId: session.staff?.id,
             canEditLocked: session.can(Perm.attendanceEditLocked),
           );
@@ -163,12 +183,28 @@ class _SheetBody extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) =>
+      _TabHolder(builder: (shift, setShift) => _content(context, ref, shift, setShift));
+
+  Widget _content(BuildContext context, WidgetRef ref, String shift, ValueChanged<String> setShift) {
     final locked = sheet.isSubmitted && !session.can(Perm.attendanceEditLocked);
     final editable = canMark && !locked;
+    final rows = sheet.rows.where((r) => r.shift == shift).toList();
+    final unmarkedHere = rows.where((r) => r.status == null).length;
+    int count(String? st) => rows.where((r) => r.status == st).length;
     return Column(
       children: [
-        _Summary(sheet: sheet),
+        _ShiftTabs(
+          shift: shift,
+          onChanged: setShift,
+          counts: {for (final x in Shift.all) x: sheet.rows.where((r) => r.shift == x).length},
+        ),
+        _Summary(
+          present: count(AttStatus.present),
+          half: count(AttStatus.half),
+          absent: count(AttStatus.absent),
+          pending: unmarkedHere,
+        ),
         if (sheet.isSubmitted)
           Container(
             margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -201,21 +237,22 @@ class _SheetBody extends ConsumerWidget {
             ]),
           ),
         Expanded(
-          child: sheet.rows.isEmpty
+          child: rows.isEmpty
               ? EmptyState(
                   icon: Icons.groups_outlined,
-                  title: tr('No labour on this site'),
+                  title: sheet.rows.isEmpty ? tr('No labour on this site') : tr('No labour in this shift'),
                   message: tr('Tap the + person icon to add labour, or assign labour to this site from their profile.'),
                 )
               : ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                  itemCount: sheet.rows.length,
+                  itemCount: rows.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, i) => _Row(
-                    row: sheet.rows[i],
+                    row: rows[i],
                     editable: editable,
-                    onMark: (st) => _mark(context, ref, sheet.rows[i], st),
-                    onOt: (h) => _setOt(context, ref, sheet.rows[i], h),
+                    onMark: (st) => _mark(context, ref, rows[i], st),
+                    onOt: (h) => _setOt(context, ref, rows[i], h),
+                    onShift: () => _changeShift(context, ref, rows[i], rows[i].shift == Shift.day ? Shift.night : Shift.day),
                   ),
                 ),
         ),
@@ -232,7 +269,7 @@ class _SheetBody extends ConsumerWidget {
                 Expanded(
                   flex: 3,
                   child: OutlinedButton.icon(
-                    onPressed: sheet.unmarked == 0 ? null : () => _markAll(context, ref),
+                    onPressed: unmarkedHere == 0 ? null : () => _markAll(context, ref, shift),
                     icon: const Icon(Icons.done_all),
                     label: Text(tr('All present')),
                   ),
@@ -255,8 +292,8 @@ class _SheetBody extends ConsumerWidget {
 }
 
 class _Summary extends StatelessWidget {
-  const _Summary({required this.sheet});
-  final Sheet sheet;
+  const _Summary({required this.present, required this.half, required this.absent, required this.pending});
+  final int present, half, absent, pending;
 
   @override
   Widget build(BuildContext context) {
@@ -274,21 +311,22 @@ class _Summary extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(13, 4, 13, 10),
       child: Row(children: [
-        cell('Present', sheet.present, Palette.present, Palette.presentBg),
-        cell('Half', sheet.half, Palette.half, Palette.halfBg),
-        cell('Absent', sheet.absent, Palette.absent, Palette.absentBg),
-        cell('Pending', sheet.unmarked, Palette.muted, const Color(0xFFE8ECEE)),
+        cell('Present', present, Palette.present, Palette.presentBg),
+        cell('Half', half, Palette.half, Palette.halfBg),
+        cell('Absent', absent, Palette.absent, Palette.absentBg),
+        cell('Pending', pending, Palette.muted, const Color(0xFFE8ECEE)),
       ]),
     );
   }
 }
 
 class _Row extends StatelessWidget {
-  const _Row({required this.row, required this.editable, required this.onMark, required this.onOt});
+  const _Row({required this.row, required this.editable, required this.onMark, required this.onOt, required this.onShift});
   final SheetRow row;
   final bool editable;
   final void Function(String status) onMark;
   final void Function(double hours) onOt;
+  final VoidCallback onShift;
 
   @override
   Widget build(BuildContext context) {
@@ -317,6 +355,12 @@ class _Row extends StatelessWidget {
                   style: const TextStyle(color: Palette.muted, fontSize: 12.5),
                 ),
               ]),
+            ),
+            IconButton(
+              tooltip: row.shift == Shift.day ? tr('Move to night shift') : tr('Move to day shift'),
+              visualDensity: VisualDensity.compact,
+              onPressed: editable ? onShift : null,
+              icon: Icon(row.shift == Shift.day ? Icons.nightlight_outlined : Icons.wb_sunny_outlined),
             ),
           ]),
           const SizedBox(height: 10),
@@ -455,4 +499,45 @@ class _StatusButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Holds which shift tab is open while the sheet rebuilds around it.
+class _TabHolder extends StatefulWidget {
+  const _TabHolder({required this.builder});
+  final Widget Function(String shift, ValueChanged<String> set) builder;
+
+  @override
+  State<_TabHolder> createState() => _TabHolderState();
+}
+
+class _TabHolderState extends State<_TabHolder> {
+  String _shift = Shift.day;
+
+  @override
+  Widget build(BuildContext context) => widget.builder(_shift, (v) => setState(() => _shift = v));
+}
+
+class _ShiftTabs extends StatelessWidget {
+  const _ShiftTabs({required this.shift, required this.onChanged, required this.counts});
+  final String shift;
+  final ValueChanged<String> onChanged;
+  final Map<String, int> counts;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+        child: SegmentedButton<String>(
+          showSelectedIcon: false,
+          segments: [
+            for (final x in Shift.all)
+              ButtonSegment(
+                value: x,
+                icon: Icon(x == Shift.day ? Icons.wb_sunny_outlined : Icons.nightlight_outlined),
+                label: Text('${tr(Shift.label(x))} (${counts[x] ?? 0})'),
+              ),
+          ],
+          selected: {shift},
+          onSelectionChanged: (v) => onChanged(v.first),
+        ),
+      );
 }

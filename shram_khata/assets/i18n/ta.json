@@ -854,5 +854,15 @@
 "Reset password and sign in": "பாஸ்வேர்டை மாற்றி உள்நுழை",
 "Send a new code": "புதிய குறியீடு அனுப்பு",
 "We email you a code. This works for accounts that use cloud sync. If you never turned on cloud sync, the password cannot be recovered.": "நாங்கள் உங்களுக்கு குறியீட்டை மின்னஞ்சல் செய்வோம். கிளவுட் சின்க் பயன்படுத்தும் கணக்குகளுக்கு இது வேலை செய்யும். கிளவுட் சின்க்கை ஒருபோதும் ஆன் செய்யவில்லை என்றால், பாஸ்வேர்டை மீட்க முடியாது.",
-"Erase all data on this phone": "இந்த போனின் எல்லா தரவையும் அழிக்கவும்"
+"Erase all data on this phone": "இந்த போனின் எல்லா தரவையும் அழிக்கவும்",
+"Day shift": "பகல் ஷிப்ட்",
+"Night shift": "இரவு ஷிப்ட்",
+"Change site": "தளத்தை மாற்று",
+"SHIFT": "ஷிப்ட்",
+"Move to day shift": "பகல் ஷிப்டுக்கு மாற்று",
+"Move to night shift": "இரவு ஷிப்டுக்கு மாற்று",
+"No labour in this shift": "இந்த ஷிப்டில் தொழிலாளர் இல்லை",
+"Same pay in both shifts. Change it when the worker moves from day to night or back.": "இரண்டு ஷிப்டுகளிலும் ஊதியம் ஒன்றே. தொழிலாளர் பகலிலிருந்து இரவுக்கு அல்லது இரவிலிருந்து பகலுக்கு மாறும்போது இதை மாற்றவும்.",
+"A worker works at one company / site at a time. Past attendance stays where it was.": "ஒரு தொழிலாளர் ஒரு நேரத்தில் ஒரு நிறுவனம் / தளத்தில் மட்டுமே வேலை செய்வார். முந்தைய வருகை அப்படியே இருக்கும்.",
+"{name} moved to {shift}": "{name} {shift} க்கு மாற்றப்பட்டார்"
 }

@@ -107,6 +107,9 @@ class Labours extends Table with PkId {
   /// active | inactive | left
   TextColumn get status => text().withDefault(const Constant('active'))();
   TextColumn get note => text().withDefault(const Constant(''))();
+
+  /// The shift this person works now: day | night. Changeable any time.
+  TextColumn get shift => text().withDefault(const Constant('day'))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
@@ -157,6 +160,9 @@ class Attendance extends Table with PkId {
   TextColumn get markedBy => text().nullable()();
   DateTimeColumn get markedAt => dateTime().withDefault(currentDateAndTime)();
   BoolColumn get isLate => boolean().withDefault(const Constant(false))();
+
+  /// day | night: the shift worked that day (a night shift counts on the date it starts).
+  TextColumn get shift => text().withDefault(const Constant('day'))();
 
   @override
   List<Set<Column>> get uniqueKeys => [

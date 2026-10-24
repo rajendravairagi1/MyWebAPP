@@ -24,6 +24,10 @@ class SheetRow {
   String? get status => entry?.status;
   double get otHours => entry?.otHours ?? 0;
 
+  /// The shift this line belongs to: the one recorded for the day, or the
+  /// person's current shift when nothing is marked yet.
+  String get shift => entry?.shift ?? labour.shift;
+
   /// Whether [status] can still be recorded here without exceeding one day.
   bool allows(String status) => fitsInDay(otherValue, status);
 }
@@ -155,11 +159,13 @@ class AttendanceService extends Service {
     required String status,
     double otHours = 0,
     String note = '',
+    String? shift,
     String? staffId,
     bool canEditLocked = false,
   }) async {
     _checkDate(date);
     if (!AttStatus.all.contains(status)) throw AppException('Invalid status.');
+    if (shift != null && !Shift.all.contains(shift)) throw AppException('Invalid shift.');
     await _checkUnlocked(siteId, date, canEditLocked);
     if (otHours < 0 || otHours > 16) throw AppException('Overtime must be between 0 and 16 hours.');
     final other = await _otherValue(labourId, siteId, date);
@@ -174,7 +180,9 @@ class AttendanceService extends Service {
         .getSingleOrNull();
     final late = date.compareTo(D.today()) < 0;
     if (existing == null) {
+      final worker = await (db.select(db.labours)..where((t) => t.id.equals(labourId))).getSingleOrNull();
       await db.into(db.attendance).insert(AttendanceCompanion.insert(
+            shift: Value(shift ?? worker?.shift ?? Shift.day),
             id: newId(),
             labourId: labourId,
             siteId: siteId,
@@ -193,6 +201,7 @@ class AttendanceService extends Service {
           note: Value(note),
           markedBy: Value(staffId),
           markedAt: Value(DateTime.now()),
+          shift: shift == null ? const Value.absent() : Value(shift),
         ),
       );
       if (existing.status != status || existing.otHours != ot) {
@@ -200,6 +209,27 @@ class AttendanceService extends Service {
             '$date ${existing.status}/${existing.otHours} -> $status/$ot');
       }
     }
+  }
+
+  /// Moves a person to [shift]: from now on, and for [date] on this site if
+  /// they are already marked.
+  Future<void> changeShift({
+    required String siteId,
+    required String date,
+    required String labourId,
+    required String shift,
+    String? staffId,
+    bool canEditLocked = false,
+  }) async {
+    if (!Shift.all.contains(shift)) throw AppException('Invalid shift.');
+    await _checkUnlocked(siteId, date, canEditLocked);
+    await db.transaction(() async {
+      await (db.update(db.labours)..where((t) => t.id.equals(labourId))).write(LaboursCompanion(shift: Value(shift)));
+      await (db.update(db.attendance)
+            ..where((t) => t.labourId.equals(labourId) & t.siteId.equals(siteId) & t.date.equals(date)))
+          .write(AttendanceCompanion(shift: Value(shift)));
+      await audit(staffId, 'shift', 'labour', labourId, '$shift $date');
+    });
   }
 
   Future<void> clear({
@@ -221,6 +251,7 @@ class AttendanceService extends Service {
   Future<int> markAllPresent({
     required String siteId,
     required String date,
+    String? shift,
     String? staffId,
     bool canEditLocked = false,
   }) async {
@@ -228,7 +259,7 @@ class AttendanceService extends Service {
     await _checkUnlocked(siteId, date, canEditLocked);
     final sheet = await loadSheet(siteId, date);
     var n = 0;
-    for (final r in sheet.rows.where((r) => r.status == null)) {
+    for (final r in sheet.rows.where((r) => r.status == null && (shift == null || r.shift == shift))) {
       if (!r.allows(AttStatus.present)) continue;
       await mark(
         siteId: siteId,

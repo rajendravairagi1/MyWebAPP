@@ -854,5 +854,15 @@
 "Reset password and sign in": "পাসওয়ার্ড রিসেট করে সাইন ইন করুন",
 "Send a new code": "নতুন কোড পাঠান",
 "We email you a code. This works for accounts that use cloud sync. If you never turned on cloud sync, the password cannot be recovered.": "আমরা আপনাকে ইমেলে কোড পাঠাই। এটি ক্লাউড সিঙ্ক ব্যবহার করা অ্যাকাউন্টের জন্য কাজ করে। ক্লাউড সিঙ্ক কখনও চালু না করলে পাসওয়ার্ড ফেরত পাওয়া যাবে না।",
-"Erase all data on this phone": "এই ফোনের সব ডেটা মুছুন"
+"Erase all data on this phone": "এই ফোনের সব ডেটা মুছুন",
+"Day shift": "দিনের শিফট",
+"Night shift": "রাতের শিফট",
+"Change site": "সাইট বদলান",
+"SHIFT": "শিফট",
+"Move to day shift": "দিনের শিফটে সরান",
+"Move to night shift": "রাতের শিফটে সরান",
+"No labour in this shift": "এই শিফটে কোনো শ্রমিক নেই",
+"Same pay in both shifts. Change it when the worker moves from day to night or back.": "দুই শিফটেই মজুরি সমান। শ্রমিক দিন থেকে রাতে বা রাত থেকে দিনে গেলে এটি বদলান।",
+"A worker works at one company / site at a time. Past attendance stays where it was.": "একজন শ্রমিক একসময়ে একটি কোম্পানি / সাইটেই কাজ করেন। আগের হাজিরা যেমন আছে তেমনই থাকবে।",
+"{name} moved to {shift}": "{name} কে {shift} এ সরানো হয়েছে"
 }

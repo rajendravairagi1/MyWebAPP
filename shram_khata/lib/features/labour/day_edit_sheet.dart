@@ -9,6 +9,7 @@ import '../../core/widgets.dart';
 import '../../data/database.dart';
 import '../../domain/calc.dart';
 import '../../state/providers.dart';
+import 'shift_picker.dart';
 
 /// Lets an owner / supervisor fix one worker's attendance for any past day
 /// straight from the worker's calendar.
@@ -60,6 +61,7 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
       : widget.choices.keys.firstWhere((s) => s.id == widget.entries.first.siteId,
           orElse: () => widget.choices.keys.first);
   String? _status;
+  late String _shift = widget.labour.shift;
   final _ot = TextEditingController();
   bool _busy = false;
 
@@ -79,6 +81,7 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
   void _load() {
     final e = _existing;
     _status = e?.status;
+    _shift = e?.shift ?? widget.labour.shift;
     _ot.text = e == null || e.otHours == 0 ? '' : e.otHours.toString();
   }
 
@@ -145,6 +148,8 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
             decoration: InputDecoration(labelText: tr('Overtime hours (optional)')),
           ),
         ],
+        const SizedBox(height: 12),
+        ShiftPicker(shift: _shift, onChanged: (v) => setState(() => _shift = v)),
         const SizedBox(height: 16),
         Row(children: [
           if (_existing != null)
@@ -169,6 +174,7 @@ class _DayEditorState extends ConsumerState<_DayEditor> {
                       date: widget.ymd,
                       labourId: widget.labour.id,
                       status: _status!,
+                      shift: _shift,
                       otHours: double.tryParse(_ot.text.trim()) ?? 0,
                       staffId: session.staff?.id,
                       canEditLocked: canEditLocked,

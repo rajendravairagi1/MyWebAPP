@@ -111,6 +111,7 @@ class LabourService extends Service {
     required int amount,
     int? otPerHour,
     int dutyHours = 8,
+    String shift = 'day',
     List<String> siteIds = const [],
     String? staffId,
   }) async {
@@ -129,6 +130,7 @@ class LabourService extends Service {
             skill: Value(skill.trim().isEmpty ? 'Helper' : skill.trim()),
             photoPath: Value(photoPath),
             joinDate: joinDate,
+            shift: Value(shift == 'night' ? 'night' : 'day'),
           ));
       await db.into(db.labourRates).insert(LabourRatesCompanion.insert(
             id: newId(),
@@ -269,6 +271,23 @@ class LabourService extends Service {
           siteId: siteId,
           fromDate: from ?? D.today(),
         ));
+  }
+
+  /// Moves a person to one site: any other open site ends today and [siteId]
+  /// starts today. Past attendance stays where it was.
+  Future<void> moveToSite(String labourId, String siteId, {String? from}) async {
+    final day = from ?? D.today();
+    await db.transaction(() async {
+      final open = await (db.select(db.assignments)
+            ..where((t) => t.labourId.equals(labourId) & t.toDate.isNull()))
+          .get();
+      if (open.length == 1 && open.first.siteId == siteId) return;
+      for (final a in open) {
+        if (a.siteId == siteId) continue;
+        await unassign(a.id, to: day);
+      }
+      await assign(labourId, siteId, from: day);
+    });
   }
 
   Future<void> unassign(String assignmentId, {String? to}) =>

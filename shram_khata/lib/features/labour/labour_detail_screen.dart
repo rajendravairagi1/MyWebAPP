@@ -24,6 +24,7 @@ import 'day_edit_sheet.dart';
 import 'duty_hours.dart';
 import 'labour_form_screen.dart';
 import 'labour_pickers.dart';
+import 'shift_picker.dart';
 
 final _labourProvider = FutureProvider.autoDispose.family<Labour?, String>((ref, id) async {
   ref.watch(dbTickProvider);
@@ -511,7 +512,7 @@ class _DetailsTab extends ConsumerWidget {
       SectionTitle(tr('WORKS AT'),
           padding: const EdgeInsets.fromLTRB(4, 20, 4, 8),
           trailing: manage
-              ? TextButton(onPressed: () => _addSite(context, ref), child: Text(tr('Add site')))
+              ? TextButton(onPressed: () => _changeSite(context, ref), child: Text(tr('Change site')))
               : null),
       asg.maybeWhen(
         data: (list) => list.isEmpty
@@ -545,6 +546,21 @@ class _DetailsTab extends ConsumerWidget {
                 ]),
               ),
         orElse: () => const SizedBox(height: 60),
+      ),
+      SectionTitle(tr('SHIFT'), padding: const EdgeInsets.fromLTRB(4, 20, 4, 8)),
+      AppCard(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          if (manage)
+            ShiftPicker(
+              shift: labour.shift,
+              onChanged: (v) => svc.update(labour.copyWith(shift: v), staffId: session.staff?.id),
+            )
+          else
+            Text(tr(Shift.label(labour.shift)), style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          Text(tr('Same pay in both shifts. Change it when the worker moves from day to night or back.'),
+              style: TextStyle(color: Palette.muted, fontSize: 13)),
+        ]),
       ),
       if (session.can(Perm.labourDocs)) ...[
         SectionTitle(tr('DOCUMENTS'),
@@ -639,7 +655,7 @@ class _DetailsTab extends ConsumerWidget {
     await ref.read(labourServiceProvider).setStatus(labour.id, status, staffId: ref.read(sessionProvider).staff?.id);
   }
 
-  Future<void> _addSite(BuildContext context, WidgetRef ref) async {
+  Future<void> _changeSite(BuildContext context, WidgetRef ref) async {
     final current = (await ref.read(labourServiceProvider).assignments(labour.id)).map((a) => a.site.id).toSet();
     if (!context.mounted) return;
     final picked = await showModalBottomSheet<Set<String>>(
@@ -647,11 +663,8 @@ class _DetailsTab extends ConsumerWidget {
       isScrollControlled: true,
       builder: (ctx) => _SitePickSheet(initial: current),
     );
-    if (picked == null) return;
-    final svc = ref.read(labourServiceProvider);
-    for (final s in picked.difference(current)) {
-      await svc.assign(labour.id, s);
-    }
+    if (picked == null || picked.isEmpty) return;
+    await ref.read(labourServiceProvider).moveToSite(labour.id, picked.first);
   }
 
   Future<void> _changeRate(BuildContext context, WidgetRef ref) async {
@@ -702,12 +715,12 @@ class _SitePickSheetState extends State<_SitePickSheet> {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(tr('Assign to sites'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          Text(tr('Change site'), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 4),
-          Text(tr('Labour appears on the attendance sheet of every site selected.'),
+          Text(tr('A worker works at one company / site at a time. Past attendance stays where it was.'),
               style: TextStyle(color: Palette.muted, fontSize: 13)),
           const SizedBox(height: 10),
-          Consumer(builder: (context, ref, _) => SiteChecklist(selected: _sel, onChanged: (v) => setState(() => _sel = v))),
+          Consumer(builder: (context, ref, _) => SiteChecklist(single: true, selected: _sel, onChanged: (v) => setState(() => _sel = v))),
           const SizedBox(height: 16),
           FilledButton(onPressed: () => Navigator.pop(context, _sel), child: Text(tr('Save'))),
         ]),
