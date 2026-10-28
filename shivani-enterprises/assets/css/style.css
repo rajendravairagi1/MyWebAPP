@@ -608,6 +608,30 @@ input.invalid:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 20%
 }
 .li-remove:hover { background: #fecaca; transform: scale(1.06); }
 
+/* ===== Stock entry rows (superadmin > Stock Entry) - every active
+   product gets its own pre-built row (name + a Qty box); the user only
+   fills in qty for whichever products actually moved and leaves the
+   rest blank, no per-row "pick a product" dropdown needed. */
+.stock-items { margin-top: 6px; max-height: 520px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; padding: 0 14px; }
+.stock-line-row {
+  display: grid;
+  grid-template-columns: 1fr 140px;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.stock-line-row:last-child { border-bottom: none; }
+.stock-line-row.stock-line-head {
+  position: sticky; top: 0; background: var(--card); z-index: 1;
+  padding-top: 10px;
+}
+.stock-line-name { font-size: 14.5px; }
+@media (max-width: 860px) {
+  .stock-items { max-height: 460px; padding: 0 12px; }
+  .stock-line-row { grid-template-columns: 1fr 110px; gap: 8px; }
+}
+
 /* ===== Product management rows (superadmin > Products), same card style ===== */
 .product-rows { margin-top: 6px; }
 .hidden-form { display: none; }
