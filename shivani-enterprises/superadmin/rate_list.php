@@ -115,7 +115,20 @@ require __DIR__ . '/../includes/header.php';
     var btn = this;
     btn.disabled = true;
     btn.textContent = 'Generating…';
-    html2canvas(document.getElementById('rateListPreview'), { scale: 2, backgroundColor: '#ffffff' }).then(function (canvas) {
+    var el = document.getElementById('rateListPreview');
+    // On a narrow phone screen the table is wider than the on-screen box;
+    // html2canvas only captures that box, so the Rate column gets clipped
+    // off. Forcing a desktop-width render in the (invisible) cloned
+    // document - regardless of the real device width - fixes that.
+    html2canvas(el, {
+      scale: 2,
+      backgroundColor: '#ffffff',
+      windowWidth: 900,
+      onclone: function (doc) {
+        var clone = doc.getElementById('rateListPreview');
+        if (clone) { clone.style.width = '640px'; clone.style.maxWidth = '640px'; }
+      }
+    }).then(function (canvas) {
       var link = document.createElement('a');
       link.download = 'rate-list-<?= e(date('Y-m-d')) ?>.png';
       link.href = canvas.toDataURL('image/png');
