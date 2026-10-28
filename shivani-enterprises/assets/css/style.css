@@ -718,7 +718,7 @@ input.invalid:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 20%
 .rate-rows { margin-top: 6px; }
 .rate-row {
   display: grid;
-  grid-template-columns: 1.8fr .8fr .9fr;
+  grid-template-columns: 1.6fr .7fr .9fr .9fr;
   gap: 12px;
   align-items: center;
   padding: 10px 0;
@@ -726,9 +726,11 @@ input.invalid:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 20%
 }
 .rate-rows > .rate-row:first-child { padding-top: 0; padding-bottom: 8px; }
 .rate-row .li-field input { text-align: right; }
+.rate-row .rr-show { text-align: center; }
+.rate-row .rr-show input { width: 20px; height: 20px; cursor: pointer; }
 @media (max-width: 640px) {
   .rate-rows > .rate-row-head { display: none; }
-  .rate-row { grid-template-columns: 1fr 70px 100px; gap: 8px; padding: 12px 0; }
+  .rate-row { grid-template-columns: 1fr 64px 90px 70px; gap: 8px; padding: 12px 0; }
   .rr-name { font-size: 14px; }
   .rr-unit { font-size: 13px; }
 }
