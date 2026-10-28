@@ -20,7 +20,15 @@ function nav_active(string $file): string
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
 <title><?= e($pageTitle) ?> · <?= e(APP_NAME) ?></title>
-<link rel="stylesheet" href="<?= e(base_url('assets/css/style.css')) ?>">
+<?php
+  // Cache-busting query string from the file's own mtime - so every time
+  // style.css is replaced on the server, browsers fetch the new one
+  // immediately instead of serving a stale cached copy (which otherwise
+  // needs a manual hard-refresh to notice).
+  $cssPath = __DIR__ . '/../assets/css/style.css';
+  $cssVer = is_file($cssPath) ? filemtime($cssPath) : time();
+?>
+<link rel="stylesheet" href="<?= e(base_url('assets/css/style.css')) ?>?v=<?= $cssVer ?>">
 <link rel="manifest" href="<?= e(base_url('manifest.json')) ?>">
 <link rel="apple-touch-icon" href="<?= e(base_url('assets/icons/apple-touch-icon.png')) ?>">
 <link rel="icon" href="<?= e(base_url('assets/icons/icon-192.png')) ?>">
