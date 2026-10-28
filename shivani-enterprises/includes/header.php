@@ -91,6 +91,7 @@ function nav_active(string $file): string
         <a<?= nav_active('dashboard.php') ?> href="<?= e(base_url($base.'dashboard.php')) ?>">Dashboard</a>
         <a<?= nav_active('admins.php') ?> href="<?= e(base_url($base.'admins.php')) ?>">Admins</a>
         <a<?= nav_active('products.php') ?> href="<?= e(base_url($base.'products.php')) ?>">Products</a>
+        <a<?= nav_active('rate_list.php') ?> href="<?= e(base_url($base.'rate_list.php')) ?>">Rate List</a>
         <a<?= nav_active('godams.php') ?> href="<?= e(base_url($base.'godams.php')) ?>">Godowns / Stock</a>
         <a<?= nav_active('customers.php') ?> href="<?= e(base_url($base.'customers.php')) ?>">All Customers</a>
         <a<?= nav_active('sales.php') ?> href="<?= e(base_url($base.'sales.php')) ?>">All Sales</a>

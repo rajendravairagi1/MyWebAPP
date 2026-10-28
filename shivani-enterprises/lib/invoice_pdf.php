@@ -170,6 +170,85 @@ function render_invoice_pdf(array $sale, array $items, array $customer, string $
 }
 
 /**
+ * Renders the current product rate list (name, unit, selling price) as a
+ * single-page PDF. Row height auto-shrinks a little for longer catalogs so
+ * every active product fits on one page.
+ */
+function render_rate_list_pdf(array $products, string $dest = 'I'): void
+{
+    $pdf = new SimplePDF();
+    $margin = 40;
+    $y = $margin;
+    $tableW = $pdf->pageWidth() - 2 * $margin;
+
+    $pdf->text($margin, $y, get_setting('company_name', APP_NAME), 18, true);
+    $y += 18;
+    $companyLine = trim(get_setting('company_address', '') . '  ' . get_setting('company_phone', ''));
+    if ($companyLine !== '') {
+        $pdf->text($margin, $y, $companyLine, 10);
+        $y += 20;
+    } else {
+        $y += 10;
+    }
+    $pdf->line($margin, $y, $pdf->pageWidth() - $margin, $y);
+    $y += 22;
+
+    $pdf->text($margin, $y, 'RATE LIST', 14, true);
+    $pdf->textRight($margin + $tableW, $y, 'Date: ' . date('d-M-Y'), 10);
+    $y += 26;
+
+    $colW = ['sr' => 36, 'unit' => 80, 'rate' => 110];
+    $colW['product'] = $tableW - $colW['sr'] - $colW['unit'] - $colW['rate'];
+    $colX = [
+        $margin,
+        $margin + $colW['sr'],
+        $margin + $colW['sr'] + $colW['product'],
+        $margin + $colW['sr'] + $colW['product'] + $colW['unit'],
+    ];
+    $unitRight = $colX[3] - 6;
+    $rateRight = $margin + $tableW - 6;
+    $tableTop = $y;
+    $headerH = 22;
+
+    // Shrink row height for long catalogs so everything still fits on one
+    // page (SimplePDF has no multi-page support), but never below 12pt.
+    $available = $pdf->pageHeight() - $tableTop - $headerH - 70;
+    $n = max(1, count($products));
+    $rowH = (float)min(20, max(12, $available / $n));
+    $fontSize = $rowH >= 16 ? 10 : 9;
+
+    $pdf->rectFilled($margin, $y, $tableW, $headerH, PDF_HEADER_BG);
+    $pdf->text($colX[0] + 6, $y + 15, '#', 10, true);
+    $pdf->text($colX[1] + 6, $y + 15, 'Product', 10, true);
+    $pdf->text($colX[2] + 6, $y + 15, 'Unit', 10, true);
+    $pdf->textRight($rateRight, $y + 15, 'Rate (Rs.)', 10, true);
+    $y += $headerH;
+
+    $rowIdx = 0;
+    foreach ($products as $p) {
+        if ($y > $pdf->pageHeight() - $margin - 20) { break; } // safety cutoff, should not normally hit
+        if ($rowIdx % 2 === 1) {
+            $pdf->rectFilled($margin, $y, $tableW, $rowH, PDF_ROW_ALT);
+        }
+        $ty = $y + $rowH - ($rowH - $fontSize) / 2 - 2;
+        $pdf->text($colX[0] + 6, $ty, (string)($rowIdx + 1), $fontSize);
+        $pdf->text($colX[1] + 6, $ty, pdf_truncate($p['name'], 40), $fontSize);
+        $pdf->text($colX[2] + 6, $ty, pdf_truncate($p['unit'], 12), $fontSize);
+        $pdf->textRight($rateRight, $ty, number_format((float)$p['default_price'], 2), $fontSize);
+        $y += $rowH;
+        $rowIdx++;
+    }
+
+    $pdf->rect($margin, $tableTop, $tableW, $y - $tableTop, 0.7, PDF_BORDER);
+    pdf_col_dividers($pdf, [$colX[1], $colX[2], $colX[3]], $tableTop, $y);
+    $pdf->line($margin, $tableTop + $headerH, $margin + $tableW, $tableTop + $headerH, 0.7, PDF_BORDER);
+
+    pdf_footer($pdf, $margin, 'This is a computer generated rate list');
+
+    $pdf->output('rate-list-' . date('Y-m-d') . '.pdf', $dest);
+}
+
+/**
  * Renders a full customer statement (all sales + all payments + running
  * balance) as a PDF.
  */

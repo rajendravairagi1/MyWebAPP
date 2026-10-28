@@ -714,6 +714,47 @@ input.invalid:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 20%
   .product-row .pr-actions .btn { flex: 1; }
 }
 
+/* ===== Rate List rows (superadmin > Rate List) ===== */
+.rate-rows { margin-top: 6px; }
+.rate-row {
+  display: grid;
+  grid-template-columns: 1.8fr .8fr .9fr;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.rate-rows > .rate-row:first-child { padding-top: 0; padding-bottom: 8px; }
+.rate-row .li-field input { text-align: right; }
+@media (max-width: 640px) {
+  .rate-rows > .rate-row-head { display: none; }
+  .rate-row { grid-template-columns: 1fr 70px 100px; gap: 8px; padding: 12px 0; }
+  .rr-name { font-size: 14px; }
+  .rr-unit { font-size: 13px; }
+}
+
+/* ===== Rate List printable preview (captured as PNG via html2canvas) ===== */
+.rate-list-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 4px 0 16px; }
+.rate-list-preview {
+  background: #ffffff; color: #141826; border: 1px solid #cbd5e1;
+  border-radius: 10px; padding: 24px; max-width: 640px;
+}
+.rlp-header { border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 14px; }
+.rlp-company { font-size: 19px; font-weight: 700; }
+.rlp-sub { font-size: 12.5px; color: #6b7280; margin-top: 2px; }
+.rlp-title-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+.rlp-title { font-size: 15px; font-weight: 700; letter-spacing: .5px; }
+.rlp-date { font-size: 12.5px; color: #6b7280; }
+.rlp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.rlp-table th { background: #f1f5f9; text-align: left; padding: 7px 8px; border: 1px solid #cbd5e1; font-weight: 700; }
+.rlp-table td { padding: 6px 8px; border: 1px solid #cbd5e1; }
+.rlp-table tbody tr:nth-child(even) { background: #f8fafc; }
+.rlp-footer { margin-top: 14px; padding-top: 10px; border-top: 1px solid #e5e7eb; font-size: 11.5px; color: #6b7280; }
+@media (max-width: 640px) {
+  .rate-list-preview { padding: 16px; max-width: 100%; }
+  .rlp-table { font-size: 12px; }
+}
+
 /* ===== Admin management rows (superadmin > Admins) ===== */
 .admin-rows { display: flex; flex-direction: column; gap: 14px; margin-top: 6px; }
 .admin-row { border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
