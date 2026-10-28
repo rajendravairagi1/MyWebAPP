@@ -26,7 +26,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pid = (int)$pid;
         $raw = trim((string)$raw);
         if ($pid <= 0 || $raw === '') continue;
-        $qty = (float)$raw;
+        // Qty is always a whole number (pieces) - round away any decimal
+        // that slipped through (e.g. pasted text) instead of silently
+        // storing a fraction.
+        $qty = (float)(int)round((float)$raw);
         if ($qty == 0) { $errors[] = 'Qty zero nahi ho sakti (jis product ki entry nahi karni usey khali chhod dein).'; continue; }
         if ($type === 'direct_sale' && $qty < 0) { $errors[] = 'Direct Sale ke liye positive qty daalein.'; continue; }
         $lines[] = ['product_id' => $pid, 'qty' => $qty];
@@ -131,7 +134,7 @@ require __DIR__ . '/../includes/header.php';
       <?php foreach ($products as $p): ?>
       <div class="stock-line-row">
         <div class="stock-line-name"><?= e($p['name']) ?> <span class="text-muted">(<?= e($p['unit']) ?>)</span></div>
-        <div class="li-field"><input type="number" step="0.01" name="qty[<?= (int)$p['id'] ?>]" class="qty-input" placeholder="—"></div>
+        <div class="li-field"><input type="number" step="1" inputmode="numeric" name="qty[<?= (int)$p['id'] ?>]" class="qty-input" placeholder="—"></div>
       </div>
       <?php endforeach; ?>
     </div>
@@ -158,6 +161,17 @@ require __DIR__ . '/../includes/header.php';
       }
       sel.addEventListener('change', apply);
       apply();
+
+      // Qty is always a whole number (pieces) - block typing "." / "e" so a
+      // decimal can never even be entered, not just discouraged by step=1.
+      document.querySelectorAll('.qty-input').forEach(function (inp) {
+        inp.addEventListener('keydown', function (e) {
+          if (e.key === '.' || e.key === ',' || e.key === 'e' || e.key === 'E') e.preventDefault();
+        });
+        inp.addEventListener('input', function () {
+          if (inp.value.indexOf('.') !== -1) inp.value = inp.value.split('.')[0];
+        });
+      });
     })();
   </script>
   <?php endif; ?>
